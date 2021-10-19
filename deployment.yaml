@@ -34,7 +34,7 @@ spec:
         app: cesium-asdc
     spec:
       containers:
-      - image: cesium_asdc
+      - image: ghcr.io/auscalabledronecloud/cesium:latest
         imagePullPolicy: Never
         name: cesium-asdc-z4hxx
         resources: {}
