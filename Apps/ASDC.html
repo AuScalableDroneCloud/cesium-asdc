@@ -1,69 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!-- Use correct character set. -->
-    <meta charset="utf-8" />
-    <!-- Tell IE to use the latest, best version. -->
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
-    />
-    <title>Hello World!</title>
-    <script src="../Build/Cesium/Cesium.js"></script>
-    <style>
-      @import url(../Build/Cesium/Widgets/widgets.css);
-      html,
-      body,
-      #cesiumContainer {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="cesiumContainer"></div>
-    <script>
-      var viewer = new Cesium.Viewer("cesiumContainer");
-      viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2017-07-21"), Cesium.JulianDate.fromIso8601("2017-10-16"));
-      viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2017-07-21");
 
-      var tilesets={};
+<head>
+  <!-- Use correct character set. -->
+  <meta charset="utf-8" />
+  <!-- Tell IE to use the latest, best version. -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+  <title>Hello World!</title>
+  <script src="../Build/Cesium/Cesium.js"></script>
+  <style>
+    @import url(../Build/Cesium/Widgets/widgets.css);
 
-      tilesets[new Date("2017-07-21")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-       url : './NUE_20170721_M1_RGB_group1_densified_point_cloud/tileset.json',
-       show:false
-      }));
+    html,
+    body,
+    #cesiumContainer {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="cesiumContainer"></div>
+  <script>
+    var viewer = new Cesium.Viewer("cesiumContainer");
+    viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2017-07-21"), Cesium.JulianDate.fromIso8601("2017-10-16"));
+    viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2017-07-21");
+
+    var tilesets = {};
+
+    tilesets[new Date("2017-07-21")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+      url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170721_M1_RGB_group1_densified_point_cloud/tileset.json',
+      show: false
+    }));
 
 
-      tilesets[new Date("2017-09-22")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-       url : './NUE_20170922_M2_RGB_group1_densified_point_cloud/tileset.json',
-       show:false
-      }));
+    tilesets[new Date("2017-09-22")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+      url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170922_M2_RGB_group1_densified_point_cloud/tileset.json',
+      show: false
+    }));
 
-      tilesets[new Date("2017-10-16")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-       url : './NUE_20171016_M4_RGB_group1_densified_point_cloud/tileset.json',
-       show:false
-      }));
+    tilesets[new Date("2017-10-16")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+      url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20171016_M4_RGB_group1_densified_point_cloud/tileset.json',
+      show: false
+    }));
 
-      viewer.flyTo(tilesets[Object.keys(tilesets)[0]]);
+    viewer.flyTo(tilesets[Object.keys(tilesets)[0]]);
 
-      viewer.clock.onTick.addEventListener((clock)=>{
-        currentTime = Cesium.JulianDate.toDate(clock.currentTime).getTime();
-        var tilesetDates= Object.keys(tilesets);
-        for (var i=0;i<tilesetDates.length;i++){
-          if (new Date(tilesetDates[i]).getTime()<=currentTime && ((i===tilesetDates.length-1 || new Date(tilesetDates[i+1]).getTime()>=currentTime))){
-            tilesets[tilesetDates[i]].show=true;
-          } else {
-            tilesets[tilesetDates[i]].show=false;
-          }
+    viewer.clock.onTick.addEventListener((clock) => {
+      currentTime = Cesium.JulianDate.toDate(clock.currentTime).getTime();
+      var tilesetDates = Object.keys(tilesets);
+      for (var i = 0; i < tilesetDates.length; i++) {
+        if (new Date(tilesetDates[i]).getTime() <= currentTime && ((i === tilesetDates.length - 1 || new Date(tilesetDates[i + 1]).getTime() >= currentTime))) {
+          tilesets[tilesetDates[i]].show = true;
+        } else {
+          tilesets[tilesetDates[i]].show = false;
         }
-      });
-    
-    </script>
-  </body>
+      }
+    });
+
+  </script>
+</body>
+
 </html>
