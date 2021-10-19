@@ -34,12 +34,15 @@ spec:
         app: cesium-asdc
     spec:
       containers:
-      - image: cesium_asdc
+      - image: ghcr.io/auscalabledronecloud/cesium:latest
         imagePullPolicy: Never
         name: cesium-asdc-z4hxx
         resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
+        ports:
+        - name: 'http'
+          containerPort: 8080      
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
