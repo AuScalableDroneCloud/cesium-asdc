@@ -10,10 +10,12 @@
   <meta name="viewport"
     content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
   <title>Hello World!</title>
+  <script type="text/javascript" src="./Sandcastle/Sandcastle-header.js"></script>
   <script src="../Build/Cesium/Cesium.js"></script>
   <style>
-    @import url(../Build/Cesium/Widgets/widgets.css);
+    @import url(./Sandcastle/templates/bucket.css);
 
+    /* @import url(../Build/Cesium/Widgets/widgets.css); */
     html,
     body,
     #cesiumContainer {
@@ -27,40 +29,88 @@
 </head>
 
 <body>
-  <div id="cesiumContainer"></div>
+  <div id="cesiumContainer" class="fullSize"></div>
+  <div id="toolbar"></div>
   <script>
-    var viewer = new Cesium.Viewer("cesiumContainer");
-    viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2017-07-21"), Cesium.JulianDate.fromIso8601("2017-10-16"));
-    viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2017-07-21");
+    const loadDataset = (dataset) => {
+      if (dataset === "NUE") {
+        viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2017-07-21"), Cesium.JulianDate.fromIso8601("2017-10-16"));
+        viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2017-07-21");
+        if (!tilesets["NUE"]) {
+          tilesets["NUE"] = {};
+          tilesets["NUE"][new Date("2017-07-21")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170721_M1_RGB_group1_densified_point_cloud/tileset.json',
+            show: false
+          }));
+
+
+          tilesets["NUE"][new Date("2017-09-22")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170922_M2_RGB_group1_densified_point_cloud/tileset.json',
+            show: false
+          }));
+
+          tilesets["NUE"][new Date("2017-10-16")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20171016_M4_RGB_group1_densified_point_cloud/tileset.json',
+            show: false
+          }));
+        }
+
+        viewer.flyTo(tilesets["NUE"][Object.keys(tilesets["NUE"])[0]]);
+
+
+      } else if (dataset === "USLN") {
+        if (!tilesets["USLN"]) {
+          tilesets["USLN"]={};
+          tilesets["USLN"][new Date("2021-05-21")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/USLN-GegedzerickRoad_2021-05-21-odm_georeferenced_model/tileset.json',
+            // show: false
+          }));
+
+          //clamp model centre to terrain
+          tilesets["USLN"][new Date("2021-05-21")].readyPromise.then(function (tileset) {
+            var positions = [
+              Cesium.Cartographic.fromCartesian(tileset.boundingSphere.center)
+            ];
+            var promise = Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, positions);
+            Cesium.when(promise, function (updatedPositions) {
+              var offset = Cesium.Cartographic.toCartesian(updatedPositions[0]);
+              var translation = Cesium.Cartesian3.subtract(offset, tileset.boundingSphere.center, new Cesium.Cartesian3());
+              tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
+            });
+          });
+        }
+
+        viewer.flyTo(tilesets["USLN"][new Date("2021-05-21")]);
+
+      }
+    }
+    var viewer = new Cesium.Viewer('cesiumContainer', {
+      terrainProvider: Cesium.createWorldTerrain()
+    });
+    viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
+
+    Sandcastle.addToolbarButton("NUE", function () {
+      loadDataset("NUE");
+    });
+
+    Sandcastle.addToolbarButton("USLN", function () {
+      loadDataset("USLN");
+    });
 
     var tilesets = {};
 
-    tilesets[new Date("2017-07-21")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-      url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170721_M1_RGB_group1_densified_point_cloud/tileset.json',
-      show: false
-    }));
-
-
-    tilesets[new Date("2017-09-22")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-      url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170922_M2_RGB_group1_densified_point_cloud/tileset.json',
-      show: false
-    }));
-
-    tilesets[new Date("2017-10-16")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-      url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20171016_M4_RGB_group1_densified_point_cloud/tileset.json',
-      show: false
-    }));
-
-    viewer.flyTo(tilesets[Object.keys(tilesets)[0]]);
+    loadDataset("NUE");
 
     viewer.clock.onTick.addEventListener((clock) => {
       currentTime = Cesium.JulianDate.toDate(clock.currentTime).getTime();
-      var tilesetDates = Object.keys(tilesets);
-      for (var i = 0; i < tilesetDates.length; i++) {
-        if (new Date(tilesetDates[i]).getTime() <= currentTime && ((i === tilesetDates.length - 1 || new Date(tilesetDates[i + 1]).getTime() >= currentTime))) {
-          tilesets[tilesetDates[i]].show = true;
-        } else {
-          tilesets[tilesetDates[i]].show = false;
+      if (tilesets["NUE"]) {
+        var tilesetDates = Object.keys(tilesets["NUE"]);
+        for (var i = 0; i < tilesetDates.length; i++) {
+          if (new Date(tilesetDates[i]).getTime() <= currentTime && ((i === tilesetDates.length - 1 || new Date(tilesetDates[i + 1]).getTime() >= currentTime))) {
+            tilesets["NUE"][tilesetDates[i]].show = true;
+          } else {
+            tilesets["NUE"][tilesetDates[i]].show = false;
+          }
         }
       }
     });
