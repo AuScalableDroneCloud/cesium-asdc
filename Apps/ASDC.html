@@ -71,7 +71,7 @@
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/USLN-GegedzerickRoad_2021-05-21-odm_georeferenced_model/tileset.json',
             show: false
           }));
-
+          console.log(tilesets["USLN"][new Date("2021-05-21")]);
           //clamp model centre to terrain
           tilesets["USLN"][new Date("2021-05-21")].readyPromise.then(function (tileset) {
             var positions = [
@@ -79,6 +79,7 @@
             ];
             var promise = Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, positions);
             Cesium.when(promise, function (updatedPositions) {
+              updatedPositions[0].height += 10;
               var offset = Cesium.Cartographic.toCartesian(updatedPositions[0]);
               var translation = Cesium.Cartesian3.subtract(offset, tileset.boundingSphere.center, new Cesium.Cartesian3());
               tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
@@ -88,40 +89,40 @@
 
         viewer.flyTo(tilesets["USLN"][new Date("2021-05-21")]);
 
-      } else if (dataset === "WheatHub") {
-        selectedDataset = "WheatHub";
+      } else if (dataset === "VBIR") {
+        selectedDataset = "VBIR";
 
         viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2019-07-02"), Cesium.JulianDate.fromIso8601("2019-10-15"));
         viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2019-07-02");
-        if (!tilesets["WheatHub"]) {
-          tilesets["WheatHub"] = {};
-          tilesets["WheatHub"][new Date("2019-07-02")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+        if (!tilesets["VBIR"]) {
+          tilesets["VBIR"] = {};
+          tilesets["VBIR"][new Date("2019-07-02")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190702_VBIR_1_DenseCloud/tileset.json',
             show: false
           }));
 
 
-          tilesets["WheatHub"][new Date("2019-08-01")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+          tilesets["VBIR"][new Date("2019-08-01")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190801_VBIR_2_DenseCloud/tileset.json',
             show: false
           }));
 
-          tilesets["WheatHub"][new Date("2019-08-30")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+          tilesets["VBIR"][new Date("2019-08-30")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190830_VBIR_3_DenseCloud/tileset.json',
             show: false
           }));
 
-          tilesets["WheatHub"][new Date("2019-10-01")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+          tilesets["VBIR"][new Date("2019-10-01")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191001_VBIR_4_DenseCloud/tileset.json',
             show: false
           }));
 
-          tilesets["WheatHub"][new Date("2019-10-15")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+          tilesets["VBIR"][new Date("2019-10-15")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191015_VBIR_5_DenseCloud/tileset.json',
             show: false
           }));
         }
-        viewer.flyTo(tilesets["WheatHub"][Object.keys(tilesets["WheatHub"])[0]]);
+        viewer.flyTo(tilesets["VBIR"][Object.keys(tilesets["VBIR"])[0]]);
 
       }
     }
@@ -130,16 +131,24 @@
     });
     viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
 
-    Sandcastle.addToolbarButton("NUE", function () {
-      loadDataset("NUE");
-    });
+    Sandcastle.addToolbarMenu([
+      {
+        text: "WheatHub - NUE",
+        onselect: function () {
+          loadDataset("NUE");
+        },
+      },
+      {
+        text: "WheatHub - VBIR",
+        onselect: function () {
+          loadDataset("VBIR");
+        },
+      }
+    ])
+
 
     Sandcastle.addToolbarButton("USLN", function () {
       loadDataset("USLN");
-    });
-
-    Sandcastle.addToolbarButton("WheatHub", function () {
-      loadDataset("WheatHub");
     });
 
     var tilesets = {};
