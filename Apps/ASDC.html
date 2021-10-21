@@ -32,8 +32,10 @@
   <div id="cesiumContainer" class="fullSize"></div>
   <div id="toolbar"></div>
   <script>
+    var selectedDataset = "NUE";
     const loadDataset = (dataset) => {
       if (dataset === "NUE") {
+        selectedDataset = "NUE";
         viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2017-07-21"), Cesium.JulianDate.fromIso8601("2017-10-16"));
         viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2017-07-21");
         if (!tilesets["NUE"]) {
@@ -59,11 +61,15 @@
 
 
       } else if (dataset === "USLN") {
+        selectedDataset = "USLN";
+
+        viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2021-05-21"), Cesium.JulianDate.fromIso8601("2021-05-22"));
+        viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2021-05-21");
         if (!tilesets["USLN"]) {
           tilesets["USLN"]={};
           tilesets["USLN"][new Date("2021-05-21")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/USLN-GegedzerickRoad_2021-05-21-odm_georeferenced_model/tileset.json',
-            // show: false
+            show: false
           }));
 
           //clamp model centre to terrain
@@ -82,6 +88,41 @@
 
         viewer.flyTo(tilesets["USLN"][new Date("2021-05-21")]);
 
+      } else if (dataset === "WheatHub") {
+        selectedDataset = "WheatHub";
+
+        viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2019-07-02"), Cesium.JulianDate.fromIso8601("2019-10-15"));
+        viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2019-07-02");
+        if (!tilesets["WheatHub"]) {
+          tilesets["WheatHub"] = {};
+          tilesets["WheatHub"][new Date("2019-07-02")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190702_VBIR_1_DenseCloud/tileset.json',
+            show: false
+          }));
+
+
+          tilesets["WheatHub"][new Date("2019-08-01")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190801_VBIR_2_DenseCloud/tileset.json',
+            show: false
+          }));
+
+          tilesets["WheatHub"][new Date("2019-08-30")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190830_VBIR_3_DenseCloud/tileset.json',
+            show: false
+          }));
+
+          tilesets["WheatHub"][new Date("2019-10-01")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191001_VBIR_4_DenseCloud/tileset.json',
+            show: false
+          }));
+
+          tilesets["WheatHub"][new Date("2019-10-15")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191015_VBIR_5_DenseCloud/tileset.json',
+            show: false
+          }));
+        }
+        viewer.flyTo(tilesets["WheatHub"][Object.keys(tilesets["WheatHub"])[0]]);
+
       }
     }
     var viewer = new Cesium.Viewer('cesiumContainer', {
@@ -97,19 +138,23 @@
       loadDataset("USLN");
     });
 
+    Sandcastle.addToolbarButton("WheatHub", function () {
+      loadDataset("WheatHub");
+    });
+
     var tilesets = {};
 
-    loadDataset("NUE");
+    loadDataset(selectedDataset);
 
     viewer.clock.onTick.addEventListener((clock) => {
       currentTime = Cesium.JulianDate.toDate(clock.currentTime).getTime();
-      if (tilesets["NUE"]) {
-        var tilesetDates = Object.keys(tilesets["NUE"]);
+      if (tilesets[selectedDataset]) {
+        var tilesetDates = Object.keys(tilesets[selectedDataset]);
         for (var i = 0; i < tilesetDates.length; i++) {
-          if (new Date(tilesetDates[i]).getTime() <= currentTime && ((i === tilesetDates.length - 1 || new Date(tilesetDates[i + 1]).getTime() >= currentTime))) {
-            tilesets["NUE"][tilesetDates[i]].show = true;
+          if ((i === 0 || new Date(tilesetDates[i]).getTime() <= currentTime) && (i === tilesetDates.length - 1 || new Date(tilesetDates[i + 1]).getTime() >= currentTime)) {
+            tilesets[selectedDataset][tilesetDates[i]].show = true;
           } else {
-            tilesets["NUE"][tilesetDates[i]].show = false;
+            tilesets[selectedDataset][tilesetDates[i]].show = false;
           }
         }
       }
