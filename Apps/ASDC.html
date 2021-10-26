@@ -33,6 +33,60 @@
   <div id="toolbar"></div>
   <script>
     var selectedDataset = "NUE";
+
+    const loadGeoJson = (dataset) => {
+       
+        var geoJsonPromise = Cesium.GeoJsonDataSource.load(dataset, {
+          // clampToGround: true  //issues with picking polygons, using terrain sampling
+        });
+
+        // viewer.dataSources.add(geoJsonPromise);
+
+        geoJsonPromise.then((dataSource) => {
+          var entities = dataSource.entities.values;
+          var samplePromises = [];
+
+          dataSource.entities.values.map((entity) => {
+          // dataSource.entities.values.slice(0,24).map((entity) => {
+            var positions = entity.polygon.hierarchy.getValue().positions;
+            var cartoPositions = [];
+            positions.map(pos => {
+              var carto = Cesium.Cartographic.fromCartesian(pos);
+              cartoPositions.push(new Cesium.Cartographic(carto.longitude, carto.latitude));
+            })
+
+            samplePromises.push(Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, cartoPositions).then((updatedPositions) => {
+              var polygonEntity = viewer.entities.add({
+                polygon:
+                {
+                  hierarchy: new Cesium.PolygonHierarchy(Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(updatedPositions)),
+                  // hierarchy:new Cesium.CallbackProperty( () => {
+                  //   updatedPositions.map(cartoPoint=>{
+                  //   // var height = viewer.scene.sampleHeight(cartoPoint);
+                  //   var height = viewer.scene.globe.getHeight(cartoPoint);
+                  //   // console.log(height);
+                  //   if (height){
+                  //     cartoPoint.height=height;
+                  //   }
+                  // })
+                  //   return(new Cesium.PolygonHierarchy(Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(updatedPositions)));
+                  // },false),  //slow
+                  material: Cesium.Color.RED,
+                  perPositionHeight: true,
+                  // perPositionHeight: false, //picking issues
+                  arcType: Cesium.ArcType.GEODESIC
+                }
+              });
+              polygonEntity.properties = entity.properties;
+            }));
+          })
+          Promise.all(samplePromises).then(() => {
+            delete (dataSource);
+          })
+        })
+        
+    }
+    
     const loadDataset = (dataset) => {
       if (dataset === "NUE") {
         selectedDataset = "NUE";
@@ -66,7 +120,7 @@
         viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2021-05-21"), Cesium.JulianDate.fromIso8601("2021-05-22"));
         viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2021-05-21");
         if (!tilesets["USLN"]) {
-          tilesets["USLN"]={};
+          tilesets["USLN"] = {};
           tilesets["USLN"][new Date("2021-05-21")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/USLN-GegedzerickRoad_2021-05-21-odm_georeferenced_model/tileset.json',
             show: false
@@ -90,6 +144,7 @@
         viewer.flyTo(tilesets["USLN"][new Date("2021-05-21")]);
 
       } else if (dataset === "VBIR") {
+
         selectedDataset = "VBIR";
 
         viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2019-07-02"), Cesium.JulianDate.fromIso8601("2019-10-15"));
@@ -124,10 +179,14 @@
         }
         viewer.flyTo(tilesets["VBIR"][Object.keys(tilesets["VBIR"])[0]]);
 
+        loadGeoJson('https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/VBIR_EM3.geojson');
+        loadGeoJson('https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/VBIR_S2M3.geojson');
+       
       }
     }
     var viewer = new Cesium.Viewer('cesiumContainer', {
-      terrainProvider: Cesium.createWorldTerrain()
+      terrainProvider: Cesium.createWorldTerrain(),
+      // selectionIndicator: false
     });
     viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
 
@@ -168,6 +227,31 @@
         }
       }
     });
+
+    var selectedEntity = new Cesium.Entity();
+    var clickHandler = viewer.screenSpaceEventHandler.getInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
+      var pickedFeature = viewer.scene.drillPick(movement.position).filter(feature => {
+
+        if (!(feature.primitive instanceof Cesium.Cesium3DTileset))
+          return feature
+      })[0];
+
+      if (!Cesium.defined(pickedFeature)) {
+        clickHandler(movement);
+        return;
+      }
+
+      selectedEntity = pickedFeature.id;
+
+      selectedEntity.description = '<table class="cesium-infoBox-defaultTable"><tbody>';
+      for (var i = 0; i < selectedEntity.properties._propertyNames.length; i++) {
+        selectedEntity.description += '<tr><th>' + selectedEntity.properties._propertyNames[i] + '</th><td>' + selectedEntity.properties[selectedEntity.properties._propertyNames[i]].getValue() + '</td></tr>';
+      }
+      selectedEntity.description += '</tbody></table>';
+      viewer.selectedEntity = selectedEntity;
+
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
   </script>
 </body>
