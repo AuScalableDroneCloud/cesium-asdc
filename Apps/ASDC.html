@@ -35,58 +35,58 @@
     var selectedDataset = "NUE";
 
     const loadGeoJson = (dataset) => {
-       
-        var geoJsonPromise = Cesium.GeoJsonDataSource.load(dataset, {
-          // clampToGround: true  //issues with picking polygons, using terrain sampling
-        });
 
-        // viewer.dataSources.add(geoJsonPromise);
+      var geoJsonPromise = Cesium.GeoJsonDataSource.load(dataset, {
+        // clampToGround: true  //issues with picking polygons, using terrain sampling
+      });
 
-        geoJsonPromise.then((dataSource) => {
-          var entities = dataSource.entities.values;
-          var samplePromises = [];
+      // viewer.dataSources.add(geoJsonPromise);
 
-          dataSource.entities.values.map((entity) => {
+      geoJsonPromise.then((dataSource) => {
+        var entities = dataSource.entities.values;
+        var samplePromises = [];
+
+        dataSource.entities.values.map((entity) => {
           // dataSource.entities.values.slice(0,24).map((entity) => {
-            var positions = entity.polygon.hierarchy.getValue().positions;
-            var cartoPositions = [];
-            positions.map(pos => {
-              var carto = Cesium.Cartographic.fromCartesian(pos);
-              cartoPositions.push(new Cesium.Cartographic(carto.longitude, carto.latitude));
-            })
+          var positions = entity.polygon.hierarchy.getValue().positions;
+          var cartoPositions = [];
+          positions.map(pos => {
+            var carto = Cesium.Cartographic.fromCartesian(pos);
+            cartoPositions.push(new Cesium.Cartographic(carto.longitude, carto.latitude));
+          })
 
-            samplePromises.push(Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, cartoPositions).then((updatedPositions) => {
-              var polygonEntity = viewer.entities.add({
-                polygon:
-                {
-                  hierarchy: new Cesium.PolygonHierarchy(Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(updatedPositions)),
-                  // hierarchy:new Cesium.CallbackProperty( () => {
-                  //   updatedPositions.map(cartoPoint=>{
-                  //   // var height = viewer.scene.sampleHeight(cartoPoint);
-                  //   var height = viewer.scene.globe.getHeight(cartoPoint);
-                  //   // console.log(height);
-                  //   if (height){
-                  //     cartoPoint.height=height;
-                  //   }
-                  // })
-                  //   return(new Cesium.PolygonHierarchy(Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(updatedPositions)));
-                  // },false),  //slow
-                  material: Cesium.Color.RED,
-                  perPositionHeight: true,
-                  // perPositionHeight: false, //picking issues
-                  arcType: Cesium.ArcType.GEODESIC
-                }
-              });
-              polygonEntity.properties = entity.properties;
-            }));
-          })
-          Promise.all(samplePromises).then(() => {
-            delete (dataSource);
-          })
+          samplePromises.push(Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, cartoPositions).then((updatedPositions) => {
+            var polygonEntity = viewer.entities.add({
+              polygon:
+              {
+                hierarchy: new Cesium.PolygonHierarchy(Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(updatedPositions)),
+                // hierarchy:new Cesium.CallbackProperty( () => {
+                //   updatedPositions.map(cartoPoint=>{
+                //   // var height = viewer.scene.sampleHeight(cartoPoint);
+                //   var height = viewer.scene.globe.getHeight(cartoPoint);
+                //   // console.log(height);
+                //   if (height){
+                //     cartoPoint.height=height;
+                //   }
+                // })
+                //   return(new Cesium.PolygonHierarchy(Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(updatedPositions)));
+                // },false),  //slow
+                material: Cesium.Color.RED,
+                perPositionHeight: true,
+                // perPositionHeight: false, //picking issues
+                arcType: Cesium.ArcType.GEODESIC
+              }
+            });
+            polygonEntity.properties = entity.properties;
+          }));
         })
-        
+        Promise.all(samplePromises).then(() => {
+          delete (dataSource);
+        })
+      })
+
     }
-    
+
     const loadDataset = (dataset) => {
       if (dataset === "NUE") {
         selectedDataset = "NUE";
@@ -125,7 +125,7 @@
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/USLN-GegedzerickRoad_2021-05-21-odm_georeferenced_model/tileset.json',
             show: false
           }));
-          console.log(tilesets["USLN"][new Date("2021-05-21")]);
+
           //clamp model centre to terrain
           tilesets["USLN"][new Date("2021-05-21")].readyPromise.then(function (tileset) {
             var positions = [
@@ -181,7 +181,7 @@
 
         loadGeoJson('https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/VBIR_EM3.geojson');
         loadGeoJson('https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/VBIR_S2M3.geojson');
-       
+
       }
     }
     var viewer = new Cesium.Viewer('cesiumContainer', {
@@ -189,6 +189,7 @@
       // selectionIndicator: false
     });
     viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
+    // viewer.scene.globe.depthTestAgainstTerrain = true;
 
     Sandcastle.addToolbarMenu([
       {
@@ -208,6 +209,48 @@
 
     Sandcastle.addToolbarButton("USLN", function () {
       loadDataset("USLN");
+    });
+    
+    Sandcastle.addToolbarButton("Dryandra Tree", function () {
+      var promise = Cesium.sampleTerrainMostDetailed(Cesium.createWorldTerrain(), [new Cesium.Cartographic.fromDegrees(149.1106873966594, -35.261415607183686)]);
+      Cesium.when(promise, function (updatedPositions) {
+        var url = 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/dryandra-tree-scan.glb'
+        var position = Cesium.Cartesian3.fromDegrees(
+          149.1106873966594,
+          -35.261415607183686,
+          updatedPositions[0].height + 3.9608609676361084
+        );
+
+        var entity = viewer.entities.add({
+          position: position,
+          model: {
+            uri: url,
+          },
+        });
+        
+        viewer.flyTo(entity);
+      });
+    });
+
+    Sandcastle.addToolbarButton("Graffiti Underpass", function () {
+      var promise = Cesium.sampleTerrainMostDetailed(Cesium.createWorldTerrain(), [new Cesium.Cartographic.fromDegrees(149.1106873966594, -35.261415607183686)]);
+      Cesium.when(promise, function (updatedPositions) {
+        var url = 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti+Underpass/scene.gltf'
+        var position = Cesium.Cartesian3.fromDegrees(
+          149.11093029457186,
+          -35.26540200316355, 
+          updatedPositions[0].height
+        );
+
+        var entity = viewer.entities.add({
+          position: position,
+          model: {
+            uri: url,
+          },
+        });
+        
+        viewer.flyTo(entity);
+      });
     });
 
     var tilesets = {};
