@@ -212,17 +212,29 @@
     });
     
     Sandcastle.addToolbarButton("Dryandra Tree", function () {
-      var promise = Cesium.sampleTerrainMostDetailed(Cesium.createWorldTerrain(), [new Cesium.Cartographic.fromDegrees(149.1106873966594, -35.261415607183686)]);
+      var promise = Cesium.sampleTerrainMostDetailed(Cesium.createWorldTerrain(), [new Cesium.Cartographic.fromDegrees(149.1106974606,-35.2614095095)]);
       Cesium.when(promise, function (updatedPositions) {
         var url = 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/dryandra-tree-scan.glb'
+        // var position = Cesium.Cartesian3.fromDegrees(
+        //   149.1106873966594,
+        //   -35.261415607183686,
+        //   updatedPositions[0].height + 3.9608609676361084 //sampled height + half model height
+        // );
+        // manual
         var position = Cesium.Cartesian3.fromDegrees(
-          149.1106873966594,
-          -35.261415607183686,
-          updatedPositions[0].height + 3.9608609676361084
+          149.1106974606,
+          -35.2614095095,
+          updatedPositions[0].height + 3
         );
 
+        var hpr = new Cesium.HeadingPitchRoll(Cesium.Math.toRadians(110), Cesium.Math.toRadians(0), Cesium.Math.toRadians(-4));
+        var orientation = Cesium.Transforms.headingPitchRollQuaternion(
+          position,
+          hpr
+        );
         var entity = viewer.entities.add({
           position: position,
+          orientation:orientation,
           model: {
             uri: url,
           },
@@ -233,17 +245,28 @@
     });
 
     Sandcastle.addToolbarButton("Graffiti Underpass", function () {
-      var promise = Cesium.sampleTerrainMostDetailed(Cesium.createWorldTerrain(), [new Cesium.Cartographic.fromDegrees(149.1106873966594, -35.261415607183686)]);
+      var promise = Cesium.sampleTerrainMostDetailed(Cesium.createWorldTerrain(), [new Cesium.Cartographic.fromDegrees(149.1109390899, -35.2654136809)]);
       Cesium.when(promise, function (updatedPositions) {
         var url = 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti+Underpass/scene.gltf'
+        // var position = Cesium.Cartesian3.fromDegrees(
+        //   149.11093029457186,
+        //   -35.26540200316355, 
+        //   updatedPositions[0].height
+        // );
+        //manual
         var position = Cesium.Cartesian3.fromDegrees(
-          149.11093029457186,
-          -35.26540200316355, 
-          updatedPositions[0].height
+          149.1109390899,
+          -35.2654136809,
+          updatedPositions[0].height + 4.5
         );
-
+        var hpr = new Cesium.HeadingPitchRoll(Cesium.Math.toRadians(-13.5), Cesium.Math.toRadians(1), Cesium.Math.toRadians(10));
+        var orientation = Cesium.Transforms.headingPitchRollQuaternion(
+          position,
+          hpr
+        );
         var entity = viewer.entities.add({
           position: position,
+          orientation:orientation,
           model: {
             uri: url,
           },
