@@ -104,7 +104,13 @@
   ];
   app.get(knownTilesetFormats, checkGzipAndNext);
 
-  app.use(express.static(__dirname));
+  app.use('/cesium',express.static(__dirname,{
+    extensions: ['html', 'htm'],
+  }));
+
+  app.get('/cesium/apps/asdc/:id', function (req, res,next) {
+    res.sendFile(__dirname + '/apps/asdc.html');
+  })
 
   function getRemoteUrlFromParam(req) {
     let remoteUrl = req.params[0];

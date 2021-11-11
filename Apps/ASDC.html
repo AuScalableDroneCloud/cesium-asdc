@@ -9,12 +9,14 @@
   <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
   <meta name="viewport"
     content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
-  <title>ASDC</title>
-  <script type="text/javascript" src="./Sandcastle/Sandcastle-header.js"></script>
-  <script src="../Build/Cesium/Cesium.js"></script>
+  <title>ASDC Cesium Platform</title>
+  <script type="text/javascript" src="/cesium/Apps/Sandcastle/Sandcastle-header.js"></script>
+  <script src="/cesium/Build/Cesium/Cesium.js"></script>
+  <!-- <script type="text/javascript" src="./Sandcastle/Sandcastle-header.js"></script>
+  <script src="../Cesium/Cesium.js"></script> -->
   <!-- <script src="../Build/CesiumUnminified/Cesium.js"></script> -->
   <style>
-    @import url(./Sandcastle/templates/bucket.css);
+    @import url(/cesium/Apps/Sandcastle/templates/bucket.css);
 
     /* @import url(../Build/Cesium/Widgets/widgets.css); */
     html,
@@ -41,7 +43,14 @@
   <script>
     Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI1NWZkNGFlZS1iNzVhLTRmNTAtOThmYi1kMTI1MjlmOTVlNjciLCJpZCI6NzIyNTQsImlhdCI6MTYzNTkwNDI4OX0.EXVvJZa8yaugMmQNkc9pjWfrjqeOpZ8Jg7_0Hdwnb1A";
 
-    var selectedDataset = "NUE";
+    var selectedDataset = "nue";
+
+    var currentUrl = window.location.href;
+    if (currentUrl[currentUrl.length - 1] === "/") currentUrl = currentUrl[currentUrl.length - 1];
+    pathEnd = currentUrl.split('/')[currentUrl.split('/').length - 1];
+    if (pathEnd != "asdc" && pathEnd != "asdc.html") {
+      selectedDataset = pathEnd.toLowerCase();
+    }
 
     const loadGeoJson = (dataset) => {
 
@@ -96,34 +105,34 @@
 
     }
 
-    var highlightHeightPX=27.2;
+    var highlightHeightPX = 27.2;
     var highlightColor = 'green';
 
     const loadDataset = (dataset) => {
-      if (dataset === "NUE") {
-        selectedDataset = "NUE";
+      if (dataset === "nue") {
+        selectedDataset = "nue";
 
-        if (!tilesets["NUE"]) {
-          tilesets["NUE"] = {};
-          tilesets["NUE"][new Date("2017-07-21")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+        if (!tilesets["nue"]) {
+          tilesets["nue"] = {};
+          tilesets["nue"][new Date("2017-07-21")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170721_M1_RGB_group1_densified_point_cloud/tileset.json',
             show: false
           }));
 
 
-          tilesets["NUE"][new Date("2017-09-22")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+          tilesets["nue"][new Date("2017-09-22")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170922_M2_RGB_group1_densified_point_cloud/tileset.json',
             show: false
           }));
 
-          tilesets["NUE"][new Date("2017-10-16")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+          tilesets["nue"][new Date("2017-10-16")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20171016_M4_RGB_group1_densified_point_cloud/tileset.json',
             show: false
           }));
 
-          viewer.timeline.addHighlightRange(highlightColor,highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2017-07-21"),Cesium.JulianDate.fromIso8601("2017-07-22"));
-          viewer.timeline.addHighlightRange(highlightColor,highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2017-09-22"),Cesium.JulianDate.fromIso8601("2017-09-23"));
-          viewer.timeline.addHighlightRange(highlightColor,highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2017-10-16"),Cesium.JulianDate.fromIso8601("2017-10-17"));
+          viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2017-07-21"), Cesium.JulianDate.fromIso8601("2017-07-22"));
+          viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2017-09-22"), Cesium.JulianDate.fromIso8601("2017-09-23"));
+          viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2017-10-16"), Cesium.JulianDate.fromIso8601("2017-10-17"));
 
         }
 
@@ -131,21 +140,22 @@
 
         viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2017-07-21");
 
-        viewer.flyTo(tilesets["NUE"][Object.keys(tilesets["NUE"])[0]]);
+        viewer.flyTo(tilesets["nue"][Object.keys(tilesets["nue"])[0]]);
 
 
-      } else if (dataset === "USLN") {
-        selectedDataset = "USLN";
+      }
+      else if (dataset === "usln") {
+        selectedDataset = "usln";
 
-        if (!tilesets["USLN"]) {
-          tilesets["USLN"] = {};
-          tilesets["USLN"][new Date("2021-05-21")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+        if (!tilesets["usln"]) {
+          tilesets["usln"] = {};
+          tilesets["usln"][new Date("2021-05-21")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/USLN-GegedzerickRoad_2021-05-21-odm_georeferenced_model/tileset.json',
             show: false
           }));
 
           //clamp model centre to terrain
-          tilesets["USLN"][new Date("2021-05-21")].readyPromise.then(function (tileset) {
+          tilesets["usln"][new Date("2021-05-21")].readyPromise.then(function (tileset) {
             var positions = [
               Cesium.Cartographic.fromCartesian(tileset.boundingSphere.center)
             ];
@@ -158,50 +168,50 @@
             });
           });
 
-          viewer.timeline.addHighlightRange(highlightColor,highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2021-05-21"),Cesium.JulianDate.fromIso8601("2021-05-22"));
+          viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2021-05-21"), Cesium.JulianDate.fromIso8601("2021-05-22"));
         }
         viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2021-05-21"), Cesium.JulianDate.fromIso8601("2021-05-22"));
         viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2021-05-21");
 
-        viewer.flyTo(tilesets["USLN"][new Date("2021-05-21")]);
+        viewer.flyTo(tilesets["usln"][new Date("2021-05-21")]);
 
-      } else if (dataset === "VBIR") {
+      }
+      else if (dataset === "vbir") {
 
-        selectedDataset = "VBIR";
+        selectedDataset = "vbir";
 
-        if (!tilesets["VBIR"]) {
-          tilesets["VBIR"] = {};
-          tilesets["VBIR"][new Date("2019-07-02")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+        if (!tilesets["vbir"]) {
+          tilesets["vbir"] = {};
+          tilesets["vbir"][new Date("2019-07-02")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190702_VBIR_1_DenseCloud/tileset.json',
             show: false
           }));
 
-
-          tilesets["VBIR"][new Date("2019-08-01")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+          tilesets["vbir"][new Date("2019-08-01")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190801_VBIR_2_DenseCloud/tileset.json',
             show: false
           }));
 
-          tilesets["VBIR"][new Date("2019-08-30")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+          tilesets["vbir"][new Date("2019-08-30")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190830_VBIR_3_DenseCloud/tileset.json',
             show: false
           }));
 
-          tilesets["VBIR"][new Date("2019-10-01")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+          tilesets["vbir"][new Date("2019-10-01")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191001_VBIR_4_DenseCloud/tileset.json',
             show: false
           }));
 
-          tilesets["VBIR"][new Date("2019-10-15")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+          tilesets["vbir"][new Date("2019-10-15")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191015_VBIR_5_DenseCloud/tileset.json',
             show: false
           }));
 
-          viewer.timeline.addHighlightRange(highlightColor,highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-07-02"),Cesium.JulianDate.fromIso8601("2019-07-03"));
-          viewer.timeline.addHighlightRange(highlightColor,highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-08-01"),Cesium.JulianDate.fromIso8601("2019-08-02"));
-          viewer.timeline.addHighlightRange(highlightColor,highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-08-30"),Cesium.JulianDate.fromIso8601("2019-08-31"));
-          viewer.timeline.addHighlightRange(highlightColor,highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-10-01"),Cesium.JulianDate.fromIso8601("2019-10-02"));
-          viewer.timeline.addHighlightRange(highlightColor,highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-10-15"),Cesium.JulianDate.fromIso8601("2019-10-16"));
+          viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-07-02"), Cesium.JulianDate.fromIso8601("2019-07-03"));
+          viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-08-01"), Cesium.JulianDate.fromIso8601("2019-08-02"));
+          viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-08-30"), Cesium.JulianDate.fromIso8601("2019-08-31"));
+          viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-10-01"), Cesium.JulianDate.fromIso8601("2019-10-02"));
+          viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-10-15"), Cesium.JulianDate.fromIso8601("2019-10-16"));
 
 
           loadGeoJson('https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/VBIR_EM3.geojson');
@@ -210,39 +220,10 @@
         viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2019-07-02"), Cesium.JulianDate.fromIso8601("2019-10-16"));
         viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2019-07-02");
 
-        viewer.flyTo(tilesets["VBIR"][Object.keys(tilesets["VBIR"])[0]]);
+        viewer.flyTo(tilesets["vbir"][Object.keys(tilesets["vbir"])[0]]);
       }
-    }
+      else if (dataset === "dryandra_model") {
 
-    var viewer = new Cesium.Viewer('cesiumContainer', {
-      terrainProvider: Cesium.createWorldTerrain(),
-      // selectionIndicator: false
-    });
-    viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
-    // viewer.scene.globe.depthTestAgainstTerrain = true;
-
-    Sandcastle.addToolbarMenu([
-      {
-        text: "WheatHub - NUE",
-        onselect: function () {
-          loadDataset("NUE");
-        },
-      },
-      {
-        text: "WheatHub - VBIR",
-        onselect: function () {
-          loadDataset("VBIR");
-        },
-      }
-    ])
-
-
-    Sandcastle.addToolbarButton("USLN", function () {
-      loadDataset("USLN");
-    });
-
-    Sandcastle.addToggleButton("Dryandra Tree Model", false, function (checked) {
-      if (!entities["Dryandra"]) {
         var promise = Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [new Cesium.Cartographic.fromDegrees(149.1106974606, -35.2614095095)]);
         Cesium.when(promise, function (updatedPositions) {
           var url = 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/dryandra-tree-scan.glb';
@@ -264,7 +245,7 @@
             hpr
           );
 
-          entities["Dryandra"] = viewer.entities.add({
+          entities["dryandra"] = viewer.entities.add({
             position: position,
             orientation: orientation,
             model: {
@@ -272,30 +253,25 @@
             }
           });
 
-          viewer.flyTo(entities["Dryandra"]);
+          viewer.flyTo(entities["dryandra"]);
         });
-      } else {
-        entities["Dryandra"].show = checked;
       }
-    });
+      else if (dataset === "dryandra_pointcloud") {
 
-    Sandcastle.addToggleButton("Dryandra Tree Point Cloud", false, function (checked) {
-      if (!tilesets["Dryandra"]) {
-        tilesets["Dryandra"] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-          url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/Point+Cloud/tileset.json',
-        }));
+        if (!tilesets["dryandra"]) {
+          tilesets["dryandra"] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/Point+Cloud/tileset.json',
+          }));
 
-        tilesets["Dryandra"].modelMatrix
+          tilesets["dryandra"].modelMatrix
 
-      } else {
-        tilesets["Dryandra"].show = checked;
+        } else {
+          tilesets["dryandra"].show = checked;
+        }
+        viewer.flyTo(tilesets["dryandra"]);
+
       }
-      viewer.flyTo(tilesets["Dryandra"]);
-
-    });
-
-    Sandcastle.addToggleButton("Graffiti Model", false, function (checked) {
-      if (!entities["Graffiti"]) {
+      else if (dataset === "graffiti_model") {
         var promise = Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [new Cesium.Cartographic.fromDegrees(149.1109390899, -35.2654136809)]);
         Cesium.when(promise, function (updatedPositions) {
           var url = 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti+Underpass/scene.gltf'
@@ -316,8 +292,7 @@
             hpr
           );
 
-
-          entities["Graffiti"] = viewer.entities.add({
+          entities["graffiti"] = viewer.entities.add({
             position: position,
             orientation: orientation,
             model: {
@@ -325,23 +300,95 @@
             },
           });
 
-          viewer.flyTo(entities["Graffiti"]);
+          viewer.flyTo(entities["graffiti"]);
 
         });
+      }
+      else if (dataset === "graffiti_pointcloud") {
+        if(!tilesets["graffiti"]){
+          tilesets["graffiti"] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti+Underpass/Point+Cloud/tileset.json',
+          }));
+        }
+        viewer.flyTo(tilesets["graffiti"]);
+      }
+    }
+
+    var viewer = new Cesium.Viewer('cesiumContainer', {
+      terrainProvider: Cesium.createWorldTerrain(),
+      // selectionIndicator: false
+    });
+    viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
+    // viewer.scene.globe.depthTestAgainstTerrain = true;
+
+
+    Sandcastle.addToolbarMenu([
+      {
+        text: "WheatHub - NUE",
+        onselect: function () {
+          window.history.pushState('', '', '/cesium/apps/asdc/nue');
+          loadDataset("nue");
+        },
+      },
+      {
+        text: "WheatHub - VBIR",
+        onselect: function () {
+          window.history.pushState('', '', '/cesium/apps/asdc/vbir');
+          loadDataset("vbir");
+        },
+      }
+    ])
+    document.getElementById("toolbar").childNodes[0].selectedIndex = selectedDataset === 'vbir' ? 1 : 0;
+
+    Sandcastle.addToolbarButton("USLN", function () {
+      window.history.pushState('', '', '/cesium/apps/asdc/usln');
+      loadDataset("usln");
+    });
+
+    Sandcastle.addToggleButton("Dryandra Tree Model", selectedDataset === "dryandra_model", function (checked) {
+      selectedDataset = "dryandra_model";
+      window.history.pushState('', '', '/cesium/apps/asdc/dryandra_model');
+
+      if (!entities["dryandra"]) {
+        loadDataset("dryandra_model");
       } else {
-        entities["Graffiti"].show = checked;
+        entities["dryandra"].show = checked;
+        if (checked) viewer.flyTo(entities["dryandra"]);
       }
     });
 
-    Sandcastle.addToggleButton("Graffiti Point Cloud", false, function (checked) {
-      if (!tilesets["Graffiti"]) {
-        tilesets["Graffiti"] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-          url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti+Underpass/Point+Cloud/tileset.json',
-        }));
+    Sandcastle.addToggleButton("Dryandra Tree Point Cloud", selectedDataset === "dryandra_pointcloud", function (checked) {
+      selectedDataset = "dryandra_pointcloud";
+      window.history.pushState('', '', '/cesium/apps/asdc/dryandra_pointcloud');
+
+      if (!tilesets["dryandra"]) {
+        loadDataset("dryandra_pointcloud");
       } else {
-        tilesets["Graffiti"].show = checked;
+        tilesets["dryandra"].show = checked;
+        if (checked) viewer.flyTo(tilesets["dryandra"]);
       }
-      viewer.flyTo(tilesets["Graffiti"]);
+    });
+
+    Sandcastle.addToggleButton("Graffiti Model", selectedDataset === "graffiti_model", function (checked) {
+      selectedDataset = "graffiti_model";
+      window.history.pushState('', '', '/cesium/apps/asdc/graffiti_model');
+      if (!entities["graffiti"]) {
+        loadDataset("graffiti_model");
+      } else {
+        entities["graffiti"].show = checked;
+        if (checked) viewer.flyTo(entities["graffiti"]);
+      }
+    });
+
+    Sandcastle.addToggleButton("Graffiti Point Cloud", selectedDataset === "graffiti_pointcloud", function (checked) {
+      selectedDataset = "graffiti_pointcloud";
+      window.history.pushState('', '', '/cesium/apps/asdc/graffiti_pointcloud');
+      if (!tilesets["graffiti"]) {
+        loadDataset("graffiti_pointcloud");
+      } else {
+        tilesets["graffiti"].show = checked;
+        if (checked) viewer.flyTo(tilesets["graffiti"]);
+      }
     });
 
     var tilesets = {};
