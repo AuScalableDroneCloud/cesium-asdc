@@ -108,8 +108,8 @@
     extensions: ['html', 'htm'],
   }));
 
-  app.get('/cesium/apps/asdc/:id', function (req, res,next) {
-    res.sendFile(__dirname + '/apps/asdc.html');
+  app.get('/cesium/Apps/ASDC/:id', function (req, res,next) {
+    res.sendFile(__dirname + '/Apps/ASDC.html');
   })
 
   function getRemoteUrlFromParam(req) {

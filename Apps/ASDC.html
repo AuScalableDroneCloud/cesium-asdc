@@ -48,7 +48,7 @@
     var currentUrl = window.location.href;
     if (currentUrl[currentUrl.length - 1] === "/") currentUrl = currentUrl[currentUrl.length - 1];
     pathEnd = currentUrl.split('/')[currentUrl.split('/').length - 1];
-    if (pathEnd != "asdc" && pathEnd != "asdc.html") {
+    if (pathEnd.toLowerCase() != "asdc" && pathEnd.toLowerCase() != "asdc.html") {
       selectedDataset = pathEnd.toLowerCase();
     }
 
@@ -326,14 +326,14 @@
       {
         text: "WheatHub - NUE",
         onselect: function () {
-          window.history.pushState('', '', '/cesium/apps/asdc/nue');
+          window.history.pushState('', '', '/cesium/Apps/ASDC/nue');
           loadDataset("nue");
         },
       },
       {
         text: "WheatHub - VBIR",
         onselect: function () {
-          window.history.pushState('', '', '/cesium/apps/asdc/vbir');
+          window.history.pushState('', '', '/cesium/Apps/ASDC/vbir');
           loadDataset("vbir");
         },
       }
@@ -341,13 +341,13 @@
     document.getElementById("toolbar").childNodes[0].selectedIndex = selectedDataset === 'vbir' ? 1 : 0;
 
     Sandcastle.addToolbarButton("USLN", function () {
-      window.history.pushState('', '', '/cesium/apps/asdc/usln');
+      window.history.pushState('', '', '/cesium/Apps/ASDC/usln');
       loadDataset("usln");
     });
 
     Sandcastle.addToggleButton("Dryandra Tree Model", selectedDataset === "dryandra_model", function (checked) {
       selectedDataset = "dryandra_model";
-      window.history.pushState('', '', '/cesium/apps/asdc/dryandra_model');
+      window.history.pushState('', '', '/cesium/Apps/ASDC/dryandra_model');
 
       if (!entities["dryandra"]) {
         loadDataset("dryandra_model");
@@ -359,7 +359,7 @@
 
     Sandcastle.addToggleButton("Dryandra Tree Point Cloud", selectedDataset === "dryandra_pointcloud", function (checked) {
       selectedDataset = "dryandra_pointcloud";
-      window.history.pushState('', '', '/cesium/apps/asdc/dryandra_pointcloud');
+      window.history.pushState('', '', '/cesium/Apps/ASDC/dryandra_pointcloud');
 
       if (!tilesets["dryandra"]) {
         loadDataset("dryandra_pointcloud");
@@ -371,7 +371,7 @@
 
     Sandcastle.addToggleButton("Graffiti Model", selectedDataset === "graffiti_model", function (checked) {
       selectedDataset = "graffiti_model";
-      window.history.pushState('', '', '/cesium/apps/asdc/graffiti_model');
+      window.history.pushState('', '', '/cesium/Apps/ASDC/graffiti_model');
       if (!entities["graffiti"]) {
         loadDataset("graffiti_model");
       } else {
@@ -382,7 +382,7 @@
 
     Sandcastle.addToggleButton("Graffiti Point Cloud", selectedDataset === "graffiti_pointcloud", function (checked) {
       selectedDataset = "graffiti_pointcloud";
-      window.history.pushState('', '', '/cesium/apps/asdc/graffiti_pointcloud');
+      window.history.pushState('', '', '/cesium/Apps/ASDC/graffiti_pointcloud');
       if (!tilesets["graffiti"]) {
         loadDataset("graffiti_pointcloud");
       } else {
