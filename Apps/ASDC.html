@@ -111,7 +111,7 @@
     const loadDataset = (dataset) => {
       if (dataset === "nue") {
         selectedDataset = "nue";
-
+        console.log(viewer.timeline);
         if (!tilesets["nue"]) {
           tilesets["nue"] = {};
           tilesets["nue"][new Date("2017-07-21")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
@@ -129,19 +129,18 @@
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20171016_M4_RGB_group1_densified_point_cloud/tileset.json',
             show: false
           }));
-
-          viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2017-07-21"), Cesium.JulianDate.fromIso8601("2017-07-22"));
-          viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2017-09-22"), Cesium.JulianDate.fromIso8601("2017-09-23"));
-          viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2017-10-16"), Cesium.JulianDate.fromIso8601("2017-10-17"));
-
         }
+
+        viewer.timeline._highlightRanges = [];
+        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2017-07-21"), Cesium.JulianDate.fromIso8601("2017-07-22"));
+        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2017-09-22"), Cesium.JulianDate.fromIso8601("2017-09-23"));
+        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2017-10-16"), Cesium.JulianDate.fromIso8601("2017-10-17"));
 
         viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2017-07-21"), Cesium.JulianDate.fromIso8601("2017-10-17"));
 
         viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2017-07-21");
 
         viewer.flyTo(tilesets["nue"][Object.keys(tilesets["nue"])[0]]);
-
 
       }
       else if (dataset === "usln") {
@@ -167,9 +166,11 @@
               tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
             });
           });
-
-          viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2021-05-21"), Cesium.JulianDate.fromIso8601("2021-05-22"));
         }
+
+        viewer.timeline._highlightRanges = [];
+        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2021-05-21"), Cesium.JulianDate.fromIso8601("2021-05-22"));
+
         viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2021-05-21"), Cesium.JulianDate.fromIso8601("2021-05-22"));
         viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2021-05-21");
 
@@ -207,16 +208,17 @@
             show: false
           }));
 
-          viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-07-02"), Cesium.JulianDate.fromIso8601("2019-07-03"));
-          viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-08-01"), Cesium.JulianDate.fromIso8601("2019-08-02"));
-          viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-08-30"), Cesium.JulianDate.fromIso8601("2019-08-31"));
-          viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-10-01"), Cesium.JulianDate.fromIso8601("2019-10-02"));
-          viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-10-15"), Cesium.JulianDate.fromIso8601("2019-10-16"));
-
-
           loadGeoJson('https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/VBIR_EM3.geojson');
           loadGeoJson('https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/VBIR_S2M3.geojson');
         }
+        viewer.timeline._highlightRanges = [];
+        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-07-02"), Cesium.JulianDate.fromIso8601("2019-07-03"));
+        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-08-01"), Cesium.JulianDate.fromIso8601("2019-08-02"));
+        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-08-30"), Cesium.JulianDate.fromIso8601("2019-08-31"));
+        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-10-01"), Cesium.JulianDate.fromIso8601("2019-10-02"));
+        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-10-15"), Cesium.JulianDate.fromIso8601("2019-10-16"));
+
+
         viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2019-07-02"), Cesium.JulianDate.fromIso8601("2019-10-16"));
         viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2019-07-02");
 
@@ -305,12 +307,61 @@
         });
       }
       else if (dataset === "graffiti_pointcloud") {
-        if(!tilesets["graffiti"]){
+        if (!tilesets["graffiti"]) {
           tilesets["graffiti"] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
             url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti+Underpass/Point+Cloud/tileset.json',
           }));
         }
         viewer.flyTo(tilesets["graffiti"]);
+      }
+      else if (dataset === "gillan_ecosphere") {
+        selectedDataset = "gillan_ecosphere";
+        if (!tilesets["gillan_ecosphere"]) {
+          tilesets["gillan_ecosphere"] = {};
+          tilesets["gillan_ecosphere"][new Date("2019-05-01")] = [];
+          fetch('/cesium/Apps/may_2019_ils.txt')
+            .then(response => response.text())
+            .then(text => text.split("\n").map((line, index) => {
+              if (index == 0) return;
+              var path = line.split("C- ")[1];
+              if (path) {
+                tilesets["gillan_ecosphere"][new Date("2019-05-01")].push(viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+                  // url: `http://localhost:3000/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                  url: `/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                  show: false
+                })));
+
+                viewer.flyTo(tilesets["gillan_ecosphere"][new Date("2019-05-01")][0]);
+              }
+            }))
+          tilesets["gillan_ecosphere"][new Date("2019-09-01")] = [];
+          fetch('/cesium/Apps/sept_2019_ils.txt')
+            .then(response => response.text())
+            .then(text => text.split("\n").map((line, index) => {
+              if (index == 0) return;
+              var path = line.split("C- ")[1];
+              if (path) {
+                tilesets["gillan_ecosphere"][new Date("2019-09-01")].push(viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+                  // url: `http://localhost:3000/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                  url: `/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                  show: false
+                })));
+
+                // viewer.flyTo(tilesets["gillan"][new Date("2019-05-01")][0]);
+              }
+            }))
+
+          loadGeoJson("https://data.cyverse.org/dav-anon/iplant/commons/cyverse_curated/Gillan_Ecosphere_2021/leaflet_map/suas-footprints.geojson");
+        } else {
+          viewer.flyTo(tilesets["gillan_ecosphere"][new Date("2019-05-01")][0]);
+        }
+
+        viewer.timeline._highlightRanges = [];
+        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-05-01"), Cesium.JulianDate.fromIso8601("2019-05-31"));
+        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-09-01"), Cesium.JulianDate.fromIso8601("2019-09-30"));
+
+        viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2019-05-01"), Cesium.JulianDate.fromIso8601("2019-09-30"));
+        viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2019-05-01");
       }
     }
 
@@ -343,6 +394,10 @@
     Sandcastle.addToolbarButton("USLN", function () {
       window.history.pushState('', '', '/cesium/Apps/ASDC/usln');
       loadDataset("usln");
+    });
+    Sandcastle.addToolbarButton("Gillan Ecosphere", function () {
+      window.history.pushState('', '', '/cesium/Apps/ASDC/gillan_ecosphere');
+      loadDataset("gillan_ecosphere");
     });
 
     Sandcastle.addToggleButton("Dryandra Tree Model", selectedDataset === "dryandra_model", function (checked) {
@@ -402,9 +457,17 @@
         var tilesetDates = Object.keys(tilesets[selectedDataset]);
         for (var i = 0; i < tilesetDates.length; i++) {
           if ((i === 0 || new Date(tilesetDates[i]).getTime() <= currentTime) && (i === tilesetDates.length - 1 || new Date(tilesetDates[i + 1]).getTime() >= currentTime)) {
-            tilesets[selectedDataset][tilesetDates[i]].show = true;
+            if (Array.isArray(tilesets[selectedDataset][tilesetDates[i]])) {
+              tilesets[selectedDataset][tilesetDates[i]].map(tileset => { tileset.show = true; })
+            } else {
+              tilesets[selectedDataset][tilesetDates[i]].show = true;
+            }
           } else {
-            tilesets[selectedDataset][tilesetDates[i]].show = false;
+            if (Array.isArray(tilesets[selectedDataset][tilesetDates[i]])) {
+              tilesets[selectedDataset][tilesetDates[i]].map(tileset => { tileset.show = false; })
+            } else {
+              tilesets[selectedDataset][tilesetDates[i]].show = false;
+            }
           }
         }
       }
