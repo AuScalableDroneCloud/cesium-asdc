@@ -1,0 +1,154 @@
+{
+    "assets": [
+        {
+            "id": 1,
+            "name": "NUE",
+            "status": "active",
+            "data": [
+                {
+                    "type": "PointCloud",
+                    "date": "2017-07-21T00:00:00.000Z",
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170721_M1_RGB_group1_densified_point_cloud/tileset.json"
+                },
+                {
+                    "type": "PointCloud",
+                    "date": "2017-09-22T00:00:00.000Z",
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170922_M2_RGB_group1_densified_point_cloud/tileset.json"
+                },
+                {
+                    "type": "PointCloud",
+                    "date": "2017-10-16T00:00:00.000Z",
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20171016_M4_RGB_group1_densified_point_cloud/tileset.json"
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "VBIR",
+            "status": "active",
+            "data": [
+                {
+                    "type": "PointCloud",
+                    "date": "2019-07-02T00:00:00.000Z",
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190702_VBIR_1_DenseCloud/tileset.json"
+                },
+                {
+                    "type": "PointCloud",
+                    "date": "2019-08-01T00:00:00.000Z",
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190801_VBIR_2_DenseCloud/tileset.json"
+                },
+                {
+                    "type": "PointCloud",
+                    "date": "2019-08-30T00:00:00.000Z",
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190830_VBIR_3_DenseCloud/tileset.json"
+                },
+                {
+                    "type": "PointCloud",
+                    "date": "2019-10-01T00:00:00.000Z",
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191001_VBIR_4_DenseCloud/tileset.json"
+                },
+                {
+                    "type": "PointCloud",
+                    "date": "2019-10-15T00:00:00.000Z",
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191015_VBIR_5_DenseCloud/tileset.json"
+                },
+                {
+                    "type": "GeoJSON",
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/VBIR_EM3.geojson"
+                },
+                {
+                    "type": "GeoJSON",
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/VBIR_S2M3.geojson"
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "name": "USLN",
+            "status": "active",
+            "data": [
+                {
+                    "type": "PointCloud",
+                    "date": "2021-05-21T00:00:00.000Z",
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/USLN-GegedzerickRoad_2021-05-21-odm_georeferenced_model/tileset.json",
+                    "position": {
+                        "lng": 148.84897057224302,
+                        "lat": -36.371437446595635,
+                        "height": 963.2143831961985
+                    }
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "name": "Gillan Ecosphere",
+            "status": "active",
+            "type": "EPTPointCloud"
+        },
+        {
+            "id": 5,
+            "name": "Dryandra Model",
+            "status": "active",
+            "data": [
+                {
+                    "type": "Model",
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/dryandra-tree-scan.glb",
+                    "position":{
+                        "lng":149.1106974606,
+                        "lat":-35.2614095095,
+                        "height":636.0639605530833
+                    },
+                    "rotation":{
+                        "heading":110,
+                        "pitch":0,
+                        "roll":-2
+                    }
+                }
+            ]
+        },
+        {
+            "id": 6,
+            "name": "Dryandra Point Cloud",
+            "status": "active",
+            "data": [
+                {
+                    "type": "PointCloud",
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/Point+Cloud/tileset.json"
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "name": "Graffiti Model",
+            "status": "active",
+            "data": [
+                {
+                    "type": "Model",
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti+Underpass/scene.gltf",
+                    "position":{
+                        "lng":149.1109390899,
+                        "lat":-35.2654136809,
+                        "height":632.9976221420972
+                    },
+                    "rotation":{
+                        "heading":-15,
+                        "pitch":1,
+                        "roll":5
+                    }
+                   
+                }
+            ]
+        },
+        {
+            "id": 8,
+            "name": "Graffiti Point Cloud",
+            "status": "active",
+            "data": [
+                {
+                    "type": "PointCloud",
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti+Underpass/Point+Cloud/tileset.json"
+                }
+            ]
+        }
+    ]
+}

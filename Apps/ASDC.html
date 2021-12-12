@@ -12,44 +12,186 @@
   <title>ASDC Cesium Platform</title>
   <script type="text/javascript" src="/cesium/Apps/Sandcastle/Sandcastle-header.js"></script>
   <script src="/cesium/Build/Cesium/Cesium.js"></script>
-  <!-- <script type="text/javascript" src="./Sandcastle/Sandcastle-header.js"></script>
-  <script src="../Cesium/Cesium.js"></script> -->
   <!-- <script src="../Build/CesiumUnminified/Cesium.js"></script> -->
   <style>
     @import url(/cesium/Apps/Sandcastle/templates/bucket.css);
 
     /* @import url(../Build/Cesium/Widgets/widgets.css); */
-    html,
-    body,
+    /* html,
+    body, */
     #cesiumContainer {
-      width: 100%;
+      width: 80%;
+      position: absolute;
+      left: 20%;
       height: 100%;
       margin: 0;
       padding: 0;
       overflow: hidden;
     }
+
+    #sidebar {
+      width: 20%;
+      position: absolute;
+      left: 0%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #FFFBF5;
+      color: black;
+    }
+
+    #sidebar-data-buttons {
+      height: calc(100% - 34.6px);
+      overflow: auto;
+    }
+
+    .sidebar-item {
+      padding: 10px;
+      border-bottom: 1px solid #EFE5D5;
+    }
+
+    .sidebar-upload-button {
+      padding: 10px;
+      border-top: 1px solid #EFE5D5;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      top: 50%;
+      width: 50%;
+      height: 50%;
+      transform: translate(-50%, -50%);
+
+      overflow: auto;
+      background-color: #FFFBF5;
+    }
+
+    .modal-header {
+      color: black;
+      padding: 2px 16px;
+      width: calc(100% - 32px);
+      border-bottom: 1px solid #EFE5D5;
+
+    }
+
+    .close {
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: #EFE5D5;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .modal-content {
+      height: calc(100% - 55.68px - 34.6px);
+      overflow: auto;
+    }
+
+    .upload-inputs {
+      color: black;
+      left: 50%;
+      position: relative;
+      transform: translate(-50%, 0%);
+      width: 75%;
+      height: 100%;
+      display: inline-grid;
+      align-content: center;
+    }
+
+    .modal-upload-button {
+      color: black;
+      padding: 10px;
+      border-top: 1px solid #EFE5D5;
+      text-align: center;
+    }
+
+    .sidebar-item:hover,
+    .sidebar-upload-button:hover,
+    .modal-upload-button:hover {
+      background: #5B8B51;
+      cursor: pointer;
+    }
+
+    .add-file-button:hover {
+      cursor: pointer
+    }
+
+    .input-line {
+      flex-direction: row;
+      width: 100%;
+      display: inline-flex;
+      justify-content: space-between;
+      align-items: center;
+    }
   </style>
 </head>
 
 <body>
-  <div id="cesiumContainer" class="fullSize"></div>
-  <div id="toolbar"></div>
-  <!-- <iframe  
-    src="https://grafana.anu.appf.org.au/d/3eeo7zHmk/aggregator?orgId=1&from=1627012980283&to=1633002312780&var-address=All&var-sensor_v=air_relative_humidity&var-sensor_v=air_temperature&var-sensor_v=volumetric_water_content&var-alias=All&viewPanel=13"
-    width="650"
-    height="300"
-    frameborder="0">
-  </iframe > -->
+  <div id="cesiumContainer"></div>
+  <div id="sidebar">
+    <div id="sidebar-data-buttons"></div>
+    <div class="sidebar-upload-button" onClick="openModal()">Upload</div>
+  </div>
+  <div class="modal" id="upload-modal">
+    <div class="modal-header">
+      <span class="close" onClick="closeModal()">&times;</span>
+      <h2>Upload</h2>
+    </div>
+    <div class="modal-content">
+      <div class="upload-inputs">
+        <form name="upload-form" id="upload-form">
+          <div class="input-line">
+            <label for="name">Name:</label>
+            <input type="text" name="name" required>
+          </div>
+          <br>
+          <br>
+          <div class="input-line">
+            <input type="file" name="files[]" accept=".laz" required>
+            <input type="date" name="dates[]" required>
+          </div>
+        </form>
+        <br>
+        <button class="add-file-button" onClick="addFileInput()">+</button>
+      </div>
+    </div>
+    <div id="modal-upload-button" class="modal-upload-button" onClick="upload()">
+      Upload
+    </div>
+  </div>
+
+  <!-- <div id="toolbar"></div> -->
+
   <script>
     Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI1NWZkNGFlZS1iNzVhLTRmNTAtOThmYi1kMTI1MjlmOTVlNjciLCJpZCI6NzIyNTQsImlhdCI6MTYzNTkwNDI4OX0.EXVvJZa8yaugMmQNkc9pjWfrjqeOpZ8Jg7_0Hdwnb1A";
 
-    var selectedDataset = "nue";
+    // var selectedDataset = "nue";
+    // var selectedDataset = 1;
+    var selectedDataset;
 
     var currentUrl = window.location.href;
     if (currentUrl[currentUrl.length - 1] === "/") currentUrl = currentUrl[currentUrl.length - 1];
     pathEnd = currentUrl.split('/')[currentUrl.split('/').length - 1];
     if (pathEnd.toLowerCase() != "asdc" && pathEnd.toLowerCase() != "asdc.html") {
       selectedDataset = pathEnd.toLowerCase();
+      if(pathEnd.toLowerCase() === "nue") selectedDataset = 1;
+      if(pathEnd.toLowerCase() === "vbir") selectedDataset = 2;
+      if(pathEnd.toLowerCase() === "usln") selectedDataset = 3;
+      if(pathEnd.toLowerCase() === "gillan_ecosphere") selectedDataset = 4;
+      if(pathEnd.toLowerCase() === "dryandra_model") selectedDataset = 5;
+      if(pathEnd.toLowerCase() === "dryandra_pointcloud") selectedDataset = 6;
+      if(pathEnd.toLowerCase() === "graffiti_model") selectedDataset = 7;
+      if(pathEnd.toLowerCase() === "graffiti_pointcloud") selectedDataset = 8;
     }
 
     const loadGeoJson = (dataset) => {
@@ -108,263 +250,6 @@
     var highlightHeightPX = 27.2;
     var highlightColor = 'green';
 
-    const loadDataset = (dataset) => {
-      if (dataset === "nue") {
-        selectedDataset = "nue";
-        console.log(viewer.timeline);
-        if (!tilesets["nue"]) {
-          tilesets["nue"] = {};
-          tilesets["nue"][new Date("2017-07-21")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170721_M1_RGB_group1_densified_point_cloud/tileset.json',
-            show: false
-          }));
-
-
-          tilesets["nue"][new Date("2017-09-22")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170922_M2_RGB_group1_densified_point_cloud/tileset.json',
-            show: false
-          }));
-
-          tilesets["nue"][new Date("2017-10-16")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20171016_M4_RGB_group1_densified_point_cloud/tileset.json',
-            show: false
-          }));
-        }
-
-        viewer.timeline._highlightRanges = [];
-        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2017-07-21"), Cesium.JulianDate.fromIso8601("2017-07-22"));
-        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2017-09-22"), Cesium.JulianDate.fromIso8601("2017-09-23"));
-        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2017-10-16"), Cesium.JulianDate.fromIso8601("2017-10-17"));
-
-        viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2017-07-21"), Cesium.JulianDate.fromIso8601("2017-10-17"));
-
-        viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2017-07-21");
-
-        viewer.flyTo(tilesets["nue"][Object.keys(tilesets["nue"])[0]]);
-
-      }
-      else if (dataset === "usln") {
-        selectedDataset = "usln";
-
-        if (!tilesets["usln"]) {
-          tilesets["usln"] = {};
-          tilesets["usln"][new Date("2021-05-21")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/USLN-GegedzerickRoad_2021-05-21-odm_georeferenced_model/tileset.json',
-            show: false
-          }));
-
-          //clamp model centre to terrain
-          tilesets["usln"][new Date("2021-05-21")].readyPromise.then(function (tileset) {
-            var positions = [
-              Cesium.Cartographic.fromCartesian(tileset.boundingSphere.center)
-            ];
-            var promise = Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, positions);
-            Cesium.when(promise, function (updatedPositions) {
-              updatedPositions[0].height += 10;
-              var offset = Cesium.Cartographic.toCartesian(updatedPositions[0]);
-              var translation = Cesium.Cartesian3.subtract(offset, tileset.boundingSphere.center, new Cesium.Cartesian3());
-              tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
-            });
-          });
-        }
-
-        viewer.timeline._highlightRanges = [];
-        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2021-05-21"), Cesium.JulianDate.fromIso8601("2021-05-22"));
-
-        viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2021-05-21"), Cesium.JulianDate.fromIso8601("2021-05-22"));
-        viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2021-05-21");
-
-        viewer.flyTo(tilesets["usln"][new Date("2021-05-21")]);
-
-      }
-      else if (dataset === "vbir") {
-
-        selectedDataset = "vbir";
-
-        if (!tilesets["vbir"]) {
-          tilesets["vbir"] = {};
-          tilesets["vbir"][new Date("2019-07-02")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190702_VBIR_1_DenseCloud/tileset.json',
-            show: false
-          }));
-
-          tilesets["vbir"][new Date("2019-08-01")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190801_VBIR_2_DenseCloud/tileset.json',
-            show: false
-          }));
-
-          tilesets["vbir"][new Date("2019-08-30")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190830_VBIR_3_DenseCloud/tileset.json',
-            show: false
-          }));
-
-          tilesets["vbir"][new Date("2019-10-01")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191001_VBIR_4_DenseCloud/tileset.json',
-            show: false
-          }));
-
-          tilesets["vbir"][new Date("2019-10-15")] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191015_VBIR_5_DenseCloud/tileset.json',
-            show: false
-          }));
-
-          loadGeoJson('https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/VBIR_EM3.geojson');
-          loadGeoJson('https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/VBIR_S2M3.geojson');
-        }
-        viewer.timeline._highlightRanges = [];
-        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-07-02"), Cesium.JulianDate.fromIso8601("2019-07-03"));
-        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-08-01"), Cesium.JulianDate.fromIso8601("2019-08-02"));
-        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-08-30"), Cesium.JulianDate.fromIso8601("2019-08-31"));
-        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-10-01"), Cesium.JulianDate.fromIso8601("2019-10-02"));
-        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-10-15"), Cesium.JulianDate.fromIso8601("2019-10-16"));
-
-
-        viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2019-07-02"), Cesium.JulianDate.fromIso8601("2019-10-16"));
-        viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2019-07-02");
-
-        viewer.flyTo(tilesets["vbir"][Object.keys(tilesets["vbir"])[0]]);
-      }
-      else if (dataset === "dryandra_model") {
-
-        var promise = Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [new Cesium.Cartographic.fromDegrees(149.1106974606, -35.2614095095)]);
-        Cesium.when(promise, function (updatedPositions) {
-          var url = 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/dryandra-tree-scan.glb';
-          // var position = Cesium.Cartesian3.fromDegrees(
-          //   149.1106873966594,
-          //   -35.261415607183686,
-          //   updatedPositions[0].height + 3.9608609676361084 //sampled height + half model height
-          // );
-          // manual
-          var position = Cesium.Cartesian3.fromDegrees(
-            149.1106974606,
-            -35.2614095095,
-            updatedPositions[0].height + 3
-          );
-
-          var hpr = new Cesium.HeadingPitchRoll(Cesium.Math.toRadians(110), Cesium.Math.toRadians(0), Cesium.Math.toRadians(-2));
-          var orientation = Cesium.Transforms.headingPitchRollQuaternion(
-            position,
-            hpr
-          );
-
-          entities["dryandra"] = viewer.entities.add({
-            position: position,
-            orientation: orientation,
-            model: {
-              uri: url,
-            }
-          });
-
-          viewer.flyTo(entities["dryandra"]);
-        });
-      }
-      else if (dataset === "dryandra_pointcloud") {
-
-        if (!tilesets["dryandra"]) {
-          tilesets["dryandra"] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/Point+Cloud/tileset.json',
-          }));
-
-          tilesets["dryandra"].modelMatrix
-
-        } else {
-          tilesets["dryandra"].show = checked;
-        }
-        viewer.flyTo(tilesets["dryandra"]);
-
-      }
-      else if (dataset === "graffiti_model") {
-        var promise = Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [new Cesium.Cartographic.fromDegrees(149.1109390899, -35.2654136809)]);
-        Cesium.when(promise, function (updatedPositions) {
-          var url = 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti+Underpass/scene.gltf'
-          // var position = Cesium.Cartesian3.fromDegrees(
-          //   149.11093029457186,
-          //   -35.26540200316355, 
-          //   updatedPositions[0].height
-          // );
-          //manual
-          var position = Cesium.Cartesian3.fromDegrees(
-            149.1109390899,
-            -35.2654136809,
-            updatedPositions[0].height + 4.5
-          );
-          var hpr = new Cesium.HeadingPitchRoll(Cesium.Math.toRadians(-15), Cesium.Math.toRadians(1), Cesium.Math.toRadians(5));
-          var orientation = Cesium.Transforms.headingPitchRollQuaternion(
-            position,
-            hpr
-          );
-
-          entities["graffiti"] = viewer.entities.add({
-            position: position,
-            orientation: orientation,
-            model: {
-              uri: url,
-            },
-          });
-
-          viewer.flyTo(entities["graffiti"]);
-
-        });
-      }
-      else if (dataset === "graffiti_pointcloud") {
-        if (!tilesets["graffiti"]) {
-          tilesets["graffiti"] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-            url: 'https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti+Underpass/Point+Cloud/tileset.json',
-          }));
-        }
-        viewer.flyTo(tilesets["graffiti"]);
-      }
-      else if (dataset === "gillan_ecosphere") {
-        selectedDataset = "gillan_ecosphere";
-        if (!tilesets["gillan_ecosphere"]) {
-          tilesets["gillan_ecosphere"] = {};
-          tilesets["gillan_ecosphere"][new Date("2019-05-01")] = [];
-          fetch('/cesium/Apps/may_2019_ils.txt')
-            .then(response => response.text())
-            .then(text => text.split("\n").map((line, index) => {
-              if (index == 0) return;
-              var path = line.split("C- ")[1];
-              if (path) {
-                tilesets["gillan_ecosphere"][new Date("2019-05-01")].push(viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-                  // url: `http://localhost:3000/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                  url: `/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                  show: false
-                })));
-
-                viewer.flyTo(tilesets["gillan_ecosphere"][new Date("2019-05-01")][0]);
-              }
-            }))
-          tilesets["gillan_ecosphere"][new Date("2019-09-01")] = [];
-          fetch('/cesium/Apps/sept_2019_ils.txt')
-            .then(response => response.text())
-            .then(text => text.split("\n").map((line, index) => {
-              if (index == 0) return;
-              var path = line.split("C- ")[1];
-              if (path) {
-                tilesets["gillan_ecosphere"][new Date("2019-09-01")].push(viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-                  // url: `http://localhost:3000/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                  url: `/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                  show: false
-                })));
-
-                // viewer.flyTo(tilesets["gillan"][new Date("2019-05-01")][0]);
-              }
-            }))
-
-          loadGeoJson("https://data.cyverse.org/dav-anon/iplant/commons/cyverse_curated/Gillan_Ecosphere_2021/leaflet_map/suas-footprints.geojson");
-        } else {
-          viewer.flyTo(tilesets["gillan_ecosphere"][new Date("2019-05-01")][0]);
-        }
-
-        viewer.timeline._highlightRanges = [];
-        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-05-01"), Cesium.JulianDate.fromIso8601("2019-05-31"));
-        viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromIso8601("2019-09-01"), Cesium.JulianDate.fromIso8601("2019-09-30"));
-
-        viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601("2019-05-01"), Cesium.JulianDate.fromIso8601("2019-09-30"));
-        viewer.clock.currentTime = new Cesium.JulianDate.fromIso8601("2019-05-01");
-      }
-    }
-
     var viewer = new Cesium.Viewer('cesiumContainer', {
       terrainProvider: Cesium.createWorldTerrain(),
       // selectionIndicator: false
@@ -372,87 +257,175 @@
     viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
     // viewer.scene.globe.depthTestAgainstTerrain = true;
 
-
-    Sandcastle.addToolbarMenu([
-      {
-        text: "WheatHub - NUE",
-        onselect: function () {
-          window.history.pushState('', '', '/cesium/Apps/ASDC/nue');
-          loadDataset("nue");
-        },
-      },
-      {
-        text: "WheatHub - VBIR",
-        onselect: function () {
-          window.history.pushState('', '', '/cesium/Apps/ASDC/vbir');
-          loadDataset("vbir");
-        },
-      }
-    ])
-    document.getElementById("toolbar").childNodes[0].selectedIndex = selectedDataset === 'vbir' ? 1 : 0;
-
-    Sandcastle.addToolbarButton("USLN", function () {
-      window.history.pushState('', '', '/cesium/Apps/ASDC/usln');
-      loadDataset("usln");
-    });
-    Sandcastle.addToolbarButton("Gillan Ecosphere", function () {
-      window.history.pushState('', '', '/cesium/Apps/ASDC/gillan_ecosphere');
-      loadDataset("gillan_ecosphere");
-    });
-
-    Sandcastle.addToggleButton("Dryandra Tree Model", selectedDataset === "dryandra_model", function (checked) {
-      selectedDataset = "dryandra_model";
-      window.history.pushState('', '', '/cesium/Apps/ASDC/dryandra_model');
-
-      if (!entities["dryandra"]) {
-        loadDataset("dryandra_model");
-      } else {
-        entities["dryandra"].show = checked;
-        if (checked) viewer.flyTo(entities["dryandra"]);
-      }
-    });
-
-    Sandcastle.addToggleButton("Dryandra Tree Point Cloud", selectedDataset === "dryandra_pointcloud", function (checked) {
-      selectedDataset = "dryandra_pointcloud";
-      window.history.pushState('', '', '/cesium/Apps/ASDC/dryandra_pointcloud');
-
-      if (!tilesets["dryandra"]) {
-        loadDataset("dryandra_pointcloud");
-      } else {
-        tilesets["dryandra"].show = checked;
-        if (checked) viewer.flyTo(tilesets["dryandra"]);
-      }
-    });
-
-    Sandcastle.addToggleButton("Graffiti Model", selectedDataset === "graffiti_model", function (checked) {
-      selectedDataset = "graffiti_model";
-      window.history.pushState('', '', '/cesium/Apps/ASDC/graffiti_model');
-      if (!entities["graffiti"]) {
-        loadDataset("graffiti_model");
-      } else {
-        entities["graffiti"].show = checked;
-        if (checked) viewer.flyTo(entities["graffiti"]);
-      }
-    });
-
-    Sandcastle.addToggleButton("Graffiti Point Cloud", selectedDataset === "graffiti_pointcloud", function (checked) {
-      selectedDataset = "graffiti_pointcloud";
-      window.history.pushState('', '', '/cesium/Apps/ASDC/graffiti_pointcloud');
-      if (!tilesets["graffiti"]) {
-        loadDataset("graffiti_pointcloud");
-      } else {
-        tilesets["graffiti"].show = checked;
-        if (checked) viewer.flyTo(tilesets["graffiti"]);
-      }
-    });
-
     var tilesets = {};
     var entities = {};
 
-    loadDataset(selectedDataset);
+    var assets;
+
+    const loadAsset = (assets, assetID) => {
+      var asset;
+
+      assets.map(a => {
+        if (a["id"] === parseInt(assetID)) {
+          asset = a;
+          return;
+        }
+      });
+      if (!asset) return;
+      selectedDataset = asset["id"];
+
+      asset.data?.map((data) => {
+        Object.keys(tilesets).map(tileset=>{
+          Object.keys(tilesets[tileset]).map(date=>{
+            tilesets[tileset][date].show=false;
+          })
+        })
+
+        Object.keys(entities).map(entity=>{
+          entities[entity].show=false;
+        })
+
+        if (data["type"] === "PointCloud") {
+          if (!tilesets[selectedDataset]) tilesets[selectedDataset] = {};
+          if (!tilesets[selectedDataset][new Date(data["date"])]) {
+            tilesets[selectedDataset][new Date(data["date"])] = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+              url: data["url"],
+              show: false
+            }));
+            if (data["position"]) {
+              tilesets[selectedDataset][new Date(data["date"])].readyPromise.then(function (tileset) {
+                var offset = Cesium.Cartographic.toCartesian(new Cesium.Cartographic.fromDegrees(data["position"]["lng"], data["position"]["lat"], data["position"]["height"]));
+                var translation = Cesium.Cartesian3.subtract(offset, tileset.boundingSphere.center, new Cesium.Cartesian3());
+                tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
+              })
+            }
+          }
+        } else if (data["type"] === "Model") {
+          //TODO: multiple models for same location
+          if (!entities[selectedDataset]) {
+            var position = Cesium.Cartesian3.fromDegrees(
+              data["position"]["lng"],
+              data["position"]["lat"],
+              data["position"]["height"]
+            );
+            var hpr = new Cesium.HeadingPitchRoll(Cesium.Math.toRadians(data["rotation"]["heading"]), Cesium.Math.toRadians(data["rotation"]["pitch"]), Cesium.Math.toRadians(data["rotation"]["roll"]));
+            var orientation = Cesium.Transforms.headingPitchRollQuaternion(
+              position,
+              hpr
+            );
+
+            entities[selectedDataset] = viewer.entities.add({
+              position: position,
+              orientation: orientation,
+              model: {
+                uri: data["url"],
+              }
+            });
+          } else {
+            entities[selectedDataset].show=true;
+          }
+        } else if (data["type"] === "GeoJSON") {
+          loadGeoJson(data.url);
+        }
+      })
+
+      //TODO: move to index.json
+      if (asset.type === "EPTPointCloud") {
+        if (!tilesets[selectedDataset]) tilesets[selectedDataset] = {};
+        tilesets[selectedDataset][new Date("2019-05-01")] = [];
+        fetch('/cesium/Apps/may_2019_ils.txt')
+          .then(response => response.text())
+          .then(text => text.split("\n").map((line, index) => {
+            if (index == 0) return;
+            var path = line.split("C- ")[1];
+            if (path) {
+              tilesets[selectedDataset][new Date("2019-05-01")].push(viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+                // url: `http://localhost:3000/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                url: `/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                // url: `https://asdc.cloud.edu.au/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                show: false
+              })));
+
+              viewer.flyTo(tilesets[selectedDataset][new Date("2019-05-01")][0]);
+            }
+          }))
+        tilesets[selectedDataset][new Date("2019-09-01")] = [];
+        fetch('/cesium/Apps/sept_2019_ils.txt')
+          .then(response => response.text())
+          .then(text => text.split("\n").map((line, index) => {
+            if (index == 0) return;
+            var path = line.split("C- ")[1];
+            if (path) {
+              tilesets[selectedDataset][new Date("2019-09-01")].push(viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+                // url: `http://localhost:3000/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                url: `/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                // url: `https://asdc.cloud.edu.au/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                show: false
+              })));
+            }
+          }))
+
+        viewer.flyTo(tilesets[selectedDataset][Object.keys(tilesets[selectedDataset])[0]]);
+        loadGeoJson("https://data.cyverse.org/dav-anon/iplant/commons/cyverse_curated/Gillan_Ecosphere_2021/leaflet_map/suas-footprints.geojson");
+      }
+
+      //TODO: dates for entities
+      viewer.timeline._highlightRanges = [];
+      if (tilesets[selectedDataset]) {
+        Object.keys(tilesets[selectedDataset]).map(date => {
+          viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromDate(new Date(date)), Cesium.JulianDate.fromDate(new Date(new Date(date).getTime() + 86400000)));
+        })
+
+
+        var maxDate = new Date(Object.keys(tilesets[selectedDataset]).reduce(function (a, b) { return new Date(a).getTime() > new Date(b).getTime() ? a : b; }));
+        var minDate = new Date(Object.keys(tilesets[selectedDataset]).reduce(function (a, b) { return new Date(a).getTime() < new Date(b).getTime() ? a : b; }));
+
+        viewer.timeline.zoomTo(Cesium.JulianDate.fromDate(minDate), Cesium.JulianDate.fromDate(new Date(maxDate.getTime() + 86400000)));
+        viewer.clock.currentTime = new Cesium.JulianDate.fromDate(minDate);
+
+      };
+
+      if (asset.data) {
+        if (asset.data[0]["type"] === "PointCloud") {
+          viewer.flyTo(tilesets[selectedDataset][Object.keys(tilesets[selectedDataset])[0]]);
+        } else if (asset.data[0]["type"] === "Model") {
+          viewer.flyTo(entities[selectedDataset]);
+        }
+      }
+    }
+
+    const setupSidebar = () => {
+      fetch('https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/index.json', {cache: "no-store"})
+        .then(response => response.text())
+        .then(text => {
+          var jsonResponse = JSON.parse(text);
+          assets = jsonResponse["assets"];
+
+          while (document.getElementById("sidebar-data-buttons").firstChild) {
+            document.getElementById("sidebar-data-buttons").removeChild(document.getElementById("sidebar-data-buttons").firstChild);
+          }
+          assets.map(asset => {
+            var assetDiv = document.createElement("div");
+            
+            assetDiv.innerHTML = asset["status"]==="processing" ? asset["name"] + " (processing)" : asset["name"];
+            assetDiv.className = "sidebar-item";
+            assetDiv.onclick = () => {
+              window.history.pushState('', '', `/cesium/Apps/ASDC/${asset["id"]}`);
+              loadAsset(assets, asset["id"]);
+            };
+
+            document.getElementById("sidebar-data-buttons").appendChild(assetDiv);
+          })
+
+          loadAsset(assets, selectedDataset);
+        })
+    }
+    
+    setupSidebar();
 
     viewer.clock.onTick.addEventListener((clock) => {
       currentTime = Cesium.JulianDate.toDate(clock.currentTime).getTime();
+
       if (tilesets[selectedDataset]) {
         var tilesetDates = Object.keys(tilesets[selectedDataset]);
         for (var i = 0; i < tilesetDates.length; i++) {
@@ -497,6 +470,85 @@
       viewer.selectedEntity = selectedEntity;
 
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+    
+    const addFileInput = () => {
+      var uploadForm = document.getElementById("upload-form");
+
+      var lineDiv = document.createElement("div");
+      lineDiv.className = "input-line";
+
+      var fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.name = "files[]";
+      fileInput.accept = ".laz";
+      fileInput.required = true;
+
+      lineDiv.appendChild(fileInput);
+
+      var dateInput = document.createElement("input");
+      dateInput.type = "date";
+      dateInput.name = "dates[]";
+      dateInput.required = true;
+
+      lineDiv.appendChild(dateInput);
+
+      var removeButton = document.createElement("input");
+      removeButton.type = "button";
+      removeButton.value = "x";
+      removeButton.onclick = function () {
+        lineDiv.remove();
+      };
+      lineDiv.appendChild(removeButton);
+
+      uploadForm.appendChild(lineDiv);
+    }
+
+    const upload = () => {
+      var xmlHttpRequest = new XMLHttpRequest();
+      var form = document.forms.namedItem("upload-form");
+
+      for (var i = 0; i < form.elements.length; i++) {
+        if (form.elements[i].value === '' && form.elements[i].hasAttribute('required')) {
+          alert('Please complete all required fields');
+          return;
+        }
+      }
+
+      var formData = new FormData(form);
+
+      document.getElementById("modal-upload-button").innerHTML = "Uploading...";
+      document.getElementById("modal-upload-button").style.pointerEvents = 'none';
+
+      xmlHttpRequest.addEventListener('loadend', (progress) => {
+        document.getElementById("modal-upload-button").innerHTML = "Upload";
+        document.getElementById("modal-upload-button").style.pointerEvents = 'auto';
+        console.log(progress);
+      });
+
+      // xmlHttpRequest.open("POST", 'http://localhost:8081/upload', true);
+      xmlHttpRequest.open("POST", '/cesiumapi', true);
+
+      xmlHttpRequest.onreadystatechange = function () {
+        if (xmlHttpRequest.readyState === 4) {
+          console.log(xmlHttpRequest.response);
+          setupSidebar();
+          closeModal();
+        }
+      }
+
+      xmlHttpRequest.send(formData);
+    }
+
+    var uploadModal = document.getElementById("upload-modal");
+
+    const openModal = () => {
+      uploadModal.style.display = "block";
+    }
+
+    const closeModal = () => {
+      uploadModal.style.display = "none";
+    }
 
   </script>
 </body>
