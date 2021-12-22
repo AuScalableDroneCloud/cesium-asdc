@@ -8,17 +8,32 @@
                 {
                     "type": "PointCloud",
                     "date": "2017-07-21T00:00:00.000Z",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170721_M1_RGB_group1_densified_point_cloud/tileset.json"
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170721_M1_RGB_group1_densified_point_cloud/tileset.json",
+                    "position": {
+                        "lng": 138.47000435251135,
+                        "lat": -34.34410884575452,
+                        "height": 43.99979598112131
+                    }
                 },
                 {
                     "type": "PointCloud",
                     "date": "2017-09-22T00:00:00.000Z",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170922_M2_RGB_group1_densified_point_cloud/tileset.json"
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170922_M2_RGB_group1_densified_point_cloud/tileset.json",
+                    "position": {
+                        "lng": 138.46997257929362,
+                        "lat": -34.34408114334087,
+                        "height": 43.99983402379628
+                    }
                 },
                 {
                     "type": "PointCloud",
                     "date": "2017-10-16T00:00:00.000Z",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20171016_M4_RGB_group1_densified_point_cloud/tileset.json"
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20171016_M4_RGB_group1_densified_point_cloud/tileset.json",
+                    "position": {
+                        "lng": 138.46996144569067,
+                        "lat": -34.34408992813137,
+                        "height": 42.999779667292145
+                    }
                 }
             ]
         },
@@ -30,27 +45,52 @@
                 {
                     "type": "PointCloud",
                     "date": "2019-07-02T00:00:00.000Z",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190702_VBIR_1_DenseCloud/tileset.json"
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190702_VBIR_1_DenseCloud/tileset.json",
+                    "position": {
+                        "lng": 142.9807932458059,
+                        "lat": -35.76086681002111,
+                        "height": 87.99976258278798
+                    }
                 },
                 {
                     "type": "PointCloud",
                     "date": "2019-08-01T00:00:00.000Z",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190801_VBIR_2_DenseCloud/tileset.json"
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190801_VBIR_2_DenseCloud/tileset.json",
+                    "position": {
+                        "lng": 142.98081513338565,
+                        "lat": -35.76085743488859,
+                        "height": 87.99977113762627
+                    }
                 },
                 {
                     "type": "PointCloud",
                     "date": "2019-08-30T00:00:00.000Z",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190830_VBIR_3_DenseCloud/tileset.json"
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190830_VBIR_3_DenseCloud/tileset.json",
+                    "position": {
+                        "lng": 142.98079369270604,
+                        "lat": -35.76088483182243,
+                        "height": 87.99976258120795
+                    }
                 },
                 {
                     "type": "PointCloud",
                     "date": "2019-10-01T00:00:00.000Z",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191001_VBIR_4_DenseCloud/tileset.json"
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191001_VBIR_4_DenseCloud/tileset.json",
+                    "position": {
+                        "lng": 142.98080474815683,
+                        "lat": -35.7608846496957,
+                        "height": 87.9997625830241
+                    }
                 },
                 {
                     "type": "PointCloud",
                     "date": "2019-10-15T00:00:00.000Z",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191015_VBIR_5_DenseCloud/tileset.json"
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191015_VBIR_5_DenseCloud/tileset.json",
+                    "position": {
+                        "lng": 142.98081558015485,
+                        "lat": -35.76087545666744,
+                        "height": 86.99976258171239
+                    }
                 },
                 {
                     "type": "GeoJSON",
@@ -83,7 +123,16 @@
             "id": 4,
             "name": "Gillan Ecosphere",
             "status": "active",
-            "type": "EPTPointCloud"
+            "type": "EPTPointCloud",
+            "data": [
+                {
+                    "position": {
+                        "lng": -110.85616158988668,
+                        "lat": 31.777620150175906,
+                        "height": 1196.9982318100317
+                    }
+                }
+            ]
         },
         {
             "id": 5,
@@ -93,15 +142,15 @@
                 {
                     "type": "Model",
                     "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/dryandra-tree-scan.glb",
-                    "position":{
-                        "lng":149.1106974606,
-                        "lat":-35.2614095095,
-                        "height":636.0639605530833
+                    "position": {
+                        "lng": 149.1106974606,
+                        "lat": -35.2614095095,
+                        "height": 636.0639605530833
                     },
-                    "rotation":{
-                        "heading":110,
-                        "pitch":0,
-                        "roll":-2
+                    "rotation": {
+                        "heading": 110,
+                        "pitch": 0,
+                        "roll": -2
                     }
                 }
             ]
@@ -113,7 +162,12 @@
             "data": [
                 {
                     "type": "PointCloud",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/Point+Cloud/tileset.json"
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/Point+Cloud/tileset.json",
+                    "position": {
+                        "lng": 149.11070075043358,
+                        "lat": -35.26140712234432,
+                        "height": 635.9999980371041
+                    }
                 }
             ]
         },
@@ -125,17 +179,16 @@
                 {
                     "type": "Model",
                     "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti+Underpass/scene.gltf",
-                    "position":{
-                        "lng":149.1109390899,
-                        "lat":-35.2654136809,
-                        "height":632.9976221420972
+                    "position": {
+                        "lng": 149.1109390899,
+                        "lat": -35.2654136809,
+                        "height": 632.9976221420972
                     },
-                    "rotation":{
-                        "heading":-15,
-                        "pitch":1,
-                        "roll":5
+                    "rotation": {
+                        "heading": -15,
+                        "pitch": 1,
+                        "roll": 5
                     }
-                   
                 }
             ]
         },
@@ -146,7 +199,44 @@
             "data": [
                 {
                     "type": "PointCloud",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti+Underpass/Point+Cloud/tileset.json"
+                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti+Underpass/Point+Cloud/tileset.json",
+                    "position": {
+                        "lng": 149.11093638822885,
+                        "lat": -35.265405666129,
+                        "height": 632.9998806194479
+                    }
+                }
+            ]
+        },
+        {
+            "id": 9,
+            "name": "Perisher (AMRF_PER)",
+            "status": "active",
+            "data": [
+                {
+                    "type": "Influx",
+                    "station": "AMRF_PER_D01",
+                    "position": {
+                        "lng": 148.43065,
+                        "lat": -36.3731306,
+                        "height": 1594
+                    }
+                }
+            ]
+        },
+        {
+            "id": 10,
+            "name": "Falls Creek (AMRF_FRY)",
+            "status": "active",
+            "data": [
+                {
+                    "type": "Influx",
+                    "station": "AMRF_FRY_D01",
+                    "position": {
+                        "lng": 147.251893,
+                        "lat": -36.877349,
+                        "height": 1730
+                    }
                 }
             ]
         }

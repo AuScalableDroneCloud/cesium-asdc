@@ -13,6 +13,7 @@
   <script type="text/javascript" src="/cesium/Apps/Sandcastle/Sandcastle-header.js"></script>
   <script src="/cesium/Build/Cesium/Cesium.js"></script>
   <!-- <script src="../Build/CesiumUnminified/Cesium.js"></script> -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
     @import url(/cesium/Apps/Sandcastle/templates/bucket.css);
 
@@ -133,6 +134,43 @@
       justify-content: space-between;
       align-items: center;
     }
+
+    #graphs-modal {
+      height: 40%;
+      width: 40%;
+      position: absolute;
+      top: 50px;
+      right: 0px;
+      background-color: black;
+      display: none;
+    }
+
+    .graphs-modal-header {
+      padding: 2px 16px;
+      width: calc(100% - 32px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+      height: 50px;
+    }
+
+    .close-graph {
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      margin-top: 6.5px;
+    }
+
+    .close-graph:hover,
+    .close-graph:focus {
+      color: rgba(255, 255, 255, 0.25);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    #graphs-container {
+      height: calc(100% - 55px);
+      overflow: auto;
+      scroll-snap-type: y mandatory;
+    }
   </style>
 </head>
 
@@ -170,13 +208,17 @@
     </div>
   </div>
 
-  <!-- <div id="toolbar"></div> -->
+  <div id="graphs-modal">
+    <div class="graphs-modal-header">
+      <span class="close-graph" onclick="closeGraphModal()">&times;</span>
+      <h3 style="padding-left: 10px;">Graphs</h3>
+    </div>
+    <div id="graphs-container"></div>
+  </div>
 
   <script>
     Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI1NWZkNGFlZS1iNzVhLTRmNTAtOThmYi1kMTI1MjlmOTVlNjciLCJpZCI6NzIyNTQsImlhdCI6MTYzNTkwNDI4OX0.EXVvJZa8yaugMmQNkc9pjWfrjqeOpZ8Jg7_0Hdwnb1A";
 
-    // var selectedDataset = "nue";
-    // var selectedDataset = 1;
     var selectedDataset;
 
     var currentUrl = window.location.href;
@@ -184,18 +226,17 @@
     pathEnd = currentUrl.split('/')[currentUrl.split('/').length - 1];
     if (pathEnd.toLowerCase() != "asdc" && pathEnd.toLowerCase() != "asdc.html") {
       selectedDataset = pathEnd.toLowerCase();
-      if(pathEnd.toLowerCase() === "nue") selectedDataset = 1;
-      if(pathEnd.toLowerCase() === "vbir") selectedDataset = 2;
-      if(pathEnd.toLowerCase() === "usln") selectedDataset = 3;
-      if(pathEnd.toLowerCase() === "gillan_ecosphere") selectedDataset = 4;
-      if(pathEnd.toLowerCase() === "dryandra_model") selectedDataset = 5;
-      if(pathEnd.toLowerCase() === "dryandra_pointcloud") selectedDataset = 6;
-      if(pathEnd.toLowerCase() === "graffiti_model") selectedDataset = 7;
-      if(pathEnd.toLowerCase() === "graffiti_pointcloud") selectedDataset = 8;
+      if (pathEnd.toLowerCase() === "nue") selectedDataset = 1;
+      if (pathEnd.toLowerCase() === "vbir") selectedDataset = 2;
+      if (pathEnd.toLowerCase() === "usln") selectedDataset = 3;
+      if (pathEnd.toLowerCase() === "gillan_ecosphere") selectedDataset = 4;
+      if (pathEnd.toLowerCase() === "dryandra_model") selectedDataset = 5;
+      if (pathEnd.toLowerCase() === "dryandra_pointcloud") selectedDataset = 6;
+      if (pathEnd.toLowerCase() === "graffiti_model") selectedDataset = 7;
+      if (pathEnd.toLowerCase() === "graffiti_pointcloud") selectedDataset = 8;
     }
 
     const loadGeoJson = (dataset) => {
-
       var geoJsonPromise = Cesium.GeoJsonDataSource.load(dataset, {
         // clampToGround: true  //issues with picking polygons, using terrain sampling
       });
@@ -250,12 +291,14 @@
     var highlightHeightPX = 27.2;
     var highlightColor = 'green';
 
+    Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(113.338953078, -43.6345972634, 153.569469029, -10.6681857235);
     var viewer = new Cesium.Viewer('cesiumContainer', {
       terrainProvider: Cesium.createWorldTerrain(),
       // selectionIndicator: false
     });
     viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
     // viewer.scene.globe.depthTestAgainstTerrain = true;
+    // viewer.scene.globe.depthTestAgainstTerrain = false;
 
     var tilesets = {};
     var entities = {};
@@ -275,14 +318,14 @@
       selectedDataset = asset["id"];
 
       asset.data?.map((data) => {
-        Object.keys(tilesets).map(tileset=>{
-          Object.keys(tilesets[tileset]).map(date=>{
-            tilesets[tileset][date].show=false;
+        Object.keys(tilesets).map(tileset => {
+          Object.keys(tilesets[tileset]).map(date => {
+            tilesets[tileset][date].show = false;
           })
         })
 
-        Object.keys(entities).map(entity=>{
-          entities[entity].show=false;
+        Object.keys(entities).map(entity => {
+          entities[entity].show = false;
         })
 
         if (data["type"] === "PointCloud") {
@@ -322,10 +365,21 @@
               }
             });
           } else {
-            entities[selectedDataset].show=true;
+            entities[selectedDataset].show = true;
           }
         } else if (data["type"] === "GeoJSON") {
           loadGeoJson(data.url);
+        } else if (data["type"] === "Influx") {
+          loadGraph(data.station);
+
+          var data = asset.data[0];
+          var position = Cesium.Cartesian3.fromDegrees(
+            data["position"]["lng"],
+            data["position"]["lat"],
+            data["position"]["height"] + 1000
+          );
+
+          viewer.camera.flyTo({ destination: position });
         }
       })
 
@@ -341,8 +395,8 @@
             if (path) {
               tilesets[selectedDataset][new Date("2019-05-01")].push(viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
                 // url: `http://localhost:3000/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                url: `/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                // url: `https://asdc.cloud.edu.au/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                // url: `/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                url: `https://asdc.cloud.edu.au/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
                 show: false
               })));
 
@@ -358,8 +412,8 @@
             if (path) {
               tilesets[selectedDataset][new Date("2019-09-01")].push(viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
                 // url: `http://localhost:3000/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                url: `/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                // url: `https://asdc.cloud.edu.au/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                // url: `/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                url: `https://asdc.cloud.edu.au/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
                 show: false
               })));
             }
@@ -380,10 +434,28 @@
         var maxDate = new Date(Object.keys(tilesets[selectedDataset]).reduce(function (a, b) { return new Date(a).getTime() > new Date(b).getTime() ? a : b; }));
         var minDate = new Date(Object.keys(tilesets[selectedDataset]).reduce(function (a, b) { return new Date(a).getTime() < new Date(b).getTime() ? a : b; }));
 
-        viewer.timeline.zoomTo(Cesium.JulianDate.fromDate(minDate), Cesium.JulianDate.fromDate(new Date(maxDate.getTime() + 86400000)));
-        viewer.clock.currentTime = new Cesium.JulianDate.fromDate(minDate);
-
-      };
+        if (minDate.toString() !== "Invalid Date" && maxDate.toString() !== "Invalid Date") {
+          viewer.timeline.zoomTo(Cesium.JulianDate.fromDate(minDate), Cesium.JulianDate.fromDate(new Date(maxDate.getTime() + 86400000)));
+          viewer.clock.currentTime = new Cesium.JulianDate.fromDate(minDate);
+        } else {
+          //point clouds with no date
+          var currentDate = new Date();
+          viewer.clock.currentTime = new Cesium.JulianDate.fromDate(new Date());
+          viewer.timeline.zoomTo(Cesium.JulianDate.fromDate(currentDate), Cesium.JulianDate.fromDate(new Date(currentDate.getTime() + 86400000)));
+        }
+      } else {
+        if (asset.data[0]["type"] === "Influx") {
+          //Influx charts from 2 weeks before
+          var currentDate = new Date();
+          viewer.clock.currentTime = new Cesium.JulianDate.fromDate(currentDate);
+          viewer.timeline.zoomTo(Cesium.JulianDate.fromDate(new Date(currentDate.getTime() - 2 * 7 * 86400000)), Cesium.JulianDate.fromDate(new Date()))
+        } else {
+          //Other data types with no date
+          var currentDate = new Date();
+          viewer.clock.currentTime = new Cesium.JulianDate.fromDate(new Date());
+          viewer.timeline.zoomTo(Cesium.JulianDate.fromDate(currentDate), Cesium.JulianDate.fromDate(new Date(currentDate.getTime() + 86400000)));
+        }
+      }
 
       if (asset.data) {
         if (asset.data[0]["type"] === "PointCloud") {
@@ -391,11 +463,20 @@
         } else if (asset.data[0]["type"] === "Model") {
           viewer.flyTo(entities[selectedDataset]);
         }
+
+        var dataTypes = asset.data.map((data) => data.type);
+        if (!dataTypes.includes("Influx")) {
+          closeGraphModal();
+        }
       }
     }
 
+    var dataSource;
+    var pinBuilder = new Cesium.PinBuilder();
+
     const setupSidebar = () => {
-      fetch('https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/index.json', {cache: "no-store"})
+      fetch('https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/index.json', { cache: "no-store" })
+        // fetch('/cesium/Apps/index.json', { cache: "no-store" })
         .then(response => response.text())
         .then(text => {
           var jsonResponse = JSON.parse(text);
@@ -404,10 +485,28 @@
           while (document.getElementById("sidebar-data-buttons").firstChild) {
             document.getElementById("sidebar-data-buttons").removeChild(document.getElementById("sidebar-data-buttons").firstChild);
           }
+
+          if (!dataSource) {
+            dataSource = new Cesium.CustomDataSource();
+            dataSource.clustering.enabled = true;
+
+            dataSource.clustering.clusterEvent.addEventListener(
+              function (clusteredEntities, cluster) {
+                cluster.label.show = false;
+                cluster.billboard.show = true;
+
+                cluster.billboard.verticalOrigin = Cesium.VerticalOrigin.BOTTOM;
+                cluster.billboard.image = pinBuilder.fromText(cluster.label.text, Cesium.Color.fromCssColorString('#5B8B51'), 48).toDataURL();
+                cluster.billboard.disableDepthTestDistance = Number.POSITIVE_INFINITY;
+                cluster.billboard.heightReference = Cesium.HeightReference.CLAMP_TO_GROUND;
+              }
+            );
+          }
+
           assets.map(asset => {
             var assetDiv = document.createElement("div");
-            
-            assetDiv.innerHTML = asset["status"]==="processing" ? asset["name"] + " (processing)" : asset["name"];
+
+            assetDiv.innerHTML = asset["status"] !== "active" ? asset["name"] + ` (${asset["status"]})` : asset["name"];
             assetDiv.className = "sidebar-item";
             assetDiv.onclick = () => {
               window.history.pushState('', '', `/cesium/Apps/ASDC/${asset["id"]}`);
@@ -415,12 +514,41 @@
             };
 
             document.getElementById("sidebar-data-buttons").appendChild(assetDiv);
+
+            if (asset.data && asset.data.length > 0 && asset.data[0].position) {
+              var data = asset.data[0];
+              var position = Cesium.Cartesian3.fromDegrees(
+                data["position"]["lng"],
+                data["position"]["lat"]
+              );
+
+              if (!viewer.dataSources.contains(dataSource)) {
+                dataSource.entities.add({
+                  position: position,
+                  billboard: {
+                    image: pinBuilder.fromColor(Cesium.Color.fromCssColorString('#5B8B51'), 48).toDataURL(),
+                    verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                    disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                  },
+                  id: "marker_" + asset.id
+                })
+              }
+            }
           })
+
+          if (!viewer.dataSources.contains(dataSource)) {
+            viewer.dataSources.add(dataSource);
+
+            setTimeout(() => {
+              dataSource.clustering.pixelRange = 0;
+            }, 0);
+          }
 
           loadAsset(assets, selectedDataset);
         })
     }
-    
+
     setupSidebar();
 
     viewer.clock.onTick.addEventListener((clock) => {
@@ -446,7 +574,6 @@
       }
     });
 
-    var selectedEntity = new Cesium.Entity();
     var clickHandler = viewer.screenSpaceEventHandler.getInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
     viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
       var pickedFeature = viewer.scene.drillPick(movement.position).filter(feature => {
@@ -462,16 +589,27 @@
 
       selectedEntity = pickedFeature.id;
 
-      selectedEntity.description = '<table class="cesium-infoBox-defaultTable"><tbody>';
-      for (var i = 0; i < selectedEntity.properties._propertyNames.length; i++) {
-        selectedEntity.description += '<tr><th>' + selectedEntity.properties._propertyNames[i] + '</th><td>' + selectedEntity.properties[selectedEntity.properties._propertyNames[i]].getValue() + '</td></tr>';
+      if (selectedEntity) {
+        if (selectedEntity.id.startsWith("marker")) {
+          var id = selectedEntity.id.slice("marker_".length);
+          window.history.pushState('', '', `/cesium/Apps/ASDC/${id}`);
+          loadAsset(assets, id);
+        } else {
+          if (selectedEntity.properties) {
+            selectedEntity.description = '<table class="cesium-infoBox-defaultTable"><tbody>';
+            for (var i = 0; i < selectedEntity.properties._propertyNames.length; i++) {
+              selectedEntity.description += '<tr><th>' + selectedEntity.properties._propertyNames[i] + '</th><td>' + selectedEntity.properties[selectedEntity.properties._propertyNames[i]].getValue() + '</td></tr>';
+            }
+            selectedEntity.description += '</tbody></table>';
+
+            viewer.selectedEntity = selectedEntity;
+          }
+        }
       }
-      selectedEntity.description += '</tbody></table>';
-      viewer.selectedEntity = selectedEntity;
 
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
-    
+
     const addFileInput = () => {
       var uploadForm = document.getElementById("upload-form");
 
@@ -531,9 +669,12 @@
 
       xmlHttpRequest.onreadystatechange = function () {
         if (xmlHttpRequest.readyState === 4) {
-          console.log(xmlHttpRequest.response);
-          setupSidebar();
-          closeModal();
+          if (xmlHttpRequest.status === 200) {
+            setupSidebar();
+            closeModal();
+          } else {
+            alert("Error " + xmlHttpRequest.status + ' : ' + xmlHttpRequest.response);
+          }
         }
       }
 
@@ -550,6 +691,227 @@
       uploadModal.style.display = "none";
     }
 
+    const createGraph = (x, y, traceNames, type, graphTitle, suffix, doubleAxis) => {
+      const pallete = ['#7EB26D', '#EAB839', '#6ED0E0', '#EF843C', '#E24D42', '#1F78C1'];
+
+      var data = [];
+
+      y.map((yi, i) => {
+        if (type === "scatter") {
+          data.push({
+            type: type,
+            mode: 'lines',
+            name: traceNames[i],
+            x: x,
+            y: yi,
+            line: { color: pallete[i], width: 1 }
+          });
+        } else if (type === "bar") {
+          data.push({
+            type: type,
+            name: traceNames[i],
+            x: x,
+            y: yi,
+            marker: { color: pallete[i] }
+          });
+        }
+      })
+
+      if (doubleAxis) {
+        data[data.length - 1].yaxis = 'y2';
+        var layout = {
+          title: graphTitle,
+          plot_bgcolor: "black",
+          paper_bgcolor: "black",
+          font: {
+            size: 10,
+            color: 'white'
+          },
+          yaxis: {
+            gridcolor: "rgba(255,255,255,0.25)",
+            ticksuffix: suffix[0]
+          },
+          yaxis2: {
+            gridcolor: "rgba(255,255,255,0.25)",
+            overlaying: 'y',
+            side: 'right',
+            ticksuffix: suffix[1]
+          },
+          xaxis: {
+            gridcolor: "rgba(255,255,255,0.25)"
+          },
+          legend: {
+            xanchor: "center",
+            yanchor: "top",
+            y: -0.3,
+            x: 0.5
+          },
+          hoverlabel: {
+            namelength: -1
+          }
+        };
+      } else {
+        var layout = {
+          title: graphTitle,
+          plot_bgcolor: "black",
+          paper_bgcolor: "black",
+          font: {
+            size: 10,
+            color: 'white'
+          },
+          yaxis: {
+            gridcolor: "rgba(255,255,255,0.25)",
+            ticksuffix: suffix
+          },
+          xaxis: {
+            gridcolor: "rgba(255,255,255,0.25)"
+          },
+          legend: {
+            xanchor: "center",
+            yanchor: "top",
+            y: -2,
+            x: 0.5,
+            orientation: "h"
+          },
+          hoverlabel: {
+            namelength: -1
+          }
+        }
+      }
+
+      var plotDiv = document.createElement('div');
+      plotDiv.style.height = '100%';
+      plotDiv.style.width = '95%';
+      plotDiv.style['scroll-snap-align'] = 'start';
+      document.getElementById('graphs-container').appendChild(plotDiv);
+
+      Plotly.newPlot(plotDiv, data, layout);
+    }
+
+    const loadGraph = (station) => {
+      while (document.getElementById("graphs-container").firstChild) {
+        document.getElementById("graphs-container").removeChild(document.getElementById("graphs-container").firstChild);
+      }
+      document.getElementById('graphs-modal').style.display = "block";
+
+      fetch(`/cesium/influx/fivemin?station=${station}`, { cache: "no-store" })
+        .then(response => {
+          if (response.status !== 200) {
+            console.log(response);
+          }
+          return response;
+        })
+        .then(response => response.json())
+        .then(parsedResponse => {
+          const unpackData = (arr, key) => {
+            return arr.map(obj => obj[key])
+          }
+
+          const pallete = ['#7EB26D', '#EAB839', '#6ED0E0', '#EF843C', '#E24D42', '#1F78C1'];
+
+          createGraph(unpackData(parsedResponse, 'time'),
+            [unpackData(parsedResponse, 'mean_PAR'), unpackData(parsedResponse, 'mean_TSR')],
+            ['mean_PAR', 'mean_Total_Solar_Radiation'],
+            'scatter',
+            'Photosynthetically Active Radiation & Shortwave Radiation',
+            ["μmol/m²/s", "W/m²"],
+            true);
+
+          var mean_Soil_VWC = [];
+          var mean_Soil_VWC_names = [];
+          var mean_Soil_Temp = [];
+          var mean_Soil_Temp_names = [];
+          var mean_Soil_EC = [];
+          var mean_Soil_EC_names = [];
+
+
+          Object.keys(parsedResponse[0]).map((key, index) => {
+            if (key.startsWith("mean_Soil_VWC")) {
+              mean_Soil_VWC.push(unpackData(parsedResponse, key));
+              mean_Soil_VWC_names.push(key);
+            }
+            if (key.startsWith("mean_Soil_Temp")) {
+              mean_Soil_Temp.push(unpackData(parsedResponse, key));
+              mean_Soil_Temp_names.push(key);
+            }
+            if (key.startsWith("mean_Soil_EC")) {
+              mean_Soil_EC.push(unpackData(parsedResponse, key));
+              mean_Soil_EC_names.push(key);
+            }
+          })
+
+          createGraph(unpackData(parsedResponse, 'time'),
+            mean_Soil_VWC,
+            mean_Soil_VWC_names,
+            'scatter',
+            'Soil Volumetric Water Content',
+            '%',
+            false);
+
+          createGraph(unpackData(parsedResponse, 'time'),
+            mean_Soil_Temp,
+            mean_Soil_Temp_names,
+            'scatter',
+            'Soil Temperature Mean',
+            '°C',
+            false);
+
+          createGraph(unpackData(parsedResponse, 'time'),
+            mean_Soil_EC,
+            mean_Soil_EC_names,
+            'scatter',
+            'Soil Electrical Conductivity',
+            'dS/m',
+            false);
+
+          createGraph(unpackData(parsedResponse, 'time'),
+            [unpackData(parsedResponse, 'mean_Air_Temperature'), unpackData(parsedResponse, 'mean_Relative_Humidity')],
+            ['mean_Air_Temperature', 'mean_Relative_Humidity'],
+            'scatter',
+            'Air Temperature & Relative Humidity',
+            ["°C", "%H"],
+            true);
+
+          fetch('/cesium/influx/daily?station=AMRF_PER_D01', { cache: "no-store" })
+            .then(dailyresponse => {
+              if (dailyresponse.status !== 200) {
+                console.log(dailyresponse);
+              }
+              return dailyresponse;
+            })
+            .then(dailyresponse => dailyresponse.json())
+            .then(parsedDailyresponse => {
+              createGraph(unpackData(parsedDailyresponse, 'time'),
+                [unpackData(parsedDailyresponse, 'sum_Rain')],
+                ['sum_Rain'],
+                'bar',
+                'Daily Rainfall Total',
+                'mm',
+                false);
+
+              createGraph(unpackData(parsedResponse, 'time'),
+                [unpackData(parsedResponse, 'mean_Snow_Depth')],
+                ['mean_Snow_Depth'],
+                'scatter',
+                'Snow Depth',
+                'm',
+                false);
+
+              createGraph(unpackData(parsedResponse, 'time'),
+                [unpackData(parsedResponse, 'mean_Battery_Voltage')],
+                ['cr1000x.mean_Battery_Voltage'],
+                'scatter',
+                'Mean Battery Voltage',
+                'V',
+                false);
+            })
+        })
+        .catch(error => console.log(error));
+    }
+
+    const closeGraphModal = () => {
+      document.getElementById('graphs-modal').style.display = "none";
+    }
   </script>
 </body>
 

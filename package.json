@@ -69,6 +69,7 @@
     "gulp-uglify": "^3.0.2",
     "gulp-zip": "^5.1.0",
     "husky": "^4.3.8",
+    "influx": "^5.9.2",
     "jasmine-core": "^3.7.1",
     "jsdoc": "^3.6.7",
     "jsep": "^0.3.1",
