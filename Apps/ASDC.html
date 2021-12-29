@@ -298,7 +298,7 @@
     });
     viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
     // viewer.scene.globe.depthTestAgainstTerrain = true;
-    // viewer.scene.globe.depthTestAgainstTerrain = false;
+    // viewer.scene.globe.depthTestAgainstTerrain = false;            
 
     var tilesets = {};
     var entities = {};
@@ -426,21 +426,24 @@
       //TODO: dates for entities
       viewer.timeline._highlightRanges = [];
       if (tilesets[selectedDataset]) {
-        Object.keys(tilesets[selectedDataset]).map(date => {
+        var tilesetDates = Object.keys(tilesets[selectedDataset]);
+
+        tilesetDates.map(date => {
           viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromDate(new Date(date)), Cesium.JulianDate.fromDate(new Date(new Date(date).getTime() + 86400000)));
         })
 
-
-        var maxDate = new Date(Object.keys(tilesets[selectedDataset]).reduce(function (a, b) { return new Date(a).getTime() > new Date(b).getTime() ? a : b; }));
-        var minDate = new Date(Object.keys(tilesets[selectedDataset]).reduce(function (a, b) { return new Date(a).getTime() < new Date(b).getTime() ? a : b; }));
+        var minDate= new Date(tilesetDates[0]);
+        var maxDate= new Date(tilesetDates[tilesetDates.length-1]);
 
         if (minDate.toString() !== "Invalid Date" && maxDate.toString() !== "Invalid Date") {
-          viewer.timeline.zoomTo(Cesium.JulianDate.fromDate(minDate), Cesium.JulianDate.fromDate(new Date(maxDate.getTime() + 86400000)));
           viewer.clock.currentTime = new Cesium.JulianDate.fromDate(minDate);
+          viewer.timeline.updateFromClock();
+          viewer.timeline.zoomTo(Cesium.JulianDate.fromDate(minDate), Cesium.JulianDate.fromDate(new Date(maxDate.getTime() + 86400000)));          
         } else {
           //point clouds with no date
           var currentDate = new Date();
           viewer.clock.currentTime = new Cesium.JulianDate.fromDate(new Date());
+          viewer.timeline.updateFromClock();
           viewer.timeline.zoomTo(Cesium.JulianDate.fromDate(currentDate), Cesium.JulianDate.fromDate(new Date(currentDate.getTime() + 86400000)));
         }
       } else {
@@ -448,18 +451,20 @@
           //Influx charts from 2 weeks before
           var currentDate = new Date();
           viewer.clock.currentTime = new Cesium.JulianDate.fromDate(currentDate);
+          viewer.timeline.updateFromClock();
           viewer.timeline.zoomTo(Cesium.JulianDate.fromDate(new Date(currentDate.getTime() - 2 * 7 * 86400000)), Cesium.JulianDate.fromDate(new Date()))
         } else {
           //Other data types with no date
           var currentDate = new Date();
           viewer.clock.currentTime = new Cesium.JulianDate.fromDate(new Date());
+          viewer.timeline.updateFromClock();
           viewer.timeline.zoomTo(Cesium.JulianDate.fromDate(currentDate), Cesium.JulianDate.fromDate(new Date(currentDate.getTime() + 86400000)));
         }
       }
 
       if (asset.data) {
         if (asset.data[0]["type"] === "PointCloud") {
-          viewer.flyTo(tilesets[selectedDataset][Object.keys(tilesets[selectedDataset])[0]]);
+          viewer.flyTo(tilesets[selectedDataset][tilesetDates[0]]);
         } else if (asset.data[0]["type"] === "Model") {
           viewer.flyTo(entities[selectedDataset]);
         }
@@ -476,7 +481,7 @@
 
     const setupSidebar = () => {
       fetch('https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/index.json', { cache: "no-store" })
-        // fetch('/cesium/Apps/index.json', { cache: "no-store" })
+      // fetch('/cesium/Apps/index.json', { cache: "no-store" })
         .then(response => response.text())
         .then(text => {
           var jsonResponse = JSON.parse(text);
@@ -502,7 +507,7 @@
               }
             );
           }
-
+          
           assets.map(asset => {
             var assetDiv = document.createElement("div");
 
@@ -514,7 +519,9 @@
             };
 
             document.getElementById("sidebar-data-buttons").appendChild(assetDiv);
-
+            
+            asset.data.sort(function (a, b) { return new Date(a.date).getTime() - new Date(b.date).getTime() });
+            
             if (asset.data && asset.data.length > 0 && asset.data[0].position) {
               var data = asset.data[0];
               var position = Cesium.Cartesian3.fromDegrees(
@@ -552,10 +559,10 @@
     setupSidebar();
 
     viewer.clock.onTick.addEventListener((clock) => {
-      currentTime = Cesium.JulianDate.toDate(clock.currentTime).getTime();
-
+      var currentTime = Cesium.JulianDate.toDate(clock.currentTime).getTime();
       if (tilesets[selectedDataset]) {
-        var tilesetDates = Object.keys(tilesets[selectedDataset]);
+        var tilesetDates = Object.keys(tilesets[selectedDataset]).sort(function (a, b) { return new Date(a).getTime() - new Date(b).getTime() });
+
         for (var i = 0; i < tilesetDates.length; i++) {
           if ((i === 0 || new Date(tilesetDates[i]).getTime() <= currentTime) && (i === tilesetDates.length - 1 || new Date(tilesetDates[i + 1]).getTime() >= currentTime)) {
             if (Array.isArray(tilesets[selectedDataset][tilesetDates[i]])) {
@@ -608,7 +615,6 @@
       }
 
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-
 
     const addFileInput = () => {
       var uploadForm = document.getElementById("upload-form");
@@ -797,7 +803,7 @@
       fetch(`/cesium/influx/fivemin?station=${station}`, { cache: "no-store" })
         .then(response => {
           if (response.status !== 200) {
-            console.log(response);
+            // console.log(response);
           }
           return response;
         })
