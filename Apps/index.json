@@ -4,6 +4,7 @@
             "id": 1,
             "name": "NUE",
             "status": "active",
+            "categoryID": 1,
             "data": [
                 {
                     "type": "PointCloud",
@@ -41,6 +42,7 @@
             "id": 2,
             "name": "VBIR",
             "status": "active",
+            "categoryID": 1,
             "data": [
                 {
                     "type": "PointCloud",
@@ -106,6 +108,7 @@
             "id": 3,
             "name": "USLN",
             "status": "active",
+            "categoryID": 2,
             "data": [
                 {
                     "type": "PointCloud",
@@ -123,6 +126,7 @@
             "id": 4,
             "name": "Gillan Ecosphere",
             "status": "active",
+            "categoryID": 3,
             "type": "EPTPointCloud",
             "data": [
                 {
@@ -138,6 +142,7 @@
             "id": 5,
             "name": "Dryandra Model",
             "status": "active",
+            "categoryID": 5,
             "data": [
                 {
                     "type": "Model",
@@ -159,6 +164,7 @@
             "id": 6,
             "name": "Dryandra Point Cloud",
             "status": "active",
+            "categoryID": 5,
             "data": [
                 {
                     "type": "PointCloud",
@@ -175,6 +181,7 @@
             "id": 7,
             "name": "Graffiti Model",
             "status": "active",
+            "categoryID": 5,
             "data": [
                 {
                     "type": "Model",
@@ -196,6 +203,7 @@
             "id": 8,
             "name": "Graffiti Point Cloud",
             "status": "active",
+            "categoryID": 5,
             "data": [
                 {
                     "type": "PointCloud",
@@ -210,8 +218,9 @@
         },
         {
             "id": 9,
-            "name": "Perisher (AMRF_PER)",
+            "name": "Perisher",
             "status": "active",
+            "categoryID": 4,
             "data": [
                 {
                     "type": "Influx",
@@ -226,8 +235,9 @@
         },
         {
             "id": 10,
-            "name": "Falls Creek (AMRF_FRY)",
+            "name": "Falls Creek",
             "status": "active",
+            "categoryID": 4,
             "data": [
                 {
                     "type": "Influx",
@@ -239,6 +249,32 @@
                     }
                 }
             ]
+        }
+    ],
+    "categories": [
+        {
+            "id": 1,
+            "name": "WheatHub"
+        },
+        {
+            "id": 2,
+            "name": "USLN"
+        },
+        {
+            "id": 3,
+            "name": "Cyverse"
+        },
+        {
+            "id": 4,
+            "name":"AMRF"
+        },
+        {
+            "id":5,
+            "name": "Miscellaneous"
+        },
+        {
+            "id":6,
+            "name": "Uploads"
         }
     ]
 }

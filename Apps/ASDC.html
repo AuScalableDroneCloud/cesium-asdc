@@ -123,6 +123,23 @@
       cursor: pointer;
     }
 
+    .sidebar-accordion:after {
+      content: '\25C4';
+      color: black;
+      float: right;
+      margin-left: 5px;
+    }
+
+    .sidebar-accordion-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.2s ease-out;
+    }
+
+    .sidebar-accordion-active:after {
+      content: '\25BC';
+    }
+
     .add-file-button:hover {
       cursor: pointer
     }
@@ -236,58 +253,6 @@
       if (pathEnd.toLowerCase() === "graffiti_pointcloud") selectedDataset = 8;
     }
 
-    const loadGeoJson = (dataset) => {
-      var geoJsonPromise = Cesium.GeoJsonDataSource.load(dataset, {
-        // clampToGround: true  //issues with picking polygons, using terrain sampling
-      });
-
-      // viewer.dataSources.add(geoJsonPromise);
-
-      geoJsonPromise.then((dataSource) => {
-        var entities = dataSource.entities.values;
-        var samplePromises = [];
-
-        dataSource.entities.values.map((entity) => {
-          // dataSource.entities.values.slice(0,24).map((entity) => {
-          var positions = entity.polygon.hierarchy.getValue().positions;
-          var cartoPositions = [];
-          positions.map(pos => {
-            var carto = Cesium.Cartographic.fromCartesian(pos);
-            cartoPositions.push(new Cesium.Cartographic(carto.longitude, carto.latitude));
-          })
-
-          samplePromises.push(Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, cartoPositions).then((updatedPositions) => {
-            var polygonEntity = viewer.entities.add({
-              polygon:
-              {
-                hierarchy: new Cesium.PolygonHierarchy(Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(updatedPositions)),
-                // hierarchy:new Cesium.CallbackProperty( () => {
-                //   updatedPositions.map(cartoPoint=>{
-                //   // var height = viewer.scene.sampleHeight(cartoPoint);
-                //   var height = viewer.scene.globe.getHeight(cartoPoint);
-                //   // console.log(height);
-                //   if (height){
-                //     cartoPoint.height=height;
-                //   }
-                // })
-                //   return(new Cesium.PolygonHierarchy(Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(updatedPositions)));
-                // },false),  //slow
-                material: Cesium.Color.RED,
-                perPositionHeight: true,
-                // perPositionHeight: false, //picking issues
-                arcType: Cesium.ArcType.GEODESIC
-              }
-            });
-            polygonEntity.properties = entity.properties;
-          }));
-        })
-        Promise.all(samplePromises).then(() => {
-          delete (dataSource);
-        })
-      })
-
-    }
-
     var highlightHeightPX = 27.2;
     var highlightColor = 'green';
 
@@ -298,7 +263,7 @@
     });
     viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
     // viewer.scene.globe.depthTestAgainstTerrain = true;
-    // viewer.scene.globe.depthTestAgainstTerrain = false;            
+    viewer.scene.globe.depthTestAgainstTerrain = false;            
 
     var tilesets = {};
     var entities = {};
@@ -432,13 +397,13 @@
           viewer.timeline.addHighlightRange(highlightColor, highlightHeightPX).setRange(Cesium.JulianDate.fromDate(new Date(date)), Cesium.JulianDate.fromDate(new Date(new Date(date).getTime() + 86400000)));
         })
 
-        var minDate= new Date(tilesetDates[0]);
-        var maxDate= new Date(tilesetDates[tilesetDates.length-1]);
+        var minDate = new Date(tilesetDates[0]);
+        var maxDate = new Date(tilesetDates[tilesetDates.length - 1]);
 
         if (minDate.toString() !== "Invalid Date" && maxDate.toString() !== "Invalid Date") {
           viewer.clock.currentTime = new Cesium.JulianDate.fromDate(minDate);
           viewer.timeline.updateFromClock();
-          viewer.timeline.zoomTo(Cesium.JulianDate.fromDate(minDate), Cesium.JulianDate.fromDate(new Date(maxDate.getTime() + 86400000)));          
+          viewer.timeline.zoomTo(Cesium.JulianDate.fromDate(minDate), Cesium.JulianDate.fromDate(new Date(maxDate.getTime() + 86400000)));
         } else {
           //point clouds with no date
           var currentDate = new Date();
@@ -476,6 +441,58 @@
       }
     }
 
+    const loadGeoJson = (dataset) => {
+      var geoJsonPromise = Cesium.GeoJsonDataSource.load(dataset, {
+        // clampToGround: true  //issues with picking polygons, using terrain sampling
+      });
+
+      // viewer.dataSources.add(geoJsonPromise);
+
+      geoJsonPromise.then((dataSource) => {
+        var entities = dataSource.entities.values;
+        var samplePromises = [];
+
+        dataSource.entities.values.map((entity) => {
+          // dataSource.entities.values.slice(0,24).map((entity) => {
+          var positions = entity.polygon.hierarchy.getValue().positions;
+          var cartoPositions = [];
+          positions.map(pos => {
+            var carto = Cesium.Cartographic.fromCartesian(pos);
+            cartoPositions.push(new Cesium.Cartographic(carto.longitude, carto.latitude));
+          })
+
+          samplePromises.push(Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, cartoPositions).then((updatedPositions) => {
+            var polygonEntity = viewer.entities.add({
+              polygon:
+              {
+                hierarchy: new Cesium.PolygonHierarchy(Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(updatedPositions)),
+                // hierarchy:new Cesium.CallbackProperty( () => {
+                //   updatedPositions.map(cartoPoint=>{
+                //   // var height = viewer.scene.sampleHeight(cartoPoint);
+                //   var height = viewer.scene.globe.getHeight(cartoPoint);
+                //   // console.log(height);
+                //   if (height){
+                //     cartoPoint.height=height;
+                //   }
+                // })
+                //   return(new Cesium.PolygonHierarchy(Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(updatedPositions)));
+                // },false),  //slow
+                material: Cesium.Color.RED,
+                perPositionHeight: true,
+                // perPositionHeight: false, //picking issues
+                arcType: Cesium.ArcType.GEODESIC
+              }
+            });
+            polygonEntity.properties = entity.properties;
+          }));
+        })
+        Promise.all(samplePromises).then(() => {
+          delete (dataSource);
+        })
+      })
+
+    }
+
     var dataSource;
     var pinBuilder = new Cesium.PinBuilder();
 
@@ -507,21 +524,52 @@
               }
             );
           }
-          
+
+          var categories = {};
+          jsonResponse["categories"].map(cat => {
+            categories[cat.id] = document.createElement("div");
+            var accordionDiv = categories[cat.id];
+
+            accordionDiv.className = "sidebar-item sidebar-accordion";
+            accordionDiv.innerHTML = cat.name;
+            accordionDiv.onclick = () => {
+              accordionDiv.classList.toggle("sidebar-accordion-active");
+              var panel = accordionDiv.nextElementSibling;
+              if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+              } else {
+                panel.style.maxHeight = panel.scrollHeight + 1 + "px";
+              }
+            };
+
+            document.getElementById("sidebar-data-buttons").appendChild(accordionDiv);
+            var accordionPanelDiv = document.createElement("div");
+            accordionPanelDiv.className = "sidebar-accordion-panel";
+            document.getElementById("sidebar-data-buttons").appendChild(accordionPanelDiv);
+          })
+
           assets.map(asset => {
+            var accordionDiv = categories[asset.categoryID];
+            var accordionPanelDiv = accordionDiv.nextElementSibling;
+
             var assetDiv = document.createElement("div");
 
-            assetDiv.innerHTML = asset["status"] !== "active" ? asset["name"] + ` (${asset["status"]})` : asset["name"];
+            var assetContentDiv = document.createElement("div");
+            assetContentDiv.innerHTML = asset["status"] !== "active" ? asset["name"] + ` (${asset["status"]})` : asset["name"];
+            assetContentDiv.style.padding = "0 18px";
             assetDiv.className = "sidebar-item";
             assetDiv.onclick = () => {
               window.history.pushState('', '', `/cesium/Apps/ASDC/${asset["id"]}`);
               loadAsset(assets, asset["id"]);
             };
 
-            document.getElementById("sidebar-data-buttons").appendChild(assetDiv);
+            assetDiv.appendChild(assetContentDiv);
+            accordionPanelDiv.appendChild(assetDiv);
             
-            asset.data.sort(function (a, b) { return new Date(a.date).getTime() - new Date(b.date).getTime() });
-            
+            if(asset.data){
+              asset.data.sort(function (a, b) { return new Date(a.date).getTime() - new Date(b.date).getTime() });
+            }
+
             if (asset.data && asset.data.length > 0 && asset.data[0].position) {
               var data = asset.data[0];
               var position = Cesium.Cartesian3.fromDegrees(
