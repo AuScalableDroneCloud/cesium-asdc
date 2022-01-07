@@ -263,7 +263,7 @@
     });
     viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
     // viewer.scene.globe.depthTestAgainstTerrain = true;
-    viewer.scene.globe.depthTestAgainstTerrain = false;            
+    viewer.scene.globe.depthTestAgainstTerrain = false;
 
     var tilesets = {};
     var entities = {};
@@ -334,6 +334,34 @@
           }
         } else if (data["type"] === "GeoJSON") {
           loadGeoJson(data.url);
+        } else if (data["type"] === "EPTPointCloud") {
+          if (!tilesets[selectedDataset]) tilesets[selectedDataset] = {};
+          if (!tilesets[selectedDataset][new Date(data["date"])]) {
+            tilesets[selectedDataset][new Date(data["date"])] = [];
+            if (data["date"] === "2019-05-01T00:00:00.000Z") {
+              var ilsFile = '/cesium/Apps/may_2019_ils.txt';
+            } else {
+              var ilsFile = '/cesium/Apps/sept_2019_ils.txt';
+            }
+            fetch(ilsFile)
+              .then(response => response.text())
+              .then(text => text.split("\n").map((line, index) => {
+                if (index == 0) return;
+                var path = line.split("C- ")[1];
+                if (path) {
+                  tilesets[selectedDataset][new Date(data["date"])].push(viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+                    // url: `http://localhost:3000/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                    // url: `/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                    url: `https://asdc.cloud.edu.au/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                    show: false
+                  })));
+
+                  if (index == 1) {
+                    viewer.flyTo(tilesets[selectedDataset][new Date("2019-05-01")][0]);
+                  }
+                }
+              }))
+          }
         } else if (data["type"] === "Influx") {
           loadGraph(data.station);
 
@@ -347,46 +375,6 @@
           viewer.camera.flyTo({ destination: position });
         }
       })
-
-      //TODO: move to index.json
-      if (asset.type === "EPTPointCloud") {
-        if (!tilesets[selectedDataset]) tilesets[selectedDataset] = {};
-        tilesets[selectedDataset][new Date("2019-05-01")] = [];
-        fetch('/cesium/Apps/may_2019_ils.txt')
-          .then(response => response.text())
-          .then(text => text.split("\n").map((line, index) => {
-            if (index == 0) return;
-            var path = line.split("C- ")[1];
-            if (path) {
-              tilesets[selectedDataset][new Date("2019-05-01")].push(viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-                // url: `http://localhost:3000/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                // url: `/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                url: `https://asdc.cloud.edu.au/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                show: false
-              })));
-
-              viewer.flyTo(tilesets[selectedDataset][new Date("2019-05-01")][0]);
-            }
-          }))
-        tilesets[selectedDataset][new Date("2019-09-01")] = [];
-        fetch('/cesium/Apps/sept_2019_ils.txt')
-          .then(response => response.text())
-          .then(text => text.split("\n").map((line, index) => {
-            if (index == 0) return;
-            var path = line.split("C- ")[1];
-            if (path) {
-              tilesets[selectedDataset][new Date("2019-09-01")].push(viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-                // url: `http://localhost:3000/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                // url: `/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                url: `https://asdc.cloud.edu.au/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                show: false
-              })));
-            }
-          }))
-
-        viewer.flyTo(tilesets[selectedDataset][Object.keys(tilesets[selectedDataset])[0]]);
-        loadGeoJson("https://data.cyverse.org/dav-anon/iplant/commons/cyverse_curated/Gillan_Ecosphere_2021/leaflet_map/suas-footprints.geojson");
-      }
 
       //TODO: dates for entities
       viewer.timeline._highlightRanges = [];
@@ -432,6 +420,8 @@
           viewer.flyTo(tilesets[selectedDataset][tilesetDates[0]]);
         } else if (asset.data[0]["type"] === "Model") {
           viewer.flyTo(entities[selectedDataset]);
+        } else if (asset.data[0]["type"] === "EPTPointCloud") {
+          viewer.flyTo(tilesets[selectedDataset][tilesetDates[0]][0]);
         }
 
         var dataTypes = asset.data.map((data) => data.type);
@@ -498,7 +488,7 @@
 
     const setupSidebar = () => {
       fetch('https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/index.json', { cache: "no-store" })
-      // fetch('/cesium/Apps/index.json', { cache: "no-store" })
+        // fetch('/cesium/Apps/index.json', { cache: "no-store" })
         .then(response => response.text())
         .then(text => {
           var jsonResponse = JSON.parse(text);
@@ -526,6 +516,8 @@
           }
 
           var categories = {};
+          var assetDivs = {};
+
           jsonResponse["categories"].map(cat => {
             categories[cat.id] = document.createElement("div");
             var accordionDiv = categories[cat.id];
@@ -558,15 +550,58 @@
             assetContentDiv.innerHTML = asset["status"] !== "active" ? asset["name"] + ` (${asset["status"]})` : asset["name"];
             assetContentDiv.style.padding = "0 18px";
             assetDiv.className = "sidebar-item";
-            assetDiv.onclick = () => {
-              window.history.pushState('', '', `/cesium/Apps/ASDC/${asset["id"]}`);
-              loadAsset(assets, asset["id"]);
-            };
+            assetContentDiv.className = "sidebar-accordion";
 
             assetDiv.appendChild(assetContentDiv);
+
+            var datesPanelDiv = document.createElement("div");
+            datesPanelDiv.className = "sidebar-accordion-panel";
+
+            asset.data.map(data => {
+              var dateDiv = document.createElement("div");
+              dateDiv.className = "sidebar-item";
+
+              var dateContentDiv = document.createElement("div");
+              dateContentDiv.style.padding = "0 36px";
+
+              if (data.date) {
+                var date = new Date(data.date);
+                dateContentDiv.innerHTML = date.toString() !== "Invalid Date" ? new Date(data.date).toLocaleDateString('en-au', { year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric" }) : data.date;
+              } else {
+                dateContentDiv.innerHTML = "No Date";
+              }
+
+              dateDiv.onclick = () => {
+                window.history.pushState('', '', `/cesium/Apps/ASDC/${asset["id"]}`);
+                loadAsset(assets, asset["id"]);
+                if (date && date.toString() !== "Invalid Date") {
+                  viewer.clock.currentTime = new Cesium.JulianDate.fromDate(new Date(data.date));
+                  viewer.timeline.updateFromClock();
+                }
+              }
+
+              dateDiv.appendChild(dateContentDiv);
+              datesPanelDiv.appendChild(dateDiv);
+            })
+
+            assetDiv.onclick = () => {
+              assetContentDiv.classList.toggle("sidebar-accordion-active");
+
+              if (datesPanelDiv.style.maxHeight) {
+                datesPanelDiv.style.maxHeight = null;
+              } else {
+                datesPanelDiv.style.maxHeight = datesPanelDiv.scrollHeight + 1 + "px";
+              }
+
+              accordionPanelDiv.style.maxHeight = parseFloat(accordionPanelDiv.style.maxHeight.slice(0, -2)) + datesPanelDiv.scrollHeight + "px";
+            };
+
             accordionPanelDiv.appendChild(assetDiv);
-            
-            if(asset.data){
+            accordionPanelDiv.appendChild(datesPanelDiv);
+
+            assetDivs[asset.id] = assetDiv;
+
+            if (asset.data) {
               asset.data.sort(function (a, b) { return new Date(a.date).getTime() - new Date(b.date).getTime() });
             }
 
@@ -600,6 +635,15 @@
             }, 0);
           }
 
+          if (selectedDataset) {
+            assets.map(a => {
+              if (a.id === parseInt(selectedDataset)) {
+                categories[a.categoryID].onclick();
+                assetDivs[selectedDataset].onclick();
+              }
+            })
+          }
+
           loadAsset(assets, selectedDataset);
         })
     }
@@ -612,7 +656,7 @@
         var tilesetDates = Object.keys(tilesets[selectedDataset]).sort(function (a, b) { return new Date(a).getTime() - new Date(b).getTime() });
 
         for (var i = 0; i < tilesetDates.length; i++) {
-          if ((i === 0 || new Date(tilesetDates[i]).getTime() <= currentTime) && (i === tilesetDates.length - 1 || new Date(tilesetDates[i + 1]).getTime() >= currentTime)) {
+          if ((i === 0 || new Date(tilesetDates[i]).getTime() <= currentTime) && (i === tilesetDates.length - 1 || new Date(tilesetDates[i + 1]).getTime() > currentTime)) {
             if (Array.isArray(tilesets[selectedDataset][tilesetDates[i]])) {
               tilesets[selectedDataset][tilesetDates[i]].map(tileset => { tileset.show = true; })
             } else {

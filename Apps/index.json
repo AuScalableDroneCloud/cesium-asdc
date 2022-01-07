@@ -96,10 +96,12 @@
                 },
                 {
                     "type": "GeoJSON",
+                    "date":"Constant",
                     "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/VBIR_EM3.geojson"
                 },
                 {
                     "type": "GeoJSON",
+                    "date":"Constant",
                     "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/VBIR_S2M3.geojson"
                 }
             ]
@@ -127,14 +129,29 @@
             "name": "Gillan Ecosphere",
             "status": "active",
             "categoryID": 3,
-            "type": "EPTPointCloud",
             "data": [
                 {
+                    "date": "2019-05-01T00:00:00.000Z",
+                    "type": "EPTPointCloud",
                     "position": {
                         "lng": -110.85616158988668,
                         "lat": 31.777620150175906,
                         "height": 1196.9982318100317
                     }
+                },
+                {
+                    "date": "2019-09-01T00:00:00.000Z",
+                    "type": "EPTPointCloud",
+                    "position": {
+                        "lng": -110.85616158988668,
+                        "lat": 31.777620150175906,
+                        "height": 1196.9982318100317
+                    }
+                },
+                {
+                    "type": "GeoJSON",
+                    "date":"Constant",
+                    "url": "https://data.cyverse.org/dav-anon/iplant/commons/cyverse_curated/Gillan_Ecosphere_2021/leaflet_map/suas-footprints.geojson"
                 }
             ]
         },
@@ -225,6 +242,7 @@
                 {
                     "type": "Influx",
                     "station": "AMRF_PER_D01",
+                    "date": "Live",
                     "position": {
                         "lng": 148.43065,
                         "lat": -36.3731306,
@@ -242,6 +260,7 @@
                 {
                     "type": "Influx",
                     "station": "AMRF_FRY_D01",
+                    "date": "Live",
                     "position": {
                         "lng": 147.251893,
                         "lat": -36.877349,
