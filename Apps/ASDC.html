@@ -488,7 +488,7 @@
 
     const setupSidebar = () => {
       fetch('https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/index.json', { cache: "no-store" })
-        // fetch('/cesium/Apps/index.json', { cache: "no-store" })
+      // fetch('/cesium/Apps/index.json', { cache: "no-store" })
         .then(response => response.text())
         .then(text => {
           var jsonResponse = JSON.parse(text);
@@ -534,11 +534,21 @@
               }
             };
 
-            document.getElementById("sidebar-data-buttons").appendChild(accordionDiv);
-            var accordionPanelDiv = document.createElement("div");
-            accordionPanelDiv.className = "sidebar-accordion-panel";
-            document.getElementById("sidebar-data-buttons").appendChild(accordionPanelDiv);
+            if (cat.id !== 6) { //Uploads
+              document.getElementById("sidebar-data-buttons").appendChild(accordionDiv);
+              var accordionPanelDiv = document.createElement("div");
+              accordionPanelDiv.className = "sidebar-accordion-panel";
+              document.getElementById("sidebar-data-buttons").appendChild(accordionPanelDiv);
+            }
           })
+
+          //Add uploads accordion last to the list
+          var uploadAccordion = categories[6];
+          document.getElementById("sidebar-data-buttons").appendChild(uploadAccordion);
+          var accordionPanelDiv = document.createElement("div");
+          accordionPanelDiv.className = "sidebar-accordion-panel";
+          document.getElementById("sidebar-data-buttons").appendChild(accordionPanelDiv);
+
 
           assets.map(asset => {
             var accordionDiv = categories[asset.categoryID];
