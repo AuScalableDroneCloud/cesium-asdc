@@ -14,6 +14,9 @@
                         "lng": 138.47000435251135,
                         "lat": -34.34410884575452,
                         "height": 43.99979598112131
+                    },
+                    "source":{
+                        "url": "s3://appf-anu/Cesium/NUE/NUE_20170721_M1_RGB_group1_densified_point_cloud/NUE_20170721_M1_RGB_group1_densified_point_cloud.laz"
                     }
                 },
                 {
@@ -24,6 +27,9 @@
                         "lng": 138.46997257929362,
                         "lat": -34.34408114334087,
                         "height": 43.99983402379628
+                    },
+                    "source":{
+                        "url": "s3://appf-anu/Cesium/NUE/NUE_20170922_M2_RGB_group1_densified_point_cloud/NUE_20170922_M2_RGB_group1_densified_point_cloud.laz"
                     }
                 },
                 {
@@ -34,6 +40,9 @@
                         "lng": 138.46996144569067,
                         "lat": -34.34408992813137,
                         "height": 42.999779667292145
+                    },
+                    "source":{
+                        "url": "s3://appf-anu/Cesium/NUE/NUE_20171016_M4_RGB_group1_densified_point_cloud/NUE_20171016_M4_RGB_group1_densified_point_cloud.laz"
                     }
                 }
             ]
@@ -52,6 +61,9 @@
                         "lng": 142.9807932458059,
                         "lat": -35.76086681002111,
                         "height": 87.99976258278798
+                    },
+                    "source":{
+                        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20190702_VBIR_1_DenseCloud.laz"
                     }
                 },
                 {
@@ -62,6 +74,9 @@
                         "lng": 142.98081513338565,
                         "lat": -35.76085743488859,
                         "height": 87.99977113762627
+                    },
+                    "source":{
+                        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20190801_VBIR_2_DenseCloud.laz"
                     }
                 },
                 {
@@ -72,6 +87,9 @@
                         "lng": 142.98079369270604,
                         "lat": -35.76088483182243,
                         "height": 87.99976258120795
+                    },
+                    "source":{
+                        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20190830_VBIR_3_DenseCloud.laz"
                     }
                 },
                 {
@@ -82,6 +100,9 @@
                         "lng": 142.98080474815683,
                         "lat": -35.7608846496957,
                         "height": 87.9997625830241
+                    },
+                    "source":{
+                        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20191001_VBIR_4_DenseCloud.laz"
                     }
                 },
                 {
@@ -92,6 +113,9 @@
                         "lng": 142.98081558015485,
                         "lat": -35.76087545666744,
                         "height": 86.99976258171239
+                    },
+                    "source":{
+                        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20191015_VBIR_5_DenseCloud.laz"
                     }
                 },
                 {
@@ -120,6 +144,9 @@
                         "lng": 148.84897057224302,
                         "lat": -36.371437446595635,
                         "height": 963.2143831961985
+                    },
+                    "source":{
+                        "url": "s3://appf-anu/Cesium/USLN/USLN-GegedzerickRoad_2021-05-21-odm_georeferenced_model.laz"
                     }
                 }
             ]
@@ -173,6 +200,9 @@
                         "heading": 110,
                         "pitch": 0,
                         "roll": -2
+                    },
+                    "source": {
+                        "url":"https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/dryandra-tree-scan.glb"
                     }
                 }
             ]
@@ -190,6 +220,9 @@
                         "lng": 149.11070075043358,
                         "lat": -35.26140712234432,
                         "height": 635.9999980371041
+                    },
+                    "source": {
+                        "url":"s3://appf-anu/Cesium/Dryandra Tree/Dryandra tree scan v1-poly.laz"
                     }
                 }
             ]
@@ -212,7 +245,19 @@
                         "heading": -15,
                         "pitch": 1,
                         "roll": 5
-                    }
+                    },
+                    "source": [
+                        {
+                            "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti Underpass/scene.gltf"
+                        },
+                        {
+                            "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti Underpass/scene.bin"
+                        },
+                        {
+                            "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti Underpass/textures/material_0_baseColor.jpeg",
+                            "dir": "textures"
+                        }
+                    ]
                 }
             ]
         },
@@ -229,6 +274,9 @@
                         "lng": 149.11093638822885,
                         "lat": -35.265405666129,
                         "height": 632.9998806194479
+                    },
+                    "source": {
+                        "url":"s3://appf-anu/Cesium/Graffiti Underpass/Graffiti underpass full v1-poly.laz"
                     }
                 }
             ]
