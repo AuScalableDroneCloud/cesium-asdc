@@ -1,347 +1,1191 @@
 {
-    "assets": [
+  "assets": [
+    {
+      "id": 1,
+      "name": "NUE",
+      "status": "active",
+      "categoryID": 1,
+      "data": [
         {
-            "id": 1,
-            "name": "NUE",
-            "status": "active",
-            "categoryID": 1,
-            "data": [
-                {
-                    "type": "PointCloud",
-                    "date": "2017-07-21T00:00:00.000Z",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170721_M1_RGB_group1_densified_point_cloud/tileset.json",
-                    "position": {
-                        "lng": 138.47000435251135,
-                        "lat": -34.34410884575452,
-                        "height": 43.99979598112131
-                    },
-                    "source":{
-                        "url": "s3://appf-anu/Cesium/NUE/NUE_20170721_M1_RGB_group1_densified_point_cloud/NUE_20170721_M1_RGB_group1_densified_point_cloud.laz"
-                    }
-                },
-                {
-                    "type": "PointCloud",
-                    "date": "2017-09-22T00:00:00.000Z",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170922_M2_RGB_group1_densified_point_cloud/tileset.json",
-                    "position": {
-                        "lng": 138.46997257929362,
-                        "lat": -34.34408114334087,
-                        "height": 43.99983402379628
-                    },
-                    "source":{
-                        "url": "s3://appf-anu/Cesium/NUE/NUE_20170922_M2_RGB_group1_densified_point_cloud/NUE_20170922_M2_RGB_group1_densified_point_cloud.laz"
-                    }
-                },
-                {
-                    "type": "PointCloud",
-                    "date": "2017-10-16T00:00:00.000Z",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20171016_M4_RGB_group1_densified_point_cloud/tileset.json",
-                    "position": {
-                        "lng": 138.46996144569067,
-                        "lat": -34.34408992813137,
-                        "height": 42.999779667292145
-                    },
-                    "source":{
-                        "url": "s3://appf-anu/Cesium/NUE/NUE_20171016_M4_RGB_group1_densified_point_cloud/NUE_20171016_M4_RGB_group1_densified_point_cloud.laz"
-                    }
-                }
-            ]
+          "type": "PointCloud",
+          "date": "2017-07-21T00:00:00.000Z",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170721_M1_RGB_group1_densified_point_cloud/tileset.json",
+          "position": {
+            "lng": 138.47000435251135,
+            "lat": -34.34410884575452,
+            "height": 43.99979598112131
+          },
+          "source": {
+            "url": "s3://appf-anu/Cesium/NUE/NUE_20170721_M1_RGB_group1_densified_point_cloud/NUE_20170721_M1_RGB_group1_densified_point_cloud.laz"
+          }
         },
         {
-            "id": 2,
-            "name": "VBIR",
-            "status": "active",
-            "categoryID": 1,
-            "data": [
-                {
-                    "type": "PointCloud",
-                    "date": "2019-07-02T00:00:00.000Z",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190702_VBIR_1_DenseCloud/tileset.json",
-                    "position": {
-                        "lng": 142.9807932458059,
-                        "lat": -35.76086681002111,
-                        "height": 87.99976258278798
-                    },
-                    "source":{
-                        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20190702_VBIR_1_DenseCloud.laz"
-                    }
-                },
-                {
-                    "type": "PointCloud",
-                    "date": "2019-08-01T00:00:00.000Z",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190801_VBIR_2_DenseCloud/tileset.json",
-                    "position": {
-                        "lng": 142.98081513338565,
-                        "lat": -35.76085743488859,
-                        "height": 87.99977113762627
-                    },
-                    "source":{
-                        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20190801_VBIR_2_DenseCloud.laz"
-                    }
-                },
-                {
-                    "type": "PointCloud",
-                    "date": "2019-08-30T00:00:00.000Z",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190830_VBIR_3_DenseCloud/tileset.json",
-                    "position": {
-                        "lng": 142.98079369270604,
-                        "lat": -35.76088483182243,
-                        "height": 87.99976258120795
-                    },
-                    "source":{
-                        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20190830_VBIR_3_DenseCloud.laz"
-                    }
-                },
-                {
-                    "type": "PointCloud",
-                    "date": "2019-10-01T00:00:00.000Z",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191001_VBIR_4_DenseCloud/tileset.json",
-                    "position": {
-                        "lng": 142.98080474815683,
-                        "lat": -35.7608846496957,
-                        "height": 87.9997625830241
-                    },
-                    "source":{
-                        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20191001_VBIR_4_DenseCloud.laz"
-                    }
-                },
-                {
-                    "type": "PointCloud",
-                    "date": "2019-10-15T00:00:00.000Z",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191015_VBIR_5_DenseCloud/tileset.json",
-                    "position": {
-                        "lng": 142.98081558015485,
-                        "lat": -35.76087545666744,
-                        "height": 86.99976258171239
-                    },
-                    "source":{
-                        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20191015_VBIR_5_DenseCloud.laz"
-                    }
-                },
-                {
-                    "type": "GeoJSON",
-                    "date":"Constant",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/VBIR_EM3.geojson"
-                },
-                {
-                    "type": "GeoJSON",
-                    "date":"Constant",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/VBIR_S2M3.geojson"
-                }
-            ]
+          "type": "PointCloud",
+          "date": "2017-09-22T00:00:00.000Z",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20170922_M2_RGB_group1_densified_point_cloud/tileset.json",
+          "position": {
+            "lng": 138.46997257929362,
+            "lat": -34.34408114334087,
+            "height": 43.99983402379628
+          },
+          "source": {
+            "url": "s3://appf-anu/Cesium/NUE/NUE_20170922_M2_RGB_group1_densified_point_cloud/NUE_20170922_M2_RGB_group1_densified_point_cloud.laz"
+          }
         },
         {
-            "id": 3,
-            "name": "USLN",
-            "status": "active",
-            "categoryID": 2,
-            "data": [
-                {
-                    "type": "PointCloud",
-                    "date": "2021-05-21T00:00:00.000Z",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/USLN-GegedzerickRoad_2021-05-21-odm_georeferenced_model/tileset.json",
-                    "position": {
-                        "lng": 148.84897057224302,
-                        "lat": -36.371437446595635,
-                        "height": 963.2143831961985
-                    },
-                    "source":{
-                        "url": "s3://appf-anu/Cesium/USLN/USLN-GegedzerickRoad_2021-05-21-odm_georeferenced_model.laz"
-                    }
-                }
-            ]
-        },
-        {
-            "id": 4,
-            "name": "Gillan Ecosphere",
-            "status": "active",
-            "categoryID": 3,
-            "data": [
-                {
-                    "date": "2019-05-01T00:00:00.000Z",
-                    "type": "EPTPointCloud",
-                    "position": {
-                        "lng": -110.85616158988668,
-                        "lat": 31.777620150175906,
-                        "height": 1196.9982318100317
-                    }
-                },
-                {
-                    "date": "2019-09-01T00:00:00.000Z",
-                    "type": "EPTPointCloud",
-                    "position": {
-                        "lng": -110.85616158988668,
-                        "lat": 31.777620150175906,
-                        "height": 1196.9982318100317
-                    }
-                },
-                {
-                    "type": "GeoJSON",
-                    "date":"Constant",
-                    "url": "https://data.cyverse.org/dav-anon/iplant/commons/cyverse_curated/Gillan_Ecosphere_2021/leaflet_map/suas-footprints.geojson"
-                }
-            ]
-        },
-        {
-            "id": 5,
-            "name": "Dryandra Model",
-            "status": "active",
-            "categoryID": 5,
-            "data": [
-                {
-                    "type": "Model",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/dryandra-tree-scan.glb",
-                    "position": {
-                        "lng": 149.1106974606,
-                        "lat": -35.2614095095,
-                        "height": 636.0639605530833
-                    },
-                    "rotation": {
-                        "heading": 110,
-                        "pitch": 0,
-                        "roll": -2
-                    },
-                    "source": {
-                        "url":"https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/dryandra-tree-scan.glb"
-                    }
-                }
-            ]
-        },
-        {
-            "id": 6,
-            "name": "Dryandra Point Cloud",
-            "status": "active",
-            "categoryID": 5,
-            "data": [
-                {
-                    "type": "PointCloud",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/Point+Cloud/tileset.json",
-                    "position": {
-                        "lng": 149.11070075043358,
-                        "lat": -35.26140712234432,
-                        "height": 635.9999980371041
-                    },
-                    "source": {
-                        "url":"s3://appf-anu/Cesium/Dryandra Tree/Dryandra tree scan v1-poly.laz"
-                    }
-                }
-            ]
-        },
-        {
-            "id": 7,
-            "name": "Graffiti Model",
-            "status": "active",
-            "categoryID": 5,
-            "data": [
-                {
-                    "type": "Model",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti+Underpass/scene.gltf",
-                    "position": {
-                        "lng": 149.1109390899,
-                        "lat": -35.2654136809,
-                        "height": 632.9976221420972
-                    },
-                    "rotation": {
-                        "heading": -15,
-                        "pitch": 1,
-                        "roll": 5
-                    },
-                    "source": [
-                        {
-                            "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti Underpass/scene.gltf"
-                        },
-                        {
-                            "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti Underpass/scene.bin"
-                        },
-                        {
-                            "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti Underpass/textures/material_0_baseColor.jpeg",
-                            "dir": "textures"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "id": 8,
-            "name": "Graffiti Point Cloud",
-            "status": "active",
-            "categoryID": 5,
-            "data": [
-                {
-                    "type": "PointCloud",
-                    "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti+Underpass/Point+Cloud/tileset.json",
-                    "position": {
-                        "lng": 149.11093638822885,
-                        "lat": -35.265405666129,
-                        "height": 632.9998806194479
-                    },
-                    "source": {
-                        "url":"s3://appf-anu/Cesium/Graffiti Underpass/Graffiti underpass full v1-poly.laz"
-                    }
-                }
-            ]
-        },
-        {
-            "id": 9,
-            "name": "Perisher",
-            "status": "active",
-            "categoryID": 4,
-            "data": [
-                {
-                    "type": "Influx",
-                    "station": "AMRF_PER_D01",
-                    "date": "Live",
-                    "position": {
-                        "lng": 148.43065,
-                        "lat": -36.3731306,
-                        "height": 1594
-                    }
-                }
-            ]
-        },
-        {
-            "id": 10,
-            "name": "Falls Creek",
-            "status": "active",
-            "categoryID": 4,
-            "data": [
-                {
-                    "type": "Influx",
-                    "station": "AMRF_FRY_D01",
-                    "date": "Live",
-                    "position": {
-                        "lng": 147.251893,
-                        "lat": -36.877349,
-                        "height": 1730
-                    }
-                }
-            ]
+          "type": "PointCloud",
+          "date": "2017-10-16T00:00:00.000Z",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE_20171016_M4_RGB_group1_densified_point_cloud/tileset.json",
+          "position": {
+            "lng": 138.46996144569067,
+            "lat": -34.34408992813137,
+            "height": 42.999779667292145
+          },
+          "source": {
+            "url": "s3://appf-anu/Cesium/NUE/NUE_20171016_M4_RGB_group1_densified_point_cloud/NUE_20171016_M4_RGB_group1_densified_point_cloud.laz"
+          }
         }
-    ],
-    "categories": [
+      ]
+    },
+    {
+      "id": 2,
+      "name": "VBIR",
+      "status": "active",
+      "categoryID": 1,
+      "data": [
         {
-            "id": 1,
-            "name": "WheatHub"
+          "type": "PointCloud",
+          "date": "2019-07-02T00:00:00.000Z",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190702_VBIR_1_DenseCloud/tileset.json",
+          "position": {
+            "lng": 142.9807932458059,
+            "lat": -35.76086681002111,
+            "height": 87.99976258278798
+          },
+          "source": {
+            "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20190702_VBIR_1_DenseCloud.laz"
+          }
         },
         {
-            "id": 2,
-            "name": "USLN"
+          "type": "PointCloud",
+          "date": "2019-08-01T00:00:00.000Z",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190801_VBIR_2_DenseCloud/tileset.json",
+          "position": {
+            "lng": 142.98081513338565,
+            "lat": -35.76085743488859,
+            "height": 87.99977113762627
+          },
+          "source": {
+            "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20190801_VBIR_2_DenseCloud.laz"
+          }
         },
         {
-            "id": 3,
-            "name": "Cyverse"
+          "type": "PointCloud",
+          "date": "2019-08-30T00:00:00.000Z",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190830_VBIR_3_DenseCloud/tileset.json",
+          "position": {
+            "lng": 142.98079369270604,
+            "lat": -35.76088483182243,
+            "height": 87.99976258120795
+          },
+          "source": {
+            "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20190830_VBIR_3_DenseCloud.laz"
+          }
         },
         {
-            "id": 4,
-            "name":"AMRF"
+          "type": "PointCloud",
+          "date": "2019-10-01T00:00:00.000Z",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191001_VBIR_4_DenseCloud/tileset.json",
+          "position": {
+            "lng": 142.98080474815683,
+            "lat": -35.7608846496957,
+            "height": 87.9997625830241
+          },
+          "source": {
+            "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20191001_VBIR_4_DenseCloud.laz"
+          }
         },
         {
-            "id":5,
-            "name": "Miscellaneous"
+          "type": "PointCloud",
+          "date": "2019-10-15T00:00:00.000Z",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191015_VBIR_5_DenseCloud/tileset.json",
+          "position": {
+            "lng": 142.98081558015485,
+            "lat": -35.76087545666744,
+            "height": 86.99976258171239
+          },
+          "source": {
+            "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20191015_VBIR_5_DenseCloud.laz"
+          }
         },
         {
-            "id":6,
-            "name": "Uploads"
+          "type": "GeoJSON",
+          "date": "Constant",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/VBIR_EM3.geojson"
+        },
+        {
+          "type": "GeoJSON",
+          "date": "Constant",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/VBIR_S2M3.geojson"
         }
-    ]
+      ]
+    },
+    {
+      "id": 3,
+      "name": "USLN",
+      "status": "active",
+      "categoryID": 2,
+      "data": [
+        {
+          "type": "PointCloud",
+          "date": "2021-05-21T00:00:00.000Z",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/USLN-GegedzerickRoad_2021-05-21-odm_georeferenced_model/tileset.json",
+          "position": {
+            "lng": 148.84897057224302,
+            "lat": -36.371437446595635,
+            "height": 963.2143831961985
+          },
+          "source": {
+            "url": "s3://appf-anu/Cesium/USLN/USLN-GegedzerickRoad_2021-05-21-odm_georeferenced_model.laz"
+          }
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Gillan Ecosphere",
+      "status": "active",
+      "categoryID": 3,
+      "data": [
+        {
+          "date": "2019-05-01T00:00:00.000Z",
+          "type": "EPTPointCloud",
+          "position": {
+            "lng": -110.85616158988668,
+            "lat": 31.777620150175906,
+            "height": 1196.9982318100317
+          }
+        },
+        {
+          "date": "2019-09-01T00:00:00.000Z",
+          "type": "EPTPointCloud",
+          "position": {
+            "lng": -110.85616158988668,
+            "lat": 31.777620150175906,
+            "height": 1196.9982318100317
+          }
+        },
+        {
+          "type": "GeoJSON",
+          "date": "Constant",
+          "url": "https://data.cyverse.org/dav-anon/iplant/commons/cyverse_curated/Gillan_Ecosphere_2021/leaflet_map/suas-footprints.geojson"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Dryandra Model",
+      "status": "active",
+      "categoryID": 5,
+      "data": [
+        {
+          "type": "Model",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/dryandra-tree-scan.glb",
+          "position": {
+            "lng": 149.1106974606,
+            "lat": -35.2614095095,
+            "height": 636.0639605530833
+          },
+          "rotation": {
+            "heading": 110,
+            "pitch": 0,
+            "roll": -2
+          },
+          "source": {
+            "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/dryandra-tree-scan.glb"
+          }
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Dryandra Point Cloud",
+      "status": "active",
+      "categoryID": 5,
+      "data": [
+        {
+          "type": "PointCloud",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/Point+Cloud/tileset.json",
+          "position": {
+            "lng": 149.11070075043358,
+            "lat": -35.26140712234432,
+            "height": 635.9999980371041
+          },
+          "source": {
+            "url": "s3://appf-anu/Cesium/Dryandra Tree/Dryandra tree scan v1-poly.laz"
+          }
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Graffiti Model",
+      "status": "active",
+      "categoryID": 5,
+      "data": [
+        {
+          "type": "Model",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti+Underpass/scene.gltf",
+          "position": {
+            "lng": 149.1109390899,
+            "lat": -35.2654136809,
+            "height": 632.9976221420972
+          },
+          "rotation": {
+            "heading": -15,
+            "pitch": 1,
+            "roll": 5
+          },
+          "source": [
+            {
+              "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti Underpass/scene.gltf"
+            },
+            {
+              "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti Underpass/scene.bin"
+            },
+            {
+              "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti Underpass/textures/material_0_baseColor.jpeg",
+              "dir": "textures"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Graffiti Point Cloud",
+      "status": "active",
+      "categoryID": 5,
+      "data": [
+        {
+          "type": "PointCloud",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti+Underpass/Point+Cloud/tileset.json",
+          "position": {
+            "lng": 149.11093638822885,
+            "lat": -35.265405666129,
+            "height": 632.9998806194479
+          },
+          "source": {
+            "url": "s3://appf-anu/Cesium/Graffiti Underpass/Graffiti underpass full v1-poly.laz"
+          }
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Perisher",
+      "status": "active",
+      "categoryID": 4,
+      "data": [
+        {
+          "type": "Influx",
+          "station": "AMRF_PER_D01",
+          "date": "Live",
+          "position": {
+            "lng": 148.43065,
+            "lat": -36.3731306,
+            "height": 1594
+          }
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Falls Creek",
+      "status": "active",
+      "categoryID": 4,
+      "data": [
+        {
+          "type": "Influx",
+          "station": "AMRF_FRY_D01",
+          "date": "Live",
+          "position": {
+            "lng": 147.251893,
+            "lat": -36.877349,
+            "height": 1730
+          }
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Adelaide Hills",
+      "status": "active",
+      "categoryID": 7,
+      "data": [
+        {
+          "type": "PointCloud",
+          "date": "2020-01-08T00:00:00.000Z",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Adelaide+Hills/Tilesets/2020-01-08/tileset.json",
+          "position": {
+            "lng": 138.9021865092186,
+            "lat": -34.91427496804004,
+            "height": -278.33450716837154
+          },
+          "schema": [
+            {
+              "count": 470990550,
+              "maximum": 312631.63,
+              "mean": 308566.3872894693,
+              "minimum": 304102.42,
+              "name": "X",
+              "offset": 308367,
+              "scale": 0.01,
+              "size": 4,
+              "stddev": 1889.1779667398673,
+              "type": "signed",
+              "variance": 3568993.390015379
+            },
+            {
+              "count": 470990550,
+              "maximum": 6144123.83,
+              "mean": 6138469.7557966765,
+              "minimum": 6124780.14,
+              "name": "Y",
+              "offset": 6134452,
+              "scale": 0.01,
+              "size": 4,
+              "stddev": 6288.179925548416,
+              "type": "signed",
+              "variance": 39541206.77607008
+            },
+            {
+              "count": 470990550,
+              "maximum": 612.397,
+              "mean": 432.2695972069748,
+              "minimum": -1153.958,
+              "name": "Z",
+              "offset": -271,
+              "scale": 0.001,
+              "size": 4,
+              "stddev": 31.495504870978642,
+              "type": "signed",
+              "variance": 991.9668270778393
+            },
+            {
+              "count": 470990550,
+              "maximum": 65534,
+              "mean": 219.93428925058075,
+              "minimum": 0,
+              "name": "Intensity",
+              "size": 2,
+              "stddev": 158.34958236663687,
+              "type": "unsigned",
+              "variance": 25074.590235688316
+            },
+            {
+              "count": 470990550,
+              "maximum": 7,
+              "mean": 1.3042126620162897,
+              "minimum": 0,
+              "name": "ReturnNumber",
+              "size": 1,
+              "stddev": 0.6549071177603698,
+              "type": "unsigned",
+              "variance": 0.4289033328931949
+            },
+            {
+              "count": 470990550,
+              "maximum": 7,
+              "mean": 1.6084078565906932,
+              "minimum": 0,
+              "name": "NumberOfReturns",
+              "size": 1,
+              "stddev": 0.9432046263788436,
+              "type": "unsigned",
+              "variance": 0.8896349672224539
+            },
+            {
+              "count": 470990550,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "ScanDirectionFlag",
+              "size": 1,
+              "stddev": 0,
+              "type": "unsigned",
+              "variance": 0
+            },
+            {
+              "count": 470990550,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "EdgeOfFlightLine",
+              "size": 1,
+              "stddev": 0,
+              "type": "unsigned",
+              "variance": 0
+            },
+            {
+              "count": 470990550,
+              "counts": [
+                {
+                  "count": 303147455,
+                  "value": 2
+                },
+                {
+                  "count": 167015712,
+                  "value": 5
+                },
+                {
+                  "count": 827383,
+                  "value": 6
+                }
+              ],
+              "maximum": 6,
+              "mean": 3.070842436222937,
+              "minimum": 2,
+              "name": "Classification",
+              "size": 1,
+              "stddev": 1.4397397451116276,
+              "type": "unsigned",
+              "variance": 2.0728505336540946
+            },
+            {
+              "count": 470990550,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "ScanAngleRank",
+              "size": 4,
+              "stddev": 0,
+              "type": "float",
+              "variance": 0
+            },
+            {
+              "count": 470990550,
+              "maximum": 255,
+              "mean": 26.595681374072107,
+              "minimum": 0,
+              "name": "UserData",
+              "size": 1,
+              "stddev": 52.46062284087515,
+              "type": "unsigned",
+              "variance": 2752.116948852552
+            },
+            {
+              "count": 470990550,
+              "maximum": 20,
+              "mean": 12.063286271878699,
+              "minimum": 1,
+              "name": "PointSourceId",
+              "size": 2,
+              "stddev": 4.97925271906911,
+              "type": "unsigned",
+              "variance": 24.792957640357123
+            },
+            {
+              "count": 470990550,
+              "maximum": 93011.712190959,
+              "mean": 73979.90618465007,
+              "minimum": 14543.003565328001,
+              "name": "GpsTime",
+              "size": 8,
+              "stddev": 30854.269786256555,
+              "type": "float",
+              "variance": 951985964.0431042
+            },
+            {
+              "count": 292474308,
+              "maximum": 65280,
+              "mean": 33683.99849509604,
+              "minimum": 0,
+              "name": "Red",
+              "size": 2,
+              "stddev": 12162.302102171543,
+              "type": "unsigned",
+              "variance": 147921592.42448634
+            },
+            {
+              "count": 292474308,
+              "maximum": 65280,
+              "mean": 29664.84132621939,
+              "minimum": 0,
+              "name": "Green",
+              "size": 2,
+              "stddev": 10844.77267671019,
+              "type": "unsigned",
+              "variance": 117609094.4095199
+            },
+            {
+              "count": 292474308,
+              "maximum": 65280,
+              "mean": 24081.53404101956,
+              "minimum": 0,
+              "name": "Blue",
+              "size": 2,
+              "stddev": 9699.710946820347,
+              "type": "unsigned",
+              "variance": 94084392.45186646
+            }
+          ]
+        },
+        {
+          "type": "PointCloud",
+          "date": "2020-01-15T00:00:00.000Z",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Adelaide+Hills/Tilesets/2020-01-15/tileset.json",
+          "position": {
+            "lng": 138.90116329020134,
+            "lat": -34.913293210520536,
+            "height": -267.17322478655007
+          },
+          "schema": [
+            {
+              "count": 586150963,
+              "maximum": 312440.14,
+              "mean": 308457.0086919221,
+              "minimum": 304102.42,
+              "name": "X",
+              "offset": 308271,
+              "scale": 0.01,
+              "size": 4,
+              "stddev": 1878.1691750211387,
+              "type": "signed",
+              "variance": 3527519.449999585
+            },
+            {
+              "count": 586150963,
+              "maximum": 6144123.83,
+              "mean": 6138549.523311223,
+              "minimum": 6124994.15,
+              "name": "Y",
+              "offset": 6134559,
+              "scale": 0.01,
+              "size": 4,
+              "stddev": 5762.61321704838,
+              "type": "signed",
+              "variance": 33207711.08930068
+            },
+            {
+              "count": 586150963,
+              "maximum": 634.384,
+              "mean": 439.2805972482188,
+              "minimum": -1153.958,
+              "name": "Z",
+              "offset": -260,
+              "scale": 0.001,
+              "size": 4,
+              "stddev": 36.87427536714477,
+              "type": "signed",
+              "variance": 1359.7121838520193
+            },
+            {
+              "count": 586150963,
+              "maximum": 65534,
+              "mean": 237.33012723207207,
+              "minimum": 0,
+              "name": "Intensity",
+              "size": 2,
+              "stddev": 186.8391477562604,
+              "type": "unsigned",
+              "variance": 34908.8671342857
+            },
+            {
+              "count": 586150963,
+              "maximum": 7,
+              "mean": 1.324581908091171,
+              "minimum": 0,
+              "name": "ReturnNumber",
+              "size": 1,
+              "stddev": 0.672754871436935,
+              "type": "unsigned",
+              "variance": 0.45259911704212696
+            },
+            {
+              "count": 586150963,
+              "maximum": 7,
+              "mean": 1.6491192764618656,
+              "minimum": 0,
+              "name": "NumberOfReturns",
+              "size": 1,
+              "stddev": 0.963061879882271,
+              "type": "unsigned",
+              "variance": 0.9274881844823737
+            },
+            {
+              "count": 586150963,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "ScanDirectionFlag",
+              "size": 1,
+              "stddev": 0,
+              "type": "unsigned",
+              "variance": 0
+            },
+            {
+              "count": 586150963,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "EdgeOfFlightLine",
+              "size": 1,
+              "stddev": 0,
+              "type": "unsigned",
+              "variance": 0
+            },
+            {
+              "count": 586150963,
+              "counts": [
+                {
+                  "count": 373508336,
+                  "value": 2
+                },
+                {
+                  "count": 211494965,
+                  "value": 5
+                },
+                {
+                  "count": 1147662,
+                  "value": 6
+                }
+              ],
+              "maximum": 6,
+              "mean": 3.0902917223390975,
+              "minimum": 2,
+              "name": "Classification",
+              "size": 1,
+              "stddev": 1.4456731926380573,
+              "type": "unsigned",
+              "variance": 2.0899709799123136
+            },
+            {
+              "count": 586150963,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "ScanAngleRank",
+              "size": 4,
+              "stddev": 0,
+              "type": "float",
+              "variance": 0
+            },
+            {
+              "count": 586150963,
+              "maximum": 255,
+              "mean": 30.56377528974411,
+              "minimum": 0,
+              "name": "UserData",
+              "size": 1,
+              "stddev": 58.180650042961396,
+              "type": "unsigned",
+              "variance": 3384.9880394215443
+            },
+            {
+              "count": 586150963,
+              "maximum": 27,
+              "mean": 15.540317907828124,
+              "minimum": 4,
+              "name": "PointSourceId",
+              "size": 2,
+              "stddev": 5.900610912183697,
+              "type": "unsigned",
+              "variance": 34.81720913698132
+            },
+            {
+              "count": 586150963,
+              "maximum": 93011.712190959,
+              "mean": 57193.37968714317,
+              "minimum": 14543.003565328001,
+              "name": "GpsTime",
+              "size": 8,
+              "stddev": 37078.92224943846,
+              "type": "float",
+              "variance": 1374846475.1799026
+            },
+            {
+              "count": 292474308,
+              "maximum": 65280,
+              "mean": 33683.99849509604,
+              "minimum": 0,
+              "name": "Red",
+              "size": 2,
+              "stddev": 12162.302102171543,
+              "type": "unsigned",
+              "variance": 147921592.42448634
+            },
+            {
+              "count": 292474308,
+              "maximum": 65280,
+              "mean": 29664.84132621939,
+              "minimum": 0,
+              "name": "Green",
+              "size": 2,
+              "stddev": 10844.77267671019,
+              "type": "unsigned",
+              "variance": 117609094.4095199
+            },
+            {
+              "count": 292474308,
+              "maximum": 65280,
+              "mean": 24081.53404101956,
+              "minimum": 0,
+              "name": "Blue",
+              "size": 2,
+              "stddev": 9699.710946820347,
+              "type": "unsigned",
+              "variance": 94084392.45186646
+            }
+          ]
+        },
+        {
+          "type": "PointCloud",
+          "date": "2020-01-26T00:00:00.000Z",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Adelaide+Hills/Tilesets/2020-01-26/tileset.json",
+          "position": {
+            "lng": 138.90028810620103,
+            "lat": -34.913278084814415,
+            "height": -257.1732303919009
+          },
+          "schema": [
+            {
+              "count": 2105589324,
+              "maximum": 312440.14,
+              "mean": 306875.88272225705,
+              "minimum": 303941.47000000003,
+              "name": "X",
+              "offset": 308191,
+              "scale": 0.01,
+              "size": 4,
+              "stddev": 1863.880763199948,
+              "type": "signed",
+              "variance": 3474051.4994268203
+            },
+            {
+              "count": 2105589324,
+              "maximum": 6144123.83,
+              "mean": 6137263.294038981,
+              "minimum": 6124994.15,
+              "name": "Y",
+              "offset": 6134559,
+              "scale": 0.01,
+              "size": 4,
+              "stddev": 4177.487743361262,
+              "type": "signed",
+              "variance": 17451403.845933568
+            },
+            {
+              "count": 2105589324,
+              "maximum": 654.77,
+              "mean": 443.22959417186115,
+              "minimum": -1153.958,
+              "name": "Z",
+              "offset": -250,
+              "scale": 0.001,
+              "size": 4,
+              "stddev": 42.95063442253018,
+              "type": "signed",
+              "variance": 1844.7569972978345
+            },
+            {
+              "count": 2105589324,
+              "maximum": 65534,
+              "mean": 238.12145539020977,
+              "minimum": 0,
+              "name": "Intensity",
+              "size": 2,
+              "stddev": 169.35319207257734,
+              "type": "unsigned",
+              "variance": 28680.503665171276
+            },
+            {
+              "count": 2105589324,
+              "maximum": 7,
+              "mean": 1.285470701313343,
+              "minimum": 0,
+              "name": "ReturnNumber",
+              "size": 1,
+              "stddev": 0.6400422980157846,
+              "type": "unsigned",
+              "variance": 0.4096541432493264
+            },
+            {
+              "count": 2105589324,
+              "maximum": 7,
+              "mean": 1.5710326763606057,
+              "minimum": 0,
+              "name": "NumberOfReturns",
+              "size": 1,
+              "stddev": 0.9283352054098978,
+              "type": "unsigned",
+              "variance": 0.8618062536034371
+            },
+            {
+              "count": 2105589324,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "ScanDirectionFlag",
+              "size": 1,
+              "stddev": 0,
+              "type": "unsigned",
+              "variance": 0
+            },
+            {
+              "count": 2105589324,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "EdgeOfFlightLine",
+              "size": 1,
+              "stddev": 0,
+              "type": "unsigned",
+              "variance": 0
+            },
+            {
+              "count": 2105589324,
+              "counts": [
+                {
+                  "count": 1398432334,
+                  "value": 2
+                },
+                {
+                  "count": 695914681,
+                  "value": 5
+                },
+                {
+                  "count": 11242309,
+                  "value": 6
+                }
+              ],
+              "maximum": 6,
+              "mean": 3.0128818828490846,
+              "minimum": 2,
+              "name": "Classification",
+              "size": 1,
+              "stddev": 1.4262093178122843,
+              "type": "unsigned",
+              "variance": 2.0340730182145816
+            },
+            {
+              "count": 2105589324,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "ScanAngleRank",
+              "size": 4,
+              "stddev": 0,
+              "type": "float",
+              "variance": 0
+            },
+            {
+              "count": 2105589324,
+              "maximum": 255,
+              "mean": 30.986343665086004,
+              "minimum": 0,
+              "name": "UserData",
+              "size": 1,
+              "stddev": 62.41848674371946,
+              "type": "unsigned",
+              "variance": 3896.067487375882
+            },
+            {
+              "count": 2105589324,
+              "maximum": 19,
+              "mean": 8.563863890486891,
+              "minimum": 1,
+              "name": "PointSourceId",
+              "size": 2,
+              "stddev": 4.5896617993054205,
+              "type": "unsigned",
+              "variance": 21.064995432003467
+            },
+            {
+              "count": 2105589324,
+              "maximum": 93011.712190959,
+              "mean": 23892.314432841944,
+              "minimum": 6853.339626078,
+              "name": "GpsTime",
+              "size": 8,
+              "stddev": 26582.003820555525,
+              "type": "float",
+              "variance": 706602927.1160285
+            },
+            {
+              "count": 2012985096,
+              "maximum": 65280,
+              "mean": 35050.06220626539,
+              "minimum": 0,
+              "name": "Red",
+              "size": 2,
+              "stddev": 11167.108795554848,
+              "type": "unsigned",
+              "variance": 124704318.85175847
+            },
+            {
+              "count": 2012985096,
+              "maximum": 65280,
+              "mean": 31279.52971618858,
+              "minimum": 0,
+              "name": "Green",
+              "size": 2,
+              "stddev": 10341.316305537726,
+              "type": "unsigned",
+              "variance": 106942822.93118046
+            },
+            {
+              "count": 2012985096,
+              "maximum": 65280,
+              "mean": 26223.81097045119,
+              "minimum": 0,
+              "name": "Blue",
+              "size": 2,
+              "stddev": 9900.376232399556,
+              "type": "unsigned",
+              "variance": 98017449.54306202
+            }
+          ]
+        },
+        {
+          "type": "PointCloud",
+          "date": "2020-09-09T00:00:00.000Z",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Adelaide+Hills/Tilesets/2020-09-09/tileset.json",
+          "position": {
+            "lng": 138.90198768709217,
+            "lat": -34.91170174337471,
+            "height": -276.44252146389294
+          },
+          "schema": [
+            {
+              "count": 2032739749,
+              "maximum": 312440.14,
+              "mean": 307136.716361217,
+              "minimum": 304246.06,
+              "name": "X",
+              "offset": 308343,
+              "scale": 0.01,
+              "size": 4,
+              "stddev": 1924.907992462582,
+              "type": "signed",
+              "variance": 3705270.7794463276
+            },
+            {
+              "count": 2032739749,
+              "maximum": 6144479.79,
+              "mean": 6137973.52526509,
+              "minimum": 6124994.15,
+              "name": "Y",
+              "offset": 6134737,
+              "scale": 0.01,
+              "size": 4,
+              "stddev": 4335.08363275515,
+              "type": "signed",
+              "variance": 18792950.102981582
+            },
+            {
+              "count": 2032739749,
+              "maximum": 615.926,
+              "mean": 443.9985956513955,
+              "minimum": -1153.958,
+              "name": "Z",
+              "offset": -269,
+              "scale": 0.001,
+              "size": 4,
+              "stddev": 43.35246388138596,
+              "type": "signed",
+              "variance": 1879.436124586874
+            },
+            {
+              "count": 2032739749,
+              "maximum": 65534,
+              "mean": 395.39214503156006,
+              "minimum": 1,
+              "name": "Intensity",
+              "size": 2,
+              "stddev": 293.3902502272799,
+              "type": "unsigned",
+              "variance": 86077.83892842592
+            },
+            {
+              "count": 2032739749,
+              "maximum": 7,
+              "mean": 1.2917976594357152,
+              "minimum": 0,
+              "name": "ReturnNumber",
+              "size": 1,
+              "stddev": 0.6535763438457391,
+              "type": "unsigned",
+              "variance": 0.4271620372347638
+            },
+            {
+              "count": 2032739749,
+              "maximum": 7,
+              "mean": 1.5835569844018298,
+              "minimum": 0,
+              "name": "NumberOfReturns",
+              "size": 1,
+              "stddev": 0.9507123462495256,
+              "type": "unsigned",
+              "variance": 0.9038539653112778
+            },
+            {
+              "count": 2032739749,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "ScanDirectionFlag",
+              "size": 1,
+              "stddev": 0,
+              "type": "unsigned",
+              "variance": 0
+            },
+            {
+              "count": 2032739749,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "EdgeOfFlightLine",
+              "size": 1,
+              "stddev": 0,
+              "type": "unsigned",
+              "variance": 0
+            },
+            {
+              "count": 2032739749,
+              "counts": [
+                {
+                  "count": 1248795173,
+                  "value": 2
+                },
+                {
+                  "count": 777521709,
+                  "value": 5
+                },
+                {
+                  "count": 6422867,
+                  "value": 6
+                }
+              ],
+              "maximum": 6,
+              "mean": 3.1601370004008222,
+              "minimum": 2,
+              "name": "Classification",
+              "size": 1,
+              "stddev": 1.4653095165576742,
+              "type": "unsigned",
+              "variance": 2.1471319793144845
+            },
+            {
+              "count": 2032739749,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "ScanAngleRank",
+              "size": 4,
+              "stddev": 0,
+              "type": "float",
+              "variance": 0
+            },
+            {
+              "count": 2032739749,
+              "maximum": 255,
+              "mean": 29.624966388651117,
+              "minimum": 0,
+              "name": "UserData",
+              "size": 1,
+              "stddev": 61.51429832489262,
+              "type": "unsigned",
+              "variance": 3784.008898403887
+            },
+            {
+              "count": 2032739749,
+              "maximum": 73,
+              "mean": 34.023054912969485,
+              "minimum": 1,
+              "name": "PointSourceId",
+              "size": 2,
+              "stddev": 22.752290414881898,
+              "type": "unsigned",
+              "variance": 517.6667191231267
+            },
+            {
+              "count": 2032739749,
+              "maximum": 88056.996749953,
+              "mean": 11429.835881556764,
+              "minimum": 4642.002189972,
+              "name": "GpsTime",
+              "size": 8,
+              "stddev": 8250.93529462127,
+              "type": "float",
+              "variance": 68077933.23602697
+            },
+            {
+              "count": 1940135521,
+              "maximum": 65280,
+              "mean": 9820.389661278015,
+              "minimum": 0,
+              "name": "Red",
+              "size": 2,
+              "stddev": 16204.630867978101,
+              "type": "unsigned",
+              "variance": 262590061.56742874
+            },
+            {
+              "count": 1940135521,
+              "maximum": 65280,
+              "mean": 9348.14992661287,
+              "minimum": 0,
+              "name": "Green",
+              "size": 2,
+              "stddev": 15328.836030497689,
+              "type": "unsigned",
+              "variance": 234973214.04988414
+            },
+            {
+              "count": 1940135521,
+              "maximum": 65280,
+              "mean": 7087.8788559754,
+              "minimum": 0,
+              "name": "Blue",
+              "size": 2,
+              "stddev": 12345.038957249411,
+              "type": "unsigned",
+              "variance": 152399986.85600564
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "name": "WheatHub"
+    },
+    {
+      "id": 2,
+      "name": "USLN"
+    },
+    {
+      "id": 3,
+      "name": "Cyverse"
+    },
+    {
+      "id": 4,
+      "name": "AMRF"
+    },
+    {
+      "id": 7,
+      "name": "ARA"
+    },
+    {
+      "id": 5,
+      "name": "Miscellaneous"
+    },
+    {
+      "id": 6,
+      "name": "Uploads"
+    }
+  ]
 }
