@@ -8,14 +8,14 @@
   const fs = require("fs");
   const url = require("url");
   const request = require("request");
-  const Influx = require('influx');
+  const Influx = require("influx");
 
   const influx = new Influx.InfluxDB({
-    database: 'main',
-    host: 'influxdb.amrf.org.au',
-    protocol: 'https',
-    username: 'anonymous',
-    password: 'password',
+    database: "main",
+    host: "influxdb.amrf.org.au",
+    protocol: "https",
+    username: "anonymous",
+    password: "password",
   });
 
   const gzipHeader = Buffer.from("1F8B08", "hex");
@@ -113,13 +113,20 @@
   ];
   app.get(knownTilesetFormats, checkGzipAndNext);
 
-  app.use('/cesium',express.static(__dirname,{
-    extensions: ['html', 'htm'],
-  }));
+  app.use(
+    "/cesium",
+    express.static(__dirname, {
+      extensions: ["html", "htm"],
+    })
+  );
 
-  app.get('/cesium/Apps/ASDC/:id', function (req, res,next) {
-    res.sendFile(__dirname + '/Apps/ASDC.html');
-  })
+  app.get("/cesium/Apps/ASDC/:assetID", function (req, res, next) {
+    res.sendFile(__dirname + "/Apps/ASDC.html");
+  });
+
+  app.get("/cesium/Apps/ASDC/:assetID/:dataID", function (req, res, next) {
+    res.sendFile(__dirname + "/Apps/ASDC.html");
+  });
 
   function getRemoteUrlFromParam(req) {
     let remoteUrl = req.params[0];
@@ -202,8 +209,10 @@
     );
   });
 
-  app.get('/cesium/influx/fivemin', (request, response) => {
-    influx.query(`
+  app.get("/cesium/influx/fivemin", (request, response) => {
+    influx
+      .query(
+        `
         select mean("PAR") AS mean_PAR, 
         mean("Total_Solar_Radiation") AS mean_TSR, 
         mean(/Soil_VWC/), 
@@ -215,19 +224,27 @@
         mean("Snow_Depth") AS "mean_Snow_Depth",
         mean("Battery_Voltage") AS mean_Battery_Voltage 
         from cr1000x where time > now()-2w and ("station_name"= \'${request.query.station}\') group by time(5m)
-      `)
-      .then(result => {response.status(200).json(result)})
-      .catch(error => response.status(500).json({ error }));
+      `
+      )
+      .then((result) => {
+        response.status(200).json(result);
+      })
+      .catch((error) => response.status(500).json({ error }));
   });
 
-  app.get('/cesium/influx/daily', (request, response) => {
-      influx.query(`
+  app.get("/cesium/influx/daily", (request, response) => {
+    influx
+      .query(
+        `
         select 
         sum("Rain") AS "sum_Rain" 
         from cr1000x where time > now()-2w and ("station_name"= \'${request.query.station}\') group by time(1d)
-      `)
-      .then(result => {response.status(200).json(result)})
-      .catch(error => response.status(500).json({ error }));
+      `
+      )
+      .then((result) => {
+        response.status(200).json(result);
+      })
+      .catch((error) => response.status(500).json({ error }));
   });
 
   const server = app.listen(

@@ -259,6 +259,7 @@
       </div>
       <div class="modal-content">
         <div class="upload-inputs">
+          <br />
           <form name="upload-form" id="upload-form">
             <div class="input-line">
               <label for="name">Name:</label>
@@ -273,6 +274,9 @@
           </form>
           <br />
           <button class="add-file-button" onClick="addFileInput()">+</button>
+          <br />
+          <div>Only .laz and .las files are accepted</div>
+          <br />
         </div>
       </div>
       <div
@@ -315,28 +319,37 @@
       // const processingAPI="http://192.168.99.100:8081";
       const processingAPI = "/cesiumapi";
 
-      var selectedDataset;
+      var selectedAssetID;
+      var selectedDataIndex;
 
       var currentUrl = window.location.href;
       if (currentUrl[currentUrl.length - 1] === "/")
         currentUrl = currentUrl[currentUrl.length - 1];
-      pathEnd = currentUrl.split("/")[currentUrl.split("/").length - 1];
+
+      var match = currentUrl.match(".*\/([^\/]+)\/([^\/]+)");
       if (
-        pathEnd.toLowerCase() != "asdc" &&
-        pathEnd.toLowerCase() != "asdc.html"
+        match[1].toUpperCase() !== "ASDC" &&
+        match[1].toLowerCase() != "asdc.html"
       ) {
-        selectedDataset = pathEnd.toLowerCase();
-        if (pathEnd.toLowerCase() === "nue") selectedDataset = 1;
-        if (pathEnd.toLowerCase() === "vbir") selectedDataset = 2;
-        if (pathEnd.toLowerCase() === "usln") selectedDataset = 3;
-        if (pathEnd.toLowerCase() === "gillan_ecosphere") selectedDataset = 4;
-        if (pathEnd.toLowerCase() === "dryandra_model") selectedDataset = 5;
-        if (pathEnd.toLowerCase() === "dryandra_pointcloud")
-          selectedDataset = 6;
-        if (pathEnd.toLowerCase() === "graffiti_model") selectedDataset = 7;
-        if (pathEnd.toLowerCase() === "graffiti_pointcloud")
-          selectedDataset = 8;
+        selectedAssetID = match[1];
+        selectedDataIndex = match[2];
+      } else {
+        selectedAssetID = match[2];
       }
+
+      if (selectedAssetID.toLowerCase() === "nue") selectedAssetID = 1;
+      else if (selectedAssetID.toLowerCase() === "vbir") selectedAssetID = 2;
+      else if (selectedAssetID.toLowerCase() === "usln") selectedAssetID = 3;
+      else if (selectedAssetID.toLowerCase() === "gillan_ecosphere")
+        selectedAssetID = 4;
+      else if (selectedAssetID.toLowerCase() === "dryandra_model")
+        selectedAssetID = 5;
+      else if (selectedAssetID.toLowerCase() === "dryandra_pointcloud")
+        selectedAssetID = 6;
+      else if (selectedAssetID.toLowerCase() === "graffiti_model")
+        selectedAssetID = 7;
+      else if (selectedAssetID.toLowerCase() === "graffiti_pointcloud")
+        selectedAssetID = 8;
 
       var highlightHeightPX = 27.2;
       var highlightColor = "green";
@@ -348,17 +361,16 @@
         -10.6681857235
       );
       var viewer = new Cesium.Viewer("cesiumContainer", {
-        terrainProvider: Cesium.createWorldTerrain(),
+        terrainProvider: Cesium.createWorldTerrain({ requestWaterMask: true }),
         vrButton: true,
         fullscreenElement: "cesiumContainer",
-        // selectionIndicator: false
       });
       viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
-      // viewer.scene.globe.depthTestAgainstTerrain = true;
       viewer.scene.globe.depthTestAgainstTerrain = false;
 
       var tilesets = {};
       var entities = {};
+      var dataSources = {};
 
       var assets;
 
@@ -477,149 +489,34 @@
         }
       };
 
-      const loadAsset = (assets, assetID) => {
-        var asset;
-
-        assets.map((a) => {
-          if (a["id"] === parseInt(assetID)) {
-            asset = a;
-            return;
-          }
-        });
+      const loadAsset = (asset) => {
         if (!asset) return;
-        selectedDataset = asset["id"];
+        selectedAsset = asset;
+        selectedAssetID = asset["id"];
+        selectedData = null;
+
+        Object.keys(tilesets).map((tileset) => {
+          Object.keys(tilesets[tileset]).map((date) => {
+            tilesets[tileset][date].show = false;
+          });
+        });
+
+        Object.keys(entities).map((entity) => {
+          entities[entity].show = false;
+        });
 
         asset.data?.map((data) => {
-          Object.keys(tilesets).map((tileset) => {
-            Object.keys(tilesets[tileset]).map((date) => {
-              tilesets[tileset][date].show = false;
-            });
-          });
-
-          Object.keys(entities).map((entity) => {
-            entities[entity].show = false;
-          });
-
-          if (data["type"] === "PointCloud") {
-            if (!tilesets[selectedDataset]) tilesets[selectedDataset] = {};
-            if (!tilesets[selectedDataset][new Date(data["date"])]) {
-              tilesets[selectedDataset][
-                new Date(data["date"])
-              ] = viewer.scene.primitives.add(
-                new Cesium.Cesium3DTileset({
-                  url: data["url"],
-                  show: false,
-                })
-              );
-              if (data["position"]) {
-                tilesets[selectedDataset][
-                  new Date(data["date"])
-                ].readyPromise.then(function (tileset) {
-                  var offset = Cesium.Cartographic.toCartesian(
-                    new Cesium.Cartographic.fromDegrees(
-                      data["position"]["lng"],
-                      data["position"]["lat"],
-                      data["position"]["height"]
-                    )
-                  );
-                  var translation = Cesium.Cartesian3.subtract(
-                    offset,
-                    tileset.boundingSphere.center,
-                    new Cesium.Cartesian3()
-                  );
-                  tileset.modelMatrix = Cesium.Matrix4.fromTranslation(
-                    translation
-                  );
-                });
-              }
-
-              tilesets[selectedDataset][new Date(data["date"])].schema =
-                data.schema;
-            }
-          } else if (data["type"] === "Model") {
-            //TODO: multiple models for same location
-            if (!entities[selectedDataset]) {
-              var position = Cesium.Cartesian3.fromDegrees(
-                data["position"]["lng"],
-                data["position"]["lat"],
-                data["position"]["height"]
-              );
-              var hpr = new Cesium.HeadingPitchRoll(
-                Cesium.Math.toRadians(data["rotation"]["heading"]),
-                Cesium.Math.toRadians(data["rotation"]["pitch"]),
-                Cesium.Math.toRadians(data["rotation"]["roll"])
-              );
-              var orientation = Cesium.Transforms.headingPitchRollQuaternion(
-                position,
-                hpr
-              );
-
-              entities[selectedDataset] = viewer.entities.add({
-                position: position,
-                orientation: orientation,
-                model: {
-                  uri: data["url"],
-                },
-              });
-            } else {
-              entities[selectedDataset].show = true;
-            }
-          } else if (data["type"] === "GeoJSON") {
-            loadGeoJson(data.url);
-          } else if (data["type"] === "EPTPointCloud") {
-            if (!tilesets[selectedDataset]) tilesets[selectedDataset] = {};
-            if (!tilesets[selectedDataset][new Date(data["date"])]) {
-              tilesets[selectedDataset][new Date(data["date"])] = [];
-              if (data["date"] === "2019-05-01T00:00:00.000Z") {
-                var ilsFile = "/cesium/Apps/may_2019_ils.txt";
-              } else {
-                var ilsFile = "/cesium/Apps/sept_2019_ils.txt";
-              }
-              fetch(ilsFile)
-                .then((response) => response.text())
-                .then((text) =>
-                  text.split("\n").map((line, index) => {
-                    if (index == 0) return;
-                    var path = line.split("C- ")[1];
-                    if (path) {
-                      tilesets[selectedDataset][new Date(data["date"])].push(
-                        viewer.scene.primitives.add(
-                          new Cesium.Cesium3DTileset({
-                            // url: `http://localhost:3000/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                            // url: `/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                            url: `https://asdc.cloud.edu.au/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                            show: false,
-                          })
-                        )
-                      );
-
-                      if (index == 1) {
-                        viewer.flyTo(
-                          tilesets[selectedDataset][new Date("2019-05-01")][0]
-                        );
-                      }
-                    }
-                  })
-                );
-            }
-          } else if (data["type"] === "Influx") {
-            loadGraph(data.station);
-
-            var data = asset.data[0];
-            var position = Cesium.Cartesian3.fromDegrees(
-              data["position"]["lng"],
-              data["position"]["lat"],
-              data["position"]["height"] + 1000
-            );
-
-            viewer.camera.flyTo({ destination: position });
-          }
+          loadData(asset, data, false, false);
         });
 
         //TODO: dates for entities
         viewer.timeline._highlightRanges = [];
-        if (tilesets[selectedDataset]) {
-          var tilesetDates = Object.keys(tilesets[selectedDataset]);
+        if (tilesets[selectedAssetID]) {
+          var tilesetDates = Object.keys(tilesets[selectedAssetID]);
+
+          tilesetDates.sort(function (a, b) {
+            return new Date(a).getTime() - new Date(b).getTime();
+          });
 
           tilesetDates.map((date) => {
             viewer.timeline
@@ -646,8 +543,14 @@
               Cesium.JulianDate.fromDate(new Date(maxDate.getTime() + 86400000))
             );
 
-            if (tilesets[selectedDataset][minDate].schema) {
-              setupStyleToolbar(tilesets[selectedDataset][minDate]);
+            if (tilesets[selectedAssetID][minDate].schema) {
+              setupStyleToolbar(tilesets[selectedAssetID][minDate]);
+            } else {
+              var toolbar = document.getElementById("toolbar");
+
+              while (toolbar.firstChild) {
+                toolbar.removeChild(toolbar.firstChild);
+              }
             }
           } else {
             //point clouds with no date
@@ -695,11 +598,11 @@
 
         if (asset.data) {
           if (asset.data[0]["type"] === "PointCloud") {
-            viewer.flyTo(tilesets[selectedDataset][tilesetDates[0]]);
+            viewer.flyTo(tilesets[selectedAssetID][tilesetDates[0]]);
           } else if (asset.data[0]["type"] === "Model") {
-            viewer.flyTo(entities[selectedDataset]);
+            viewer.flyTo(entities[selectedAssetID]);
           } else if (asset.data[0]["type"] === "EPTPointCloud") {
-            viewer.flyTo(tilesets[selectedDataset][tilesetDates[0]][0]);
+            viewer.flyTo(tilesets[selectedAssetID][tilesetDates[0]][0]);
           }
 
           var dataTypes = asset.data.map((data) => data.type);
@@ -709,13 +612,265 @@
         }
       };
 
-      const loadGeoJson = (dataset) => {
+      const loadData = (asset, data, fly, timeline) => {
+        selectedAsset = asset;
+        selectedAssetID = asset["id"];
+
+        Object.keys(tilesets).map((tileset) => {
+          Object.keys(tilesets[tileset]).map((date) => {
+            if (Array.isArray(tilesets[tileset][new Date(date)])) {
+              tilesets[tileset][new Date(date)].map((tileset) => {
+                tileset.show = false;
+              });
+            } else {
+              tilesets[tileset][new Date(date)].show = false;
+            }
+          });
+        });
+
+        Object.keys(entities).map((entity) => {
+          entities[entity].show = false;
+        });
+
+        Object.keys(dataSources).map((a) => {
+          Object.keys(dataSources[a]).map((i) => {
+            dataSources[a][i].show = false;
+          });
+        });
+
+        if (data["type"] === "PointCloud") {
+          if (!tilesets[selectedAssetID]) tilesets[selectedAssetID] = {};
+          if (!tilesets[selectedAssetID][new Date(data["date"])]) {
+            tilesets[selectedAssetID][
+              new Date(data["date"])
+            ] = viewer.scene.primitives.add(
+              new Cesium.Cesium3DTileset({
+                url: data["url"],
+                show: false,
+              })
+            );
+            if (data["position"]) {
+              tilesets[selectedAssetID][
+                new Date(data["date"])
+              ].readyPromise.then(function (tileset) {
+                var offset = Cesium.Cartographic.toCartesian(
+                  new Cesium.Cartographic.fromDegrees(
+                    data["position"]["lng"],
+                    data["position"]["lat"],
+                    data["position"]["height"]
+                  )
+                );
+                var translation = Cesium.Cartesian3.subtract(
+                  offset,
+                  tileset.boundingSphere.center,
+                  new Cesium.Cartesian3()
+                );
+                tileset.modelMatrix = Cesium.Matrix4.fromTranslation(
+                  translation
+                );
+              });
+            }
+
+            tilesets[selectedAssetID][new Date(data["date"])].schema =
+              data.schema;
+          }
+        } else if (data["type"] === "Model") {
+          //TODO: multiple models for same location
+          if (!entities[selectedAssetID]) {
+            var position = Cesium.Cartesian3.fromDegrees(
+              data["position"]["lng"],
+              data["position"]["lat"],
+              data["position"]["height"]
+            );
+            var hpr = new Cesium.HeadingPitchRoll(
+              Cesium.Math.toRadians(data["rotation"]["heading"]),
+              Cesium.Math.toRadians(data["rotation"]["pitch"]),
+              Cesium.Math.toRadians(data["rotation"]["roll"])
+            );
+            var orientation = Cesium.Transforms.headingPitchRollQuaternion(
+              position,
+              hpr
+            );
+
+            entities[selectedAssetID] = viewer.entities.add({
+              position: position,
+              orientation: orientation,
+              model: {
+                uri: data["url"],
+              },
+            });
+          } else {
+            entities[selectedAssetID].show = true;
+          }
+        } else if (data["type"] === "GeoJSON") {
+          loadGeoJson(asset, data, fly);
+        } else if (data["type"] === "EPTPointCloud") {
+          if (!tilesets[selectedAssetID]) tilesets[selectedAssetID] = {};
+          if (!tilesets[selectedAssetID][new Date(data["date"])]) {
+            tilesets[selectedAssetID][new Date(data["date"])] = [];
+            if (data["date"] === "2019-05-01T00:00:00.000Z") {
+              var ilsFile = "/cesium/Apps/may_2019_ils.txt";
+            } else {
+              var ilsFile = "/cesium/Apps/sept_2019_ils.txt";
+            }
+            fetch(ilsFile)
+              .then((response) => response.text())
+              .then((text) =>
+                text.split("\n").map((line, index) => {
+                  if (index == 0) return;
+                  var path = line.split("C- ")[1];
+                  if (path) {
+                    tilesets[selectedAssetID][new Date(data["date"])].push(
+                      viewer.scene.primitives.add(
+                        new Cesium.Cesium3DTileset({
+                          // url: `http://localhost:3000/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                          // url: `/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                          url: `https://asdc.cloud.edu.au/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                          show: false,
+                        })
+                      )
+                    );
+
+                    if (index == 1) {
+                      viewer.flyTo(
+                        // tilesets[selectedAssetID][new Date("2019-05-01")][0]
+                        tilesets[selectedAssetID][new Date(data["date"])][0]
+                      );
+                    }
+                  }
+                })
+              );
+          }
+        } else if (data["type"] === "Influx") {
+          loadGraph(data.station);
+        }
+
+        if (data["type"] != "Influx") {
+          closeGraphModal();
+        }
+
+        if (fly) {
+          if (data["type"] === "PointCloud") {
+            viewer.flyTo(tilesets[selectedAssetID][new Date(data["date"])]);
+          } else if (data["type"] === "Model") {
+            viewer.flyTo(entities[selectedAssetID]);
+          } else if (data["type"] === "EPTPointCloud") {
+            viewer.flyTo(tilesets[selectedAssetID][new Date(data["date"])][0]);
+          } else if (data["type"] === "Influx") {
+            var position = Cesium.Cartesian3.fromDegrees(
+              data["position"]["lng"],
+              data["position"]["lat"],
+              data["position"]["height"] + 1000
+            );
+
+            viewer.camera.flyTo({ destination: position });
+          }
+        }
+
+        if (timeline) {
+          var date = new Date(data.date);
+          viewer.timeline._highlightRanges = [];
+
+          if (tilesets[selectedAssetID] && tilesets[selectedAssetID][date]) {
+            viewer.timeline
+              .addHighlightRange(highlightColor, highlightHeightPX)
+              .setRange(
+                Cesium.JulianDate.fromDate(new Date(date)),
+                Cesium.JulianDate.fromDate(
+                  new Date(new Date(date).getTime() + 86400000)
+                )
+              );
+
+            if (date.toString() !== "Invalid Date") {
+              viewer.clock.currentTime = new Cesium.JulianDate.fromDate(date);
+              viewer.timeline.updateFromClock();
+              viewer.timeline.zoomTo(
+                Cesium.JulianDate.fromDate(date),
+                Cesium.JulianDate.fromDate(new Date(date.getTime() + 86400000))
+              );
+
+              if (tilesets[selectedAssetID][date].schema) {
+                setupStyleToolbar(tilesets[selectedAssetID][date]);
+              } else {
+                var toolbar = document.getElementById("toolbar");
+
+                while (toolbar.firstChild) {
+                  toolbar.removeChild(toolbar.firstChild);
+                }
+              }
+            } else {
+              //point clouds with no date
+              var currentDate = new Date();
+              viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+                new Date()
+              );
+              viewer.timeline.updateFromClock();
+              viewer.timeline.zoomTo(
+                Cesium.JulianDate.fromDate(currentDate),
+                Cesium.JulianDate.fromDate(
+                  new Date(currentDate.getTime() + 86400000)
+                )
+              );
+            }
+          } else {
+            var toolbar = document.getElementById("toolbar");
+
+            while (toolbar.firstChild) {
+              toolbar.removeChild(toolbar.firstChild);
+            }
+
+            if (data["type"] === "Influx") {
+              //Influx charts from 2 weeks before
+              var currentDate = new Date();
+              viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+                currentDate
+              );
+              viewer.timeline.updateFromClock();
+              viewer.timeline.zoomTo(
+                Cesium.JulianDate.fromDate(
+                  new Date(currentDate.getTime() - 2 * 7 * 86400000)
+                ),
+                Cesium.JulianDate.fromDate(new Date())
+              );
+            } else {
+              //Other data types with no date
+              var currentDate = new Date();
+              viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+                new Date()
+              );
+              viewer.timeline.updateFromClock();
+              viewer.timeline.zoomTo(
+                Cesium.JulianDate.fromDate(currentDate),
+                Cesium.JulianDate.fromDate(
+                  new Date(currentDate.getTime() + 86400000)
+                )
+              );
+            }
+          }
+        }
+      };
+
+      const loadGeoJson = (asset, data, fly) => {
+        var dataset = data.url;
         var geoJsonPromise = Cesium.GeoJsonDataSource.load(dataset, {
           // clampToGround: true  //issues with picking polygons, using terrain sampling
         });
 
         // viewer.dataSources.add(geoJsonPromise);
 
+        if (!dataSources[asset.id]) dataSources[asset.id] = {};
+        var dataIndex = asset.data.indexOf(data);
+        if (!dataSources[asset.id][dataIndex]) {
+          dataSources[asset.id][dataIndex] = new Cesium.CustomDataSource();
+        } else {
+          dataSources[asset.id][dataIndex].show = true;
+          if (fly) {
+            viewer.flyTo(dataSources[asset.id][dataIndex]);
+          }
+          return;
+        }
+
+        viewer.dataSources.add(dataSources[asset.id][dataIndex]);
         geoJsonPromise.then((dataSource) => {
           var entities = dataSource.entities.values;
           var samplePromises = [];
@@ -736,7 +891,10 @@
                 viewer.terrainProvider,
                 cartoPositions
               ).then((updatedPositions) => {
-                var polygonEntity = viewer.entities.add({
+                // var polygonEntity = viewer.entities.add({
+                var polygonEntity = dataSources[asset.id][
+                  dataIndex
+                ].entities.add({
                   polygon: {
                     hierarchy: new Cesium.PolygonHierarchy(
                       Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
@@ -766,6 +924,9 @@
           });
           Promise.all(samplePromises).then(() => {
             delete dataSource;
+            if (fly) {
+              viewer.flyTo(dataSources[asset.id][asset.data.indexOf(data)]);
+            }
           });
         });
       };
@@ -877,8 +1038,11 @@
         }
       };
 
-      var dataSource;
+      var markersDataSource;
       var pinBuilder = new Cesium.PinBuilder();
+
+      var selectedAsset;
+      var selectedData;
 
       const setupSidebar = () => {
         fetch(
@@ -899,30 +1063,30 @@
                 );
             }
 
-            if (!dataSource) {
-              dataSource = new Cesium.CustomDataSource();
-              dataSource.clustering.enabled = true;
+            if (!markersDataSource) {
+              markersDataSource = new Cesium.CustomDataSource();
+              markersDataSource.clustering.enabled = true;
 
-              dataSource.clustering.clusterEvent.addEventListener(function (
-                clusteredEntities,
-                cluster
-              ) {
-                cluster.label.show = false;
-                cluster.billboard.show = true;
+              markersDataSource.clustering.clusterEvent.addEventListener(
+                function (clusteredEntities, cluster) {
+                  cluster.label.show = false;
+                  cluster.billboard.show = true;
 
-                cluster.billboard.verticalOrigin = Cesium.VerticalOrigin.BOTTOM;
-                cluster.billboard.image = pinBuilder
-                  .fromText(
-                    cluster.label.text,
-                    Cesium.Color.fromCssColorString("#5B8B51"),
-                    48
-                  )
-                  .toDataURL();
-                cluster.billboard.disableDepthTestDistance =
-                  Number.POSITIVE_INFINITY;
-                cluster.billboard.heightReference =
-                  Cesium.HeightReference.CLAMP_TO_GROUND;
-              });
+                  cluster.billboard.verticalOrigin =
+                    Cesium.VerticalOrigin.BOTTOM;
+                  cluster.billboard.image = pinBuilder
+                    .fromText(
+                      cluster.label.text,
+                      Cesium.Color.fromCssColorString("#5B8B51"),
+                      48
+                    )
+                    .toDataURL();
+                  cluster.billboard.disableDepthTestDistance =
+                    Number.POSITIVE_INFINITY;
+                  cluster.billboard.heightReference =
+                    Cesium.HeightReference.CLAMP_TO_GROUND;
+                }
+              );
             }
 
             var categories = {};
@@ -988,6 +1152,27 @@
               var datesPanelDiv = document.createElement("div");
               datesPanelDiv.className = "sidebar-accordion-panel";
 
+              if (asset.data.length > 1) {
+                var timeseriesDiv = document.createElement("div");
+                timeseriesDiv.className = "sidebar-item";
+
+                var timeseriesContentDiv = document.createElement("div");
+                timeseriesContentDiv.style.padding = "0 36px";
+                timeseriesContentDiv.innerHTML = "Time Series";
+
+                timeseriesDiv.onclick = () => {
+                  window.history.pushState(
+                    "",
+                    "",
+                    `/cesium/Apps/ASDC/${asset["id"]}`
+                  );
+                  loadAsset(asset);
+                };
+
+                timeseriesDiv.appendChild(timeseriesContentDiv);
+                datesPanelDiv.appendChild(timeseriesDiv);
+              }
+
               asset.data.map((data, index) => {
                 var dateDiv = document.createElement("div");
                 dateDiv.className = "sidebar-item";
@@ -1015,15 +1200,12 @@
                   window.history.pushState(
                     "",
                     "",
-                    `/cesium/Apps/ASDC/${asset["id"]}`
+                    `/cesium/Apps/ASDC/${asset["id"]}/${asset.data.indexOf(
+                      data
+                    )}`
                   );
-                  loadAsset(assets, asset["id"]);
-                  if (date && date.toString() !== "Invalid Date") {
-                    viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
-                      new Date(data.date)
-                    );
-                    viewer.timeline.updateFromClock();
-                  }
+                  selectedData = data;
+                  loadData(asset, data, true, true);
                 };
 
                 dateDiv.appendChild(dateContentDiv);
@@ -1163,8 +1345,8 @@
                   data["position"]["lat"]
                 );
 
-                if (!viewer.dataSources.contains(dataSource)) {
-                  dataSource.entities.add({
+                if (!viewer.dataSources.contains(markersDataSource)) {
+                  markersDataSource.entities.add({
                     position: position,
                     billboard: {
                       image: pinBuilder
@@ -1183,24 +1365,32 @@
               }
             });
 
-            if (!viewer.dataSources.contains(dataSource)) {
-              viewer.dataSources.add(dataSource);
+            if (!viewer.dataSources.contains(markersDataSource)) {
+              viewer.dataSources.add(markersDataSource);
 
               setTimeout(() => {
-                dataSource.clustering.pixelRange = 0;
+                markersDataSource.clustering.pixelRange = 0;
               }, 0);
             }
 
-            if (selectedDataset) {
+            if (selectedAssetID) {
               assets.map((a) => {
-                if (a.id === parseInt(selectedDataset)) {
+                if (a.id === parseInt(selectedAssetID)) {
+                  selectedAsset = a;
+                  if (selectedDataIndex) {
+                    selectedData = a.data[selectedDataIndex];
+                  }
                   categories[a.categoryID].onclick();
-                  assetDivs[selectedDataset].onclick();
+                  assetDivs[selectedAssetID].onclick();
                 }
               });
             }
 
-            loadAsset(assets, selectedDataset);
+            if (selectedData) {
+              loadData(selectedAsset, selectedData, true, true);
+            } else {
+              loadAsset(selectedAsset);
+            }
           });
       };
 
@@ -1210,48 +1400,94 @@
 
       viewer.clock.onTick.addEventListener((clock) => {
         var currentTime = Cesium.JulianDate.toDate(clock.currentTime).getTime();
-        if (tilesets[selectedDataset]) {
-          var tilesetDates = Object.keys(tilesets[selectedDataset]).sort(
-            function (a, b) {
-              return new Date(a).getTime() - new Date(b).getTime();
-            }
-          );
+        if (tilesets[selectedAssetID]) {
+          if (!selectedData) {
+            var tilesetDates = Object.keys(tilesets[selectedAssetID]).sort(
+              function (a, b) {
+                return new Date(a).getTime() - new Date(b).getTime();
+              }
+            );
 
-          for (var i = 0; i < tilesetDates.length; i++) {
-            if (
-              (i === 0 || new Date(tilesetDates[i]).getTime() <= currentTime) &&
-              (i === tilesetDates.length - 1 ||
-                new Date(tilesetDates[i + 1]).getTime() > currentTime)
-            ) {
-              if (Array.isArray(tilesets[selectedDataset][tilesetDates[i]])) {
-                tilesets[selectedDataset][tilesetDates[i]].map((tileset) => {
-                  tileset.show = true;
-                });
-              } else {
-                tilesets[selectedDataset][tilesetDates[i]].show = true;
+            for (var i = 0; i < tilesetDates.length; i++) {
+              if (
+                (i === 0 ||
+                  new Date(tilesetDates[i]).getTime() <= currentTime) &&
+                (i === tilesetDates.length - 1 ||
+                  new Date(tilesetDates[i + 1]).getTime() > currentTime)
+              ) {
+                if (Array.isArray(tilesets[selectedAssetID][tilesetDates[i]])) {
+                  tilesets[selectedAssetID][tilesetDates[i]].map((tileset) => {
+                    tileset.show = true;
+                  });
+                } else {
+                  tilesets[selectedAssetID][tilesetDates[i]].show = true;
 
-                if (
-                  selectedTileset !=
-                    tilesets[selectedDataset][tilesetDates[i]] &&
-                  tilesets[selectedDataset][tilesetDates[i]]
-                ) {
-                  setupStyleToolbar(tilesets[selectedDataset][tilesetDates[i]]);
-                  applyStyle(
-                    selectedDimension,
-                    tilesets[selectedDataset][tilesetDates[i]]
-                  );
+                  if (
+                    selectedTileset !=
+                      tilesets[selectedAssetID][tilesetDates[i]] &&
+                    tilesets[selectedAssetID][tilesetDates[i]]
+                  ) {
+                    setupStyleToolbar(
+                      tilesets[selectedAssetID][tilesetDates[i]]
+                    );
+                    applyStyle(
+                      selectedDimension,
+                      tilesets[selectedAssetID][tilesetDates[i]]
+                    );
+                  }
+
+                  selectedTileset = tilesets[selectedAssetID][tilesetDates[i]];
                 }
-
-                selectedTileset = tilesets[selectedDataset][tilesetDates[i]];
-              }
-            } else {
-              if (Array.isArray(tilesets[selectedDataset][tilesetDates[i]])) {
-                tilesets[selectedDataset][tilesetDates[i]].map((tileset) => {
-                  tileset.show = false;
-                });
               } else {
-                tilesets[selectedDataset][tilesetDates[i]].show = false;
+                if (Array.isArray(tilesets[selectedAssetID][tilesetDates[i]])) {
+                  tilesets[selectedAssetID][tilesetDates[i]].map((tileset) => {
+                    tileset.show = false;
+                  });
+                } else {
+                  tilesets[selectedAssetID][tilesetDates[i]].show = false;
+                }
               }
+            }
+          } else {
+            if (
+              selectedData.type === "PointCloud" ||
+              selectedData.type === "EPTPointCloud"
+            ) {
+              if (
+                Array.isArray(
+                  tilesets[selectedAssetID][new Date(selectedData.date)]
+                )
+              ) {
+                tilesets[selectedAssetID][new Date(selectedData.date)].map(
+                  (tileset) => {
+                    tileset.show = true;
+                  }
+                );
+              } else {
+                tilesets[selectedAssetID][
+                  new Date(selectedData.date)
+                ].show = true;
+              }
+            }
+          }
+        }
+
+        //constant geojsons
+        if (dataSources[selectedAssetID]) {
+          if (!selectedData) {
+            Object.keys(dataSources[selectedAssetID]).map((i) => {
+              dataSources[selectedAssetID][i].show = true;
+            });
+          } else {
+            if (
+              selectedData.type === "GeoJSON" &&
+              dataSources[selectedAssetID][
+                selectedAsset.data.indexOf(selectedData)
+              ]
+            ) {
+              dataSources[selectedAssetID][
+                selectedAsset.data.indexOf(selectedData)
+              ].show = true;
             }
           }
         }
@@ -1281,7 +1517,12 @@
           if (selectedEntity.id.startsWith("marker")) {
             var id = selectedEntity.id.slice("marker_".length);
             window.history.pushState("", "", `/cesium/Apps/ASDC/${id}`);
-            loadAsset(assets, id);
+            assets.map((a) => {
+              if (a["id"] === parseInt(assetID)) {
+                loadAsset(a);
+                return;
+              }
+            });
           } else {
             if (selectedEntity.properties) {
               selectedEntity.description =
@@ -1351,6 +1592,30 @@
             form.elements[i].hasAttribute("required")
           ) {
             alert("Please complete all required fields");
+            return;
+          }
+        }
+
+        if (Array.isArray(form.elements["files[]"])) {
+          form.elements["files[]"].map((file) => {
+            if (
+              !file.files[0].name.toLowerCase().endsWith(".laz") ||
+              !file.files[0].name.toLowerCase().endsWith(".las")
+            ) {
+              alert("Only .laz and .las files are accepted");
+              return;
+            }
+          });
+        } else {
+          if (
+            !form.elements["files[]"].files[0].name
+              .toLowerCase()
+              .endsWith(".laz") ||
+            !form.elements["files[]"].files[0].name
+              .toLowerCase()
+              .endsWith(".las")
+          ) {
+            alert("Only .laz and .las files are accepted");
             return;
           }
         }
