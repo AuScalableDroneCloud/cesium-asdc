@@ -603,6 +603,14 @@
             viewer.flyTo(entities[selectedAssetID]);
           } else if (asset.data[0]["type"] === "EPTPointCloud") {
             viewer.flyTo(tilesets[selectedAssetID][tilesetDates[0]][0]);
+          } else if (asset.data[0]["type"] === "Influx") {
+            var position = Cesium.Cartesian3.fromDegrees(
+              asset.data[0]["position"]["lng"],
+              asset.data[0]["position"]["lat"],
+              asset.data[0]["position"]["height"] + 1000
+            );
+
+            viewer.camera.flyTo({ destination: position });
           }
 
           var dataTypes = asset.data.map((data) => data.type);
@@ -1518,7 +1526,7 @@
             var id = selectedEntity.id.slice("marker_".length);
             window.history.pushState("", "", `/cesium/Apps/ASDC/${id}`);
             assets.map((a) => {
-              if (a["id"] === parseInt(assetID)) {
+              if (a["id"] === parseInt(id)) {
                 loadAsset(a);
                 return;
               }
