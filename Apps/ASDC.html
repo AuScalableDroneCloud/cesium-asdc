@@ -799,6 +799,7 @@
 
               if (tilesets[selectedAssetID][date].schema) {
                 setupStyleToolbar(tilesets[selectedAssetID][date]);
+                applyStyle(selectedDimension, tilesets[selectedAssetID][date]);
               } else {
                 var toolbar = document.getElementById("toolbar");
 
