@@ -16,7 +16,7 @@
       src="/cesium/Apps/Sandcastle/Sandcastle-header.js"
     ></script>
     <script src="/cesium/Build/Cesium/Cesium.js"></script>
-    <!-- <script src="../Build/CesiumUnminified/Cesium.js"></script> -->
+    <!-- <script src="/cesium/Build/CesiumUnminified/Cesium.js"></script> -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <link
       rel="stylesheet"
@@ -246,7 +246,10 @@
 
   <body>
     <div id="cesiumContainer">
-      <div id="toolbar" style="z-index: 2"></div>
+      <div id="toolbars-container" style="z-index: 2; position: absolute">
+        <div id="toolbar" style="position: static"></div>
+        <div id="cam-toolbar" style="margin: 5px; padding: 2px 5px"></div>
+      </div>
     </div>
     <div id="sidebar">
       <div id="sidebar-data-buttons"></div>
@@ -373,6 +376,90 @@
       var dataSources = {};
 
       var assets;
+
+      viewer.camera.moveEnd.addEventListener(() => {
+        var viewMenu = [];
+
+        var selectedIndex;
+        var timeseriesInView = false;
+
+        assets.map((asset) => {
+          asset.data.map((data) => {
+            if (data.position) {
+              var lng = data.position.lng;
+              var lat = data.position.lat;
+              var height = data.position.height;
+
+              var dataPosition = Cesium.Cartographic.toCartesian(
+                new Cesium.Cartographic.fromDegrees(lng, lat, height)
+              );
+
+              var distance = Cesium.Cartesian3.distance(
+                viewer.camera.position,
+                dataPosition
+              );
+              if (
+                distance <=
+                (data.boundingSphereRadius
+                  ? data.boundingSphereRadius * 4
+                  : 2000)
+              ) {
+                viewMenu.push({
+                  text: data.date
+                    ? `${asset.name} - ${data.date}`
+                    : `${asset.name} - No Date`,
+                  onselect: () => {
+                    selectedData = data;
+                    if (
+                      (tilesets[asset.id] &&
+                        tilesets[asset.id][new Date(data.date)] &&
+                        tilesets[asset.id][new Date(data.date)] !=
+                          selectedTileset) ||
+                      !tilesets[asset.id] ||
+                      !tilesets[asset.id][new Date(data.date)]
+                    ) {
+                      loadData(asset, data, false, true);
+                    }
+                  },
+                  data: data,
+                });
+                if (selectedData && selectedData === data) {
+                  selectedIndex = viewMenu.length - 1;
+                }
+                if (!selectedData && selectedAsset === asset) {
+                  timeseriesInView = true;
+                }
+              }
+            }
+          });
+        });
+
+        var toolbar = document.getElementById("cam-toolbar");
+
+        while (toolbar.firstChild) {
+          toolbar.removeChild(toolbar.firstChild);
+        }
+
+        if (viewMenu.length > 0) {
+          Sandcastle.addToolbarMenu(viewMenu, "cam-toolbar");
+          if (selectedIndex) {
+            document.getElementById(
+              "cam-toolbar"
+            ).childNodes[0].selectedIndex = selectedIndex;
+
+            if (selectedData && selectedData != viewMenu[selectedIndex].data) {
+              viewMenu[selectedIndex].onselect();
+            }
+          } else {
+            if (
+              (selectedData && selectedData != viewMenu[0].data) ||
+              !timeseriesInView
+            ) {
+              viewMenu[0].onselect();
+            }
+          }
+        }
+      });
 
       var selectedDimension;
       const applyStyle = (schemaName, tileset) => {
@@ -543,6 +630,8 @@
               Cesium.JulianDate.fromDate(new Date(maxDate.getTime() + 86400000))
             );
 
+            selectedTileset = tilesets[selectedAssetID][minDate];
+
             if (tilesets[selectedAssetID][minDate].schema) {
               setupStyleToolbar(tilesets[selectedAssetID][minDate]);
             } else {
@@ -657,6 +746,13 @@
                 show: false,
               })
             );
+            // tilesets[selectedAssetID][
+            //     new Date(data["date"])
+            //   ].readyPromise.then(function (tileset) {
+            // console.log(tilesets[selectedAssetID][
+            //   new Date(data["date"])
+            // ].boundingSphere.radius);
+            //   });
             if (data["position"]) {
               tilesets[selectedAssetID][
                 new Date(data["date"])
@@ -707,6 +803,13 @@
                 uri: data["url"],
               },
             });
+
+            // var model = viewer.scene.primitives.add(Cesium.Model.fromGltf({
+            //   url: data["url"],
+            // }));
+            // Cesium.when(model.readyPromise).then(()=>{
+            //   console.log(model.boundingSphere);
+            // })
           } else {
             entities[selectedAssetID].show = true;
           }
@@ -780,16 +883,18 @@
           viewer.timeline._highlightRanges = [];
 
           if (tilesets[selectedAssetID] && tilesets[selectedAssetID][date]) {
-            viewer.timeline
-              .addHighlightRange(highlightColor, highlightHeightPX)
-              .setRange(
-                Cesium.JulianDate.fromDate(new Date(date)),
-                Cesium.JulianDate.fromDate(
-                  new Date(new Date(date).getTime() + 86400000)
-                )
-              );
+            selectedTileset = tilesets[selectedAssetID][date];
 
             if (date.toString() !== "Invalid Date") {
+              viewer.timeline
+                .addHighlightRange(highlightColor, highlightHeightPX)
+                .setRange(
+                  Cesium.JulianDate.fromDate(new Date(date)),
+                  Cesium.JulianDate.fromDate(
+                    new Date(new Date(date).getTime() + 86400000)
+                  )
+                );
+
               viewer.clock.currentTime = new Cesium.JulianDate.fromDate(date);
               viewer.timeline.updateFromClock();
               viewer.timeline.zoomTo(
@@ -876,7 +981,29 @@
           if (fly) {
             viewer.flyTo(dataSources[asset.id][dataIndex]);
           }
-          return;
+          // Cesium.when(viewer.dataSourceDisplay.ready, function () {
+          //     var boundingSpheres=[];
+          //     var entities = dataSources[asset.id][asset.data.indexOf(data)].entities.values;
+          //     for (var i=0;i<entities.length;i++){
+          //       var boundingSphere = new Cesium.BoundingSphere();
+          //       var state = viewer.dataSourceDisplay.getBoundingSphere(
+          //         entities[i],
+          //         false,
+          //         boundingSphere
+          //       );
+          //       console.log(state);
+          //       if (state === 0){
+          //         boundingSpheres.push(boundingSphere);
+          //       } else {
+          //         return;
+          //       }
+          //     }
+          //     var full = Cesium.BoundingSphere.fromBoundingSpheres(boundingSpheres);
+          //     var fullCarto = Cesium.Cartographic.fromCartesian(full.center)
+          //     console.log(fullCarto);
+          //     console.log(fullCarto.longitude * Cesium.Math.DEGREES_PER_RADIAN);
+          //     console.log(fullCarto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
+          //   });
         }
 
         viewer.dataSources.add(dataSources[asset.id][dataIndex]);

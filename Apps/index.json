@@ -15,6 +15,7 @@
             "lat": -34.34410884575452,
             "height": 43.99979598112131
           },
+          "boundingSphereRadius": 88.32003627222949,
           "source": {
             "url": "s3://appf-anu/Cesium/NUE/NUE_20170721_M1_RGB_group1_densified_point_cloud/NUE_20170721_M1_RGB_group1_densified_point_cloud.laz"
           }
@@ -28,6 +29,7 @@
             "lat": -34.34408114334087,
             "height": 43.99983402379628
           },
+          "boundingSphereRadius": 79.66113801914958,
           "source": {
             "url": "s3://appf-anu/Cesium/NUE/NUE_20170922_M2_RGB_group1_densified_point_cloud/NUE_20170922_M2_RGB_group1_densified_point_cloud.laz"
           }
@@ -41,6 +43,7 @@
             "lat": -34.34408992813137,
             "height": 42.999779667292145
           },
+          "boundingSphereRadius": 91.78358847935698,
           "source": {
             "url": "s3://appf-anu/Cesium/NUE/NUE_20171016_M4_RGB_group1_densified_point_cloud/NUE_20171016_M4_RGB_group1_densified_point_cloud.laz"
           }
@@ -62,6 +65,7 @@
             "lat": -35.76086681002111,
             "height": 87.99976258278798
           },
+          "boundingSphereRadius": 95.2649054397572,
           "source": {
             "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20190702_VBIR_1_DenseCloud.laz"
           }
@@ -75,6 +79,7 @@
             "lat": -35.76085743488859,
             "height": 87.99977113762627
           },
+          "boundingSphereRadius": 93.53279916333481,
           "source": {
             "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20190801_VBIR_2_DenseCloud.laz"
           }
@@ -88,6 +93,7 @@
             "lat": -35.76088483182243,
             "height": 87.99976258120795
           },
+          "boundingSphereRadius": 95.26490544047932,
           "source": {
             "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20190830_VBIR_3_DenseCloud.laz"
           }
@@ -101,6 +107,7 @@
             "lat": -35.7608846496957,
             "height": 87.9997625830241
           },
+          "boundingSphereRadius": 95.26490516117929,
           "source": {
             "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20191001_VBIR_4_DenseCloud.laz"
           }
@@ -114,6 +121,7 @@
             "lat": -35.76087545666744,
             "height": 86.99976258171239
           },
+          "boundingSphereRadius": 95.26489491013635,
           "source": {
             "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20191015_VBIR_5_DenseCloud.laz"
           }
@@ -121,11 +129,23 @@
         {
           "type": "GeoJSON",
           "date": "Constant",
+          "position": {
+            "lng": 142.9810840776032,
+            "lat": -35.76086813381027,
+            "height": 86.11466283169541
+          },
+          "boundingSphereRadius": 37.03363064520736,
           "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/VBIR_EM3.geojson"
         },
         {
           "type": "GeoJSON",
           "date": "Constant",
+          "position": {
+            "lng": 142.98064918330766,
+            "lat": -35.76086790056169,
+            "height": 86.56694773741798
+          },
+          "boundingSphereRadius": 43.25577106866934,
           "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/VBIR_S2M3.geojson"
         }
       ]
@@ -145,6 +165,7 @@
             "lat": -36.371437446595635,
             "height": 963.2143831961985
           },
+          "boundingSphereRadius": 602.8668063852829,
           "source": {
             "url": "s3://appf-anu/Cesium/USLN/USLN-GegedzerickRoad_2021-05-21-odm_georeferenced_model.laz"
           }
@@ -178,6 +199,12 @@
         {
           "type": "GeoJSON",
           "date": "Constant",
+          "position": {
+            "lng": -110.8593411699667,
+            "lat": 31.825095031592205,
+            "height": 1113.585155344287
+          },
+          "boundingSphereRadius": 6978.01489555672,
           "url": "https://data.cyverse.org/dav-anon/iplant/commons/cyverse_curated/Gillan_Ecosphere_2021/leaflet_map/suas-footprints.geojson"
         }
       ]
@@ -201,6 +228,7 @@
             "pitch": 0,
             "roll": -2
           },
+          "boundingSphereRadius": 6.441569602051442,
           "source": {
             "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Dryandra+Tree/dryandra-tree-scan.glb"
           }
@@ -221,6 +249,7 @@
             "lat": -35.26140712234432,
             "height": 635.9999980371041
           },
+          "boundingSphereRadius": 8.660524269641662,
           "source": {
             "url": "s3://appf-anu/Cesium/Dryandra Tree/Dryandra tree scan v1-poly.laz"
           }
@@ -246,6 +275,7 @@
             "pitch": 1,
             "roll": 5
           },
+          "boundingSphereRadius": 40.8565673471627,
           "source": [
             {
               "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Graffiti Underpass/scene.gltf"
@@ -275,6 +305,7 @@
             "lat": -35.265405666129,
             "height": 632.9998806194479
           },
+          "boundingSphereRadius": 67.55246959256266,
           "source": {
             "url": "s3://appf-anu/Cesium/Graffiti Underpass/Graffiti underpass full v1-poly.laz"
           }
@@ -332,6 +363,7 @@
             "lat": -34.91427496804004,
             "height": -278.33450716837154
           },
+          "boundingSphereRadius": 16781.786952190658,
           "schema": [
             {
               "count": 470990550,
@@ -540,6 +572,7 @@
             "lat": -34.913293210520536,
             "height": -267.17322478655007
           },
+          "boundingSphereRadius": 16595.85120680558,
           "schema": [
             {
               "count": 586150963,
@@ -748,6 +781,7 @@
             "lat": -34.913278084814415,
             "height": -257.1732303919009
           },
+          "boundingSphereRadius": 16595.864426112486,
           "schema": [
             {
               "count": 2105589324,
@@ -956,6 +990,7 @@
             "lat": -34.91170174337471,
             "height": -276.44252146389294
           },
+          "boundingSphereRadius": 16905.179485469358,
           "schema": [
             {
               "count": 2032739749,
