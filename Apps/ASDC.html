@@ -271,7 +271,7 @@
             <br />
             <br />
             <div class="input-line">
-              <input type="file" name="files[]" accept=".laz" required />
+              <input type="file" name="files[]" accept=".laz,.las" required />
               <input type="date" name="dates[]" required />
             </div>
           </form>
@@ -462,20 +462,30 @@
       });
 
       var selectedDimension;
-      const applyStyle = (schemaName, tileset) => {
+      const applyStyle = (schemaName) => {
         var schema;
         if (schemaName) {
-          if (tileset.schema) {
-            tileset.schema.map((_schema) => {
+          if (
+            selectedTileset.asset &&
+            !selectedTileset.asset.options.dimensions.includes(schemaName)
+          ) {
+            return;
+          }
+
+          if (selectedTileset.asset && selectedTileset.asset.ept.schema) {
+            selectedTileset.asset.ept.schema.map((_schema) => {
               if (_schema.name === schemaName) {
                 schema = _schema;
               }
             });
+          } else {
+            selectedTileset.style = null;
+            return;
           }
 
           if (schema) {
             if (schema.name === "Classification") {
-              tileset.style = new Cesium.Cesium3DTileStyle({
+              selectedTileset.style = new Cesium.Cesium3DTileStyle({
                 color: {
                   conditions: [
                     ["${Classification} === 2", "rgb(153,138,98)"],
@@ -489,7 +499,7 @@
                 },
               });
             } else if (schema.name === "Intensity") {
-              tileset.style = new Cesium.Cesium3DTileStyle({
+              selectedTileset.style = new Cesium.Cesium3DTileStyle({
                 color: `rgb((\${Intensity}/${
                   schema.mean + schema.stddev
                 })*255,(\${Intensity}/${
@@ -501,11 +511,11 @@
               schema.name === "Green" ||
               schema.name === "Blue"
             ) {
-              tileset.style = new Cesium.Cesium3DTileStyle({
+              selectedTileset.style = new Cesium.Cesium3DTileStyle({
                 color: `\${COLOR} * color('${schema.name.toLowerCase()}')`,
               });
             } else if (schema.name === "Z") {
-              tileset.style = new Cesium.Cesium3DTileStyle({
+              selectedTileset.style = new Cesium.Cesium3DTileStyle({
                 color: {
                   conditions: [
                     ["${Z} >= 0", `hsl((\${Z})/(${schema.maximum}),1,0.5)`],
@@ -514,15 +524,15 @@
                 },
               });
             } else {
-              tileset.style = new Cesium.Cesium3DTileStyle({
+              selectedTileset.style = new Cesium.Cesium3DTileStyle({
                 color: `hsl((\${${schema.name}}-${schema.minimum})/(${schema.maximum}-${schema.minimum}),1,0.5)`,
               });
             }
           } else {
-            tileset.style = null;
+            selectedTileset.style = null;
           }
         } else {
-          tileset.style = null;
+          selectedTileset.style = null;
         }
         selectedDimension = schemaName;
       };
@@ -534,20 +544,22 @@
           toolbar.removeChild(toolbar.firstChild);
         }
 
-        if (!tileset.schema) return;
+        if (!tileset.asset || !tileset.asset.ept.schema) return;
+        if (tileset.asset && tileset.asset.options.dimensions.length === 0)
+          return;
 
         var styleToolbarMenu = [
           {
             text: "RGB",
             onselect: () => {
-              applyStyle(null, tileset);
+              applyStyle(null);
             },
           },
         ];
 
         var selectedIndex;
         var filterList = ["X", "Y", "GpsTime"];
-        tileset.schema
+        tileset.asset.ept.schema
           .filter((_schema) => {
             if (
               _schema.minimum != _schema.maximum &&
@@ -560,7 +572,7 @@
             styleToolbarMenu.push({
               text: _schema.name,
               onselect: () => {
-                applyStyle(_schema.name, tileset);
+                applyStyle(_schema.name);
               },
             });
             if (selectedDimension && _schema.name === selectedDimension) {
@@ -570,7 +582,7 @@
 
         Sandcastle.addToolbarMenu(styleToolbarMenu);
 
-        if (selectedIndex) {
+        if (selectedIndex != undefined) {
           document.getElementById("toolbar").childNodes[0].selectedIndex =
             selectedIndex + 1;
         }
@@ -632,15 +644,17 @@
 
             selectedTileset = tilesets[selectedAssetID][minDate];
 
-            if (tilesets[selectedAssetID][minDate].schema) {
-              setupStyleToolbar(tilesets[selectedAssetID][minDate]);
-            } else {
-              var toolbar = document.getElementById("toolbar");
+            // if (tilesets[selectedAssetID][minDate].asset && tilesets[selectedAssetID][minDate].asset.ept.schema) {
+            //   setupStyleToolbar(tilesets[selectedAssetID][minDate]);
+            //   applyStyle(selectedDimension);
+            // } else {
+            //   var toolbar = document.getElementById("toolbar");
 
-              while (toolbar.firstChild) {
-                toolbar.removeChild(toolbar.firstChild);
-              }
-            }
+            //   while (toolbar.firstChild) {
+            //     toolbar.removeChild(toolbar.firstChild);
+            //   }
+            // }
+            setupStyleToolbar(tilesets[selectedAssetID][minDate]);
           } else {
             //point clouds with no date
             var currentDate = new Date();
@@ -751,32 +765,45 @@
             //   ].readyPromise.then(function (tileset) {
             // console.log(tilesets[selectedAssetID][
             //   new Date(data["date"])
-            // ].boundingSphere.radius);
+            // // ].boundingSphere.radius);
+            // ]);
             //   });
-            if (data["position"]) {
-              tilesets[selectedAssetID][
-                new Date(data["date"])
-              ].readyPromise.then(function (tileset) {
-                var offset = Cesium.Cartographic.toCartesian(
-                  new Cesium.Cartographic.fromDegrees(
-                    data["position"]["lng"],
-                    data["position"]["lat"],
-                    data["position"]["height"]
-                  )
-                );
-                var translation = Cesium.Cartesian3.subtract(
-                  offset,
-                  tileset.boundingSphere.center,
-                  new Cesium.Cartesian3()
-                );
-                tileset.modelMatrix = Cesium.Matrix4.fromTranslation(
-                  translation
-                );
-              });
-            }
 
-            tilesets[selectedAssetID][new Date(data["date"])].schema =
-              data.schema;
+            tilesets[selectedAssetID][new Date(data["date"])].readyPromise.then(
+              function (tileset) {
+                if (data["position"]) {
+                  var offset = Cesium.Cartographic.toCartesian(
+                    new Cesium.Cartographic.fromDegrees(
+                      data["position"]["lng"],
+                      data["position"]["lat"],
+                      data["position"]["height"]
+                    )
+                  );
+                  var translation = Cesium.Cartesian3.subtract(
+                    offset,
+                    tileset.boundingSphere.center,
+                    new Cesium.Cartesian3()
+                  );
+                  tileset.modelMatrix = Cesium.Matrix4.fromTranslation(
+                    translation
+                  );
+                }
+
+                // if (tileset.asset && tileset.asset.ept.schema) {
+                //   setupStyleToolbar(tileset);
+                //   // selectedTileset = tilesets[selectedAssetID][date];
+                //   // applyStyle(selectedDimension);
+
+                // } else {
+                //   var toolbar = document.getElementById("toolbar");
+
+                //   while (toolbar.firstChild) {
+                //     toolbar.removeChild(toolbar.firstChild);
+                //   }
+                // }
+                setupStyleToolbar(tileset);
+              }
+            );
           }
         } else if (data["type"] === "Model") {
           //TODO: multiple models for same location
@@ -902,16 +929,17 @@
                 Cesium.JulianDate.fromDate(new Date(date.getTime() + 86400000))
               );
 
-              if (tilesets[selectedAssetID][date].schema) {
-                setupStyleToolbar(tilesets[selectedAssetID][date]);
-                applyStyle(selectedDimension, tilesets[selectedAssetID][date]);
-              } else {
-                var toolbar = document.getElementById("toolbar");
+              // if (tilesets[selectedAssetID][date].asset && tilesets[selectedAssetID][date].asset.ept.schema) {
+              //   setupStyleToolbar(tilesets[selectedAssetID][date]);
+              //   applyStyle(selectedDimension);
+              // } else {
+              //   var toolbar = document.getElementById("toolbar");
 
-                while (toolbar.firstChild) {
-                  toolbar.removeChild(toolbar.firstChild);
-                }
-              }
+              //   while (toolbar.firstChild) {
+              //     toolbar.removeChild(toolbar.firstChild);
+              //   }
+              // }
+              setupStyleToolbar(tilesets[selectedAssetID][date]);
             } else {
               //point clouds with no date
               var currentDate = new Date();
@@ -976,6 +1004,66 @@
         var dataIndex = asset.data.indexOf(data);
         if (!dataSources[asset.id][dataIndex]) {
           dataSources[asset.id][dataIndex] = new Cesium.CustomDataSource();
+
+          viewer.dataSources.add(dataSources[asset.id][dataIndex]);
+          geoJsonPromise.then((dataSource) => {
+            var entities = dataSource.entities.values;
+            var samplePromises = [];
+
+            dataSource.entities.values.map((entity) => {
+              // dataSource.entities.values.slice(0,24).map((entity) => {
+              var positions = entity.polygon.hierarchy.getValue().positions;
+              var cartoPositions = [];
+              positions.map((pos) => {
+                var carto = Cesium.Cartographic.fromCartesian(pos);
+                cartoPositions.push(
+                  new Cesium.Cartographic(carto.longitude, carto.latitude)
+                );
+              });
+
+              samplePromises.push(
+                Cesium.sampleTerrainMostDetailed(
+                  viewer.terrainProvider,
+                  cartoPositions
+                ).then((updatedPositions) => {
+                  // var polygonEntity = viewer.entities.add({
+                  var polygonEntity = dataSources[asset.id][
+                    dataIndex
+                  ].entities.add({
+                    polygon: {
+                      hierarchy: new Cesium.PolygonHierarchy(
+                        Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                          updatedPositions
+                        )
+                      ),
+                      // hierarchy:new Cesium.CallbackProperty( () => {
+                      //   updatedPositions.map(cartoPoint=>{
+                      //   // var height = viewer.scene.sampleHeight(cartoPoint);
+                      //   var height = viewer.scene.globe.getHeight(cartoPoint);
+                      //   // console.log(height);
+                      //   if (height){
+                      //     cartoPoint.height=height;
+                      //   }
+                      // })
+                      //   return(new Cesium.PolygonHierarchy(Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(updatedPositions)));
+                      // },false),  //slow
+                      material: Cesium.Color.RED,
+                      perPositionHeight: true,
+                      // perPositionHeight: false, //picking issues
+                      arcType: Cesium.ArcType.GEODESIC,
+                    },
+                  });
+                  polygonEntity.properties = entity.properties;
+                })
+              );
+            });
+            Promise.all(samplePromises).then(() => {
+              delete dataSource;
+              if (fly) {
+                viewer.flyTo(dataSources[asset.id][asset.data.indexOf(data)]);
+              }
+            });
+          });
         } else {
           dataSources[asset.id][dataIndex].show = true;
           if (fly) {
@@ -1005,66 +1093,6 @@
           //     console.log(fullCarto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
           //   });
         }
-
-        viewer.dataSources.add(dataSources[asset.id][dataIndex]);
-        geoJsonPromise.then((dataSource) => {
-          var entities = dataSource.entities.values;
-          var samplePromises = [];
-
-          dataSource.entities.values.map((entity) => {
-            // dataSource.entities.values.slice(0,24).map((entity) => {
-            var positions = entity.polygon.hierarchy.getValue().positions;
-            var cartoPositions = [];
-            positions.map((pos) => {
-              var carto = Cesium.Cartographic.fromCartesian(pos);
-              cartoPositions.push(
-                new Cesium.Cartographic(carto.longitude, carto.latitude)
-              );
-            });
-
-            samplePromises.push(
-              Cesium.sampleTerrainMostDetailed(
-                viewer.terrainProvider,
-                cartoPositions
-              ).then((updatedPositions) => {
-                // var polygonEntity = viewer.entities.add({
-                var polygonEntity = dataSources[asset.id][
-                  dataIndex
-                ].entities.add({
-                  polygon: {
-                    hierarchy: new Cesium.PolygonHierarchy(
-                      Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-                        updatedPositions
-                      )
-                    ),
-                    // hierarchy:new Cesium.CallbackProperty( () => {
-                    //   updatedPositions.map(cartoPoint=>{
-                    //   // var height = viewer.scene.sampleHeight(cartoPoint);
-                    //   var height = viewer.scene.globe.getHeight(cartoPoint);
-                    //   // console.log(height);
-                    //   if (height){
-                    //     cartoPoint.height=height;
-                    //   }
-                    // })
-                    //   return(new Cesium.PolygonHierarchy(Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(updatedPositions)));
-                    // },false),  //slow
-                    material: Cesium.Color.RED,
-                    perPositionHeight: true,
-                    // perPositionHeight: false, //picking issues
-                    arcType: Cesium.ArcType.GEODESIC,
-                  },
-                });
-                polygonEntity.properties = entity.properties;
-              })
-            );
-          });
-          Promise.all(samplePromises).then(() => {
-            delete dataSource;
-            if (fly) {
-              viewer.flyTo(dataSources[asset.id][asset.data.indexOf(data)]);
-            }
-          });
-        });
       };
 
       var pcFormats = ["laz", "las", "xyz", "pcd", "ply"];
@@ -1566,13 +1594,16 @@
                     setupStyleToolbar(
                       tilesets[selectedAssetID][tilesetDates[i]]
                     );
-                    applyStyle(
-                      selectedDimension,
-                      tilesets[selectedAssetID][tilesetDates[i]]
-                    );
                   }
 
                   selectedTileset = tilesets[selectedAssetID][tilesetDates[i]];
+
+                  if (
+                    selectedTileset.asset &&
+                    selectedTileset.asset.ept.schema
+                  ) {
+                    applyStyle(selectedDimension);
+                  }
                 }
               } else {
                 if (Array.isArray(tilesets[selectedAssetID][tilesetDates[i]])) {
@@ -1603,6 +1634,23 @@
                 tilesets[selectedAssetID][
                   new Date(selectedData.date)
                 ].show = true;
+
+                if (
+                  selectedTileset !=
+                    tilesets[selectedAssetID][new Date(selectedData.date)] &&
+                  tilesets[selectedAssetID][new Date(selectedData.date)]
+                ) {
+                  setupStyleToolbar(
+                    tilesets[selectedAssetID][new Date(selectedData.date)]
+                  );
+                }
+
+                selectedTileset =
+                  tilesets[selectedAssetID][new Date(selectedData.date)];
+
+                if (selectedTileset.asset && selectedTileset.asset.ept.schema) {
+                  applyStyle(selectedDimension);
+                }
               }
             }
           }
@@ -1695,7 +1743,7 @@
         var fileInput = document.createElement("input");
         fileInput.type = "file";
         fileInput.name = "files[]";
-        fileInput.accept = ".laz";
+        fileInput.accept = ".laz,.las";
         fileInput.required = true;
 
         lineDiv.appendChild(fileInput);
@@ -1735,7 +1783,7 @@
         if (Array.isArray(form.elements["files[]"])) {
           form.elements["files[]"].map((file) => {
             if (
-              !file.files[0].name.toLowerCase().endsWith(".laz") ||
+              !file.files[0].name.toLowerCase().endsWith(".laz") &&
               !file.files[0].name.toLowerCase().endsWith(".las")
             ) {
               alert("Only .laz and .las files are accepted");
@@ -1746,7 +1794,7 @@
           if (
             !form.elements["files[]"].files[0].name
               .toLowerCase()
-              .endsWith(".laz") ||
+              .endsWith(".laz") &&
             !form.elements["files[]"].files[0].name
               .toLowerCase()
               .endsWith(".las")
@@ -2030,7 +2078,7 @@
             })
               .then((dailyresponse) => {
                 if (dailyresponse.status !== 200) {
-                  console.log(dailyresponse);
+                  // console.log(dailyresponse);
                 }
                 return dailyresponse;
               })
