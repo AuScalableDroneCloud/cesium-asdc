@@ -2,11 +2,12 @@ name: Docker Image CI and publish
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
+  #push:
+  #  branches: [ main ]
+  #pull_request:
+  #  branches: [ main ]
+  release:
+    types: [published]
 jobs:
   push_to_registry:
     name: Build and push Docker image to GitHub Packages
