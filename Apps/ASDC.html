@@ -249,6 +249,22 @@
       <div id="toolbars-container" style="z-index: 2; position: absolute">
         <div id="toolbar" style="position: static"></div>
         <div id="cam-toolbar" style="margin: 5px; padding: 2px 5px"></div>
+        <div
+          id="msse-slider-container"
+          style="margin: 5px; padding: 2px 5px; display: none"
+        >
+          Maximum Screen Space Error:
+          <input
+            type="range"
+            min="0"
+            max="256"
+            value="32"
+            id="msse-slider"
+            style="vertical-align: middle"
+            oninput="setScreenSpaceError()"
+          />
+          <span id="msse-value">32</span>
+        </div>
       </div>
     </div>
     <div id="sidebar">
@@ -374,6 +390,10 @@
       var tilesets = {};
       var entities = {};
       var dataSources = {};
+
+      var selectedTileset;
+
+      var MSSE = 32;
 
       var assets;
 
@@ -700,6 +720,17 @@
         }
 
         if (asset.data) {
+          if (
+            asset.data[0]["type"] === "PointCloud" ||
+            asset.data[0]["type"] === "EPTPointCloud"
+          ) {
+            document.getElementById("msse-slider-container").style.display =
+              "block";
+          } else {
+            document.getElementById("msse-slider-container").style.display =
+              "none";
+          }
+
           if (asset.data[0]["type"] === "PointCloud") {
             viewer.flyTo(tilesets[selectedAssetID][tilesetDates[0]]);
           } else if (asset.data[0]["type"] === "Model") {
@@ -726,6 +757,8 @@
       const loadData = (asset, data, fly, timeline) => {
         selectedAsset = asset;
         selectedAssetID = asset["id"];
+
+        selectedTileset = null;
 
         Object.keys(tilesets).map((tileset) => {
           Object.keys(tilesets[tileset]).map((date) => {
@@ -757,6 +790,7 @@
             ] = viewer.scene.primitives.add(
               new Cesium.Cesium3DTileset({
                 url: data["url"],
+                maximumScreenSpaceError: MSSE,
                 show: false,
               })
             );
@@ -864,6 +898,7 @@
                           // url: `http://localhost:3000/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
                           // url: `/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
                           url: `https://asdc.cloud.edu.au/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                          maximumScreenSpaceError: MSSE,
                           show: false,
                         })
                       )
@@ -885,6 +920,14 @@
 
         if (data["type"] != "Influx") {
           closeGraphModal();
+        }
+
+        if (data["type"] === "PointCloud" || data["type"] === "EPTPointCloud") {
+          document.getElementById("msse-slider-container").style.display =
+            "block";
+        } else {
+          document.getElementById("msse-slider-container").style.display =
+            "none";
         }
 
         if (fly) {
@@ -1061,6 +1104,8 @@
               delete dataSource;
               if (fly) {
                 viewer.flyTo(dataSources[asset.id][asset.data.indexOf(data)]);
+                document.getElementById("msse-slider-container").style.display =
+                  "none";
               }
             });
           });
@@ -1068,6 +1113,8 @@
           dataSources[asset.id][dataIndex].show = true;
           if (fly) {
             viewer.flyTo(dataSources[asset.id][dataIndex]);
+            document.getElementById("msse-slider-container").style.display =
+              "none";
           }
           // Cesium.when(viewer.dataSourceDisplay.ready, function () {
           //     var boundingSpheres=[];
@@ -1560,7 +1607,24 @@
 
       setupSidebar();
 
-      var selectedTileset;
+      const setScreenSpaceError = (test) => {
+        MSSE = document.getElementById("msse-slider").value;
+        document.getElementById("msse-value").innerHTML = MSSE;
+
+        selectedTileset.maximumScreenSpaceError = MSSE;
+
+        Object.keys(tilesets).map((tileset) => {
+          Object.keys(tilesets[tileset]).map((date) => {
+            if (Array.isArray(tilesets[tileset][new Date(date)])) {
+              tilesets[tileset][new Date(date)].map((tileset) => {
+                tileset.maximumScreenSpaceError = MSSE;
+              });
+            } else {
+              tilesets[tileset][new Date(date)].maximumScreenSpaceError = MSSE;
+            }
+          });
+        });
+      };
 
       viewer.clock.onTick.addEventListener((clock) => {
         var currentTime = Cesium.JulianDate.toDate(clock.currentTime).getTime();
