@@ -9,6 +9,7 @@
   const url = require("url");
   const request = require("request");
   const Influx = require("influx");
+  const path = require('path');
 
   const influx = new Influx.InfluxDB({
     database: "main",
@@ -115,17 +116,24 @@
 
   app.use(
     "/cesium",
+    express.static(path.join(__dirname,"node_modules","cesium"), {
+      extensions: ["html", "htm"],
+    })
+  );
+
+  app.use(
+    "/cesium",
     express.static(__dirname, {
       extensions: ["html", "htm"],
     })
   );
 
   app.get("/cesium/Apps/ASDC/:assetID", function (req, res, next) {
-    res.sendFile(__dirname + "/Apps/ASDC.html");
+    res.sendFile(__dirname + "/Apps/ASDC/index.html");
   });
 
   app.get("/cesium/Apps/ASDC/:assetID/:dataID", function (req, res, next) {
-    res.sendFile(__dirname + "/Apps/ASDC.html");
+    res.sendFile(__dirname + "/Apps/ASDC/index.html");
   });
 
   function getRemoteUrlFromParam(req) {

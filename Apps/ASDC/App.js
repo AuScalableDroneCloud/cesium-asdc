@@ -1,0 +1,1864 @@
+Cesium.Ion.defaultAccessToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI1NWZkNGFlZS1iNzVhLTRmNTAtOThmYi1kMTI1MjlmOTVlNjciLCJpZCI6NzIyNTQsImlhdCI6MTYzNTkwNDI4OX0.EXVvJZa8yaugMmQNkc9pjWfrjqeOpZ8Jg7_0Hdwnb1A";
+
+// const processingAPI="http://localhost:8081";
+// const processingAPI="http://192.168.99.100:8081";
+const processingAPI = "/cesiumapi";
+
+var selectedAssetID;
+var selectedDataIndex;
+
+var currentUrl = window.location.href;
+if (currentUrl[currentUrl.length - 1] === "/")
+    currentUrl = currentUrl.slice(0, currentUrl.length - 1);
+
+var match = currentUrl.match(".*\/([^\/]+)\/([^\/]+)");
+if (
+    match[1].toUpperCase() !== "ASDC" &&
+    match[1].toLowerCase() != "asdc.html"
+) {
+    selectedAssetID = match[1];
+    selectedDataIndex = match[2];
+} else {
+    selectedAssetID = match[2];
+}
+
+if (selectedAssetID.toLowerCase() === "nue") selectedAssetID = 1;
+else if (selectedAssetID.toLowerCase() === "vbir") selectedAssetID = 2;
+else if (selectedAssetID.toLowerCase() === "usln") selectedAssetID = 3;
+else if (selectedAssetID.toLowerCase() === "gillan_ecosphere")
+    selectedAssetID = 4;
+else if (selectedAssetID.toLowerCase() === "dryandra_model")
+    selectedAssetID = 5;
+else if (selectedAssetID.toLowerCase() === "dryandra_pointcloud")
+    selectedAssetID = 6;
+else if (selectedAssetID.toLowerCase() === "graffiti_model")
+    selectedAssetID = 7;
+else if (selectedAssetID.toLowerCase() === "graffiti_pointcloud")
+    selectedAssetID = 8;
+
+var highlightHeightPX = 27.2;
+var highlightColor = "green";
+
+Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(
+    113.338953078,
+    -43.6345972634,
+    153.569469029,
+    -10.6681857235
+);
+var viewer = new Cesium.Viewer("cesiumContainer", {
+    terrainProvider: Cesium.createWorldTerrain({ requestWaterMask: true }),
+    vrButton: true,
+    fullscreenElement: "cesiumContainer",
+});
+viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
+viewer.scene.globe.depthTestAgainstTerrain = false;
+
+var tilesets = {};
+var entities = {};
+var dataSources = {};
+
+var selectedTileset;
+
+var MSSE = 32;
+
+var assets;
+
+viewer.camera.moveEnd.addEventListener(() => {
+    var viewMenu = [];
+
+    var selectedIndex;
+    var timeseriesInView = false;
+
+    assets.map((asset) => {
+        asset.data.map((data) => {
+            if (data.position) {
+                var lng = data.position.lng;
+                var lat = data.position.lat;
+                var height = data.position.height;
+
+                var dataPosition = Cesium.Cartographic.toCartesian(
+                    new Cesium.Cartographic.fromDegrees(lng, lat, height)
+                );
+
+                var distance = Cesium.Cartesian3.distance(
+                    viewer.camera.position,
+                    dataPosition
+                );
+                if (
+                    distance <=
+                    (data.boundingSphereRadius
+                        ? data.boundingSphereRadius * 4
+                        : 2000)
+                ) {
+                    viewMenu.push({
+                        text: data.date
+                            ? `${asset.name} - ${data.date}`
+                            : `${asset.name} - No Date`,
+                        onselect: () => {
+                            selectedData = data;
+                            if (
+                                (tilesets[asset.id] &&
+                                    tilesets[asset.id][new Date(data.date)] &&
+                                    tilesets[asset.id][new Date(data.date)] !=
+                                    selectedTileset) ||
+                                !tilesets[asset.id] ||
+                                !tilesets[asset.id][new Date(data.date)]
+                            ) {
+                                loadData(asset, data, false, true);
+                            }
+                        },
+                        data: data,
+                    });
+                    if (selectedData && selectedData === data) {
+                        selectedIndex = viewMenu.length - 1;
+                    }
+                    if (!selectedData && selectedAsset === asset) {
+                        timeseriesInView = true;
+                    }
+                }
+            }
+        });
+    });
+
+    var toolbar = document.getElementById("cam-toolbar");
+
+    while (toolbar.firstChild) {
+        toolbar.removeChild(toolbar.firstChild);
+    }
+
+    if (viewMenu.length > 0) {
+        Sandcastle.addToolbarMenu(viewMenu, "cam-toolbar");
+        if (selectedIndex) {
+            document.getElementById(
+                "cam-toolbar"
+            ).childNodes[0].selectedIndex = selectedIndex;
+
+            if (selectedData && selectedData != viewMenu[selectedIndex].data) {
+                viewMenu[selectedIndex].onselect();
+            }
+        } else {
+            if (
+                (selectedData && selectedData != viewMenu[0].data) ||
+                !timeseriesInView
+            ) {
+                viewMenu[0].onselect();
+            }
+        }
+    }
+});
+
+var selectedDimension;
+const applyStyle = (schemaName) => {
+    var schema;
+    if (schemaName) {
+        if (
+            selectedTileset.asset &&
+            !selectedTileset.asset.options.dimensions.includes(schemaName)
+        ) {
+            return;
+        }
+
+        if (selectedTileset.asset && selectedTileset.asset.ept.schema) {
+            selectedTileset.asset.ept.schema.map((_schema) => {
+                if (_schema.name === schemaName) {
+                    schema = _schema;
+                }
+            });
+        } else {
+            selectedTileset.style = null;
+            return;
+        }
+
+        if (schema) {
+            if (schema.name === "Classification") {
+                selectedTileset.style = new Cesium.Cesium3DTileStyle({
+                    color: {
+                        conditions: [
+                            ["${Classification} === 2", "rgb(153,138,98)"],
+                            ["${Classification} === 3", "rgb(224,255,137)"],
+                            ["${Classification} === 4", "rgb(172,218,88)"],
+                            ["${Classification} === 5", "rgb(48,98,0)"],
+                            ["${Classification} === 6", "rgb(172,172,172)"],
+                            ["${Classification} === 9", "rgb(140,204,255)"],
+                            ["true", "rgb(255,255,255)"],
+                        ],
+                    },
+                });
+            } else if (schema.name === "Intensity") {
+                selectedTileset.style = new Cesium.Cesium3DTileStyle({
+                    color: `rgb((\${Intensity}/${schema.mean + schema.stddev
+                        })*255,(\${Intensity}/${schema.mean + schema.stddev
+                        })*255,(\${Intensity}/${schema.mean + schema.stddev})*255)`,
+                });
+            } else if (
+                schema.name === "Red" ||
+                schema.name === "Green" ||
+                schema.name === "Blue"
+            ) {
+                selectedTileset.style = new Cesium.Cesium3DTileStyle({
+                    color: `\${COLOR} * color('${schema.name.toLowerCase()}')`,
+                });
+            } else if (schema.name === "Z") {
+                selectedTileset.style = new Cesium.Cesium3DTileStyle({
+                    color: {
+                        conditions: [
+                            ["${Z} >= 0", `hsl((\${Z})/(${schema.maximum}),1,0.5)`],
+                            ["${Z} < 0", `hsl((-1*\${Z})/(${schema.minimum}),1,0.5)`],
+                        ],
+                    },
+                });
+            } else {
+                selectedTileset.style = new Cesium.Cesium3DTileStyle({
+                    color: `hsl((\${${schema.name}}-${schema.minimum})/(${schema.maximum}-${schema.minimum}),1,0.5)`,
+                });
+            }
+        } else {
+            selectedTileset.style = null;
+        }
+    } else {
+        selectedTileset.style = null;
+    }
+    selectedDimension = schemaName;
+};
+
+const setupStyleToolbar = (tileset) => {
+    var toolbar = document.getElementById("toolbar");
+
+    while (toolbar.firstChild) {
+        toolbar.removeChild(toolbar.firstChild);
+    }
+
+    if (!tileset.asset || !tileset.asset.ept.schema) return;
+    if (tileset.asset && tileset.asset.options.dimensions.length === 0)
+        return;
+
+    var styleToolbarMenu = [
+        {
+            text: "RGB",
+            onselect: () => {
+                applyStyle(null);
+            },
+        },
+    ];
+
+    var selectedIndex;
+    var filterList = ["X", "Y", "GpsTime"];
+    tileset.asset.ept.schema
+        .filter((_schema) => {
+            if (
+                _schema.minimum != _schema.maximum &&
+                !filterList.includes(_schema.name)
+            ) {
+                return _schema;
+            }
+        })
+        .map((_schema, index) => {
+            styleToolbarMenu.push({
+                text: _schema.name,
+                onselect: () => {
+                    applyStyle(_schema.name);
+                },
+            });
+            if (selectedDimension && _schema.name === selectedDimension) {
+                selectedIndex = index;
+            }
+        });
+
+    Sandcastle.addToolbarMenu(styleToolbarMenu);
+
+    if (selectedIndex != undefined) {
+        document.getElementById("toolbar").childNodes[0].selectedIndex =
+            selectedIndex + 1;
+    }
+};
+
+const loadAsset = (asset) => {
+    if (!asset) return;
+    selectedAsset = asset;
+    selectedAssetID = asset["id"];
+    selectedData = null;
+
+    Object.keys(tilesets).map((tileset) => {
+        Object.keys(tilesets[tileset]).map((date) => {
+            tilesets[tileset][date].show = false;
+        });
+    });
+
+    Object.keys(entities).map((entity) => {
+        entities[entity].show = false;
+    });
+
+    asset.data?.map((data) => {
+        loadData(asset, data, false, false);
+    });
+
+    //TODO: dates for entities
+    viewer.timeline._highlightRanges = [];
+    if (tilesets[selectedAssetID]) {
+        var tilesetDates = Object.keys(tilesets[selectedAssetID]);
+
+        tilesetDates.sort(function (a, b) {
+            return new Date(a).getTime() - new Date(b).getTime();
+        });
+
+        tilesetDates.map((date) => {
+            viewer.timeline
+                .addHighlightRange(highlightColor, highlightHeightPX)
+                .setRange(
+                    Cesium.JulianDate.fromDate(new Date(date)),
+                    Cesium.JulianDate.fromDate(
+                        new Date(new Date(date).getTime() + 86400000)
+                    )
+                );
+        });
+
+        var minDate = new Date(tilesetDates[0]);
+        var maxDate = new Date(tilesetDates[tilesetDates.length - 1]);
+
+        if (
+            minDate.toString() !== "Invalid Date" &&
+            maxDate.toString() !== "Invalid Date"
+        ) {
+            viewer.clock.currentTime = new Cesium.JulianDate.fromDate(minDate);
+            viewer.timeline.updateFromClock();
+            viewer.timeline.zoomTo(
+                Cesium.JulianDate.fromDate(minDate),
+                Cesium.JulianDate.fromDate(new Date(maxDate.getTime() + 86400000))
+            );
+
+            selectedTileset = tilesets[selectedAssetID][minDate];
+
+            // if (tilesets[selectedAssetID][minDate].asset && tilesets[selectedAssetID][minDate].asset.ept.schema) {
+            //   setupStyleToolbar(tilesets[selectedAssetID][minDate]);
+            //   applyStyle(selectedDimension);
+            // } else {
+            //   var toolbar = document.getElementById("toolbar");
+
+            //   while (toolbar.firstChild) {
+            //     toolbar.removeChild(toolbar.firstChild);
+            //   }
+            // }
+            setupStyleToolbar(tilesets[selectedAssetID][minDate]);
+        } else {
+            //point clouds with no date
+            var currentDate = new Date();
+            viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+                new Date()
+            );
+            viewer.timeline.updateFromClock();
+            viewer.timeline.zoomTo(
+                Cesium.JulianDate.fromDate(currentDate),
+                Cesium.JulianDate.fromDate(
+                    new Date(currentDate.getTime() + 86400000)
+                )
+            );
+        }
+    } else {
+        if (asset.data[0]["type"] === "Influx") {
+            //Influx charts from 2 weeks before
+            var currentDate = new Date();
+            viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+                currentDate
+            );
+            viewer.timeline.updateFromClock();
+            viewer.timeline.zoomTo(
+                Cesium.JulianDate.fromDate(
+                    new Date(currentDate.getTime() - 2 * 7 * 86400000)
+                ),
+                Cesium.JulianDate.fromDate(new Date())
+            );
+        } else {
+            //Other data types with no date
+            var currentDate = new Date();
+            viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+                new Date()
+            );
+            viewer.timeline.updateFromClock();
+            viewer.timeline.zoomTo(
+                Cesium.JulianDate.fromDate(currentDate),
+                Cesium.JulianDate.fromDate(
+                    new Date(currentDate.getTime() + 86400000)
+                )
+            );
+        }
+    }
+
+    if (asset.data) {
+        if (
+            asset.data[0]["type"] === "PointCloud" ||
+            asset.data[0]["type"] === "EPTPointCloud"
+        ) {
+            document.getElementById("msse-slider-container").style.display =
+                "block";
+        } else {
+            document.getElementById("msse-slider-container").style.display =
+                "none";
+        }
+
+        if (asset.data[0]["type"] === "PointCloud") {
+            viewer.flyTo(tilesets[selectedAssetID][tilesetDates[0]]);
+        } else if (asset.data[0]["type"] === "Model") {
+            viewer.flyTo(entities[selectedAssetID]);
+        } else if (asset.data[0]["type"] === "EPTPointCloud") {
+            viewer.flyTo(tilesets[selectedAssetID][tilesetDates[0]][0]);
+        } else if (asset.data[0]["type"] === "Influx") {
+            var position = Cesium.Cartesian3.fromDegrees(
+                asset.data[0]["position"]["lng"],
+                asset.data[0]["position"]["lat"],
+                asset.data[0]["position"]["height"] + 1000
+            );
+
+            viewer.camera.flyTo({ destination: position });
+        }
+
+        var dataTypes = asset.data.map((data) => data.type);
+        if (!dataTypes.includes("Influx")) {
+            closeGraphModal();
+        }
+    }
+};
+
+const loadData = (asset, data, fly, timeline) => {
+    selectedAsset = asset;
+    selectedAssetID = asset["id"];
+
+    selectedTileset = null;
+
+    Object.keys(tilesets).map((tileset) => {
+        Object.keys(tilesets[tileset]).map((date) => {
+            if (Array.isArray(tilesets[tileset][new Date(date)])) {
+                tilesets[tileset][new Date(date)].map((tileset) => {
+                    tileset.show = false;
+                });
+            } else {
+                tilesets[tileset][new Date(date)].show = false;
+            }
+        });
+    });
+
+    Object.keys(entities).map((entity) => {
+        entities[entity].show = false;
+    });
+
+    Object.keys(dataSources).map((a) => {
+        Object.keys(dataSources[a]).map((i) => {
+            dataSources[a][i].show = false;
+        });
+    });
+
+    if (data["type"] === "PointCloud") {
+        if (!tilesets[selectedAssetID]) tilesets[selectedAssetID] = {};
+        if (!tilesets[selectedAssetID][new Date(data["date"])]) {
+            tilesets[selectedAssetID][
+                new Date(data["date"])
+            ] = viewer.scene.primitives.add(
+                new Cesium.Cesium3DTileset({
+                    url: data["url"],
+                    maximumScreenSpaceError: MSSE,
+                    show: false,
+                })
+            );
+            // tilesets[selectedAssetID][
+            //     new Date(data["date"])
+            //   ].readyPromise.then(function (tileset) {
+            // console.log(tilesets[selectedAssetID][
+            //   new Date(data["date"])
+            // // ].boundingSphere.radius);
+            // ]);
+            //   });
+
+            tilesets[selectedAssetID][new Date(data["date"])].readyPromise.then(
+                function (tileset) {
+                    if (data["position"]) {
+                        var offset = Cesium.Cartographic.toCartesian(
+                            new Cesium.Cartographic.fromDegrees(
+                                data["position"]["lng"],
+                                data["position"]["lat"],
+                                data["position"]["height"]
+                            )
+                        );
+                        var translation = Cesium.Cartesian3.subtract(
+                            offset,
+                            tileset.boundingSphere.center,
+                            new Cesium.Cartesian3()
+                        );
+                        tileset.modelMatrix = Cesium.Matrix4.fromTranslation(
+                            translation
+                        );
+                    }
+
+                    // if (tileset.asset && tileset.asset.ept.schema) {
+                    //   setupStyleToolbar(tileset);
+                    //   // selectedTileset = tilesets[selectedAssetID][date];
+                    //   // applyStyle(selectedDimension);
+
+                    // } else {
+                    //   var toolbar = document.getElementById("toolbar");
+
+                    //   while (toolbar.firstChild) {
+                    //     toolbar.removeChild(toolbar.firstChild);
+                    //   }
+                    // }
+                    setupStyleToolbar(tileset);
+                }
+            );
+        }
+    } else if (data["type"] === "Model") {
+        //TODO: multiple models for same location
+        if (!entities[selectedAssetID]) {
+            var position = Cesium.Cartesian3.fromDegrees(
+                data["position"]["lng"],
+                data["position"]["lat"],
+                data["position"]["height"]
+            );
+            var hpr = new Cesium.HeadingPitchRoll(
+                Cesium.Math.toRadians(data["rotation"]["heading"]),
+                Cesium.Math.toRadians(data["rotation"]["pitch"]),
+                Cesium.Math.toRadians(data["rotation"]["roll"])
+            );
+            var orientation = Cesium.Transforms.headingPitchRollQuaternion(
+                position,
+                hpr
+            );
+
+            entities[selectedAssetID] = viewer.entities.add({
+                position: position,
+                orientation: orientation,
+                model: {
+                    uri: data["url"],
+                },
+            });
+
+            // var model = viewer.scene.primitives.add(Cesium.Model.fromGltf({
+            //   url: data["url"],
+            // }));
+            // Cesium.when(model.readyPromise).then(()=>{
+            //   console.log(model.boundingSphere);
+            // })
+        } else {
+            entities[selectedAssetID].show = true;
+        }
+    } else if (data["type"] === "GeoJSON") {
+        loadGeoJson(asset, data, fly);
+    } else if (data["type"] === "EPTPointCloud") {
+        if (!tilesets[selectedAssetID]) tilesets[selectedAssetID] = {};
+        if (!tilesets[selectedAssetID][new Date(data["date"])]) {
+            tilesets[selectedAssetID][new Date(data["date"])] = [];
+            if (data["date"] === "2019-05-01T00:00:00.000Z") {
+                var ilsFile = "/cesium/Apps/may_2019_ils.txt";
+            } else {
+                var ilsFile = "/cesium/Apps/sept_2019_ils.txt";
+            }
+            fetch(ilsFile)
+                .then((response) => response.text())
+                .then((text) =>
+                    text.split("\n").map((line, index) => {
+                        if (index == 0) return;
+                        var path = line.split("C- ")[1];
+                        if (path) {
+                            tilesets[selectedAssetID][new Date(data["date"])].push(
+                                viewer.scene.primitives.add(
+                                    new Cesium.Cesium3DTileset({
+                                        // url: `http://localhost:3000/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                                        // url: `/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                                        url: `https://asdc.cloud.edu.au/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
+                                        maximumScreenSpaceError: MSSE,
+                                        show: false,
+                                    })
+                                )
+                            );
+
+                            if (index == 1) {
+                                viewer.flyTo(
+                                    // tilesets[selectedAssetID][new Date("2019-05-01")][0]
+                                    tilesets[selectedAssetID][new Date(data["date"])][0]
+                                );
+                            }
+                        }
+                    })
+                );
+        }
+    } else if (data["type"] === "Influx") {
+        loadGraph(data.station);
+    }
+
+    if (data["type"] != "Influx") {
+        closeGraphModal();
+    }
+
+    if (data["type"] === "PointCloud" || data["type"] === "EPTPointCloud") {
+        document.getElementById("msse-slider-container").style.display =
+            "block";
+    } else {
+        document.getElementById("msse-slider-container").style.display =
+            "none";
+    }
+
+    if (fly) {
+        if (data["type"] === "PointCloud") {
+            viewer.flyTo(tilesets[selectedAssetID][new Date(data["date"])]);
+        } else if (data["type"] === "Model") {
+            viewer.flyTo(entities[selectedAssetID]);
+        } else if (data["type"] === "EPTPointCloud") {
+            viewer.flyTo(tilesets[selectedAssetID][new Date(data["date"])][0]);
+        } else if (data["type"] === "Influx") {
+            var position = Cesium.Cartesian3.fromDegrees(
+                data["position"]["lng"],
+                data["position"]["lat"],
+                data["position"]["height"] + 1000
+            );
+
+            viewer.camera.flyTo({ destination: position });
+        }
+    }
+
+    if (timeline) {
+        var date = new Date(data.date);
+        viewer.timeline._highlightRanges = [];
+
+        if (tilesets[selectedAssetID] && tilesets[selectedAssetID][date]) {
+            selectedTileset = tilesets[selectedAssetID][date];
+
+            if (date.toString() !== "Invalid Date") {
+                viewer.timeline
+                    .addHighlightRange(highlightColor, highlightHeightPX)
+                    .setRange(
+                        Cesium.JulianDate.fromDate(new Date(date)),
+                        Cesium.JulianDate.fromDate(
+                            new Date(new Date(date).getTime() + 86400000)
+                        )
+                    );
+
+                viewer.clock.currentTime = new Cesium.JulianDate.fromDate(date);
+                viewer.timeline.updateFromClock();
+                viewer.timeline.zoomTo(
+                    Cesium.JulianDate.fromDate(date),
+                    Cesium.JulianDate.fromDate(new Date(date.getTime() + 86400000))
+                );
+
+                // if (tilesets[selectedAssetID][date].asset && tilesets[selectedAssetID][date].asset.ept.schema) {
+                //   setupStyleToolbar(tilesets[selectedAssetID][date]);
+                //   applyStyle(selectedDimension);
+                // } else {
+                //   var toolbar = document.getElementById("toolbar");
+
+                //   while (toolbar.firstChild) {
+                //     toolbar.removeChild(toolbar.firstChild);
+                //   }
+                // }
+                setupStyleToolbar(tilesets[selectedAssetID][date]);
+            } else {
+                //point clouds with no date
+                var currentDate = new Date();
+                viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+                    new Date()
+                );
+                viewer.timeline.updateFromClock();
+                viewer.timeline.zoomTo(
+                    Cesium.JulianDate.fromDate(currentDate),
+                    Cesium.JulianDate.fromDate(
+                        new Date(currentDate.getTime() + 86400000)
+                    )
+                );
+            }
+        } else {
+            var toolbar = document.getElementById("toolbar");
+
+            while (toolbar.firstChild) {
+                toolbar.removeChild(toolbar.firstChild);
+            }
+
+            if (data["type"] === "Influx") {
+                //Influx charts from 2 weeks before
+                var currentDate = new Date();
+                viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+                    currentDate
+                );
+                viewer.timeline.updateFromClock();
+                viewer.timeline.zoomTo(
+                    Cesium.JulianDate.fromDate(
+                        new Date(currentDate.getTime() - 2 * 7 * 86400000)
+                    ),
+                    Cesium.JulianDate.fromDate(new Date())
+                );
+            } else {
+                //Other data types with no date
+                var currentDate = new Date();
+                viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+                    new Date()
+                );
+                viewer.timeline.updateFromClock();
+                viewer.timeline.zoomTo(
+                    Cesium.JulianDate.fromDate(currentDate),
+                    Cesium.JulianDate.fromDate(
+                        new Date(currentDate.getTime() + 86400000)
+                    )
+                );
+            }
+        }
+    }
+};
+
+const loadGeoJson = (asset, data, fly) => {
+    var dataset = data.url;
+
+    if (!dataSources[asset.id]) dataSources[asset.id] = {};
+    var dataIndex = asset.data.indexOf(data);
+    
+    if (!dataSources[asset.id][dataIndex]) {
+        var geoJsonPromise = Cesium.GeoJsonDataSource.load(dataset, {
+            // clampToGround: true  //issues with picking polygons, using terrain sampling
+        });
+    
+        // viewer.dataSources.add(geoJsonPromise);
+
+        dataSources[asset.id][dataIndex] = new Cesium.CustomDataSource();
+
+        viewer.dataSources.add(dataSources[asset.id][dataIndex]);
+        geoJsonPromise.then((dataSource) => {
+            var entities = dataSource.entities.values;
+            var samplePromises = [];
+
+            dataSource.entities.values.map((entity) => {
+                // dataSource.entities.values.slice(0,24).map((entity) => {
+                var positions = entity.polygon.hierarchy.getValue().positions;
+                var cartoPositions = [];
+                positions.map((pos) => {
+                    var carto = Cesium.Cartographic.fromCartesian(pos);
+                    cartoPositions.push(
+                        new Cesium.Cartographic(carto.longitude, carto.latitude)
+                    );
+                });
+
+                samplePromises.push(
+                    Cesium.sampleTerrainMostDetailed(
+                        viewer.terrainProvider,
+                        cartoPositions
+                    ).then((updatedPositions) => {
+                        // var polygonEntity = viewer.entities.add({
+                        var polygonEntity = dataSources[asset.id][
+                            dataIndex
+                        ].entities.add({
+                            polygon: {
+                                hierarchy: new Cesium.PolygonHierarchy(
+                                    Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                                        updatedPositions
+                                    )
+                                ),
+                                // hierarchy:new Cesium.CallbackProperty( () => {
+                                //   updatedPositions.map(cartoPoint=>{
+                                //   // var height = viewer.scene.sampleHeight(cartoPoint);
+                                //   var height = viewer.scene.globe.getHeight(cartoPoint);
+                                //   // console.log(height);
+                                //   if (height){
+                                //     cartoPoint.height=height;
+                                //   }
+                                // })
+                                //   return(new Cesium.PolygonHierarchy(Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(updatedPositions)));
+                                // },false),  //slow
+                                material: Cesium.Color.RED,
+                                perPositionHeight: true,
+                                // perPositionHeight: false, //picking issues
+                                arcType: Cesium.ArcType.GEODESIC,
+                            },
+                        });
+                        polygonEntity.properties = entity.properties;
+                    })
+                );
+            });
+            Promise.all(samplePromises).then(() => {
+                dataSource=null;
+                geoJsonPromise=null;
+                if (fly) {
+                    viewer.flyTo(dataSources[asset.id][asset.data.indexOf(data)]);
+                    document.getElementById("msse-slider-container").style.display =
+                        "none";
+                }
+            });
+        });
+    } else {
+        dataSources[asset.id][dataIndex].show = true;
+        if (fly) {
+            viewer.flyTo(dataSources[asset.id][dataIndex]);
+            document.getElementById("msse-slider-container").style.display =
+                "none";
+        }
+        // Cesium.when(viewer.dataSourceDisplay.ready, function () {
+        //     var boundingSpheres=[];
+        //     var entities = dataSources[asset.id][asset.data.indexOf(data)].entities.values;
+        //     for (var i=0;i<entities.length;i++){
+        //       var boundingSphere = new Cesium.BoundingSphere();
+        //       var state = viewer.dataSourceDisplay.getBoundingSphere(
+        //         entities[i],
+        //         false,
+        //         boundingSphere
+        //       );
+        //       console.log(state);
+        //       if (state === 0){
+        //         boundingSpheres.push(boundingSphere);
+        //       } else {
+        //         return;
+        //       }
+        //     }
+        //     var full = Cesium.BoundingSphere.fromBoundingSpheres(boundingSpheres);
+        //     var fullCarto = Cesium.Cartographic.fromCartesian(full.center)
+        //     console.log(fullCarto);
+        //     console.log(fullCarto.longitude * Cesium.Math.DEGREES_PER_RADIAN);
+        //     console.log(fullCarto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
+        //   });
+    }
+};
+
+var pcFormats = ["laz", "las", "xyz", "pcd", "ply"];
+
+const downloadFile = (asset, data, index, format) => {
+    var waitModal = document.getElementById("processing-wait-modal");
+
+    if (pcFormats.includes(format)) {
+        waitModal.style.display = "block";
+        fetch(
+            `${processingAPI}/download?` +
+            new URLSearchParams({
+                assetID: asset.id,
+                dataIndex: index,
+                format: format,
+            }),
+            { cache: "no-store" }
+        )
+            .then((response) => response.text())
+            .then((text) => {
+                waitModal.style.display = "none";
+                var link = document.createElement("a");
+                link.href = text;
+                waitModal.style.display = "none";
+                link.click();
+                link.remove();
+            })
+            .catch((err) => {
+                alert(err);
+                waitModal.style.display = "none";
+            });
+    } else if (data.type === "GeoJSON") {
+        if (data.url.endsWith(".geojson")) {
+            var link = document.createElement("a");
+            link.href = data.url;
+            link.target = "_blank";
+            link.click();
+            link.remove();
+        }
+    } else if (data.type === "Model") {
+        if (!Array.isArray(data.source)) {
+            var link = document.createElement("a");
+            link.href = data.source.url;
+            link.target = "_blank";
+            link.click();
+            link.remove();
+        } else {
+            waitModal.style.display = "block";
+            fetch(
+                `${processingAPI}/download?` +
+                new URLSearchParams({
+                    assetID: asset.id,
+                    dataIndex: index,
+                    format: "zip",
+                }),
+                { cache: "no-store" }
+            )
+                .then((response) => response.text())
+                .then((text) => {
+                    var link = document.createElement("a");
+                    link.href = text;
+                    waitModal.style.display = "none";
+                    link.click();
+                    link.remove();
+                })
+                .catch((err) => {
+                    alert(err);
+                    waitModal.style.display = "none";
+                });
+        }
+    } else if (data.type === "Influx") {
+        waitModal.style.display = "block";
+        fetch(`/cesium/influx/fivemin?station=${data.station}`, {
+            cache: "no-store",
+        })
+            .then((response) => response.json())
+            .then((parsedResponse) => {
+                fetch(`/cesium/influx/daily?station=${data.station}`, {
+                    cache: "no-store",
+                })
+                    .then((dailyresponse) => dailyresponse.json())
+                    .then((parsedDailyresponse) => {
+                        waitModal.style.display = "none";
+                        var outJson = {
+                            fivemin: parsedResponse,
+                            daily: parsedDailyresponse,
+                        };
+                        const blob = new Blob([JSON.stringify(outJson)]);
+                        const url = URL.createObjectURL(blob);
+                        var link = document.createElement("a");
+                        link.href = url;
+                        link.download = `Influx_${data.station}_2w.json`;
+                        waitModal.style.display = "none";
+                        link.click();
+                        URL.revokeObjectURL(url);
+                        link.remove();
+                    })
+                    .catch((err) => {
+                        alert(err);
+                        waitModal.style.display = "none";
+                    });
+            })
+            .catch((err) => {
+                alert(err);
+                waitModal.style.display = "none";
+            });
+    }
+};
+
+var markersDataSource;
+var pinBuilder = new Cesium.PinBuilder();
+
+var selectedAsset;
+var selectedData;
+
+const setupSidebar = () => {
+    fetch(
+        "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/index.json",
+        { cache: "no-store" }
+    )
+        // fetch('/cesium/Apps/index.json', { cache: "no-store" })
+        .then((response) => response.text())
+        .then((text) => {
+            var jsonResponse = JSON.parse(text);
+            assets = jsonResponse["assets"];
+
+            while (document.getElementById("sidebar-data-buttons").firstChild) {
+                document
+                    .getElementById("sidebar-data-buttons")
+                    .removeChild(
+                        document.getElementById("sidebar-data-buttons").firstChild
+                    );
+            }
+
+            if (!markersDataSource) {
+                markersDataSource = new Cesium.CustomDataSource();
+                markersDataSource.clustering.enabled = true;
+
+                markersDataSource.clustering.clusterEvent.addEventListener(
+                    function (clusteredEntities, cluster) {
+                        cluster.label.show = false;
+                        cluster.billboard.show = true;
+
+                        cluster.billboard.verticalOrigin =
+                            Cesium.VerticalOrigin.BOTTOM;
+                        cluster.billboard.image = pinBuilder
+                            .fromText(
+                                cluster.label.text,
+                                Cesium.Color.fromCssColorString("#5B8B51"),
+                                48
+                            )
+                            .toDataURL();
+                        cluster.billboard.disableDepthTestDistance =
+                            Number.POSITIVE_INFINITY;
+                        cluster.billboard.heightReference =
+                            Cesium.HeightReference.CLAMP_TO_GROUND;
+                    }
+                );
+            }
+
+            var categories = {};
+            var assetDivs = {};
+
+            jsonResponse["categories"].map((cat) => {
+                categories[cat.id] = document.createElement("div");
+                var accordionDiv = categories[cat.id];
+
+                accordionDiv.className = "sidebar-item sidebar-accordion";
+                accordionDiv.innerHTML = cat.name;
+                accordionDiv.onclick = () => {
+                    accordionDiv.classList.toggle("sidebar-accordion-active");
+                    var panel = accordionDiv.nextElementSibling;
+                    if (panel.style.maxHeight) {
+                        panel.style.maxHeight = null;
+                    } else {
+                        panel.style.maxHeight = panel.scrollHeight + 1 + "px";
+                    }
+                };
+
+                if (cat.id !== 6) {
+                    //Uploads
+                    document
+                        .getElementById("sidebar-data-buttons")
+                        .appendChild(accordionDiv);
+                    var accordionPanelDiv = document.createElement("div");
+                    accordionPanelDiv.className = "sidebar-accordion-panel";
+                    document
+                        .getElementById("sidebar-data-buttons")
+                        .appendChild(accordionPanelDiv);
+                }
+            });
+
+            //Add uploads accordion last to the list
+            var uploadAccordion = categories[6];
+            document
+                .getElementById("sidebar-data-buttons")
+                .appendChild(uploadAccordion);
+            var accordionPanelDiv = document.createElement("div");
+            accordionPanelDiv.className = "sidebar-accordion-panel";
+            document
+                .getElementById("sidebar-data-buttons")
+                .appendChild(accordionPanelDiv);
+
+            assets.map((asset) => {
+                var accordionDiv = categories[asset.categoryID];
+                var accordionPanelDiv = accordionDiv.nextElementSibling;
+
+                var assetDiv = document.createElement("div");
+
+                var assetContentDiv = document.createElement("div");
+                assetContentDiv.innerHTML =
+                    asset["status"] !== "active"
+                        ? asset["name"] + ` (${asset["status"]})`
+                        : asset["name"];
+                assetContentDiv.style.padding = "0 18px";
+                assetDiv.className = "sidebar-item";
+                assetContentDiv.className = "sidebar-accordion";
+
+                assetDiv.appendChild(assetContentDiv);
+
+                var datesPanelDiv = document.createElement("div");
+                datesPanelDiv.className = "sidebar-accordion-panel";
+
+                if (asset.data.length > 1) {
+                    var timeseriesDiv = document.createElement("div");
+                    timeseriesDiv.className = "sidebar-item";
+
+                    var timeseriesContentDiv = document.createElement("div");
+                    timeseriesContentDiv.style.padding = "0 36px";
+                    timeseriesContentDiv.innerHTML = "Time Series";
+
+                    timeseriesDiv.onclick = () => {
+                        window.history.pushState(
+                            "",
+                            "",
+                            `/cesium/Apps/ASDC/${asset["id"]}`
+                        );
+                        loadAsset(asset);
+                    };
+
+                    timeseriesDiv.appendChild(timeseriesContentDiv);
+                    datesPanelDiv.appendChild(timeseriesDiv);
+                }
+
+                asset.data.map((data, index) => {
+                    var dateDiv = document.createElement("div");
+                    dateDiv.className = "sidebar-item";
+
+                    var dateContentDiv = document.createElement("div");
+                    dateContentDiv.style.padding = "0 36px";
+
+                    if (data.date) {
+                        var date = new Date(data.date);
+                        dateContentDiv.innerHTML =
+                            date.toString() !== "Invalid Date"
+                                ? new Date(data.date).toLocaleDateString("en-au", {
+                                    year: "numeric",
+                                    month: "numeric",
+                                    day: "numeric",
+                                    hour: "numeric",
+                                    minute: "numeric",
+                                })
+                                : data.date;
+                    } else {
+                        dateContentDiv.innerHTML = "No Date";
+                    }
+
+                    dateDiv.onclick = () => {
+                        window.history.pushState(
+                            "",
+                            "",
+                            `/cesium/Apps/ASDC/${asset["id"]}/${asset.data.indexOf(
+                                data
+                            )}`
+                        );
+                        selectedData = data;
+                        loadData(asset, data, true, true);
+                    };
+
+                    dateDiv.appendChild(dateContentDiv);
+                    datesPanelDiv.appendChild(dateDiv);
+
+                    if (data.type != "EPTPointCloud" && data.source) {
+                        var downloadBtn = document.createElement("div");
+                        downloadBtn.className = "dlBtn fa fa-download";
+                        downloadBtn.style.float = "right";
+
+                        downloadBtn.onclick = (evt) => {
+                            evt.stopPropagation();
+                        };
+
+                        downloadBtn.onmouseover = (evt) => {
+                            var dlDropdown = document.getElementById("dlDropdown");
+                            dlDropdown.style.left =
+                                evt.target.offsetLeft +
+                                evt.target.offsetWidth / 2 -
+                                document.getElementById("sidebar-data-buttons")
+                                    .scrollLeft +
+                                "px";
+                            dlDropdown.style.top =
+                                evt.target.offsetTop +
+                                evt.target.offsetHeight / 2 -
+                                document.getElementById("sidebar-data-buttons")
+                                    .scrollTop +
+                                "px";
+                            dlDropdown.style.display = "block";
+                            downloadBtn.style.color = "white";
+
+                            dlDropdown.onmouseover = (event) => {
+                                dlDropdown.style.display = "block";
+                                downloadBtn.style.color = "white";
+                                dateDiv.style.background = "#5B8B51";
+                            };
+
+                            dlDropdown.onmouseleave = (event) => {
+                                dlDropdown.style.display = "none";
+                                downloadBtn.style.color = "black";
+                                dateDiv.style.background = null;
+                            };
+
+                            if (data.type === "PointCloud") {
+                                pcFormats.map((format) => {
+                                    dlDropdown.children["dl-" + format].style.display =
+                                        "block";
+                                    dlDropdown.children["dl-" + format].onclick = () => {
+                                        downloadFile(asset, data, index, format);
+                                    };
+                                });
+                                dlDropdown.children["dl-geojson"].style.display = "none";
+                                dlDropdown.children["dl-gltf"].style.display = "none";
+                                dlDropdown.children["dl-json"].style.display = "none";
+                            } else if (data.type === "GeoJSON") {
+                                pcFormats.map((format) => {
+                                    dlDropdown.children["dl-" + format].style.display =
+                                        "none";
+                                });
+                                dlDropdown.children["dl-geojson"].style.display = "block";
+                                dlDropdown.children["dl-geojson"].onclick = () => {
+                                    downloadFile(asset, data, index, data.type);
+                                };
+                                dlDropdown.children["dl-gltf"].style.display = "none";
+                                dlDropdown.children["dl-json"].style.display = "none";
+                            } else if (data.type === "Model") {
+                                pcFormats.map((format) => {
+                                    dlDropdown.children["dl-" + format].style.display =
+                                        "none";
+                                });
+                                dlDropdown.children["dl-geojson"].style.display = "none";
+                                dlDropdown.children["dl-gltf"].style.display = "block";
+                                dlDropdown.children["dl-gltf"].onclick = () => {
+                                    downloadFile(asset, data, index, data.type);
+                                };
+                                dlDropdown.children["dl-json"].style.display = "none";
+                            } else if (data.type === "Influx") {
+                                pcFormats.map((format) => {
+                                    dlDropdown.children["dl-" + format].style.display =
+                                        "none";
+                                });
+                                dlDropdown.children["dl-geojson"].style.display = "none";
+                                dlDropdown.children["dl-gltf"].style.display = "none";
+                                dlDropdown.children["dl-json"].style.display = "block";
+                                dlDropdown.children["dl-json"].onclick = () => {
+                                    downloadFile(asset, data, index, data.type);
+                                };
+                            }
+                        };
+
+                        downloadBtn.onmouseleave = (evt) => {
+                            dlDropdown.style.display = "none";
+                            downloadBtn.style.color = "black";
+                        };
+
+                        dateContentDiv.appendChild(downloadBtn);
+                    }
+                });
+
+                assetDiv.onclick = () => {
+                    assetContentDiv.classList.toggle("sidebar-accordion-active");
+
+                    if (datesPanelDiv.style.maxHeight) {
+                        datesPanelDiv.style.maxHeight = null;
+                    } else {
+                        datesPanelDiv.style.maxHeight =
+                            datesPanelDiv.scrollHeight + 1 + "px";
+                    }
+
+                    accordionPanelDiv.style.maxHeight =
+                        parseFloat(accordionPanelDiv.style.maxHeight.slice(0, -2)) +
+                        datesPanelDiv.scrollHeight +
+                        "px";
+                };
+
+                accordionPanelDiv.appendChild(assetDiv);
+                accordionPanelDiv.appendChild(datesPanelDiv);
+
+                assetDivs[asset.id] = assetDiv;
+
+                if (asset.data) {
+                    asset.data.sort(function (a, b) {
+                        return (
+                            new Date(a.date).getTime() - new Date(b.date).getTime()
+                        );
+                    });
+                }
+
+                if (
+                    asset.data &&
+                    asset.data.length > 0 &&
+                    asset.data[0].position
+                ) {
+                    var data = asset.data[0];
+                    var position = Cesium.Cartesian3.fromDegrees(
+                        data["position"]["lng"],
+                        data["position"]["lat"]
+                    );
+
+                    if (!viewer.dataSources.contains(markersDataSource)) {
+                        markersDataSource.entities.add({
+                            position: position,
+                            billboard: {
+                                image: pinBuilder
+                                    .fromColor(
+                                        Cesium.Color.fromCssColorString("#5B8B51"),
+                                        48
+                                    )
+                                    .toDataURL(),
+                                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                                disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                            },
+                            id: "marker_" + asset.id,
+                        });
+                    }
+                }
+            });
+
+            if (!viewer.dataSources.contains(markersDataSource)) {
+                viewer.dataSources.add(markersDataSource);
+
+                setTimeout(() => {
+                    markersDataSource.clustering.pixelRange = 0;
+                }, 0);
+            }
+
+            if (selectedAssetID) {
+                assets.map((a) => {
+                    if (a.id === parseInt(selectedAssetID)) {
+                        selectedAsset = a;
+                        if (selectedDataIndex) {
+                            selectedData = a.data[selectedDataIndex];
+                        }
+                        categories[a.categoryID].onclick();
+                        assetDivs[selectedAssetID].onclick();
+                    }
+                });
+            }
+
+            if (selectedData) {
+                loadData(selectedAsset, selectedData, true, true);
+            } else {
+                loadAsset(selectedAsset);
+            }
+        });
+};
+
+setupSidebar();
+
+const setScreenSpaceError = (evt) => {
+    MSSE = evt.target.value;
+    document.getElementById("msse-value").innerHTML = MSSE;
+
+    selectedTileset.maximumScreenSpaceError = MSSE;
+
+    Object.keys(tilesets).map((tileset) => {
+        Object.keys(tilesets[tileset]).map((date) => {
+            if (Array.isArray(tilesets[tileset][new Date(date)])) {
+                tilesets[tileset][new Date(date)].map((tileset) => {
+                    tileset.maximumScreenSpaceError = MSSE;
+                });
+            } else {
+                tilesets[tileset][new Date(date)].maximumScreenSpaceError = MSSE;
+            }
+        });
+    });
+};
+
+document.getElementById("msse-slider").oninput = setScreenSpaceError;
+
+viewer.clock.onTick.addEventListener((clock) => {
+    var currentTime = Cesium.JulianDate.toDate(clock.currentTime).getTime();
+    if (tilesets[selectedAssetID]) {
+        if (!selectedData) {
+            var tilesetDates = Object.keys(tilesets[selectedAssetID]).sort(
+                function (a, b) {
+                    return new Date(a).getTime() - new Date(b).getTime();
+                }
+            );
+
+            for (var i = 0; i < tilesetDates.length; i++) {
+                if (
+                    (i === 0 ||
+                        new Date(tilesetDates[i]).getTime() <= currentTime) &&
+                    (i === tilesetDates.length - 1 ||
+                        new Date(tilesetDates[i + 1]).getTime() > currentTime)
+                ) {
+                    if (Array.isArray(tilesets[selectedAssetID][tilesetDates[i]])) {
+                        tilesets[selectedAssetID][tilesetDates[i]].map((tileset) => {
+                            tileset.show = true;
+                        });
+                    } else {
+                        tilesets[selectedAssetID][tilesetDates[i]].show = true;
+
+                        if (
+                            selectedTileset !=
+                            tilesets[selectedAssetID][tilesetDates[i]] &&
+                            tilesets[selectedAssetID][tilesetDates[i]]
+                        ) {
+                            setupStyleToolbar(
+                                tilesets[selectedAssetID][tilesetDates[i]]
+                            );
+                        }
+
+                        selectedTileset = tilesets[selectedAssetID][tilesetDates[i]];
+
+                        if (
+                            selectedTileset.asset &&
+                            selectedTileset.asset.ept.schema
+                        ) {
+                            applyStyle(selectedDimension);
+                        }
+                    }
+                } else {
+                    if (Array.isArray(tilesets[selectedAssetID][tilesetDates[i]])) {
+                        tilesets[selectedAssetID][tilesetDates[i]].map((tileset) => {
+                            tileset.show = false;
+                        });
+                    } else {
+                        tilesets[selectedAssetID][tilesetDates[i]].show = false;
+                    }
+                }
+            }
+        } else {
+            if (
+                selectedData.type === "PointCloud" ||
+                selectedData.type === "EPTPointCloud"
+            ) {
+                if (
+                    Array.isArray(
+                        tilesets[selectedAssetID][new Date(selectedData.date)]
+                    )
+                ) {
+                    tilesets[selectedAssetID][new Date(selectedData.date)].map(
+                        (tileset) => {
+                            tileset.show = true;
+                        }
+                    );
+                } else {
+                    tilesets[selectedAssetID][
+                        new Date(selectedData.date)
+                    ].show = true;
+
+                    if (
+                        selectedTileset !=
+                        tilesets[selectedAssetID][new Date(selectedData.date)] &&
+                        tilesets[selectedAssetID][new Date(selectedData.date)]
+                    ) {
+                        setupStyleToolbar(
+                            tilesets[selectedAssetID][new Date(selectedData.date)]
+                        );
+                    }
+
+                    selectedTileset =
+                        tilesets[selectedAssetID][new Date(selectedData.date)];
+
+                    if (selectedTileset.asset && selectedTileset.asset.ept.schema) {
+                        applyStyle(selectedDimension);
+                    }
+                }
+            }
+        }
+    }
+
+    //constant geojsons
+    if (dataSources[selectedAssetID]) {
+        if (!selectedData) {
+            Object.keys(dataSources[selectedAssetID]).map((i) => {
+                dataSources[selectedAssetID][i].show = true;
+            });
+        } else {
+            if (
+                selectedData.type === "GeoJSON" &&
+                dataSources[selectedAssetID][
+                selectedAsset.data.indexOf(selectedData)
+                ]
+            ) {
+                dataSources[selectedAssetID][
+                    selectedAsset.data.indexOf(selectedData)
+                ].show = true;
+            }
+        }
+    }
+});
+
+var clickHandler = viewer.screenSpaceEventHandler.getInputAction(
+    Cesium.ScreenSpaceEventType.LEFT_CLICK
+);
+viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(
+    movement
+) {
+    var pickedFeature = viewer.scene
+        .drillPick(movement.position)
+        .filter((feature) => {
+            if (!(feature.primitive instanceof Cesium.Cesium3DTileset))
+                return feature;
+        })[0];
+
+    if (!Cesium.defined(pickedFeature)) {
+        clickHandler(movement);
+        return;
+    }
+
+    var selectedEntity = pickedFeature.id;
+
+    if (selectedEntity) {
+        if (selectedEntity.id.startsWith("marker")) {
+            var id = selectedEntity.id.slice("marker_".length);
+            window.history.pushState("", "", `/cesium/Apps/ASDC/${id}`);
+            assets.map((a) => {
+                if (a["id"] === parseInt(id)) {
+                    loadAsset(a);
+                    return;
+                }
+            });
+        } else {
+            if (selectedEntity.properties) {
+                selectedEntity.description =
+                    '<table class="cesium-infoBox-defaultTable"><tbody>';
+                for (
+                    var i = 0;
+                    i < selectedEntity.properties._propertyNames.length;
+                    i++
+                ) {
+                    selectedEntity.description +=
+                        "<tr><th>" +
+                        selectedEntity.properties._propertyNames[i] +
+                        "</th><td>" +
+                        selectedEntity.properties[
+                            selectedEntity.properties._propertyNames[i]
+                        ].getValue() +
+                        "</td></tr>";
+                }
+                selectedEntity.description += "</tbody></table>";
+
+                viewer.selectedEntity = selectedEntity;
+            }
+        }
+    }
+},
+    Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+const addFileInput = () => {
+    var uploadForm = document.getElementById("upload-form");
+
+    var lineDiv = document.createElement("div");
+    lineDiv.className = "input-line";
+
+    var fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.name = "files[]";
+    fileInput.accept = ".laz,.las";
+    fileInput.required = true;
+
+    lineDiv.appendChild(fileInput);
+
+    var dateInput = document.createElement("input");
+    dateInput.type = "date";
+    dateInput.name = "dates[]";
+    dateInput.required = true;
+
+    lineDiv.appendChild(dateInput);
+
+    var removeButton = document.createElement("input");
+    removeButton.type = "button";
+    removeButton.value = "x";
+    removeButton.onclick = function () {
+        lineDiv.remove();
+    };
+    lineDiv.appendChild(removeButton);
+
+    uploadForm.appendChild(lineDiv);
+};
+
+const upload = () => {
+    var xmlHttpRequest = new XMLHttpRequest();
+    var form = document.forms.namedItem("upload-form");
+
+    for (var i = 0; i < form.elements.length; i++) {
+        if (
+            form.elements[i].value === "" &&
+            form.elements[i].hasAttribute("required")
+        ) {
+            alert("Please complete all required fields");
+            return;
+        }
+    }
+
+    if (Array.isArray(form.elements["files[]"])) {
+        form.elements["files[]"].map((file) => {
+            if (
+                !file.files[0].name.toLowerCase().endsWith(".laz") &&
+                !file.files[0].name.toLowerCase().endsWith(".las")
+            ) {
+                alert("Only .laz and .las files are accepted");
+                return;
+            }
+        });
+    } else {
+        if (
+            !form.elements["files[]"].files[0].name
+                .toLowerCase()
+                .endsWith(".laz") &&
+            !form.elements["files[]"].files[0].name
+                .toLowerCase()
+                .endsWith(".las")
+        ) {
+            alert("Only .laz and .las files are accepted");
+            return;
+        }
+    }
+
+    var formData = new FormData(form);
+
+    document.getElementById("modal-upload-button").innerHTML =
+        "Uploading...";
+    document.getElementById("modal-upload-button").style.pointerEvents =
+        "none";
+
+    xmlHttpRequest.addEventListener("loadend", (progress) => {
+        document.getElementById("modal-upload-button").innerHTML = "Upload";
+        document.getElementById("modal-upload-button").style.pointerEvents =
+            "auto";
+        console.log(progress);
+    });
+
+    xmlHttpRequest.open("POST", `${processingAPI}/upload`, true);
+
+    xmlHttpRequest.onreadystatechange = function () {
+        if (xmlHttpRequest.readyState === 4) {
+            if (xmlHttpRequest.status === 200) {
+                setupSidebar();
+                closeModal();
+            } else {
+                alert(
+                    "Error " +
+                    xmlHttpRequest.status +
+                    " : " +
+                    xmlHttpRequest.response
+                );
+            }
+        }
+    };
+
+    xmlHttpRequest.send(formData);
+};
+
+var uploadModal = document.getElementById("upload-modal");
+
+const openModal = () => {
+    uploadModal.style.display = "block";
+};
+
+const closeModal = () => {
+    uploadModal.style.display = "none";
+};
+
+document.getElementById("sidebar-upload-button").onclick = openModal;
+document.getElementById("close-upload-modal").onclick = closeModal;
+document.getElementById("add-file-button").onclick = addFileInput;
+document.getElementById("modal-upload-button").onclick = upload;
+
+const createGraph = (
+    x,
+    y,
+    traceNames,
+    type,
+    graphTitle,
+    suffix,
+    doubleAxis
+) => {
+    const pallete = [
+        "#7EB26D",
+        "#EAB839",
+        "#6ED0E0",
+        "#EF843C",
+        "#E24D42",
+        "#1F78C1",
+    ];
+
+    var data = [];
+
+    y.map((yi, i) => {
+        if (type === "scatter") {
+            data.push({
+                type: type,
+                mode: "lines",
+                name: traceNames[i],
+                x: x,
+                y: yi,
+                line: { color: pallete[i], width: 1 },
+            });
+        } else if (type === "bar") {
+            data.push({
+                type: type,
+                name: traceNames[i],
+                x: x,
+                y: yi,
+                marker: { color: pallete[i] },
+            });
+        }
+    });
+
+    if (doubleAxis) {
+        data[data.length - 1].yaxis = "y2";
+        var layout = {
+            title: graphTitle,
+            plot_bgcolor: "black",
+            paper_bgcolor: "black",
+            font: {
+                size: 10,
+                color: "white",
+            },
+            yaxis: {
+                gridcolor: "rgba(255,255,255,0.25)",
+                ticksuffix: suffix[0],
+            },
+            yaxis2: {
+                gridcolor: "rgba(255,255,255,0.25)",
+                overlaying: "y",
+                side: "right",
+                ticksuffix: suffix[1],
+            },
+            xaxis: {
+                gridcolor: "rgba(255,255,255,0.25)",
+            },
+            legend: {
+                xanchor: "center",
+                yanchor: "top",
+                y: -0.3,
+                x: 0.5,
+            },
+            hoverlabel: {
+                namelength: -1,
+            },
+        };
+    } else {
+        var layout = {
+            title: graphTitle,
+            plot_bgcolor: "black",
+            paper_bgcolor: "black",
+            font: {
+                size: 10,
+                color: "white",
+            },
+            yaxis: {
+                gridcolor: "rgba(255,255,255,0.25)",
+                ticksuffix: suffix,
+            },
+            xaxis: {
+                gridcolor: "rgba(255,255,255,0.25)",
+            },
+            legend: {
+                xanchor: "center",
+                yanchor: "top",
+                y: -2,
+                x: 0.5,
+                orientation: "h",
+            },
+            hoverlabel: {
+                namelength: -1,
+            },
+        };
+    }
+
+    var plotDiv = document.createElement("div");
+    plotDiv.style.height = "100%";
+    plotDiv.style.width = "95%";
+    plotDiv.style["scroll-snap-align"] = "start";
+    document.getElementById("graphs-container").appendChild(plotDiv);
+
+    Plotly.newPlot(plotDiv, data, layout);
+};
+
+const loadGraph = (station) => {
+    while (document.getElementById("graphs-container").firstChild) {
+        document
+            .getElementById("graphs-container")
+            .removeChild(
+                document.getElementById("graphs-container").firstChild
+            );
+    }
+    document.getElementById("graphs-modal").style.display = "block";
+
+    fetch(`/cesium/influx/fivemin?station=${station}`, {
+        cache: "no-store",
+    })
+        .then((response) => {
+            if (response.status !== 200) {
+                // console.log(response);
+            }
+            return response;
+        })
+        .then((response) => response.json())
+        .then((parsedResponse) => {
+            const unpackData = (arr, key) => {
+                return arr.map((obj) => obj[key]);
+            };
+
+            const pallete = [
+                "#7EB26D",
+                "#EAB839",
+                "#6ED0E0",
+                "#EF843C",
+                "#E24D42",
+                "#1F78C1",
+            ];
+
+            createGraph(
+                unpackData(parsedResponse, "time"),
+                [
+                    unpackData(parsedResponse, "mean_PAR"),
+                    unpackData(parsedResponse, "mean_TSR"),
+                ],
+                ["mean_PAR", "mean_Total_Solar_Radiation"],
+                "scatter",
+                "Photosynthetically Active Radiation & Shortwave Radiation",
+                ["μmol/m²/s", "W/m²"],
+                true
+            );
+
+            var mean_Soil_VWC = [];
+            var mean_Soil_VWC_names = [];
+            var mean_Soil_Temp = [];
+            var mean_Soil_Temp_names = [];
+            var mean_Soil_EC = [];
+            var mean_Soil_EC_names = [];
+
+            Object.keys(parsedResponse[0]).map((key, index) => {
+                if (key.startsWith("mean_Soil_VWC")) {
+                    mean_Soil_VWC.push(unpackData(parsedResponse, key));
+                    mean_Soil_VWC_names.push(key);
+                }
+                if (key.startsWith("mean_Soil_Temp")) {
+                    mean_Soil_Temp.push(unpackData(parsedResponse, key));
+                    mean_Soil_Temp_names.push(key);
+                }
+                if (key.startsWith("mean_Soil_EC")) {
+                    mean_Soil_EC.push(unpackData(parsedResponse, key));
+                    mean_Soil_EC_names.push(key);
+                }
+            });
+
+            createGraph(
+                unpackData(parsedResponse, "time"),
+                mean_Soil_VWC,
+                mean_Soil_VWC_names,
+                "scatter",
+                "Soil Volumetric Water Content",
+                "%",
+                false
+            );
+
+            createGraph(
+                unpackData(parsedResponse, "time"),
+                mean_Soil_Temp,
+                mean_Soil_Temp_names,
+                "scatter",
+                "Soil Temperature Mean",
+                "°C",
+                false
+            );
+
+            createGraph(
+                unpackData(parsedResponse, "time"),
+                mean_Soil_EC,
+                mean_Soil_EC_names,
+                "scatter",
+                "Soil Electrical Conductivity",
+                "dS/m",
+                false
+            );
+
+            createGraph(
+                unpackData(parsedResponse, "time"),
+                [
+                    unpackData(parsedResponse, "mean_Air_Temperature"),
+                    unpackData(parsedResponse, "mean_Relative_Humidity"),
+                ],
+                ["mean_Air_Temperature", "mean_Relative_Humidity"],
+                "scatter",
+                "Air Temperature & Relative Humidity",
+                ["°C", "%H"],
+                true
+            );
+
+            fetch(`/cesium/influx/daily?station=${station}`, {
+                cache: "no-store",
+            })
+                .then((dailyresponse) => {
+                    if (dailyresponse.status !== 200) {
+                        // console.log(dailyresponse);
+                    }
+                    return dailyresponse;
+                })
+                .then((dailyresponse) => dailyresponse.json())
+                .then((parsedDailyresponse) => {
+                    createGraph(
+                        unpackData(parsedDailyresponse, "time"),
+                        [unpackData(parsedDailyresponse, "sum_Rain")],
+                        ["sum_Rain"],
+                        "bar",
+                        "Daily Rainfall Total",
+                        "mm",
+                        false
+                    );
+
+                    createGraph(
+                        unpackData(parsedResponse, "time"),
+                        [unpackData(parsedResponse, "mean_Snow_Depth")],
+                        ["mean_Snow_Depth"],
+                        "scatter",
+                        "Snow Depth",
+                        "m",
+                        false
+                    );
+
+                    createGraph(
+                        unpackData(parsedResponse, "time"),
+                        [unpackData(parsedResponse, "mean_Battery_Voltage")],
+                        ["cr1000x.mean_Battery_Voltage"],
+                        "scatter",
+                        "Mean Battery Voltage",
+                        "V",
+                        false
+                    );
+                });
+        })
+        .catch((error) => console.log(error));
+};
+
+const closeGraphModal = () => {
+    document.getElementById("graphs-modal").style.display = "none";
+};
+
+document.getElementById("close-graph").onclick = closeGraphModal;

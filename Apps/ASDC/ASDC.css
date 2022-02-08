@@ -1,0 +1,216 @@
+#cesiumContainer {
+    width: 80%;
+    position: absolute;
+    left: 300px;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  #sidebar {
+    width: 300px;
+    position: absolute;
+    left: 0%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #fffbf5;
+    color: black;
+  }
+
+  #sidebar-data-buttons {
+    height: calc(100% - 34.6px);
+    overflow: auto;
+  }
+
+  .sidebar-item {
+    padding: 10px;
+    border-bottom: 1px solid #efe5d5;
+  }
+
+  .sidebar-upload-button {
+    padding: 10px;
+    border-top: 1px solid #efe5d5;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 50%;
+    top: 50%;
+    width: 50%;
+    height: 50%;
+    transform: translate(-50%, -50%);
+
+    overflow: auto;
+    background-color: #fffbf5;
+  }
+
+  .modal-header {
+    color: black;
+    padding: 2px 16px;
+    width: calc(100% - 32px);
+    border-bottom: 1px solid #efe5d5;
+  }
+
+  .close {
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+
+  .close:hover,
+  .close:focus {
+    color: #efe5d5;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .modal-content {
+    height: calc(100% - 55.68px - 34.6px);
+    overflow: auto;
+  }
+
+  .upload-inputs {
+    color: black;
+    left: 50%;
+    position: relative;
+    transform: translate(-50%, 0%);
+    width: 75%;
+    height: 100%;
+    display: inline-grid;
+    align-content: center;
+  }
+
+  .modal-upload-button {
+    color: black;
+    padding: 10px;
+    border-top: 1px solid #efe5d5;
+    text-align: center;
+  }
+
+  .sidebar-item:hover,
+  .sidebar-upload-button:hover,
+  .modal-upload-button:hover {
+    background: #5b8b51;
+    cursor: pointer;
+  }
+
+  .sidebar-accordion:after {
+    content: "\25C4";
+    color: black;
+    float: right;
+    margin-left: 5px;
+  }
+
+  .sidebar-accordion-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+  }
+
+  .sidebar-accordion-active:after {
+    content: "\25BC";
+  }
+
+  .add-file-button:hover {
+    cursor: pointer;
+  }
+
+  .input-line {
+    flex-direction: row;
+    width: 100%;
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  #graphs-modal {
+    height: 40%;
+    width: 40%;
+    position: absolute;
+    top: 50px;
+    right: 0px;
+    background-color: black;
+    display: none;
+  }
+
+  .graphs-modal-header {
+    padding: 2px 16px;
+    width: calc(100% - 32px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+    height: 50px;
+  }
+
+  .close-graph {
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: 6.5px;
+  }
+
+  .close-graph:hover,
+  .close-graph:focus {
+    color: rgba(255, 255, 255, 0.25);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  #graphs-container {
+    height: calc(100% - 55px);
+    overflow: auto;
+    scroll-snap-type: y mandatory;
+  }
+
+  #dlDropdown {
+    display: none;
+    position: absolute;
+    background: #fffbf5;
+    border: 1px solid #efe5d5;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .dlDropdownRow {
+    color: black;
+    height: 12px;
+    padding: 5px;
+  }
+
+  .dlDropdownRow:hover {
+    background: #5b8b51;
+    cursor: pointer;
+  }
+
+  .processing-modal {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: black;
+  }
+
+  .loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+    animation: spin 2s linear infinite;
+    margin-right: 10px;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
