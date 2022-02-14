@@ -1191,6 +1191,866 @@
           ]
         }
       ]
+    },
+    {
+      "id": 12,
+      "name": "Kangaroo Island",
+      "status": "active",
+      "categoryID": 7,
+      "data": [
+        {
+          "type": "PointCloud",
+          "date": "2020-01-27T00:00:00.000Z",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Kangaroo+Island/Tilesets/2020-01-27/tileset.json",
+          "position": {
+            "lng": 137.0997199298238,
+            "lat": -35.77286578665691,
+            "height": -82.45896784225464
+          },
+          "boundingSphereRadius": 62789.22807829081,
+          "schema": [
+            {
+              "count": 2783292141,
+              "maximum": 725964.31,
+              "mean": 683238.2340639206,
+              "minimum": 653921.35,
+              "name": "X",
+              "offset": 689943,
+              "scale": 0.01,
+              "size": 4,
+              "stddev": 20731.935644648333,
+              "type": "signed",
+              "variance": 429813155.57384014
+            },
+            {
+              "count": 2783292141,
+              "maximum": 6046078.05,
+              "mean": 6040126.389150714,
+              "minimum": 6032278.04,
+              "name": "Y",
+              "offset": 6039178,
+              "scale": 0.01,
+              "size": 4,
+              "stddev": 4125.561725892464,
+              "type": "signed",
+              "variance": 17020259.554148808
+            },
+            {
+              "count": 2783292141,
+              "maximum": 741.383,
+              "mean": 196.85660651893204,
+              "minimum": -703.523,
+              "name": "Z",
+              "offset": 19,
+              "scale": 0.001,
+              "size": 4,
+              "stddev": 86.52212314058002,
+              "type": "signed",
+              "variance": 7486.077792753692
+            },
+            {
+              "count": 2783292141,
+              "maximum": 65534,
+              "mean": 154.4403586008661,
+              "minimum": 7,
+              "name": "Intensity",
+              "size": 2,
+              "stddev": 152.96754474763432,
+              "type": "unsigned",
+              "variance": 23399.069746119505
+            },
+            {
+              "count": 2783292141,
+              "maximum": 7,
+              "mean": 1.35122100644767,
+              "minimum": 0,
+              "name": "ReturnNumber",
+              "size": 1,
+              "stddev": 0.672023023813243,
+              "type": "unsigned",
+              "variance": 0.45161494453509454
+            },
+            {
+              "count": 2783292141,
+              "maximum": 7,
+              "mean": 1.7023557237140365,
+              "minimum": 0,
+              "name": "NumberOfReturns",
+              "size": 1,
+              "stddev": 0.9380092802173532,
+              "type": "unsigned",
+              "variance": 0.879861409773877
+            },
+            {
+              "count": 2783292141,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "ScanDirectionFlag",
+              "size": 1,
+              "stddev": 0,
+              "type": "unsigned",
+              "variance": 0
+            },
+            {
+              "count": 2783292141,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "EdgeOfFlightLine",
+              "size": 1,
+              "stddev": 0,
+              "type": "unsigned",
+              "variance": 0
+            },
+            {
+              "count": 2783292141,
+              "counts": [
+                {
+                  "count": 1418706345,
+                  "value": 2
+                },
+                {
+                  "count": 36345502,
+                  "value": 4
+                },
+                {
+                  "count": 1327581145,
+                  "value": 5
+                },
+                {
+                  "count": 659149,
+                  "value": 6
+                }
+              ],
+              "maximum": 6,
+              "mean": 3.4580111714546597,
+              "minimum": 2,
+              "name": "Classification",
+              "size": 1,
+              "stddev": 1.4909954115934385,
+              "type": "unsigned",
+              "variance": 2.223067317392687
+            },
+            {
+              "count": 2783292141,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "ScanAngleRank",
+              "size": 4,
+              "stddev": 0,
+              "type": "float",
+              "variance": 0
+            },
+            {
+              "count": 2783292141,
+              "maximum": 255,
+              "mean": 29.07166453390446,
+              "minimum": 0,
+              "name": "UserData",
+              "size": 1,
+              "stddev": 59.33845150700576,
+              "type": "unsigned",
+              "variance": 3521.0518272492736
+            },
+            {
+              "count": 2783292141,
+              "maximum": 98,
+              "mean": 23.22869538293351,
+              "minimum": 1,
+              "name": "PointSourceId",
+              "size": 2,
+              "stddev": 22.139323828555003,
+              "type": "unsigned",
+              "variance": 490.14965958562334
+            },
+            {
+              "count": 2783292141,
+              "maximum": 99350.382201535,
+              "mean": 52130.87188533457,
+              "minimum": 5850.002941007,
+              "name": "GpsTime",
+              "size": 8,
+              "stddev": 41811.40052675906,
+              "type": "float",
+              "variance": 1748193214.0090683
+            },
+            {
+              "count": 2301520034,
+              "maximum": 65280,
+              "mean": 34427.37679192092,
+              "minimum": 0,
+              "name": "Red",
+              "size": 2,
+              "stddev": 10854.654407586462,
+              "type": "unsigned",
+              "variance": 117823522.30813621
+            },
+            {
+              "count": 2301520034,
+              "maximum": 65280,
+              "mean": 31286.277616911433,
+              "minimum": 0,
+              "name": "Green",
+              "size": 2,
+              "stddev": 10321.45400663241,
+              "type": "unsigned",
+              "variance": 106532412.81102823
+            },
+            {
+              "count": 2301520034,
+              "maximum": 65280,
+              "mean": 27426.907420777807,
+              "minimum": 0,
+              "name": "Blue",
+              "size": 2,
+              "stddev": 10335.456096327105,
+              "type": "unsigned",
+              "variance": 106821652.71910511
+            }
+          ]
+        },
+        {
+          "type": "PointCloud",
+          "date": "2020-02-06T00:00:00.000Z",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Kangaroo+Island/Tilesets/2020-02-06/tileset.json",
+          "position": {
+            "lng": 137.03584883080674,
+            "lat": -35.822800085646435,
+            "height": -117.93314391959753
+          },
+          "boundingSphereRadius": 73041.55254797498,
+          "schema": [
+            {
+              "count": 4558534469,
+              "maximum": 725964.31,
+              "mean": 674062.9430245386,
+              "minimum": 642244.83,
+              "name": "X",
+              "offset": 684105,
+              "scale": 0.01,
+              "size": 4,
+              "stddev": 23673.24530352664,
+              "type": "signed",
+              "variance": 560422543.2009461
+            },
+            {
+              "count": 4558534469,
+              "maximum": 6048582.25,
+              "mean": 6034312.03001864,
+              "minimum": 6018916.26,
+              "name": "Y",
+              "offset": 6033749,
+              "scale": 0.01,
+              "size": 4,
+              "stddev": 9065.808070893869,
+              "type": "signed",
+              "variance": 82188875.97828442
+            },
+            {
+              "count": 4558534469,
+              "maximum": 741.383,
+              "mean": 154.9138120096816,
+              "minimum": -703.523,
+              "name": "Z",
+              "offset": 19,
+              "scale": 0.001,
+              "size": 4,
+              "stddev": 91.27060839794954,
+              "type": "signed",
+              "variance": 8330.323957331859
+            },
+            {
+              "count": 4558534469,
+              "maximum": 65534,
+              "mean": 186.5100580293579,
+              "minimum": 7,
+              "name": "Intensity",
+              "size": 2,
+              "stddev": 153.85389513095222,
+              "type": "unsigned",
+              "variance": 23671.02104696604
+            },
+            {
+              "count": 4558534469,
+              "maximum": 7,
+              "mean": 1.279115376367664,
+              "minimum": 0,
+              "name": "ReturnNumber",
+              "size": 1,
+              "stddev": 0.6020112765237768,
+              "type": "unsigned",
+              "variance": 0.3624175770617873
+            },
+            {
+              "count": 4558534469,
+              "maximum": 7,
+              "mean": 1.558214017751593,
+              "minimum": 0,
+              "name": "NumberOfReturns",
+              "size": 1,
+              "stddev": 0.8543907983691104,
+              "type": "unsigned",
+              "variance": 0.7299836363378058
+            },
+            {
+              "count": 4558534469,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "ScanDirectionFlag",
+              "size": 1,
+              "stddev": 0,
+              "type": "unsigned",
+              "variance": 0
+            },
+            {
+              "count": 4558534469,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "EdgeOfFlightLine",
+              "size": 1,
+              "stddev": 0,
+              "type": "unsigned",
+              "variance": 0
+            },
+            {
+              "count": 4558534469,
+              "counts": [
+                {
+                  "count": 2732150889,
+                  "value": 2
+                },
+                {
+                  "count": 36345502,
+                  "value": 4
+                },
+                {
+                  "count": 1788926809,
+                  "value": 5
+                },
+                {
+                  "count": 1111269,
+                  "value": 6
+                }
+              ],
+              "maximum": 6,
+              "mean": 3.1942251493371514,
+              "minimum": 2,
+              "name": "Classification",
+              "size": 1,
+              "stddev": 1.4633969785769894,
+              "type": "unsigned",
+              "variance": 2.1415307169082616
+            },
+            {
+              "count": 4558534469,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "ScanAngleRank",
+              "size": 4,
+              "stddev": 0,
+              "type": "float",
+              "variance": 0
+            },
+            {
+              "count": 4558534469,
+              "maximum": 255,
+              "mean": 22.481260175594347,
+              "minimum": 0,
+              "name": "UserData",
+              "size": 1,
+              "stddev": 53.37756783369636,
+              "type": "unsigned",
+              "variance": 2849.1647478408568
+            },
+            {
+              "count": 4558534469,
+              "maximum": 98,
+              "mean": 23.848369153134804,
+              "minimum": 1,
+              "name": "PointSourceId",
+              "size": 2,
+              "stddev": 20.479614008697077,
+              "type": "unsigned",
+              "variance": 419.4145899452215
+            },
+            {
+              "count": 4558534469,
+              "maximum": 100537.998644332,
+              "mean": 57592.627197785405,
+              "minimum": 5141.508840709001,
+              "name": "GpsTime",
+              "size": 8,
+              "stddev": 42232.72640525665,
+              "type": "float",
+              "variance": 1783603179.6212623
+            },
+            {
+              "count": 3653720828,
+              "maximum": 65280,
+              "mean": 34304.39996960502,
+              "minimum": 0,
+              "name": "Red",
+              "size": 2,
+              "stddev": 12289.886448206804,
+              "type": "unsigned",
+              "variance": 151041308.90981725
+            },
+            {
+              "count": 3653720828,
+              "maximum": 65280,
+              "mean": 31026.90722028995,
+              "minimum": 0,
+              "name": "Green",
+              "size": 2,
+              "stddev": 11642.934188872234,
+              "type": "unsigned",
+              "variance": 135557916.52640995
+            },
+            {
+              "count": 3653720828,
+              "maximum": 65280,
+              "mean": 27296.929492991407,
+              "minimum": 0,
+              "name": "Blue",
+              "size": 2,
+              "stddev": 11353.492115341109,
+              "type": "unsigned",
+              "variance": 128901783.21311271
+            }
+          ]
+        },
+        {
+          "type": "PointCloud",
+          "date": "2020-04-13T00:00:00.000Z",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Kangaroo+Island/Tilesets/2020-04-13/tileset.json",
+          "position": {
+            "lng": 137.0369737255388,
+            "lat": -35.866923615587574,
+            "height": -117.9329872626849
+          },
+          "boundingSphereRadius": 73041.77512495751,
+          "schema": [
+            {
+              "count": 5788176392,
+              "maximum": 725964.31,
+              "mean": 675975.4558364686,
+              "minimum": 642244.83,
+              "name": "X",
+              "offset": 684105,
+              "scale": 0.01,
+              "size": 4,
+              "stddev": 22103.791172044865,
+              "type": "signed",
+              "variance": 488577584.1773685
+            },
+            {
+              "count": 5788176392,
+              "maximum": 6048582.25,
+              "mean": 6031245.4560432155,
+              "minimum": 6009121.33,
+              "name": "Y",
+              "offset": 6028852,
+              "scale": 0.01,
+              "size": 4,
+              "stddev": 11499.351328932471,
+              "type": "signed",
+              "variance": 132235080.98622097
+            },
+            {
+              "count": 5788176392,
+              "maximum": 741.383,
+              "mean": 136.685731087321,
+              "minimum": -703.523,
+              "name": "Z",
+              "offset": 19,
+              "scale": 0.001,
+              "size": 4,
+              "stddev": 92.29470662311125,
+              "type": "signed",
+              "variance": 8518.312870646176
+            },
+            {
+              "count": 5788176392,
+              "maximum": 65534,
+              "mean": 262.05726304618753,
+              "minimum": 7,
+              "name": "Intensity",
+              "size": 2,
+              "stddev": 264.5390968421225,
+              "type": "unsigned",
+              "variance": 69980.93375804585
+            },
+            {
+              "count": 5788176392,
+              "maximum": 7,
+              "mean": 1.2793016695611104,
+              "minimum": 0,
+              "name": "ReturnNumber",
+              "size": 1,
+              "stddev": 0.6021813646925902,
+              "type": "unsigned",
+              "variance": 0.36262239598303037
+            },
+            {
+              "count": 5788176392,
+              "maximum": 7,
+              "mean": 1.5585448225918392,
+              "minimum": 0,
+              "name": "NumberOfReturns",
+              "size": 1,
+              "stddev": 0.8545477647618721,
+              "type": "unsigned",
+              "variance": 0.7302518822595119
+            },
+            {
+              "count": 5788176392,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "ScanDirectionFlag",
+              "size": 1,
+              "stddev": 0,
+              "type": "unsigned",
+              "variance": 0
+            },
+            {
+              "count": 5788176392,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "EdgeOfFlightLine",
+              "size": 1,
+              "stddev": 0,
+              "type": "unsigned",
+              "variance": 0
+            },
+            {
+              "count": 5788176392,
+              "counts": [
+                {
+                  "count": 3499267043,
+                  "value": 2
+                },
+                {
+                  "count": 36345502,
+                  "value": 4
+                },
+                {
+                  "count": 2250877279,
+                  "value": 5
+                },
+                {
+                  "count": 1686568,
+                  "value": 6
+                }
+              ],
+              "maximum": 6,
+              "mean": 3.1803491549502416,
+              "minimum": 2,
+              "name": "Classification",
+              "size": 1,
+              "stddev": 1.461653286737482,
+              "type": "unsigned",
+              "variance": 2.136430330630484
+            },
+            {
+              "count": 5788176392,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "ScanAngleRank",
+              "size": 4,
+              "stddev": 0,
+              "type": "float",
+              "variance": 0
+            },
+            {
+              "count": 5788176392,
+              "maximum": 255,
+              "mean": 21.026579653864026,
+              "minimum": 0,
+              "name": "UserData",
+              "size": 1,
+              "stddev": 51.25207283511992,
+              "type": "unsigned",
+              "variance": 2626.7749698964367
+            },
+            {
+              "count": 5788176392,
+              "maximum": 98,
+              "mean": 22.242051561341192,
+              "minimum": 1,
+              "name": "PointSourceId",
+              "size": 2,
+              "stddev": 22.335479468970714,
+              "type": "unsigned",
+              "variance": 498.8736431088123
+            },
+            {
+              "count": 5788176392,
+              "maximum": 102718.99999895,
+              "mean": 61862.22510560418,
+              "minimum": 5141.508840709001,
+              "name": "GpsTime",
+              "size": 8,
+              "stddev": 41820.2514579622,
+              "type": "float",
+              "variance": 1748933432.0071895
+            },
+            {
+              "count": 4277434551,
+              "maximum": 65280,
+              "mean": 33863.98267303904,
+              "minimum": 0,
+              "name": "Red",
+              "size": 2,
+              "stddev": 11750.794149612308,
+              "type": "unsigned",
+              "variance": 138081163.14656284
+            },
+            {
+              "count": 4277434551,
+              "maximum": 65280,
+              "mean": 30732.6046093981,
+              "minimum": 0,
+              "name": "Green",
+              "size": 2,
+              "stddev": 11227.992907185799,
+              "type": "unsigned",
+              "variance": 126067824.7238146
+            },
+            {
+              "count": 4277434551,
+              "maximum": 65280,
+              "mean": 27189.116561836472,
+              "minimum": 0,
+              "name": "Blue",
+              "size": 2,
+              "stddev": 10999.302902527877,
+              "type": "unsigned",
+              "variance": 120984664.3415582
+            }
+          ]
+        },
+        {
+          "type": "PointCloud",
+          "date": "2020-09-10T00:00:00.000Z",
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Kangaroo+Island/Tilesets/2020-09-10/tileset.json",
+          "position": {
+            "lng": 137.0651363279417,
+            "lat": -35.85490671026343,
+            "height": -133.140330058937
+          },
+          "boundingSphereRadius": 77030.83283066475,
+          "schema": [
+            {
+              "count": 4883474203,
+              "maximum": 730826.17,
+              "mean": 678781.3641782581,
+              "minimum": 642569.2000000001,
+              "name": "X",
+              "offset": 686698,
+              "scale": 0.01,
+              "size": 4,
+              "stddev": 22425.748428754127,
+              "type": "signed",
+              "variance": 502914192.5897682
+            },
+            {
+              "count": 4883474203,
+              "maximum": 6051132.54,
+              "mean": 6030407.1924329335,
+              "minimum": 6009121.33,
+              "name": "Y",
+              "offset": 6030127,
+              "scale": 0.01,
+              "size": 4,
+              "stddev": 11057.93927676222,
+              "type": "signed",
+              "variance": 122278021.04856054
+            },
+            {
+              "count": 4883474203,
+              "maximum": 741.383,
+              "mean": 138.62470516587868,
+              "minimum": -703.523,
+              "name": "Z",
+              "offset": 19,
+              "scale": 0.001,
+              "size": 4,
+              "stddev": 95.9590852434641,
+              "type": "signed",
+              "variance": 9208.146040762409
+            },
+            {
+              "count": 4883474203,
+              "maximum": 65534,
+              "mean": 312.11965710103203,
+              "minimum": 7,
+              "name": "Intensity",
+              "size": 2,
+              "stddev": 282.8993094677774,
+              "type": "unsigned",
+              "variance": 80032.0192973453
+            },
+            {
+              "count": 4883474203,
+              "maximum": 7,
+              "mean": 1.2710199710252639,
+              "minimum": 0,
+              "name": "ReturnNumber",
+              "size": 1,
+              "stddev": 0.5990687654166503,
+              "type": "unsigned",
+              "variance": 0.3588833856978296
+            },
+            {
+              "count": 4883474203,
+              "maximum": 7,
+              "mean": 1.5419209519678136,
+              "minimum": 0,
+              "name": "NumberOfReturns",
+              "size": 1,
+              "stddev": 0.8554176931089424,
+              "type": "unsigned",
+              "variance": 0.7317394296838248
+            },
+            {
+              "count": 4883474203,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "ScanDirectionFlag",
+              "size": 1,
+              "stddev": 0,
+              "type": "unsigned",
+              "variance": 0
+            },
+            {
+              "count": 4883474203,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "EdgeOfFlightLine",
+              "size": 1,
+              "stddev": 0,
+              "type": "unsigned",
+              "variance": 0
+            },
+            {
+              "count": 4883474203,
+              "counts": [
+                {
+                  "count": 2891333220,
+                  "value": 2
+                },
+                {
+                  "count": 36345502,
+                  "value": 4
+                },
+                {
+                  "count": 1954688115,
+                  "value": 5
+                },
+                {
+                  "count": 1107366,
+                  "value": 6
+                }
+              ],
+              "maximum": 6,
+              "mean": 3.216589781379524,
+              "minimum": 2,
+              "name": "Classification",
+              "size": 1,
+              "stddev": 1.4682304243040682,
+              "type": "unsigned",
+              "variance": 2.155700578852104
+            },
+            {
+              "count": 4883474203,
+              "maximum": 0,
+              "mean": 0,
+              "minimum": 0,
+              "name": "ScanAngleRank",
+              "size": 4,
+              "stddev": 0,
+              "type": "float",
+              "variance": 0
+            },
+            {
+              "count": 4883474203,
+              "maximum": 255,
+              "mean": 19.14754211736241,
+              "minimum": 0,
+              "name": "UserData",
+              "size": 1,
+              "stddev": 49.52959673731559,
+              "type": "unsigned",
+              "variance": 2453.1809529611037
+            },
+            {
+              "count": 4883474203,
+              "maximum": 98,
+              "mean": 14.517277791379819,
+              "minimum": 1,
+              "name": "PointSourceId",
+              "size": 2,
+              "stddev": 16.259577453588655,
+              "type": "unsigned",
+              "variance": 264.3738589692485
+            },
+            {
+              "count": 4883474203,
+              "maximum": 100880.445103328,
+              "mean": 54377.44187643332,
+              "minimum": 3032.048154505,
+              "name": "GpsTime",
+              "size": 8,
+              "stddev": 42658.084699135965,
+              "type": "float",
+              "variance": 1819712190.1986578
+            },
+            {
+              "count": 2878820739,
+              "maximum": 65280,
+              "mean": 26211.159022656775,
+              "minimum": 0,
+              "name": "Red",
+              "size": 2,
+              "stddev": 16508.50650219094,
+              "type": "unsigned",
+              "variance": 272530786.9328805
+            },
+            {
+              "count": 2878820739,
+              "maximum": 65280,
+              "mean": 24308.935847743323,
+              "minimum": 0,
+              "name": "Green",
+              "size": 2,
+              "stddev": 15627.834394825295,
+              "type": "unsigned",
+              "variance": 244229207.87208447
+            },
+            {
+              "count": 2878820739,
+              "maximum": 65280,
+              "mean": 22086.11745228551,
+              "minimum": 0,
+              "name": "Blue",
+              "size": 2,
+              "stddev": 14790.167403091733,
+              "type": "unsigned",
+              "variance": 218749051.81147724
+            }
+          ]
+        }
+      ]
     }
   ],
   "categories": [
