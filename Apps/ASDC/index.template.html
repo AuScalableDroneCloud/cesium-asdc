@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Use correct character set. -->
+    <meta charset="utf-8" />
+    <!-- Tell IE to use the latest, best version. -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+    />
+    <title>ASDC Cesium Platform</title>
+    <script
+      type="text/javascript"
+      src="/cesium/Apps/Sandcastle/Sandcastle-header.js"
+    ></script>
+    <script src="/cesium/Build/Cesium/Cesium.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <style>
+      @import url(/cesium/Apps/Sandcastle/templates/bucket.css);
+    </style>
+  </head>
+
+  <body>
+    <div id="cesiumContainer">
+      <div id="toolbars-container" style="z-index: 2; position: absolute">
+        <div id="toolbar" style="position: static"></div>
+        <div id="cam-toolbar" style="margin: 5px; padding: 2px 5px"></div>
+        <div
+          id="msse-slider-container"
+          style="margin: 5px; padding: 2px 5px; display: none"
+        >
+          Maximum Screen Space Error:
+          <input
+            type="range"
+            min="0"
+            max="256"
+            value="32"
+            id="msse-slider"
+            style="vertical-align: middle"
+          />
+          <span id="msse-value">32</span>
+        </div>
+      </div>
+    </div>
+    <div id="sidebar">
+      <div id="sidebar-data-buttons"></div>
+      <div id="sidebar-upload-button" class="sidebar-upload-button">Upload</div>
+    </div>
+    <div class="modal" id="upload-modal">
+      <div class="modal-header">
+        <span id="close-upload-modal" class="close">&times;</span>
+        <h2>Upload</h2>
+      </div>
+      <div class="modal-content">
+        <div class="upload-inputs">
+          <br />
+          <form name="upload-form" id="upload-form">
+            <div class="input-line">
+              <label for="name">Name:</label>
+              <input type="text" name="name" required />
+            </div>
+            <br />
+            <br />
+            <div class="input-line">
+              <input type="file" name="files[]" accept=".laz,.las" required />
+              <input type="date" name="dates[]" required />
+            </div>
+          </form>
+          <br />
+          <button id="add-file-button" class="add-file-button">+</button>
+          <br />
+          <div>Only .laz and .las files are accepted</div>
+          <br />
+        </div>
+      </div>
+      <div id="modal-upload-button" class="modal-upload-button">Upload</div>
+    </div>
+    <div id="graphs-modal">
+      <div class="graphs-modal-header">
+        <span id="close-graph" class="close-graph">&times;</span>
+        <h3 style="padding-left: 10px">Graphs</h3>
+      </div>
+      <div id="graphs-container"></div>
+    </div>
+    <div id="dlDropdown">
+      <div class="dlDropdownRow" id="dl-laz">LAZ Format (.laz)</div>
+      <div class="dlDropdownRow" id="dl-las">LAS Format (.las)</div>
+      <div class="dlDropdownRow" id="dl-xyz">XYZ Format (.xyz)</div>
+      <div class="dlDropdownRow" id="dl-pcd">PCD Format (.pcd)</div>
+      <div class="dlDropdownRow" id="dl-ply">PLY Format (.ply)</div>
+      <div class="dlDropdownRow" id="dl-geojson">GeoJSON Format (.geojson)</div>
+      <div class="dlDropdownRow" id="dl-json">JSON Format (.json)</div>
+      <div class="dlDropdownRow" id="dl-gltf">GLTF/GLB Format (.gltf/.glb)</div>
+    </div>
+    <div class="modal" id="processing-wait-modal">
+      <div class="processing-modal">
+        <div class="loader"></div>
+        Processing
+      </div>
+    </div>
+    <% for (var js in htmlWebpackPlugin.files.js) { %>
+    <script src="/cesium/Apps/ASDC/<%= htmlWebpackPlugin.files.js[js] %>"></script>
+    <% } %>
+  </body>
+</html>
