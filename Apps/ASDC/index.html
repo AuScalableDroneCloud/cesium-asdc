@@ -23,7 +23,7 @@
     />
     <style>
       @import url(/cesium/Apps/Sandcastle/templates/bucket.css);
-      @import url(/cesium/Apps/ASDC/ASDC.css);      
+      @import url(/cesium/Apps/ASDC/ASDC.css);
     </style>
   </head>
   <body>
@@ -39,11 +39,10 @@
           <input
             type="range"
             min="0"
-            max="256"
+            max="512"
             value="32"
             id="msse-slider"
             style="vertical-align: middle"
-            
           />
           <span id="msse-value">32</span>
         </div>
@@ -80,12 +79,7 @@
           <br />
         </div>
       </div>
-      <div
-        id="modal-upload-button"
-        class="modal-upload-button"
-      >
-        Upload
-      </div>
+      <div id="modal-upload-button" class="modal-upload-button">Upload</div>
     </div>
     <div id="graphs-modal">
       <div class="graphs-modal-header">
@@ -110,7 +104,7 @@
         Processing
       </div>
     </div>
-    
+
     <script src="/cesium/Apps/ASDC/App.js" type="module"></script>
   </body>
 </html>

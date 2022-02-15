@@ -47,6 +47,14 @@ setViewer(
 viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
 viewer.scene.globe.depthTestAgainstTerrain = false;
 
+var uploadPage;
+if (window.location.href.toLowerCase().includes("cesium/apps/asdc/uploads")) {
+  uploadPage = true;
+} else {
+  uploadPage = false;
+}
+setupSidebar(uploadPage);
+
 viewer.camera.moveEnd.addEventListener(() => {
   if (!assets) return;
 
@@ -132,8 +140,6 @@ viewer.camera.moveEnd.addEventListener(() => {
     }
   }
 });
-
-setupSidebar();
 
 viewer.clock.onTick.addEventListener((clock) => {
   var currentTime = Cesium.JulianDate.toDate(clock.currentTime).getTime();
@@ -260,7 +266,13 @@ viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
   if (selectedEntity) {
     if (selectedEntity.id.startsWith("marker")) {
       var id = selectedEntity.id.slice("marker_".length);
-      window.history.pushState("", "", `/cesium/Apps/ASDC/${id}`);
+      window.history.pushState(
+        "",
+        "",
+        uploadPage
+          ? `/cesium/Apps/ASDC/Uploads/${id}`
+          : `/cesium/Apps/ASDC/${id}`
+      );
       assets.map((a) => {
         if (a["id"] === parseInt(id)) {
           loadAsset(a);

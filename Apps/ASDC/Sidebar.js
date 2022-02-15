@@ -15,7 +15,7 @@ import {
 import { loadAsset, loadData } from "./Datasets.js";
 import { indexFile, pcFormats, processingAPI } from "./Constants.js";
 
-export const setupSidebar = () => {
+export const setupSidebar = (uploads) => {
   fetch(indexFile, { cache: "no-store" })
     .then((response) => response.text())
     .then((text) => {
@@ -75,7 +75,7 @@ export const setupSidebar = () => {
           }
         };
 
-        if (cat.id !== 6) {
+        if (!uploads && cat.id !== 6) {
           //Uploads
           document
             .getElementById("sidebar-data-buttons")
@@ -89,17 +89,22 @@ export const setupSidebar = () => {
       });
 
       //Add uploads accordion last to the list
-      var uploadAccordion = categories[6];
-      document
-        .getElementById("sidebar-data-buttons")
-        .appendChild(uploadAccordion);
-      var accordionPanelDiv = document.createElement("div");
-      accordionPanelDiv.className = "sidebar-accordion-panel";
-      document
-        .getElementById("sidebar-data-buttons")
-        .appendChild(accordionPanelDiv);
+      if (uploads) {
+        var uploadAccordion = categories[6];
+        document
+          .getElementById("sidebar-data-buttons")
+          .appendChild(uploadAccordion);
+        var accordionPanelDiv = document.createElement("div");
+        accordionPanelDiv.className = "sidebar-accordion-panel";
+        document
+          .getElementById("sidebar-data-buttons")
+          .appendChild(accordionPanelDiv);
+      }
 
       assets.map((asset) => {
+        if (!uploads && asset.categoryID == 6) return;
+        if (uploads && asset.categoryID != 6) return;
+
         var accordionDiv = categories[asset.categoryID];
         var accordionPanelDiv = accordionDiv.nextElementSibling;
 
@@ -131,7 +136,9 @@ export const setupSidebar = () => {
             window.history.pushState(
               "",
               "",
-              `/cesium/Apps/ASDC/${asset["id"]}`
+              uploads
+                ? `/cesium/Apps/ASDC/Uploads/${asset["id"]}`
+                : `/cesium/Apps/ASDC/${asset["id"]}`
             );
             loadAsset(asset);
           };
@@ -168,7 +175,13 @@ export const setupSidebar = () => {
               window.history.pushState(
                 "",
                 "",
-                `/cesium/Apps/ASDC/${asset["id"]}/${asset.data.indexOf(data)}`
+                uploads
+                  ? `/cesium/Apps/ASDC/Uploads/${
+                      asset["id"]
+                    }/${asset.data.indexOf(data)}`
+                  : `/cesium/Apps/ASDC/${asset["id"]}/${asset.data.indexOf(
+                      data
+                    )}`
               );
               setSelectedData(data);
               loadData(asset, data, true, true);
