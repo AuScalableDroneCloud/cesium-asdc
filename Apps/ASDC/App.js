@@ -48,6 +48,8 @@ viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
 viewer.scene.globe.depthTestAgainstTerrain = false;
 
 viewer.camera.moveEnd.addEventListener(() => {
+  if (!assets) return;
+
   var viewMenu = [];
 
   var selectedIndex;

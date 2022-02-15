@@ -21,6 +21,7 @@ export const setupSidebar = () => {
     .then((text) => {
       var jsonResponse = JSON.parse(text);
       setAssets(jsonResponse["assets"]);
+      if (!assets) return;
 
       while (document.getElementById("sidebar-data-buttons").firstChild) {
         document
