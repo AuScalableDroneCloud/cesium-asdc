@@ -135,7 +135,7 @@
     )
   );
 
-  app.get("/cesium/Apps/ASDC/:assetID", function (req, res, next) {
+  app.get("/cesium/Apps/ASDC/:dataIDs", function (req, res, next) {
     res.sendFile(
       argv.production
         ? __dirname + "/build/Apps/ASDC/index.html"
@@ -143,27 +143,7 @@
     );
   });
 
-  app.get("/cesium/Apps/ASDC/:assetID/:dataID", function (req, res, next) {
-    res.sendFile(
-      argv.production
-        ? __dirname + "/build/Apps/ASDC/index.html"
-        : __dirname + "/Apps/ASDC/index.html"
-    );
-  });
-
-  app.get("/cesium/Apps/ASDC/Uploads/:assetID", function (req, res, next) {
-    res.sendFile(
-      argv.production
-        ? __dirname + "/build/Apps/ASDC/index.html"
-        : __dirname + "/Apps/ASDC/index.html"
-    );
-  });
-
-  app.get("/cesium/Apps/ASDC/Uploads/:assetID/:dataID", function (
-    req,
-    res,
-    next
-  ) {
+  app.get("/cesium/Apps/ASDC/Uploads/:dataIDs", function (req, res, next) {
     res.sendFile(
       argv.production
         ? __dirname + "/build/Apps/ASDC/index.html"

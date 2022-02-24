@@ -4,6 +4,9 @@
   "description": "",
   "main": "server.cjs",
   "scripts": {
+    "start": "node server.cjs",
+    "build": "node ./node_modules/webpack/bin/webpack.js --mode production",
+    "serve-build": "node server.cjs --production",
     "test": "echo \"no test specified\"",
     "prepare": "husky install"
   },

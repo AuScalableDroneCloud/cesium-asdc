@@ -5,15 +5,21 @@ import {
   assets,
   setAssets,
   viewer,
-  selectedAsset,
-  setSelectedAsset,
-  selectedAssetID,
-  selectedData,
-  setSelectedData,
-  selectedDataIndex,
+  datasets,
+  setDatasets,
+  timelineTracks,
+  selectedDataIDs,
+  setSelectedDatasets,
+  setSelectedAssetIDs,
+  selectedDatasets,
+  tilesets,
+  dataSources,
+  entities,
+  selectedAssetIDs,
 } from "./State.js";
-import { loadAsset, loadData } from "./Datasets.js";
+import { loadAsset, loadData, syncTimeline } from "./Datasets.js";
 import { indexFile, pcFormats, processingAPI } from "./Constants.js";
+import { closeGraphModal } from "./Graphs.js";
 
 export const setupSidebar = (uploads) => {
   fetch(indexFile, { cache: "no-store" })
@@ -21,6 +27,8 @@ export const setupSidebar = (uploads) => {
     .then((text) => {
       var jsonResponse = JSON.parse(text);
       setAssets(jsonResponse["assets"]);
+      setDatasets(jsonResponse["datasets"]);
+
       if (!assets) return;
 
       while (document.getElementById("sidebar-data-buttons").firstChild) {
@@ -61,6 +69,7 @@ export const setupSidebar = (uploads) => {
 
       jsonResponse["categories"].map((cat) => {
         categories[cat.id] = document.createElement("div");
+        categories[cat.id].id = `category-${cat.id}`;
         var accordionDiv = categories[cat.id];
 
         accordionDiv.className = "sidebar-item sidebar-accordion";
@@ -110,6 +119,12 @@ export const setupSidebar = (uploads) => {
 
         var assetDiv = document.createElement("div");
 
+        var assetCheckbox = document.createElement("input");
+        assetCheckbox.id = `assetCheckbox-${asset.id}`;
+        assetCheckbox.type = "checkbox";
+        assetCheckbox.style.float = "left";
+        assetCheckbox.style.margin = "0 5px 0 0";
+
         var assetContentDiv = document.createElement("div");
         assetContentDiv.innerHTML =
           asset["status"] !== "active"
@@ -133,14 +148,41 @@ export const setupSidebar = (uploads) => {
           timeseriesContentDiv.innerHTML = "Time Series";
 
           timeseriesDiv.onclick = () => {
+            assetCheckbox.indeterminate = false;
+            assetCheckbox.checked = true;
+            checkboxes.map((cb) => {
+              cb.checked = assetCheckbox.checked;
+            });
+            var dataIDs = "";
+            var newDataIDs = [];
+            if (selectedDatasets) {
+              selectedDatasets.map((d) => {
+                newDataIDs.push(d.id);
+              });
+            }
+
+            asset["data"].map((id) => {
+              if (!newDataIDs.includes(id)) {
+                newDataIDs.push(id);
+              }
+            });
+
+            newDataIDs.sort((a, b) => a - b);
+
+            newDataIDs.map((id) => {
+              dataIDs += id + "&";
+            });
+
+            dataIDs = dataIDs.slice(0, dataIDs.length - 1);
+
             window.history.pushState(
               "",
               "",
               uploads
-                ? `/cesium/Apps/ASDC/Uploads/${asset["id"]}`
-                : `/cesium/Apps/ASDC/${asset["id"]}`
+                ? `/cesium/Apps/ASDC/Uploads/${dataIDs}`
+                : `/cesium/Apps/ASDC/${dataIDs}`
             );
-            loadAsset(asset);
+            loadAsset(asset, true, true);
           };
 
           timeseriesDiv.appendChild(timeseriesContentDiv);
@@ -148,9 +190,165 @@ export const setupSidebar = (uploads) => {
         }
 
         if (asset.data) {
-          asset.data.map((data, index) => {
+          var checkboxes = [];
+          var assetDatasets = [];
+          asset.data.map((dataID, index) => {
+            var data = dataID;
+            for (var i = 0; i < datasets.length; i++) {
+              if (datasets[i].id === dataID) {
+                data = datasets[i];
+                data.asset = asset;
+                assetDatasets.push(data);
+                break;
+              }
+            }
+
             var dateDiv = document.createElement("div");
             dateDiv.className = "sidebar-item";
+            dateDiv.id = `dataButton-${data.id}`;
+
+            var checkbox = document.createElement("input");
+            checkbox.id = `dataCheckbox-${data.id}`;
+            checkbox.type = "checkbox";
+            checkbox.style.float = "left";
+            checkbox.style.margin = "0 5px 0 0";
+
+            checkbox.checked =
+              selectedDataIDs && selectedDataIDs.includes(data.id);
+            checkboxes.push(checkbox);
+
+            assetCheckbox.checked = checkboxes.every((cb) => cb.checked);
+            assetCheckbox.indeterminate =
+              !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
+
+            checkbox.onchange = (e) => {
+              assetCheckbox.checked = checkboxes.every((cb) => cb.checked);
+              assetCheckbox.indeterminate =
+                !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
+              if (checkbox.checked) {
+                if (!selectedDatasets.includes(data)) {
+                  selectedDatasets.push(data);
+                }
+                var dataIDs = "";
+                var newDataIDs = [];
+                selectedDatasets.map((d) => {
+                  newDataIDs.push(d.id);
+                });
+
+                newDataIDs.sort((a, b) => a - b);
+
+                newDataIDs.map((id) => {
+                  dataIDs += id + "&";
+                });
+
+                dataIDs = dataIDs.slice(0, dataIDs.length - 1);
+
+                window.history.pushState(
+                  "",
+                  "",
+                  uploads
+                    ? `/cesium/Apps/ASDC/Uploads/${dataIDs}`
+                    : `/cesium/Apps/ASDC/${dataIDs}`
+                );
+
+                loadData(asset, data, true, false, true);
+
+                if (new Date(data.date) != "Invalid Date") {
+                  viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+                    new Date(data.date)
+                  );
+                }
+              } else {
+                if (
+                  tilesets[asset.id] &&
+                  tilesets[asset.id][new Date(data.date)]
+                ) {
+                  if (Array.isArray(tilesets[asset.id][new Date(data.date)])) {
+                    tilesets[asset.id][new Date(data.date)].map((tileset) => {
+                      tileset.show = false;
+                    });
+                  } else {
+                    tilesets[asset.id][new Date(data.date)].show = false;
+                  }
+                }
+                if (dataSources[asset.id] && dataSources[asset.id][data.id]) {
+                  dataSources[asset.id][data.id].show = false;
+                }
+                if (entities[asset.id]) {
+                  entities[asset.id].show = false;
+                }
+                closeGraphModal();
+                setSelectedDatasets(
+                  selectedDatasets.filter((d) => {
+                    return d.id !== data.id;
+                  })
+                );
+                setSelectedAssetIDs(
+                  selectedAssetIDs.filter((a) => {
+                    return a !== data.asset.id;
+                  })
+                );
+
+                var dataIDs = "";
+                var newDataIDs = [];
+                selectedDatasets.map((d) => {
+                  newDataIDs.push(d.id);
+                });
+
+                newDataIDs.sort((a, b) => a - b);
+
+                newDataIDs.map((id) => {
+                  dataIDs += id + "&";
+                });
+
+                dataIDs = dataIDs.slice(0, dataIDs.length - 1);
+
+                window.history.pushState(
+                  "",
+                  "",
+                  uploads
+                    ? `/cesium/Apps/ASDC/Uploads/${dataIDs}`
+                    : `/cesium/Apps/ASDC/${dataIDs}`
+                );
+
+                if (!selectedDatasets.find((d) => d.asset === asset)) {
+                  viewer.timeline._trackList.splice(
+                    viewer.timeline._trackList.indexOf(
+                      timelineTracks[asset["id"]]
+                    ),
+                    1
+                  );
+
+                  timelineTracks[asset["id"]] = null;
+                  delete timelineTracks[asset["id"]];
+
+                  viewer.timeline._makeTics();
+                  viewer.timeline.container.style.bottom =
+                    Object.keys(timelineTracks).length * 8 + "px";
+                  viewer.timeline._trackContainer.style.height =
+                    Object.keys(timelineTracks).length * 8 + 1 + "px";
+                }
+
+                if (
+                  timelineTracks[asset["id"]] &&
+                  timelineTracks[asset["id"]].intervals
+                ) {
+                  timelineTracks[asset["id"]].intervals.map((t) => {
+                    if (
+                      Cesium.JulianDate.toDate(t.start).getTime() ===
+                      new Date(data.date).getTime()
+                    ) {
+                      timelineTracks[asset["id"]].intervals.splice(
+                        timelineTracks[asset["id"]].intervals.indexOf(t),
+                        1
+                      );
+                    }
+                  });
+                  viewer.timeline._makeTics();
+                }
+              }
+              syncTimeline(false);
+            };
 
             var dateContentDiv = document.createElement("div");
             dateContentDiv.style.padding = "0 36px";
@@ -171,26 +369,56 @@ export const setupSidebar = (uploads) => {
               dateContentDiv.innerHTML = "No Date";
             }
 
-            dateDiv.onclick = () => {
+            dateDiv.onclick = (e) => {
+              if (e && e.target === checkbox) {
+                return;
+              }
+              checkbox.checked = true;
+              assetCheckbox.checked = checkboxes.every((cb) => cb.checked);
+              assetCheckbox.indeterminate =
+                !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
+              if (!selectedDatasets.includes(data)) {
+                selectedDatasets.push(data);
+              }
+              var dataIDs = "";
+              var newDataIDs = [];
+              selectedDatasets.map((d) => {
+                newDataIDs.push(d.id);
+              });
+
+              newDataIDs.sort((a, b) => a - b);
+
+              newDataIDs.map((id) => {
+                dataIDs += id + "&";
+              });
+
+              dataIDs = dataIDs.slice(0, dataIDs.length - 1);
+
               window.history.pushState(
                 "",
                 "",
                 uploads
-                  ? `/cesium/Apps/ASDC/Uploads/${
-                      asset["id"]
-                    }/${asset.data.indexOf(data)}`
-                  : `/cesium/Apps/ASDC/${asset["id"]}/${asset.data.indexOf(
-                      data
-                    )}`
+                  ? `/cesium/Apps/ASDC/Uploads/${dataIDs}`
+                  : `/cesium/Apps/ASDC/${dataIDs}`
               );
-              setSelectedData(data);
-              loadData(asset, data, true, true);
+
+              loadData(asset, data, true, true, true);
             };
 
+            // if (data.type!="Influx"){
+            dateContentDiv.appendChild(checkbox);
+            // }
+            // if (!assetDatasets.every(d=> d.type=="Influx")){
+            assetContentDiv.appendChild(assetCheckbox);
+            // }
             dateDiv.appendChild(dateContentDiv);
             datesPanelDiv.appendChild(dateDiv);
 
-            if (data.type != "EPTPointCloud" && data.source) {
+            if (
+              (data.type != "EPTPointCloud" && data.source) ||
+              data.type === "Influx" ||
+              data.type === "GeoJSON"
+            ) {
               var downloadBtn = document.createElement("div");
               downloadBtn.className = "dlBtn fa fa-download";
               downloadBtn.style.float = "right";
@@ -278,7 +506,114 @@ export const setupSidebar = (uploads) => {
             }
           });
         }
-        assetDiv.onclick = () => {
+
+        assetCheckbox.onchange = (e) => {
+          checkboxes.map((cb) => {
+            cb.checked = assetCheckbox.checked;
+          });
+          if (assetCheckbox.checked) {
+            var dataIDs = "";
+            var newDataIDs = [];
+            if (selectedDatasets) {
+              selectedDatasets.map((d) => {
+                newDataIDs.push(d.id);
+              });
+            }
+
+            asset["data"].map((id) => {
+              if (!newDataIDs.includes(id)) {
+                newDataIDs.push(id);
+              }
+            });
+
+            newDataIDs.sort((a, b) => a - b);
+
+            newDataIDs.map((id) => {
+              dataIDs += id + "&";
+            });
+
+            dataIDs = dataIDs.slice(0, dataIDs.length - 1);
+
+            window.history.pushState(
+              "",
+              "",
+              uploads
+                ? `/cesium/Apps/ASDC/Uploads/${dataIDs}`
+                : `/cesium/Apps/ASDC/${dataIDs}`
+            );
+            loadAsset(asset, false, true);
+          } else {
+            selectedDatasets.map((d) => {
+              if (d.asset.id === asset.id) {
+                if (
+                  tilesets[d.asset.id] &&
+                  tilesets[d.asset.id][new Date(d.date)]
+                ) {
+                  if (Array.isArray(tilesets[d.asset.id][new Date(d.date)])) {
+                    tilesets[d.asset.id][new Date(d.date)].map((tileset) => {
+                      tileset.show = false;
+                    });
+                  } else {
+                    tilesets[d.asset.id][new Date(d.date)].show = false;
+                  }
+                }
+                if (dataSources[d.asset.id] && dataSources[d.asset.id][d.id]) {
+                  dataSources[d.asset.id][d.id].show = false;
+                }
+                if (entities[asset["id"]]) {
+                  entities[asset["id"]].show = false;
+                }
+                closeGraphModal();
+              }
+            });
+            setSelectedDatasets(
+              selectedDatasets.filter((d) => {
+                return d.asset.id !== asset.id;
+              })
+            );
+            setSelectedAssetIDs(
+              selectedAssetIDs.filter((a) => {
+                return a !== data.asset.id;
+              })
+            );
+            var dataIDs = "";
+            selectedDatasets.map((d) => {
+              dataIDs += d.id + "&";
+            });
+            dataIDs = dataIDs.slice(0, dataIDs.length - 1);
+
+            window.history.pushState(
+              "",
+              "",
+              uploads
+                ? `/cesium/Apps/ASDC/Uploads/${dataIDs}`
+                : `/cesium/Apps/ASDC/${dataIDs}`
+            );
+
+            if (
+              viewer.timeline._trackList.indexOf(timelineTracks[asset["id"]]) !=
+              -1
+            ) {
+              viewer.timeline._trackList.splice(
+                viewer.timeline._trackList.indexOf(timelineTracks[asset["id"]]),
+                1
+              );
+            }
+
+            timelineTracks[asset["id"]] = null;
+            delete timelineTracks[asset["id"]];
+
+            viewer.timeline._makeTics();
+            viewer.timeline.container.style.bottom =
+              Object.keys(timelineTracks).length * 8 - 1 + "px";
+            viewer.timeline._trackContainer.style.height =
+              Object.keys(timelineTracks).length * 8 + 1 + "px";
+          }
+          syncTimeline(true);
+        };
+
+        assetDiv.onclick = (e) => {
+          if (e && e.target === assetCheckbox) return;
           assetContentDiv.classList.toggle("sidebar-accordion-active");
 
           if (datesPanelDiv.style.maxHeight) {
@@ -299,32 +634,33 @@ export const setupSidebar = (uploads) => {
 
         assetDivs[asset.id] = assetDiv;
 
-        if (asset.data) {
-          asset.data.sort(function (a, b) {
+        if (assetDatasets && assetDatasets.length > 0) {
+          assetDatasets.sort(function (a, b) {
             return new Date(a.date).getTime() - new Date(b.date).getTime();
           });
-        }
 
-        if (asset.data && asset.data.length > 0 && asset.data[0].position) {
-          var data = asset.data[0];
-          var position = Cesium.Cartesian3.fromDegrees(
-            data["position"]["lng"],
-            data["position"]["lat"]
-          );
+          if (assetDatasets[0].position) {
+            var data = assetDatasets[0];
 
-          if (!viewer.dataSources.contains(markersDataSource)) {
-            markersDataSource.entities.add({
-              position: position,
-              billboard: {
-                image: pinBuilder
-                  .fromColor(Cesium.Color.fromCssColorString("#5B8B51"), 48)
-                  .toDataURL(),
-                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                disableDepthTestDistance: Number.POSITIVE_INFINITY,
-                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-              },
-              id: "marker_" + asset.id,
-            });
+            var position = Cesium.Cartesian3.fromDegrees(
+              data["position"]["lng"],
+              data["position"]["lat"]
+            );
+
+            if (!viewer.dataSources.contains(markersDataSource)) {
+              markersDataSource.entities.add({
+                position: position,
+                billboard: {
+                  image: pinBuilder
+                    .fromColor(Cesium.Color.fromCssColorString("#5B8B51"), 48)
+                    .toDataURL(),
+                  verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                  disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                  heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                },
+                id: "marker_" + asset.id,
+              });
+            }
           }
         }
       });
@@ -337,23 +673,51 @@ export const setupSidebar = (uploads) => {
         }, 0);
       }
 
-      if (selectedAssetID) {
-        assets.map((a) => {
-          if (a.id === parseInt(selectedAssetID)) {
-            setSelectedAsset(a);
-            if (selectedDataIndex) {
-              setSelectedData(a.data[selectedDataIndex]);
+      if (selectedDataIDs) {
+        var assetIDs = [];
+        var selectedCats = [];
+        var newSelectedDatasets = [];
+        selectedDataIDs.map((dataID) => {
+          var asset;
+          for (var i = 0; i < assets.length; i++) {
+            if (assets[i].data.includes(parseInt(dataID))) {
+              asset = assets[i];
+              if (!assetIDs.includes(assets[i]["id"])) {
+                assetIDs.push(assets[i]["id"]);
+              }
+              if (!selectedCats.includes(asset.categoryID)) {
+                selectedCats.push(asset.categoryID);
+              }
+              break;
             }
-            categories[a.categoryID].onclick();
-            assetDivs[selectedAssetID].onclick();
+          }
+          for (var i = 0; i < datasets.length; i++) {
+            if (datasets[i].id === parseInt(dataID)) {
+              newSelectedDatasets.push(datasets[i]);
+              loadData(
+                asset,
+                datasets[i],
+                datasets[i].id === asset.data[0],
+                false,
+                true
+              );
+              break;
+            }
           }
         });
-      }
 
-      if (selectedData) {
-        loadData(selectedAsset, selectedData, true, true);
-      } else {
-        loadAsset(selectedAsset);
+        selectedCats.map((c) => {
+          categories[c].onclick();
+        });
+
+        assetIDs.map((a) => {
+          assetDivs[a].onclick();
+        });
+
+        setSelectedDatasets(newSelectedDatasets);
+        syncTimeline(true);
+
+        setSelectedAssetIDs(assetIDs);
       }
     });
 };

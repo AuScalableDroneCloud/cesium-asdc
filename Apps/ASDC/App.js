@@ -1,17 +1,17 @@
 import { cesiumIonAccessToken } from "./Constants.js";
 import {
-  selectedTileset,
-  setSelectedTileset,
-  selectedDimension,
   viewer,
   setViewer,
   tilesets,
-  dataSources,
-  selectedAssetID,
-  selectedAsset,
+  entities,
+  selectedAssetIDs,
   selectedData,
   setSelectedData,
   assets,
+  datasets,
+  selectedDatasets,
+  dataSources,
+  setSelectedDatasets,
 } from "./State.js";
 import { loadAsset, loadData, setScreenSpaceError } from "./Datasets.js";
 import {
@@ -21,14 +21,12 @@ import {
   openModal,
   closeModal,
 } from "./Sidebar.js";
-import { applyStyle, setupStyleToolbar } from "./PointcloudStyle.js";
 import { closeGraphModal } from "./Graphs.js";
-import { findAssetAndDataFromUrl, checkAssetStrings } from "./URL.js";
+import { findAssetAndDataFromUrl } from "./URL.js";
 
 Cesium.Ion.defaultAccessToken = cesiumIonAccessToken;
 
 findAssetAndDataFromUrl();
-checkAssetStrings();
 
 Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(
   113.338953078,
@@ -53,6 +51,7 @@ if (window.location.href.toLowerCase().includes("cesium/apps/asdc/uploads")) {
 } else {
   uploadPage = false;
 }
+
 setupSidebar(uploadPage);
 
 viewer.camera.moveEnd.addEventListener(() => {
@@ -65,7 +64,17 @@ viewer.camera.moveEnd.addEventListener(() => {
 
   assets.map((asset) => {
     if (asset.data) {
-      asset.data.map((data) => {
+      var assetDataset = [];
+      asset.data?.map((dataID) => {
+        for (var i = 0; i < datasets.length; i++) {
+          if (datasets[i].id === dataID) {
+            assetDataset.push(datasets[i]);
+            break;
+          }
+        }
+      });
+
+      assetDataset.map((data) => {
         if (data.position) {
           var lng = data.position.lng;
           var lat = data.position.lat;
@@ -81,31 +90,88 @@ viewer.camera.moveEnd.addEventListener(() => {
           );
           if (
             distance <=
-            (data.boundingSphereRadius ? data.boundingSphereRadius * 2 : 2000)
+            (data.boundingSphereRadius ? data.boundingSphereRadius * 2.5 : 2000)
           ) {
             viewMenu.push({
               text: data.date
                 ? `${asset.name} - ${data.date}`
                 : `${asset.name} - No Date`,
               onselect: () => {
-                setSelectedData(data);
-                if (
-                  (tilesets[asset.id] &&
-                    tilesets[asset.id][new Date(data.date)] &&
-                    tilesets[asset.id][new Date(data.date)] !=
-                      selectedTileset) ||
-                  !tilesets[asset.id] ||
-                  !tilesets[asset.id][new Date(data.date)]
-                ) {
-                  loadData(asset, data, false, true);
+                if (data != selectedData) {
+                  if (selectedData) {
+                    var checkbox = document.getElementById(
+                      `dataCheckbox-${selectedData.id}`
+                    );
+                    if (
+                      selectedDatasets.includes(selectedData) &&
+                      !checkbox.checked
+                    ) {
+                      if (
+                        tilesets[selectedData.asset.id] &&
+                        tilesets[selectedData.asset.id][
+                          new Date(selectedData.date)
+                        ]
+                      ) {
+                        if (
+                          Array.isArray(
+                            tilesets[selectedData.asset.id][
+                              new Date(selectedData.date)
+                            ]
+                          )
+                        ) {
+                          tilesets[selectedData.asset.id][
+                            new Date(selectedData.date)
+                          ].map((tileset) => {
+                            tileset.show = false;
+                          });
+                        } else {
+                          tilesets[selectedData.asset.id][
+                            new Date(selectedData.date)
+                          ].show = false;
+                        }
+                      }
+                      if (entities[selectedData.asset.id]) {
+                        entities[selectedData.asset.id].show = false;
+                      }
+                      if (
+                        dataSources[selectedData.asset.id] &&
+                        dataSources[selectedData.asset.id][selectedData.id]
+                      ) {
+                        dataSources[selectedData.asset.id][
+                          selectedData.id
+                        ].show = false;
+                      }
+                      setSelectedDatasets(
+                        selectedDatasets.filter((d) => {
+                          return d.id !== selectedData.id;
+                        })
+                      );
+                    }
+                  }
+
+                  loadData(asset, data, false, true, false, true);
+
+                  if (
+                    data["type"] === "PointCloud" ||
+                    data["type"] === "EPTPointCloud"
+                  ) {
+                    document.getElementById(
+                      "msse-slider-container"
+                    ).style.display = "block";
+                  } else {
+                    document.getElementById(
+                      "msse-slider-container"
+                    ).style.display = "none";
+                  }
                 }
+                setSelectedData(data);
               },
               data: data,
             });
             if (selectedData && selectedData === data) {
               selectedIndex = viewMenu.length - 1;
             }
-            if (!selectedData && selectedAsset === asset) {
+            if (selectedAssetIDs.includes(asset.id)) {
               timeseriesInView = true;
             }
           }
@@ -131,10 +197,7 @@ viewer.camera.moveEnd.addEventListener(() => {
         viewMenu[selectedIndex].onselect();
       }
     } else {
-      if (
-        (selectedData && selectedData != viewMenu[0].data) ||
-        !timeseriesInView
-      ) {
+      if (!timeseriesInView) {
         viewMenu[0].onselect();
       }
     }
@@ -143,106 +206,49 @@ viewer.camera.moveEnd.addEventListener(() => {
 
 viewer.clock.onTick.addEventListener((clock) => {
   var currentTime = Cesium.JulianDate.toDate(clock.currentTime).getTime();
-  if (tilesets[selectedAssetID]) {
-    if (!selectedData) {
-      var tilesetDates = Object.keys(tilesets[selectedAssetID]).sort(function (
-        a,
-        b
-      ) {
+  if (!selectedAssetIDs) return;
+  selectedAssetIDs.map((assetID) => {
+    if (!tilesets[assetID]) return;
+    var tilesetDates = Object.keys(tilesets[assetID])
+      .filter((k) => {
+        var selectedAssetDates = selectedDatasets
+          .filter(
+            (data) =>
+              new Date(data.date) != "Invalid Date" && data.asset.id == assetID
+          )
+          .map((data) => new Date(data.date));
+        return !!selectedAssetDates.find((item) => {
+          return item.getTime() == new Date(k).getTime();
+        });
+      })
+      .sort(function (a, b) {
         return new Date(a).getTime() - new Date(b).getTime();
       });
 
-      for (var i = 0; i < tilesetDates.length; i++) {
-        if (
-          (i === 0 || new Date(tilesetDates[i]).getTime() <= currentTime) &&
-          (i === tilesetDates.length - 1 ||
-            new Date(tilesetDates[i + 1]).getTime() > currentTime)
-        ) {
-          if (Array.isArray(tilesets[selectedAssetID][tilesetDates[i]])) {
-            tilesets[selectedAssetID][tilesetDates[i]].map((tileset) => {
-              tileset.show = true;
-            });
-          } else {
-            tilesets[selectedAssetID][tilesetDates[i]].show = true;
-
-            if (
-              selectedTileset != tilesets[selectedAssetID][tilesetDates[i]] &&
-              tilesets[selectedAssetID][tilesetDates[i]]
-            ) {
-              setupStyleToolbar(tilesets[selectedAssetID][tilesetDates[i]]);
-            }
-
-            setSelectedTileset(tilesets[selectedAssetID][tilesetDates[i]]);
-
-            if (selectedTileset.asset && selectedTileset.asset.ept.schema) {
-              applyStyle(selectedDimension);
-            }
-          }
-        } else {
-          if (Array.isArray(tilesets[selectedAssetID][tilesetDates[i]])) {
-            tilesets[selectedAssetID][tilesetDates[i]].map((tileset) => {
-              tileset.show = false;
-            });
-          } else {
-            tilesets[selectedAssetID][tilesetDates[i]].show = false;
-          }
-        }
-      }
-    } else {
+    for (var i = 0; i < tilesetDates.length; i++) {
       if (
-        selectedData.type === "PointCloud" ||
-        selectedData.type === "EPTPointCloud"
+        (i === 0 || new Date(tilesetDates[i]).getTime() <= currentTime) &&
+        (i === tilesetDates.length - 1 ||
+          new Date(tilesetDates[i + 1]).getTime() > currentTime)
       ) {
-        if (
-          Array.isArray(tilesets[selectedAssetID][new Date(selectedData.date)])
-        ) {
-          tilesets[selectedAssetID][new Date(selectedData.date)].map(
-            (tileset) => {
-              tileset.show = true;
-            }
-          );
+        if (Array.isArray(tilesets[assetID][tilesetDates[i]])) {
+          tilesets[assetID][tilesetDates[i]].map((tileset) => {
+            tileset.show = true;
+          });
         } else {
-          tilesets[selectedAssetID][new Date(selectedData.date)].show = true;
-
-          if (
-            selectedTileset !=
-              tilesets[selectedAssetID][new Date(selectedData.date)] &&
-            tilesets[selectedAssetID][new Date(selectedData.date)]
-          ) {
-            setupStyleToolbar(
-              tilesets[selectedAssetID][new Date(selectedData.date)]
-            );
-          }
-
-          setSelectedTileset(
-            tilesets[selectedAssetID][new Date(selectedData.date)]
-          );
-
-          if (selectedTileset.asset && selectedTileset.asset.ept.schema) {
-            applyStyle(selectedDimension);
-          }
+          tilesets[assetID][tilesetDates[i]].show = true;
+        }
+      } else {
+        if (Array.isArray(tilesets[assetID][tilesetDates[i]])) {
+          tilesets[assetID][tilesetDates[i]].map((tileset) => {
+            tileset.show = false;
+          });
+        } else {
+          tilesets[assetID][tilesetDates[i]].show = false;
         }
       }
     }
-  }
-
-  //constant geojsons
-  if (dataSources[selectedAssetID]) {
-    if (!selectedData) {
-      Object.keys(dataSources[selectedAssetID]).map((i) => {
-        dataSources[selectedAssetID][i].show = true;
-      });
-    } else {
-      if (
-        selectedData.type === "GeoJSON" &&
-        dataSources[selectedAssetID][selectedAsset.data.indexOf(selectedData)]
-      ) {
-        dataSources[selectedAssetID][
-          selectedAsset.data.indexOf(selectedData)
-        ].show = true;
-      }
-    }
-  }
+  });
 });
 
 var clickHandler = viewer.screenSpaceEventHandler.getInputAction(
@@ -266,19 +272,46 @@ viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
   if (selectedEntity) {
     if (selectedEntity.id.startsWith("marker")) {
       var id = selectedEntity.id.slice("marker_".length);
-      window.history.pushState(
-        "",
-        "",
-        uploadPage
-          ? `/cesium/Apps/ASDC/Uploads/${id}`
-          : `/cesium/Apps/ASDC/${id}`
-      );
-      assets.map((a) => {
-        if (a["id"] === parseInt(id)) {
-          loadAsset(a);
+      for (var i = 0; i < assets.length; i++) {
+        if (assets[i].id === parseInt(id)) {
+          assets[i].data.map((id) => {
+            var checkbox = document.getElementById(`dataCheckbox-${id}`);
+            if (checkbox) {
+              checkbox.checked = true;
+            }
+          });
+          var assetCheckbox = document.getElementById(
+            `assetCheckbox-${assets[i].id}`
+          );
+          if (assetCheckbox) {
+            assetCheckbox.checked = true;
+          }
+          // var catAccordion = document.getElementById(`category-${assets[i].categoryID}`);
+          // if (!catAccordion.classList.contains("sidebar-accordion-active")){
+          //   catAccordion.classList.toggle("sidebar-accordion-active");
+          //   var panel = catAccordion.nextElementSibling;
+          //   panel.style.maxHeight = panel.scrollHeight + 1 + "px";
+          // }
+          loadAsset(assets[i], true, true);
+
+          var newDataIDs = [...assets[i].data];
+          selectedDatasets.map((d) => {
+            if (!newDataIDs.includes(d.id)) {
+              newDataIDs.push(d.id);
+            }
+          });
+          newDataIDs.sort((a, b) => a - b);
+          var dataIDs = newDataIDs.join("&");
+          window.history.pushState(
+            "",
+            "",
+            uploadPage
+              ? `/cesium/Apps/ASDC/Uploads/${dataIDs}`
+              : `/cesium/Apps/ASDC/${dataIDs}`
+          );
           return;
         }
-      });
+      }
     } else {
       if (selectedEntity.properties) {
         selectedEntity.description =
