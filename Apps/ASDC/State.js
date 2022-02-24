@@ -16,7 +16,7 @@ export var dataSources = {};
 
 export var selectedDimension;
 
-export var MSSE = 32;
+export var MSSE = 83;
 
 export var markersDataSource;
 

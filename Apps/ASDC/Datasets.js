@@ -125,7 +125,16 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
     }
 
     if (assetDataset[0]["type"] === "PointCloud") {
-      viewer.flyTo(tilesets[asset["id"]][tilesetDates[0]]);
+      var pos = Cesium.Cartographic.toCartesian(
+        Cesium.Cartographic.fromDegrees(
+          assetDataset[0].position["lng"],
+          assetDataset[0].position["lat"],
+          assetDataset[0].position["height"]
+        )
+      );
+      viewer.camera.flyToBoundingSphere(
+        new Cesium.BoundingSphere(pos, assetDataset[0].boundingSphereRadius)
+      );
     } else if (assetDataset[0]["type"] === "Model") {
       viewer.flyTo(entities[asset["id"]]);
     } else if (assetDataset[0]["type"] === "EPTPointCloud") {
@@ -165,8 +174,8 @@ export const loadData = (
       ] = viewer.scene.primitives.add(
         new Cesium.Cesium3DTileset({
           url: data["url"],
-          maximumScreenSpaceError: MSSE,
-          // show: false,
+          maximumScreenSpaceError:
+            ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
           show: new Date(data["date"]) != "Invalid Date" ? false : true,
         })
       );
@@ -301,8 +310,28 @@ export const loadData = (
   }
 
   if (fly) {
+    var assetDataset = [];
+    asset.data?.map((dataID) => {
+      for (var i = 0; i < datasets.length; i++) {
+        if (datasets[i].id === dataID) {
+          assetDataset.push(datasets[i]);
+          break;
+        }
+      }
+    });
+
     if (data["type"] === "PointCloud") {
-      viewer.flyTo(tilesets[asset["id"]][new Date(data["date"])]);
+      //   viewer.flyTo(tilesets[asset["id"]][new Date(data["date"])]);
+      var pos = Cesium.Cartographic.toCartesian(
+        Cesium.Cartographic.fromDegrees(
+          assetDataset[0].position["lng"],
+          assetDataset[0].position["lat"],
+          assetDataset[0].position["height"]
+        )
+      );
+      viewer.camera.flyToBoundingSphere(
+        new Cesium.BoundingSphere(pos, assetDataset[0].boundingSphereRadius)
+      );
     } else if (data["type"] === "Model") {
       viewer.flyTo(entities[asset["id"]]);
     } else if (data["type"] === "EPTPointCloud") {
@@ -552,18 +581,28 @@ export const loadGeoJson = (asset, data, fly) => {
 };
 
 export const setScreenSpaceError = (evt) => {
-  setMSSE(evt.target.value);
+  setMSSE(parseInt(evt.target.value));
 
-  document.getElementById("msse-value").innerHTML = MSSE;
+  document.getElementById("msse-value").innerHTML = MSSE + " %";
 
   Object.keys(tilesets).map((tileset) => {
     Object.keys(tilesets[tileset]).map((date) => {
       if (Array.isArray(tilesets[tileset][new Date(date)])) {
-        tilesets[tileset][new Date(date)].map((tileset) => {
-          tileset.maximumScreenSpaceError = MSSE;
+        tilesets[tileset][new Date(date)].map((t) => {
+          //   tileset.maximumScreenSpaceError = MSSE;
+          t.maximumScreenSpaceError =
+            ((100 - MSSE) / 100) * viewer.canvas.height * 0.25;
+          if (MSSE === 0) {
+            t.show = false;
+          }
         });
       } else {
-        tilesets[tileset][new Date(date)].maximumScreenSpaceError = MSSE;
+        // tilesets[tileset][new Date(date)].maximumScreenSpaceError = MSSE;
+        tilesets[tileset][new Date(date)].maximumScreenSpaceError =
+          ((100 - MSSE) / 100) * viewer.canvas.height * 0.25;
+        if (MSSE === 0) {
+          tilesets[tileset][new Date(date)].show = false;
+        }
       }
     });
   });

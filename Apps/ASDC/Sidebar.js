@@ -677,7 +677,7 @@ export const setupSidebar = (uploads) => {
         var assetIDs = [];
         var selectedCats = [];
         var newSelectedDatasets = [];
-        selectedDataIDs.map((dataID) => {
+        selectedDataIDs.map((dataID, index) => {
           var asset;
           for (var i = 0; i < assets.length; i++) {
             if (assets[i].data.includes(parseInt(dataID))) {
@@ -694,13 +694,7 @@ export const setupSidebar = (uploads) => {
           for (var i = 0; i < datasets.length; i++) {
             if (datasets[i].id === parseInt(dataID)) {
               newSelectedDatasets.push(datasets[i]);
-              loadData(
-                asset,
-                datasets[i],
-                datasets[i].id === asset.data[0],
-                false,
-                true
-              );
+              loadData(asset, datasets[i], index == 0, false, true);
               break;
             }
           }

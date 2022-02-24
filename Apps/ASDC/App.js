@@ -12,6 +12,7 @@ import {
   selectedDatasets,
   dataSources,
   setSelectedDatasets,
+  MSSE,
 } from "./State.js";
 import { loadAsset, loadData, setScreenSpaceError } from "./Datasets.js";
 import {
@@ -233,10 +234,14 @@ viewer.clock.onTick.addEventListener((clock) => {
       ) {
         if (Array.isArray(tilesets[assetID][tilesetDates[i]])) {
           tilesets[assetID][tilesetDates[i]].map((tileset) => {
-            tileset.show = true;
+            if (MSSE !== 0) {
+              tileset.show = true;
+            }
           });
         } else {
-          tilesets[assetID][tilesetDates[i]].show = true;
+          if (MSSE !== 0) {
+            tilesets[assetID][tilesetDates[i]].show = true;
+          }
         }
       } else {
         if (Array.isArray(tilesets[assetID][tilesetDates[i]])) {
