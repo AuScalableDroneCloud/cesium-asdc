@@ -13,6 +13,7 @@ export var selectedAssetIDs = [];
 export var tilesets = {};
 export var entities = {};
 export var dataSources = {};
+export var imageryLayers = {};
 
 export var selectedDimension;
 

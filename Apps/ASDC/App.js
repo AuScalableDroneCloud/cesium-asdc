@@ -13,6 +13,7 @@ import {
   dataSources,
   setSelectedDatasets,
   MSSE,
+  imageryLayers,
 } from "./State.js";
 import { loadAsset, loadData, setScreenSpaceError } from "./Datasets.js";
 import {
@@ -139,6 +140,14 @@ viewer.camera.moveEnd.addEventListener(() => {
                         dataSources[selectedData.asset.id][selectedData.id]
                       ) {
                         dataSources[selectedData.asset.id][
+                          selectedData.id
+                        ].show = false;
+                      }
+                      if (
+                        imageryLayers[selectedData.asset.id] &&
+                        imageryLayers[selectedData.asset.id][selectedData.id]
+                      ) {
+                        imageryLayers[selectedData.asset.id][
                           selectedData.id
                         ].show = false;
                       }

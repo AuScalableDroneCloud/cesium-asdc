@@ -97,6 +97,26 @@
       "status": "active",
       "categoryID": 6,
       "data": [30]
+    },
+    {
+      "id": 17,
+      "name": "APPF ANU Controlled Environment Facility-point-cloud-polycam",
+      "status": "failed",
+      "categoryID": 6
+    },
+    {
+      "id": 18,
+      "name": "USLN-Coolama-2022-02-11-P4M-TB_v2_PointCloud",
+      "status": "active",
+      "categoryID": 2,
+      "data": [31]
+    },
+    {
+      "id": 19,
+      "name": "USLN-Coolama-2022-02-11-P4M-TB_v2_Imagery",
+      "status": "active",
+      "categoryID": 2,
+      "data": [32]
     }
   ],
   "datasets": [
@@ -267,17 +287,129 @@
         "lng": -110.85616158988668,
         "lat": 31.777620150175906,
         "height": 1196.9982318100317
-      }
+      },
+      "boundingSphereRadius": 259.91579374270424,
+      "url": [
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/15_2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/1a_g2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/1a_u6/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/21_2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/21_3/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/21_5/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/21_6/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/21_7/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/21_8/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/21_9/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/22-5/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/22_1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/22_2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/22_3/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/22_5/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/22_6/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/22_9/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/22_g1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/23_g1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/28_g1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/2b_u1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/2n_10w/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/2s_1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/2s_2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/2s_6/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/2s_9/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/35a_u1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/35b_u2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/40_g1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/41_g2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/42_g2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/42_u1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/4_g2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/5_g1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/6_g2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/6a_1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/6a_15/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/6a_16/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/6a_20/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/6a_3/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/6a_36/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/6a_39/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/6a_42/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/6b_3w/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/6b_54/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/6b_56/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/6b_60/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/8_2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/8_4/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/8_5/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/8_7/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/8_g2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/may_2019/9_g1/ept.json"
+      ]
     },
     {
       "id": 13,
       "date": "2019-09-01T00:00:00.000Z",
       "type": "EPTPointCloud",
       "position": {
-        "lng": -110.85616158988668,
-        "lat": 31.777620150175906,
-        "height": 1196.9982318100317
-      }
+        "lng": -110.85607709914827,
+        "lat": 31.777620055117836,
+        "height": 1197.9983704346753
+      },
+      "boundingSphereRadius": 249.51893108253344,
+      "url": [
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/15_g2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/1a_g2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/1a_u6/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/21_2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/21_3/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/21_5/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/21_6/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/21_7/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/21_8/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/21_9/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/22_1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/22_2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/22_3/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/22_5/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/22_6/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/22_9/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/22_g1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/23_g1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/28_g1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/2b_u1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/2n_10w/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/2n_1w/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/2s_1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/2s_2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/2s_6/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/2s_9/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/35a_u1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/35b_u2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/40_g1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/41_g2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/42_g2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/42_u1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/4_g2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/5_g1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/6_g2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/6a_1/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/6a_15/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/6a_16/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/6a_20/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/6a_3/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/6a_36/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/6a_39/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/6a_42/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/6b_3w/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/6b_54/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/6b_56/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/6b_60/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/8_2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/8_4/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/8_5/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/8_7/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/8_g2/ept.json",
+        "https://de.cyverse.org/anon-files/iplant/home/shared/commons_repo/curated/Gillan_Ecosphere_2021/pointclouds/ept/sept_2019/9_g1/ept.json"
+      ]
     },
     {
       "id": 14,
@@ -513,6 +645,37 @@
       "source": {
         "url": "s3://appf-anu/Cesium/Uploads/16/0/Apple maps car, Braddon (scaniverse).las"
       }
+    },
+    {
+      "id": 31,
+      "date": "2022-02-11T00:00:00.000Z",
+      "type": "EPTPointCloud",
+      "position": {
+        "lng": 148.8762894785008,
+        "lat": -36.34450135893103,
+        "height": 881.9985267056549
+      },
+      "boundingSphereRadius": 237.32666340668663,
+      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/d7d20c75-2a06-48a6-8946-6efc9cff341c/assets/entwine_pointcloud/ept.json"
+    },
+    {
+      "id": 32,
+      "date": "2022-02-11T00:00:00.000Z",
+      "type": "Imagery",
+      "position": {
+        "lng": 148.87628110888033,
+        "lat": -36.34449680978972,
+        "height": 16
+      },
+      "bounds": [
+        148.87494292448295,
+        -36.345718219571566,
+        148.87761929327772,
+        -36.34327540000787
+      ],
+      "minzoom": 13,
+      "maxzoom": 24,
+      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/d7d20c75-2a06-48a6-8946-6efc9cff341c/orthophoto/tiles/{z}/{x}/{y}.png?color_map=rdylgn&formula=NDVI%20(Blue)&bands=NGB&hillshade=&rescale=-1.000,1.000"
     }
   ],
   "categories": [

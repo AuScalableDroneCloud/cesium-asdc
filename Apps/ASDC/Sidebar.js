@@ -16,6 +16,7 @@ import {
   dataSources,
   entities,
   selectedAssetIDs,
+  imageryLayers,
 } from "./State.js";
 import { loadAsset, loadData, syncTimeline } from "./Datasets.js";
 import { indexFile, pcFormats, processingAPI } from "./Constants.js";
@@ -126,14 +127,21 @@ export const setupSidebar = (uploads) => {
         assetCheckbox.style.margin = "0 5px 0 0";
 
         var assetContentDiv = document.createElement("div");
-        assetContentDiv.innerHTML =
+        var assetContentDivText = document.createElement("div");
+        assetContentDivText.innerHTML =
           asset["status"] !== "active"
             ? asset["name"] + ` (${asset["status"]})`
             : asset["name"];
+
+        assetContentDivText.style["flex-grow"] = 1;
+
         assetContentDiv.style.padding = "0 18px";
+        assetContentDiv.style.display = "flex";
         assetDiv.className = "sidebar-item";
         assetContentDiv.className = "sidebar-accordion";
 
+        assetContentDiv.appendChild(assetCheckbox);
+        assetContentDiv.appendChild(assetContentDivText);
         assetDiv.appendChild(assetContentDiv);
 
         var datesPanelDiv = document.createElement("div");
@@ -277,6 +285,12 @@ export const setupSidebar = (uploads) => {
                 if (entities[asset.id]) {
                   entities[asset.id].show = false;
                 }
+                if (
+                  imageryLayers[asset.id] &&
+                  imageryLayers[asset.id][data.id]
+                ) {
+                  imageryLayers[asset.id][data.id].show = false;
+                }
                 closeGraphModal();
                 setSelectedDatasets(
                   selectedDatasets.filter((d) => {
@@ -405,12 +419,7 @@ export const setupSidebar = (uploads) => {
               loadData(asset, data, true, true, true);
             };
 
-            // if (data.type!="Influx"){
             dateContentDiv.appendChild(checkbox);
-            // }
-            // if (!assetDatasets.every(d=> d.type=="Influx")){
-            assetContentDiv.appendChild(assetCheckbox);
-            // }
             dateDiv.appendChild(dateContentDiv);
             datesPanelDiv.appendChild(dateDiv);
 
@@ -563,6 +572,12 @@ export const setupSidebar = (uploads) => {
                 if (entities[asset["id"]]) {
                   entities[asset["id"]].show = false;
                 }
+                if (
+                  imageryLayers[asset.id] &&
+                  imageryLayers[asset.id][data.id]
+                ) {
+                  imageryLayers[asset.id][data.id].show = false;
+                }
                 closeGraphModal();
               }
             });
@@ -571,23 +586,26 @@ export const setupSidebar = (uploads) => {
                 return d.asset.id !== asset.id;
               })
             );
+
             setSelectedAssetIDs(
               selectedAssetIDs.filter((a) => {
                 return a !== data.asset.id;
               })
             );
-            var dataIDs = "";
+
+            var dataIDs = [];
             selectedDatasets.map((d) => {
-              dataIDs += d.id + "&";
+              dataIDs.push(d.id);
             });
-            dataIDs = dataIDs.slice(0, dataIDs.length - 1);
+
+            dataIDs.sort((a, b) => a - b);
 
             window.history.pushState(
               "",
               "",
               uploads
-                ? `/cesium/Apps/ASDC/Uploads/${dataIDs}`
-                : `/cesium/Apps/ASDC/${dataIDs}`
+                ? `/cesium/Apps/ASDC/Uploads/${dataIDs.join("&")}`
+                : `/cesium/Apps/ASDC/${dataIDs.join("&")}`
             );
 
             if (
@@ -680,7 +698,7 @@ export const setupSidebar = (uploads) => {
         selectedDataIDs.map((dataID, index) => {
           var asset;
           for (var i = 0; i < assets.length; i++) {
-            if (assets[i].data.includes(parseInt(dataID))) {
+            if (assets[i].data && assets[i].data.includes(parseInt(dataID))) {
               asset = assets[i];
               if (!assetIDs.includes(assets[i]["id"])) {
                 assetIDs.push(assets[i]["id"]);

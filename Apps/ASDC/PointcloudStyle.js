@@ -62,15 +62,6 @@ export const applyStyle = (schemaName) => {
             selectedTileset.style = new Cesium.Cesium3DTileStyle({
               color: `\${COLOR} * color('${schema.name.toLowerCase()}')`,
             });
-          } else if (schema.name === "Z") {
-            selectedTileset.style = new Cesium.Cesium3DTileStyle({
-              color: {
-                conditions: [
-                  ["${Z} >= 0", `hsl((\${Z})/(${schema.maximum}),1,0.5)`],
-                  ["${Z} < 0", `hsl((-1*\${Z})/(${schema.minimum}),1,0.5)`],
-                ],
-              },
-            });
           } else {
             selectedTileset.style = new Cesium.Cesium3DTileStyle({
               color: `hsl((\${${schema.name}}-${schema.minimum})/(${schema.maximum}-${schema.minimum}),1,0.5)`,
@@ -130,6 +121,7 @@ export const setupStyleToolbar = (tileset) => {
       }
     });
 
+  if (styleToolbarMenu.length === 1) return;
   Sandcastle.addToolbarMenu(styleToolbarMenu);
 
   if (selectedIndex != undefined) {

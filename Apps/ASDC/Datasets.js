@@ -11,10 +11,11 @@ import {
   timelineTracks,
   datasets,
   selectedDimension,
+  imageryLayers,
 } from "./State.js";
 import { loadGraph, closeGraphModal } from "./Graphs.js";
 import { setupStyleToolbar, applyStyle } from "./PointcloudStyle.js";
-import { highlightHeightPX, highlightColor } from "./Constants.js";
+import { highlightHeightPX, highlightColor, eptServer } from "./Constants.js";
 
 export const loadAsset = (asset, timeline, timelineTrack) => {
   if (!asset) return;
@@ -124,7 +125,10 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
       document.getElementById("msse-slider-container").style.display = "none";
     }
 
-    if (assetDataset[0]["type"] === "PointCloud") {
+    if (
+      assetDataset[0]["type"] === "PointCloud" ||
+      assetDataset[0]["type"] === "EPTPointCloud"
+    ) {
       var pos = Cesium.Cartographic.toCartesian(
         Cesium.Cartographic.fromDegrees(
           assetDataset[0].position["lng"],
@@ -137,8 +141,6 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
       );
     } else if (assetDataset[0]["type"] === "Model") {
       viewer.flyTo(entities[asset["id"]]);
-    } else if (assetDataset[0]["type"] === "EPTPointCloud") {
-      viewer.flyTo(tilesets[asset["id"]][tilesetDates[0]][0]);
     } else if (assetDataset[0]["type"] === "Influx") {
       var position = Cesium.Cartesian3.fromDegrees(
         assetDataset[0]["position"]["lng"],
@@ -147,6 +149,32 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
       );
 
       viewer.camera.flyTo({ destination: position });
+    } else if (assetDataset[0]["type"] === "Imagery") {
+      var data = assetDataset[0];
+      var rectangle = new Cesium.Rectangle.fromDegrees(
+        data.bounds[0],
+        data.bounds[1],
+        data.bounds[2],
+        data.bounds[3]
+      );
+      const cartographics = [
+        Cesium.Rectangle.center(rectangle),
+        Cesium.Rectangle.southeast(rectangle),
+        Cesium.Rectangle.southwest(rectangle),
+        Cesium.Rectangle.northeast(rectangle),
+        Cesium.Rectangle.northwest(rectangle),
+      ];
+
+      Cesium.sampleTerrainMostDetailed(
+        viewer.terrainProvider,
+        cartographics
+      ).then((updatedPositions) => {
+        var cartesians = Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+          updatedPositions
+        );
+        var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
+        viewer.camera.flyToBoundingSphere(boundingSphere);
+      });
     }
   }
 };
@@ -256,43 +284,106 @@ export const loadData = (
   } else if (data["type"] === "EPTPointCloud") {
     if (!tilesets[asset["id"]]) tilesets[asset["id"]] = {};
     if (!tilesets[asset["id"]][new Date(data["date"])]) {
-      tilesets[asset["id"]][new Date(data["date"])] = [];
-      if (data["date"] === "2019-05-01T00:00:00.000Z") {
-        var ilsFile = "/cesium/Apps/may_2019_ils.txt";
+      var eptURL;
+      if (Array.isArray(data.url)) {
+        eptURL = data.url[0];
+        tilesets[asset["id"]][new Date(data["date"])] = [];
       } else {
-        var ilsFile = "/cesium/Apps/sept_2019_ils.txt";
+        eptURL = data.url;
       }
-      fetch(ilsFile)
+      fetch(eptURL, { cache: "no-store" })
         .then((response) => response.text())
-        .then((text) =>
-          text.split("\n").map((line, index) => {
-            if (index == 0) return;
-            var path = line.split("C- ")[1];
-            if (path) {
+        .then((text) => {
+          var ept = JSON.parse(text);
+          var dimensions = [];
+          var truncate = true;
+          ept.schema.map((s) => {
+            if (s.minimum && s.maximum) {
+              if (s.minimum != s.maximum) {
+                dimensions.push(s.name);
+              }
+            } else {
+              dimensions.push(s.name);
+            }
+            if (s.name === "Red" || s.name === "Green" || s.name === "Blue") {
+              if (s.maximum && s.maximum <= 255) {
+                truncate = false;
+              }
+            }
+          });
+          if (Array.isArray(data.url)) {
+            data.url.map((url, index) => {
               tilesets[asset["id"]][new Date(data["date"])].push(
                 viewer.scene.primitives.add(
                   new Cesium.Cesium3DTileset({
-                    // url: `http://localhost:3000/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                    // url: `/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                    url: `https://asdc.cloud.edu.au/ept/tileset.json?ept=https://de.cyverse.org/anon-files${path}/ept.json&truncate`,
-                    maximumScreenSpaceError: MSSE,
-                    show: false,
+                    url: `${eptServer}/tileset.json?ept=${url}&dimensions=${dimensions.join(
+                      ","
+                    )}&${truncate ? "truncate" : null}`,
+                    maximumScreenSpaceError:
+                      ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
+                    show:
+                      new Date(data["date"]) != "Invalid Date" ? false : true,
                   })
                 )
               );
-
-              if (index == 1) {
-                viewer.flyTo(
-                  // tilesets[asset["id"]][new Date("2019-05-01")][0]
-                  tilesets[asset["id"]][new Date(data["date"])][0]
-                );
+              if (index == 0) {
+                tilesets[asset["id"]][
+                  new Date(data["date"])
+                ][0].readyPromise.then(function (tileset) {
+                  setupStyleToolbar(tileset);
+                  applyStyle(selectedDimension);
+                });
               }
-            }
-          })
-        );
+            });
+          } else {
+            tilesets[asset["id"]][
+              new Date(data["date"])
+            ] = viewer.scene.primitives.add(
+              new Cesium.Cesium3DTileset({
+                url: `${eptServer}/tileset.json?ept=${
+                  data.url
+                }&dimensions=${dimensions.join(",")}&${
+                  truncate ? "truncate" : null
+                }`,
+                maximumScreenSpaceError:
+                  ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
+                show: new Date(data["date"]) != "Invalid Date" ? false : true,
+              })
+            );
+            tilesets[asset["id"]][new Date(data["date"])].readyPromise.then(
+              function (tileset) {
+                setupStyleToolbar(tileset);
+                applyStyle(selectedDimension);
+              }
+            );
+          }
+        });
+    } else {
+      if (Array.isArray(data.url)) {
+        tilesets[asset["id"]][new Date(data["date"])].map((t) => {
+          t.show = true;
+        });
+      } else {
+        tilesets[asset["id"]][new Date(data["date"])].show = true;
+      }
     }
   } else if (data["type"] === "Influx") {
     loadGraph(data.station);
+  } else if (data["type"] === "Imagery") {
+    if (!imageryLayers[asset.id]) imageryLayers[asset.id] = {};
+    imageryLayers[asset.id][data.id] = viewer.imageryLayers.addImageryProvider(
+      new Cesium.UrlTemplateImageryProvider({
+        url: data.url,
+        rectangle: new Cesium.Rectangle.fromDegrees(
+          data.bounds[0],
+          data.bounds[1],
+          data.bounds[2],
+          data.bounds[3]
+        ),
+        minimumLevel: data.minzoom,
+        maximumLevel: data.maxzoom,
+      })
+    );
   }
 
   if (data["type"] != "Influx") {
@@ -301,7 +392,7 @@ export const loadData = (
 
   if (
     !!selectedDatasets.find(
-      (d) => d.type == "PointCloud" || d.tyee == "EPTPointCloud"
+      (d) => d.type == "PointCloud" || d.type == "EPTPointCloud"
     )
   ) {
     document.getElementById("msse-slider-container").style.display = "block";
@@ -320,8 +411,7 @@ export const loadData = (
       }
     });
 
-    if (data["type"] === "PointCloud") {
-      //   viewer.flyTo(tilesets[asset["id"]][new Date(data["date"])]);
+    if (data["type"] === "PointCloud" || data["type"] === "EPTPointCloud") {
       var pos = Cesium.Cartographic.toCartesian(
         Cesium.Cartographic.fromDegrees(
           assetDataset[0].position["lng"],
@@ -334,8 +424,6 @@ export const loadData = (
       );
     } else if (data["type"] === "Model") {
       viewer.flyTo(entities[asset["id"]]);
-    } else if (data["type"] === "EPTPointCloud") {
-      viewer.flyTo(tilesets[asset["id"]][new Date(data["date"])][0]);
     } else if (data["type"] === "Influx") {
       var position = Cesium.Cartesian3.fromDegrees(
         data["position"]["lng"],
@@ -344,6 +432,31 @@ export const loadData = (
       );
 
       viewer.camera.flyTo({ destination: position });
+    } else if (data["type"] === "Imagery") {
+      var rectangle = new Cesium.Rectangle.fromDegrees(
+        data.bounds[0],
+        data.bounds[1],
+        data.bounds[2],
+        data.bounds[3]
+      );
+      const cartographics = [
+        Cesium.Rectangle.center(rectangle),
+        Cesium.Rectangle.southeast(rectangle),
+        Cesium.Rectangle.southwest(rectangle),
+        Cesium.Rectangle.northeast(rectangle),
+        Cesium.Rectangle.northwest(rectangle),
+      ];
+
+      Cesium.sampleTerrainMostDetailed(
+        viewer.terrainProvider,
+        cartographics
+      ).then((updatedPositions) => {
+        var cartesians = Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+          updatedPositions
+        );
+        var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
+        viewer.camera.flyToBoundingSphere(boundingSphere);
+      });
     }
   }
 
@@ -385,12 +498,6 @@ export const loadData = (
         // );
       }
     } else {
-      // var toolbar = document.getElementById("toolbar");
-
-      // while (toolbar.firstChild) {
-      //     toolbar.removeChild(toolbar.firstChild);
-      // }
-
       if (data["type"] === "Influx") {
         //Influx charts from 2 weeks before
         var currentDate = new Date();
