@@ -16,7 +16,7 @@
     },
     {
       "id": 3,
-      "name": "USLN",
+      "name": "Gegedzerick Rd",
       "status": "active",
       "categoryID": 2,
       "data": [11]
@@ -106,38 +106,17 @@
     },
     {
       "id": 18,
-      "name": "Coolama (Point Cloud)",
+      "name": "Coolama",
       "status": "active",
       "categoryID": 2,
-      "data": [31]
+      "data": [31, 32, 33, 34, 35]
     },
     {
       "id": 19,
-      "name": "Coolama (Imagery)",
+      "name": "Doran",
       "status": "active",
       "categoryID": 2,
-      "data": [32]
-    },
-    {
-      "id": 20,
-      "name": "Coolama (Contours)",
-      "status": "active",
-      "categoryID": 2,
-      "data": [33]
-    },
-    {
-      "id": 21,
-      "name": "Coolama (Imagery - Plant Health RDVI)",
-      "status": "active",
-      "categoryID": 2,
-      "data": [34]
-    },
-    {
-      "id": 22,
-      "name": "Coolama (DTM)",
-      "status": "active",
-      "categoryID": 2,
-      "data": [35]
+      "data": [36, 37, 38, 39, 40]
     }
   ],
   "datasets": [
@@ -670,6 +649,7 @@
     {
       "id": 31,
       "date": "2022-02-11T00:00:00.000Z",
+      "name": "Point Cloud",
       "type": "EPTPointCloud",
       "position": {
         "lng": 148.8762894785008,
@@ -682,38 +662,27 @@
     {
       "id": 32,
       "date": "2022-02-11T00:00:00.000Z",
+      "name": "Ortho - NDVI",
       "type": "Imagery",
       "position": {
-        "lng": 148.87628110888033,
-        "lat": -36.34449680978972,
+        "lng": 148.87628137631458,
+        "lat": -36.344502010265224,
         "height": 16
       },
       "bounds": [
-        148.87494292448295,
-        -36.345718219571566,
-        148.87761929327772,
-        -36.34327540000787
+        148.8749411622239,
+        -36.345729531573845,
+        148.87762159040525,
+        -36.3432744889566
       ],
       "minzoom": 13,
       "maxzoom": 24,
-      "/url": "https://asdc.cloud.edu.au/api/projects/52/tasks/d7d20c75-2a06-48a6-8946-6efc9cff341c/orthophoto/tiles/{z}/{x}/{y}.png?color_map=rdylgn&formula=NDVI%20(Blue)&bands=NGB&hillshade=&rescale=-1.000,1.000",
-      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/f47d2fb3-71ac-4bc0-8b8c-21d246c26147/orthophoto/tiles/{z}/{x}/{y}.png?rescale=0%2C255"
+      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/f47d2fb3-71ac-4bc0-8b8c-21d246c26147/orthophoto/tiles/{z}/{x}/{y}.png?formula=NDVI&bands=RGN&color_map=rdylgn&rescale=-1%2C1"
     },
     {
       "id": 33,
-      "type": "GeoJSON",
       "date": "2022-02-11T00:00:00.000Z",
-      "position": {
-        "lng": 148.87631867620053,
-        "lat": -36.344509546167295,
-        "height": 875.6806266100472
-      },
-      "boundingSphereRadius": 166.84871806191717,
-      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/USLN/Contours.json"
-    },
-    {
-      "id": 34,
-      "date": "2022-02-11T00:00:00.000Z",
+      "name": "Ortho - RDVI",
       "type": "Imagery",
       "position": {
         "lng": 148.87628137631458,
@@ -731,8 +700,9 @@
       "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/f47d2fb3-71ac-4bc0-8b8c-21d246c26147/orthophoto/tiles/{z}/{x}/{y}.png?color_map=rdylgn_r&formula=RDVI&bands=RGN&hillshade=&rescale=-15.969,13.363"
     },
     {
-      "id": 35,
+      "id": 34,
       "date": "2022-02-11T00:00:00.000Z",
+      "name": "DTM",
       "type": "Imagery",
       "position": {
         "lng": 148.8762813516335,
@@ -748,6 +718,105 @@
       "minzoom": 13,
       "maxzoom": 24,
       "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/f47d2fb3-71ac-4bc0-8b8c-21d246c26147/dtm/tiles/{z}/{x}/{y}.png?color_map=viridis&hillshade=6&rescale=877.0599975585938%2C885.9813232421875"
+    },
+    {
+      "id": 35,
+      "type": "GeoJSON",
+      "name": "Contours",
+      "date": "2022-02-11T00:00:00.000Z",
+      "position": {
+        "lng": 148.87631867620053,
+        "lat": -36.344509546167295,
+        "height": 875.6806266100472
+      },
+      "boundingSphereRadius": 166.84871806191717,
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/USLN/Contours.json"
+    },
+    {
+      "id": 36,
+      "date": "2022-02-11T00:00:00.000Z",
+      "name": "Point Cloud",
+      "type": "EPTPointCloud",
+      "position": {
+        "lng": 148.81281221028536,
+        "lat": -36.37286615055364,
+        "height": 910.9991832863858
+      },
+      "boundingSphereRadius": 176.69796801283664,
+      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/8a41e21b-23a2-4b44-a652-57064cb913b8/assets/entwine_pointcloud/ept.json"
+    },
+    {
+      "id": 37,
+      "date": "2022-02-11T00:00:00.000Z",
+      "name": "Ortho - NDVI",
+      "type": "Imagery",
+      "position": {
+        "lng": 148.81281990373333,
+        "lat": -36.37286616252379,
+        "height": 16
+      },
+      "bounds": [
+        148.81171394103723,
+        -36.37338985662639,
+        148.81392586642946,
+        -36.37234246842119
+      ],
+      "minzoom": 14,
+      "maxzoom": 24,
+      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/8a41e21b-23a2-4b44-a652-57064cb913b8/orthophoto/tiles/{z}/{x}/{y}.png?formula=NDVI&bands=RGN&color_map=rdylgn&rescale=-1%2C1"
+    },
+    {
+      "id": 38,
+      "date": "2022-02-11T00:00:00.000Z",
+      "name": "Ortho - RDVI",
+      "type": "Imagery",
+      "position": {
+        "lng": 148.81281990373333,
+        "lat": -36.37286616252379,
+        "height": 16
+      },
+      "bounds": [
+        148.81171394103723,
+        -36.37338985662639,
+        148.81392586642946,
+        -36.37234246842119
+      ],
+      "minzoom": 14,
+      "maxzoom": 24,
+      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/8a41e21b-23a2-4b44-a652-57064cb913b8/orthophoto/tiles/{z}/{x}/{y}.png?color_map=rdylgn_r&formula=RDVI&bands=RGN&hillshade=&rescale=-15.969,13.969"
+    },
+    {
+      "id": 39,
+      "date": "2022-02-11T00:00:00.000Z",
+      "name": "DTM",
+      "type": "Imagery",
+      "position": {
+        "lng": 148.8128196433314,
+        "lat": -36.37286617074823,
+        "height": 16
+      },
+      "bounds": [
+        148.81171395918432,
+        -36.37338986125863,
+        148.81392532747853,
+        -36.37234248023783
+      ],
+      "minzoom": 14,
+      "maxzoom": 24,
+      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/8a41e21b-23a2-4b44-a652-57064cb913b8/dtm/tiles/{z}/{x}/{y}.png?color_map=viridis&hillshade=6&rescale=901.5453491210938%2C918.5599975585938"
+    },
+    {
+      "id": 40,
+      "type": "GeoJSON",
+      "name": "Contours",
+      "date": "2022-02-11T00:00:00.000Z",
+      "position": {
+        "lng": 148.81280596821028,
+        "lat": -36.37309160287979,
+        "height": 917.0042392113367
+      },
+      "boundingSphereRadius": 130.7282106932594,
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/USLN/Contours_Doran.json"
     }
   ],
   "categories": [

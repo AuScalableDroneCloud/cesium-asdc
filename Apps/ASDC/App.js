@@ -96,9 +96,11 @@ viewer.camera.moveEnd.addEventListener(() => {
             (data.boundingSphereRadius ? data.boundingSphereRadius * 2.5 : 2000)
           ) {
             viewMenu.push({
-              text: data.date
-                ? `${asset.name} - ${data.date}`
-                : `${asset.name} - No Date`,
+              text:
+                (data.date
+                  ? `${asset.name} - ${data.date}`
+                  : `${asset.name} - No Date`) +
+                (data.name ? " - " + data.name : ""),
               onselect: () => {
                 if (data != selectedData) {
                   if (selectedData) {
@@ -240,7 +242,9 @@ viewer.clock.onTick.addEventListener((clock) => {
         var selectedAssetDates = selectedDatasets
           .filter(
             (data) =>
-              new Date(data.date) != "Invalid Date" && data.asset.id == assetID
+              new Date(data.date) != "Invalid Date" &&
+              data.asset.id == assetID &&
+              (data.type == "PointCloud" || data.type == "EPTPointCloud")
           )
           .map((data) => new Date(data.date));
         return !!selectedAssetDates.find((item) => {

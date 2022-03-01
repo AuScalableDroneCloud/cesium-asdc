@@ -377,15 +377,15 @@ export const setupSidebar = (uploads) => {
             if (data.date) {
               var date = new Date(data.date);
               dateContentDiv.innerHTML =
-                date.toString() !== "Invalid Date"
+                (date.toString() !== "Invalid Date"
                   ? new Date(data.date).toLocaleDateString("en-au", {
                       year: "numeric",
                       month: "numeric",
                       day: "numeric",
-                      hour: "numeric",
-                      minute: "numeric",
+                      // hour: "numeric",
+                      // minute: "numeric",
                     })
-                  : data.date;
+                  : data.date) + (data.name ? " - " + data.name : "");
             } else {
               dateContentDiv.innerHTML = "No Date";
             }

@@ -355,6 +355,14 @@ export const loadData = (
             );
             tilesets[asset["id"]][new Date(data["date"])].readyPromise.then(
               function (tileset) {
+                // console.log(tilesets[asset["id"]][
+                //   new Date(data["date"])
+                //   ].boundingSphere);
+                // var carto = Cesium.Cartographic.fromCartesian(tilesets[asset["id"]][new Date(data["date"])].boundingSphere.center);
+                // console.log(carto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
+                // console.log(carto.longitude * Cesium.Math.DEGREES_PER_RADIAN);
+                // console.log(carto.height);
+
                 setupStyleToolbar(tileset);
                 applyStyle(selectedDimension);
               }
@@ -375,7 +383,6 @@ export const loadData = (
   } else if (data["type"] === "Imagery") {
     if (!imageryLayers[asset.id]) imageryLayers[asset.id] = {};
     if (!imageryLayers[asset.id][data.id]) {
-      console.log("creating imagery layer");
       imageryLayers[asset.id][
         data.id
       ] = viewer.imageryLayers.addImageryProvider(
@@ -421,7 +428,11 @@ export const loadData = (
       }
     });
 
-    if (data["type"] === "PointCloud" || data["type"] === "EPTPointCloud") {
+    if (
+      assetDataset[0]["type"] === "PointCloud" ||
+      assetDataset[0]["type"] === "EPTPointCloud"
+    ) {
+      // if (assetDataset[0].position && assetDataset[0].boundingSphereRadius){
       var pos = Cesium.Cartographic.toCartesian(
         Cesium.Cartographic.fromDegrees(
           assetDataset[0].position["lng"],
@@ -432,9 +443,13 @@ export const loadData = (
       viewer.camera.flyToBoundingSphere(
         new Cesium.BoundingSphere(pos, assetDataset[0].boundingSphereRadius)
       );
-    } else if (data["type"] === "Model") {
+      // }
+      // else {
+      //   viewer.flyTo(tilesets[asset["id"]][new Date(data["date"])])
+      // }
+    } else if (assetDataset[0]["type"] === "Model") {
       viewer.flyTo(entities[asset["id"]]);
-    } else if (data["type"] === "Influx") {
+    } else if (assetDataset[0]["type"] === "Influx") {
       var position = Cesium.Cartesian3.fromDegrees(
         data["position"]["lng"],
         data["position"]["lat"],
@@ -442,7 +457,7 @@ export const loadData = (
       );
 
       viewer.camera.flyTo({ destination: position });
-    } else if (data["type"] === "Imagery") {
+    } else if (assetDataset[0]["type"] === "Imagery") {
       var rectangle = new Cesium.Rectangle.fromDegrees(
         data.bounds[0],
         data.bounds[1],
