@@ -12,6 +12,7 @@ import {
   selectedDatasets,
   dataSources,
   setSelectedDatasets,
+  setSelectedAssetIDs,
   MSSE,
   imageryLayers,
 } from "./State.js";
@@ -151,11 +152,26 @@ viewer.camera.moveEnd.addEventListener(() => {
                           selectedData.id
                         ].show = false;
                       }
+                      console.log(
+                        imageryLayers[selectedData.asset.id] &&
+                          imageryLayers[selectedData.asset.id][selectedData.id]
+                      );
                       setSelectedDatasets(
                         selectedDatasets.filter((d) => {
                           return d.id !== selectedData.id;
                         })
                       );
+                      if (
+                        !selectedDatasets.find((d) =>
+                          selectedAssetIDs.includes(d.asset.id)
+                        )
+                      ) {
+                        setSelectedAssetIDs(
+                          selectedAssetIDs.filter((a) => {
+                            return a !== data.asset.id;
+                          })
+                        );
+                      }
                     }
                   }
 

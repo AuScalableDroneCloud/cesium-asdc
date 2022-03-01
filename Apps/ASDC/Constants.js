@@ -5,6 +5,7 @@ export const indexFile =
   "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/index.json";
 // export const indexFile = "/cesium/Apps/ASDC/index.json";
 
+// export const eptServer = "http://localhost:3000";
 export const eptServer = "https://asdc.cloud.edu.au/ept";
 
 export const pcFormats = ["laz", "las", "xyz", "pcd", "ply"];

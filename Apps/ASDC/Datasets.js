@@ -188,10 +188,13 @@ export const loadData = (
   select = true
 ) => {
   if (select) {
-    if (!selectedAssetIDs.includes(asset["id"]))
+    if (!selectedAssetIDs.includes(asset["id"])) {
       setSelectedAssetIDs([...selectedAssetIDs, asset["id"]]);
+    }
 
-    if (!selectedDatasets.includes(data)) selectedDatasets.push(data);
+    if (!selectedDatasets.includes(data)) {
+      selectedDatasets.push(data);
+    }
   }
 
   if (data["type"] === "PointCloud") {
@@ -371,19 +374,26 @@ export const loadData = (
     loadGraph(data.station);
   } else if (data["type"] === "Imagery") {
     if (!imageryLayers[asset.id]) imageryLayers[asset.id] = {};
-    imageryLayers[asset.id][data.id] = viewer.imageryLayers.addImageryProvider(
-      new Cesium.UrlTemplateImageryProvider({
-        url: data.url,
-        rectangle: new Cesium.Rectangle.fromDegrees(
-          data.bounds[0],
-          data.bounds[1],
-          data.bounds[2],
-          data.bounds[3]
-        ),
-        minimumLevel: data.minzoom,
-        maximumLevel: data.maxzoom,
-      })
-    );
+    if (!imageryLayers[asset.id][data.id]) {
+      console.log("creating imagery layer");
+      imageryLayers[asset.id][
+        data.id
+      ] = viewer.imageryLayers.addImageryProvider(
+        new Cesium.UrlTemplateImageryProvider({
+          url: data.url,
+          rectangle: new Cesium.Rectangle.fromDegrees(
+            data.bounds[0],
+            data.bounds[1],
+            data.bounds[2],
+            data.bounds[3]
+          ),
+          minimumLevel: data.minzoom,
+          maximumLevel: data.maxzoom,
+        })
+      );
+    } else {
+      imageryLayers[asset.id][data.id].show = true;
+    }
   }
 
   if (data["type"] != "Influx") {
@@ -601,49 +611,76 @@ export const loadGeoJson = (asset, data, fly) => {
       var samplePromises = [];
 
       dataSource.entities.values.map((entity) => {
-        // dataSource.entities.values.slice(0,24).map((entity) => {
-        var positions = entity.polygon.hierarchy.getValue().positions;
-        var cartoPositions = [];
-        positions.map((pos) => {
-          var carto = Cesium.Cartographic.fromCartesian(pos);
-          cartoPositions.push(
-            new Cesium.Cartographic(carto.longitude, carto.latitude)
-          );
-        });
+        if (entity.polygon) {
+          var positions = entity.polygon.hierarchy.getValue().positions;
+          var cartoPositions = [];
+          positions.map((pos) => {
+            var carto = Cesium.Cartographic.fromCartesian(pos);
+            cartoPositions.push(
+              new Cesium.Cartographic(carto.longitude, carto.latitude)
+            );
+          });
 
-        samplePromises.push(
-          Cesium.sampleTerrainMostDetailed(
-            viewer.terrainProvider,
-            cartoPositions
-          ).then((updatedPositions) => {
-            // var polygonEntity = viewer.entities.add({
-            var polygonEntity = dataSources[asset.id][dataID].entities.add({
-              polygon: {
-                hierarchy: new Cesium.PolygonHierarchy(
-                  Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+          samplePromises.push(
+            Cesium.sampleTerrainMostDetailed(
+              viewer.terrainProvider,
+              cartoPositions
+            ).then((updatedPositions) => {
+              var polygonEntity = dataSources[asset.id][dataID].entities.add({
+                polygon: {
+                  hierarchy: new Cesium.PolygonHierarchy(
+                    Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                      updatedPositions
+                    )
+                  ),
+                  // hierarchy:new Cesium.CallbackProperty( () => {
+                  //   updatedPositions.map(cartoPoint=>{
+                  //   // var height = viewer.scene.sampleHeight(cartoPoint);
+                  //   var height = viewer.scene.globe.getHeight(cartoPoint);
+                  //   // console.log(height);
+                  //   if (height){
+                  //     cartoPoint.height=height;
+                  //   }
+                  // })
+                  //   return(new Cesium.PolygonHierarchy(Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(updatedPositions)));
+                  // },false),  //slow
+                  material: Cesium.Color.RED,
+                  perPositionHeight: true,
+                  // perPositionHeight: false, //picking issues
+                  arcType: Cesium.ArcType.GEODESIC,
+                },
+              });
+              polygonEntity.properties = entity.properties;
+            })
+          );
+        }
+        if (entity.polyline) {
+          var positions = entity.polyline.positions._value;
+          var cartoPositions = [];
+          positions.map((pos) => {
+            var carto = Cesium.Cartographic.fromCartesian(pos);
+            cartoPositions.push(
+              new Cesium.Cartographic(carto.longitude, carto.latitude)
+            );
+          });
+
+          samplePromises.push(
+            Cesium.sampleTerrainMostDetailed(
+              viewer.terrainProvider,
+              cartoPositions
+            ).then((updatedPositions) => {
+              var polylineEntity = dataSources[asset.id][dataID].entities.add({
+                polyline: {
+                  positions: Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
                     updatedPositions
-                  )
-                ),
-                // hierarchy:new Cesium.CallbackProperty( () => {
-                //   updatedPositions.map(cartoPoint=>{
-                //   // var height = viewer.scene.sampleHeight(cartoPoint);
-                //   var height = viewer.scene.globe.getHeight(cartoPoint);
-                //   // console.log(height);
-                //   if (height){
-                //     cartoPoint.height=height;
-                //   }
-                // })
-                //   return(new Cesium.PolygonHierarchy(Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(updatedPositions)));
-                // },false),  //slow
-                material: Cesium.Color.RED,
-                perPositionHeight: true,
-                // perPositionHeight: false, //picking issues
-                arcType: Cesium.ArcType.GEODESIC,
-              },
-            });
-            polygonEntity.properties = entity.properties;
-          })
-        );
+                  ),
+                  material: Cesium.Color.YELLOW,
+                },
+              });
+              polylineEntity.properties = entity.properties;
+            })
+          );
+        }
       });
       Promise.all(samplePromises).then(() => {
         dataSource = null;
@@ -662,8 +699,9 @@ export const loadGeoJson = (asset, data, fly) => {
       document.getElementById("msse-slider-container").style.display = "none";
     }
     // Cesium.when(viewer.dataSourceDisplay.ready, function () {
+    //   console.log("ready");
     //     var boundingSpheres=[];
-    //     var entities = dataSources[asset.id][asset.data.indexOf(data)].entities.values;
+    //     var entities = dataSources[asset.id][dataID].entities.values;
     //     for (var i=0;i<entities.length;i++){
     //       var boundingSphere = new Cesium.BoundingSphere();
     //       var state = viewer.dataSourceDisplay.getBoundingSphere(
@@ -679,6 +717,7 @@ export const loadGeoJson = (asset, data, fly) => {
     //       }
     //     }
     //     var full = Cesium.BoundingSphere.fromBoundingSpheres(boundingSpheres);
+    //     console.log(full);
     //     var fullCarto = Cesium.Cartographic.fromCartesian(full.center)
     //     console.log(fullCarto);
     //     console.log(fullCarto.longitude * Cesium.Math.DEGREES_PER_RADIAN);

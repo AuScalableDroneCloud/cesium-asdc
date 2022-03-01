@@ -297,11 +297,18 @@ export const setupSidebar = (uploads) => {
                     return d.id !== data.id;
                   })
                 );
-                setSelectedAssetIDs(
-                  selectedAssetIDs.filter((a) => {
-                    return a !== data.asset.id;
-                  })
-                );
+
+                if (
+                  !selectedDatasets.find((d) =>
+                    selectedAssetIDs.includes(d.asset.id)
+                  )
+                ) {
+                  setSelectedAssetIDs(
+                    selectedAssetIDs.filter((a) => {
+                      return a !== data.asset.id;
+                    })
+                  );
+                }
 
                 var dataIDs = "";
                 var newDataIDs = [];
@@ -586,12 +593,13 @@ export const setupSidebar = (uploads) => {
                 return d.asset.id !== asset.id;
               })
             );
-
+            // if (!selectedDatasets.find(d=>selectedAssetIDs.includes(d.asset.id))) {
             setSelectedAssetIDs(
               selectedAssetIDs.filter((a) => {
                 return a !== data.asset.id;
               })
             );
+            // }
 
             var dataIDs = [];
             selectedDatasets.map((d) => {
