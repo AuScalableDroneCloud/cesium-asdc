@@ -21,6 +21,7 @@ import {
 import { loadAsset, loadData, syncTimeline } from "./Datasets.js";
 import { indexFile, pcFormats, processingAPI } from "./Constants.js";
 import { closeGraphModal } from "./Graphs.js";
+import { applyAlpha } from "./PointcloudStyle.js";
 
 export const setupSidebar = (uploads) => {
   fetch(indexFile, { cache: "no-store" })
@@ -153,7 +154,7 @@ export const setupSidebar = (uploads) => {
 
           var timeseriesContentDiv = document.createElement("div");
           timeseriesContentDiv.style.padding = "0 36px";
-          timeseriesContentDiv.innerHTML = "Time Series";
+          timeseriesContentDiv.innerHTML = "All Layers";
 
           timeseriesDiv.onclick = () => {
             assetCheckbox.indeterminate = false;
@@ -373,21 +374,22 @@ export const setupSidebar = (uploads) => {
 
             var dateContentDiv = document.createElement("div");
             dateContentDiv.style.padding = "0 36px";
+            dateContentDiv.style.display = "flex";
 
+            var dateContentDivText = document.createElement("div");
+            dateContentDivText.style["flex-grow"] = 1;
             if (data.date) {
               var date = new Date(data.date);
-              dateContentDiv.innerHTML =
+              dateContentDivText.innerHTML =
                 (date.toString() !== "Invalid Date"
                   ? new Date(data.date).toLocaleDateString("en-au", {
                       year: "numeric",
                       month: "numeric",
                       day: "numeric",
-                      // hour: "numeric",
-                      // minute: "numeric",
                     })
                   : data.date) + (data.name ? " - " + data.name : "");
             } else {
-              dateContentDiv.innerHTML = "No Date";
+              dateContentDivText.innerHTML = "No Date";
             }
 
             dateDiv.onclick = (e) => {
@@ -427,17 +429,134 @@ export const setupSidebar = (uploads) => {
             };
 
             dateContentDiv.appendChild(checkbox);
+            dateContentDiv.appendChild(dateContentDivText);
             dateDiv.appendChild(dateContentDiv);
             datesPanelDiv.appendChild(dateDiv);
 
+            var opacitySliderBtn = document.createElement("div");
+            opacitySliderBtn.className = "fa fa-sliders";
+            opacitySliderBtn.style.float = "right";
+            dateContentDiv.appendChild(opacitySliderBtn);
+            var opacityDropdown = document.getElementById(
+              "alpha-slider-container"
+            );
+
+            opacitySliderBtn.onmouseover = (evt) => {
+              if (data.type === "PointCloud" || data.type === "EPTPointCloud") {
+                if (
+                  tilesets[asset.id] &&
+                  tilesets[asset.id][new Date(data.date)].style &&
+                  tilesets[asset.id][new Date(data.date)].style.color
+                ) {
+                  var alpha = tilesets[asset.id][
+                    new Date(data.date)
+                  ].style.color.expression
+                    .match(/\((.*)\)/)
+                    .pop()
+                    .split(",")
+                    .pop();
+                  document.getElementById("alpha-slider").value = alpha * 100;
+                  document.getElementById("alpha-value").innerHTML =
+                    alpha * 100 + " %";
+                } else {
+                  document.getElementById("alpha-slider").value = 100;
+                  document.getElementById("alpha-value").innerHTML = "100 %";
+                }
+              } else if (data.type === "Imagery") {
+                if (
+                  imageryLayers[asset.id] &&
+                  imageryLayers[asset.id][data.id]
+                ) {
+                  document.getElementById("alpha-slider").value =
+                    imageryLayers[asset.id][data.id].alpha * 100;
+                  document.getElementById("alpha-value").innerHTML =
+                    imageryLayers[asset.id][data.id].alpha * 100 + " %";
+                } else {
+                  document.getElementById("alpha-slider").value = 100;
+                  document.getElementById("alpha-value").innerHTML = "100 %";
+                }
+              } else if (data.type === "Model") {
+                if (entities[asset.id] && entities[asset.id].model.color) {
+                  document.getElementById("alpha-slider").value =
+                    entities[asset.id].model.color.getValue().alpha * 100;
+                  document.getElementById("alpha-value").innerHTML =
+                    entities[asset.id].model.color.getValue().alpha * 100 +
+                    " %";
+                } else {
+                  document.getElementById("alpha-slider").value = 100;
+                  document.getElementById("alpha-value").innerHTML = "100 %";
+                }
+              } else if (data.type === "GeoJSON") {
+                if (dataSources[asset.id] && dataSources[asset.id][data.id]) {
+                  var entity =
+                    dataSources[asset.id][data.id].entities.values[0];
+                  if (entity) {
+                    if (entity.polygon) {
+                      document.getElementById("alpha-slider").value =
+                        entity.polygon.material.color.getValue().alpha * 100;
+                      document.getElementById("alpha-value").innerHTML =
+                        entity.polygon.material.color.getValue().alpha * 100 +
+                        " %";
+                    } else if (entity.polyline) {
+                      document.getElementById("alpha-slider").value =
+                        entity.polyline.material.color.getValue().alpha * 100;
+                      document.getElementById("alpha-value").innerHTML =
+                        entity.polyline.material.color.getValue().alpha * 100 +
+                        " %";
+                    } else {
+                      document.getElementById("alpha-slider").value = 100;
+                      document.getElementById("alpha-value").innerHTML =
+                        "100 %";
+                    }
+                  }
+                } else {
+                  document.getElementById("alpha-slider").value = 100;
+                  document.getElementById("alpha-value").innerHTML = "100 %";
+                }
+              }
+
+              opacityDropdown.style.left =
+                evt.target.offsetLeft +
+                evt.target.offsetWidth / 2 -
+                document.getElementById("sidebar-data-buttons").scrollLeft +
+                "px";
+              opacityDropdown.style.top =
+                evt.target.offsetTop +
+                evt.target.offsetHeight / 2 -
+                document.getElementById("sidebar-data-buttons").scrollTop +
+                "px";
+              opacityDropdown.style.display = "block";
+              opacitySliderBtn.style.color = "white";
+
+              opacityDropdown.onmouseover = (event) => {
+                opacityDropdown.style.display = "block";
+                opacitySliderBtn.style.color = "white";
+                dateDiv.style.background = "#5B8B51";
+              };
+
+              opacityDropdown.onmouseleave = (event) => {
+                opacityDropdown.style.display = "none";
+                opacitySliderBtn.style.color = "black";
+                dateDiv.style.background = null;
+              };
+
+              document.getElementById("alpha-slider").oninput = (evt) =>
+                applyAlpha(evt, asset, data);
+            };
+            opacitySliderBtn.onmouseleave = (evt) => {
+              opacityDropdown.style.display = "none";
+              opacitySliderBtn.style.color = "black";
+            };
+
             if (
-              (data.type != "EPTPointCloud" && data.source) ||
+              data.source ||
               data.type === "Influx" ||
               data.type === "GeoJSON"
             ) {
               var downloadBtn = document.createElement("div");
-              downloadBtn.className = "dlBtn fa fa-download";
+              downloadBtn.className = "fa fa-download";
               downloadBtn.style.float = "right";
+              downloadBtn.style.paddingLeft = "10px";
 
               downloadBtn.onclick = (evt) => {
                 evt.stopPropagation();
@@ -470,7 +589,10 @@ export const setupSidebar = (uploads) => {
                   dateDiv.style.background = null;
                 };
 
-                if (data.type === "PointCloud") {
+                if (
+                  data.type === "PointCloud" ||
+                  data.type === "EPTPointCloud"
+                ) {
                   pcFormats.map((format) => {
                     dlDropdown.children["dl-" + format].style.display = "block";
                     dlDropdown.children["dl-" + format].onclick = () => {
@@ -484,12 +606,23 @@ export const setupSidebar = (uploads) => {
                   pcFormats.map((format) => {
                     dlDropdown.children["dl-" + format].style.display = "none";
                   });
-                  dlDropdown.children["dl-geojson"].style.display = "block";
-                  dlDropdown.children["dl-geojson"].onclick = () => {
-                    downloadFile(asset, data, index, data.type);
-                  };
+                  if (data.url.endsWith(".geojson")) {
+                    dlDropdown.children["dl-geojson"].style.display = "block";
+                    dlDropdown.children["dl-geojson"].onclick = () => {
+                      downloadFile(asset, data, index, data.type);
+                    };
+                  } else {
+                    dlDropdown.children["dl-geojson"].style.display = "none";
+                  }
+                  if (data.url.endsWith(".json")) {
+                    dlDropdown.children["dl-json"].style.display = "block";
+                    dlDropdown.children["dl-json"].onclick = () => {
+                      downloadFile(asset, data, index, data.type);
+                    };
+                  } else {
+                    dlDropdown.children["dl-json"].style.display = "none";
+                  }
                   dlDropdown.children["dl-gltf"].style.display = "none";
-                  dlDropdown.children["dl-json"].style.display = "none";
                 } else if (data.type === "Model") {
                   pcFormats.map((format) => {
                     dlDropdown.children["dl-" + format].style.display = "none";
@@ -508,6 +641,17 @@ export const setupSidebar = (uploads) => {
                   dlDropdown.children["dl-gltf"].style.display = "none";
                   dlDropdown.children["dl-json"].style.display = "block";
                   dlDropdown.children["dl-json"].onclick = () => {
+                    downloadFile(asset, data, index, data.type);
+                  };
+                } else if (data.type === "Imagery") {
+                  pcFormats.map((format) => {
+                    dlDropdown.children["dl-" + format].style.display = "none";
+                  });
+                  dlDropdown.children["dl-geojson"].style.display = "none";
+                  dlDropdown.children["dl-gltf"].style.display = "none";
+                  dlDropdown.children["dl-json"].style.display = "none";
+                  dlDropdown.children["dl-tif"].style.display = "block";
+                  dlDropdown.children["dl-tif"].onclick = () => {
                     downloadFile(asset, data, index, data.type);
                   };
                 }
@@ -580,10 +724,10 @@ export const setupSidebar = (uploads) => {
                   entities[asset["id"]].show = false;
                 }
                 if (
-                  imageryLayers[asset.id] &&
-                  imageryLayers[asset.id][data.id]
+                  imageryLayers[d.asset.id] &&
+                  imageryLayers[d.asset.id][d.id]
                 ) {
-                  imageryLayers[asset.id][data.id].show = false;
+                  imageryLayers[d.asset.id][d.id].show = false;
                 }
                 closeGraphModal();
               }
@@ -593,13 +737,11 @@ export const setupSidebar = (uploads) => {
                 return d.asset.id !== asset.id;
               })
             );
-            // if (!selectedDatasets.find(d=>selectedAssetIDs.includes(d.asset.id))) {
             setSelectedAssetIDs(
               selectedAssetIDs.filter((a) => {
                 return a !== data.asset.id;
               })
             );
-            // }
 
             var dataIDs = [];
             selectedDatasets.map((d) => {
@@ -746,31 +888,69 @@ export const downloadFile = (asset, data, index, format) => {
   var waitModal = document.getElementById("processing-wait-modal");
 
   if (pcFormats.includes(format)) {
-    waitModal.style.display = "block";
-    fetch(
-      `${processingAPI}/download?` +
-        new URLSearchParams({
-          assetID: asset.id,
-          dataIndex: index,
-          format: format,
-        }),
-      { cache: "no-store" }
-    )
-      .then((response) => response.text())
-      .then((text) => {
-        waitModal.style.display = "none";
-        var link = document.createElement("a");
-        link.href = text;
-        waitModal.style.display = "none";
-        link.click();
-        link.remove();
-      })
-      .catch((err) => {
-        alert(err);
-        waitModal.style.display = "none";
-      });
+    if (
+      data.source.url.startsWith("s3://") ||
+      !data.source.url.endsWith("." + format)
+    ) {
+      waitModal.style.display = "block";
+      let filename;
+      fetch(
+        `${processingAPI}/download?` +
+          new URLSearchParams({
+            assetID: asset.id,
+            dataID: data.id,
+            format: format,
+          }),
+        { cache: "no-store" }
+      )
+        .then((response) => {
+          if (response.status === 404) {
+            response.text().then((text) => {
+              alert(text);
+              waitModal.style.display = "none";
+            });
+          } else if (response.status === 302) {
+            response.text().then((text) => {
+              waitModal.style.display = "none";
+              var link = document.createElement("a");
+              link.href = text;
+              waitModal.style.display = "none";
+              link.click();
+              link.remove();
+            });
+          } else {
+            filename = response.headers
+              .get("Content-Disposition")
+              .split(";")[1]
+              .split("=")[1];
+            filename = filename.slice(1, filename.length - 1);
+            response
+              .blob()
+              .then((blob) => URL.createObjectURL(blob))
+              .then((url) => {
+                var link = document.createElement("a");
+                link.href = url;
+                link.download = filename;
+                waitModal.style.display = "none";
+                link.click();
+                URL.revokeObjectURL(url);
+                link.remove();
+              });
+          }
+        })
+        .catch((err) => {
+          alert(err);
+          waitModal.style.display = "none";
+        });
+    } else {
+      var link = document.createElement("a");
+      link.href = data.source.url;
+      link.target = "_blank";
+      link.click();
+      link.remove();
+    }
   } else if (data.type === "GeoJSON") {
-    if (data.url.endsWith(".geojson")) {
+    if (data.url.endsWith(".geojson") || data.url.endsWith(".json")) {
       var link = document.createElement("a");
       link.href = data.url;
       link.target = "_blank";
@@ -786,22 +966,34 @@ export const downloadFile = (asset, data, index, format) => {
       link.remove();
     } else {
       waitModal.style.display = "block";
+      let filename;
       fetch(
         `${processingAPI}/download?` +
           new URLSearchParams({
             assetID: asset.id,
-            dataIndex: index,
+            dataID: data.id,
             format: "zip",
           }),
         { cache: "no-store" }
       )
-        .then((response) => response.text())
-        .then((text) => {
-          var link = document.createElement("a");
-          link.href = text;
-          waitModal.style.display = "none";
-          link.click();
-          link.remove();
+        .then((response) => {
+          filename = response.headers
+            .get("Content-Disposition")
+            .split(";")[1]
+            .split("=")[1];
+          filename = filename.slice(1, filename.length - 1);
+          response
+            .blob()
+            .then((blob) => URL.createObjectURL(blob))
+            .then((url) => {
+              var link = document.createElement("a");
+              link.href = url;
+              link.download = filename;
+              waitModal.style.display = "none";
+              link.click();
+              URL.revokeObjectURL(url);
+              link.remove();
+            });
         })
         .catch((err) => {
           alert(err);
@@ -844,6 +1036,12 @@ export const downloadFile = (asset, data, index, format) => {
         alert(err);
         waitModal.style.display = "none";
       });
+  } else if (data.type === "Imagery") {
+    var link = document.createElement("a");
+    link.href = data.source.url;
+    link.target = "_blank";
+    link.click();
+    link.remove();
   }
 };
 

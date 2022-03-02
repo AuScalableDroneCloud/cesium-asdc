@@ -18,6 +18,7 @@ export var imageryLayers = {};
 export var selectedDimension;
 
 export var MSSE = 83;
+export var alpha = 1;
 
 export var markersDataSource;
 
@@ -63,4 +64,8 @@ export function setMSSE(newMSSE) {
 
 export function setMarkersDataSource(newMarkersDataSource) {
   markersDataSource = newMarkersDataSource;
+}
+
+export function setAlpha(newAlpha) {
+  alpha = newAlpha;
 }

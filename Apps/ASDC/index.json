@@ -657,7 +657,10 @@
         "height": 881.9985267056549
       },
       "boundingSphereRadius": 237.32666340668663,
-      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/d7d20c75-2a06-48a6-8946-6efc9cff341c/assets/entwine_pointcloud/ept.json"
+      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/f47d2fb3-71ac-4bc0-8b8c-21d246c26147/assets/entwine_pointcloud/ept.json",
+      "source": {
+        "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/f47d2fb3-71ac-4bc0-8b8c-21d246c26147/download/georeferenced_model.laz"
+      }
     },
     {
       "id": 32,
@@ -677,7 +680,10 @@
       ],
       "minzoom": 13,
       "maxzoom": 24,
-      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/f47d2fb3-71ac-4bc0-8b8c-21d246c26147/orthophoto/tiles/{z}/{x}/{y}.png?formula=NDVI&bands=RGN&color_map=rdylgn&rescale=-1%2C1"
+      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/f47d2fb3-71ac-4bc0-8b8c-21d246c26147/orthophoto/tiles/{z}/{x}/{y}.png?formula=NDVI&bands=RGN&color_map=rdylgn&rescale=-1%2C1",
+      "source": {
+        "url": "https://asdc.cloud.edu.au/api/workers/get/f661d32f-fe94-4635-8907-6109f4d572f7?filename=USLN-Coolama-2022-02-11-P4M-TB_NDVI-JPG_V3_OptionsUSLN-GER-SettingsV1-orthophoto-NDVI.tif"
+      }
     },
     {
       "id": 33,
@@ -697,7 +703,10 @@
       ],
       "minzoom": 13,
       "maxzoom": 24,
-      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/f47d2fb3-71ac-4bc0-8b8c-21d246c26147/orthophoto/tiles/{z}/{x}/{y}.png?color_map=rdylgn_r&formula=RDVI&bands=RGN&hillshade=&rescale=-15.969,13.363"
+      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/f47d2fb3-71ac-4bc0-8b8c-21d246c26147/orthophoto/tiles/{z}/{x}/{y}.png?color_map=rdylgn_r&formula=RDVI&bands=RGN&hillshade=&rescale=-15.969,13.363",
+      "source": {
+        "url": "https://asdc.cloud.edu.au/api/workers/get/93ff2317-4328-4467-aec3-e90ed514e63f?filename=USLN-Coolama-2022-02-11-P4M-TB_NDVI-JPG_V3_OptionsUSLN-GER-SettingsV1-orthophoto-RDVI.tif"
+      }
     },
     {
       "id": 34,
@@ -717,7 +726,10 @@
       ],
       "minzoom": 13,
       "maxzoom": 24,
-      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/f47d2fb3-71ac-4bc0-8b8c-21d246c26147/dtm/tiles/{z}/{x}/{y}.png?color_map=viridis&hillshade=6&rescale=877.0599975585938%2C885.9813232421875"
+      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/f47d2fb3-71ac-4bc0-8b8c-21d246c26147/dtm/tiles/{z}/{x}/{y}.png?color_map=viridis&hillshade=6&rescale=877.0599975585938%2C885.9813232421875",
+      "source": {
+        "url": "https://asdc.cloud.edu.au/api/workers/get/df2c87df-c802-46a5-bdc0-a2edc2e6373b?filename=USLN-Coolama-2022-02-11-P4M-TB_NDVI-JPG_V3_OptionsUSLN-GER-SettingsV1-dtm.tif"
+      }
     },
     {
       "id": 35,
@@ -743,7 +755,10 @@
         "height": 910.9991832863858
       },
       "boundingSphereRadius": 176.69796801283664,
-      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/8a41e21b-23a2-4b44-a652-57064cb913b8/assets/entwine_pointcloud/ept.json"
+      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/8a41e21b-23a2-4b44-a652-57064cb913b8/assets/entwine_pointcloud/ept.json",
+      "source": {
+        "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/8a41e21b-23a2-4b44-a652-57064cb913b8/download/georeferenced_model.laz"
+      }
     },
     {
       "id": 37,
@@ -763,7 +778,10 @@
       ],
       "minzoom": 14,
       "maxzoom": 24,
-      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/8a41e21b-23a2-4b44-a652-57064cb913b8/orthophoto/tiles/{z}/{x}/{y}.png?formula=NDVI&bands=RGN&color_map=rdylgn&rescale=-1%2C1"
+      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/8a41e21b-23a2-4b44-a652-57064cb913b8/orthophoto/tiles/{z}/{x}/{y}.png?formula=NDVI&bands=RGN&color_map=rdylgn&rescale=-1%2C1",
+      "source": {
+        "url": "https://asdc.cloud.edu.au/api/workers/get/78dadd74-5203-4edf-a291-f13c20e55093?filename=USLN-Doran-2022-02-11-P4M-TB_NDVI-JPG_V2_OptionsOptionsUSLN-GER-SettingsV1-orthophoto-NDVI.tif"
+      }
     },
     {
       "id": 38,
@@ -783,7 +801,10 @@
       ],
       "minzoom": 14,
       "maxzoom": 24,
-      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/8a41e21b-23a2-4b44-a652-57064cb913b8/orthophoto/tiles/{z}/{x}/{y}.png?color_map=rdylgn_r&formula=RDVI&bands=RGN&hillshade=&rescale=-15.969,13.969"
+      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/8a41e21b-23a2-4b44-a652-57064cb913b8/orthophoto/tiles/{z}/{x}/{y}.png?color_map=rdylgn_r&formula=RDVI&bands=RGN&hillshade=&rescale=-15.969,13.969",
+      "source": {
+        "url": " https://asdc.cloud.edu.au/api/workers/get/c7a64094-1407-4382-9425-a4dfa479bd43?filename=USLN-Doran-2022-02-11-P4M-TB_NDVI-JPG_V2_OptionsOptionsUSLN-GER-SettingsV1-orthophoto-RDVI.tif"
+      }
     },
     {
       "id": 39,
@@ -803,7 +824,10 @@
       ],
       "minzoom": 14,
       "maxzoom": 24,
-      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/8a41e21b-23a2-4b44-a652-57064cb913b8/dtm/tiles/{z}/{x}/{y}.png?color_map=viridis&hillshade=6&rescale=901.5453491210938%2C918.5599975585938"
+      "url": "https://asdc.cloud.edu.au/api/projects/52/tasks/8a41e21b-23a2-4b44-a652-57064cb913b8/dtm/tiles/{z}/{x}/{y}.png?color_map=viridis&hillshade=6&rescale=901.5453491210938%2C918.5599975585938",
+      "source": {
+        "url": "https://asdc.cloud.edu.au/api/workers/get/1795506e-4179-4a01-9ad5-fbbd9fe84f1b?filename=USLN-Doran-2022-02-11-P4M-TB_NDVI-JPG_V2_OptionsOptionsUSLN-GER-SettingsV1-dtm.tif"
+      }
     },
     {
       "id": 40,

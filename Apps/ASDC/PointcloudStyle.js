@@ -3,6 +3,11 @@ import {
   setSelectedDimension,
   selectedAssetIDs,
   tilesets,
+  // setAlpha,
+  // alpha,
+  imageryLayers,
+  entities,
+  dataSources,
 } from "./State.js";
 
 export const applyStyle = (schemaName) => {
@@ -60,7 +65,8 @@ export const applyStyle = (schemaName) => {
             schema.name === "Blue"
           ) {
             selectedTileset.style = new Cesium.Cesium3DTileStyle({
-              color: `\${COLOR} * color('${schema.name.toLowerCase()}')`,
+              // color: `\${COLOR} * color('${schema.name.toLowerCase()}')`,
+              color: `rgba(\${COLOR}.r * 255,\${COLOR}.g* 255,\${COLOR}.b* 255,0.75)`,
             });
           } else {
             selectedTileset.style = new Cesium.Cesium3DTileStyle({
@@ -127,5 +133,48 @@ export const setupStyleToolbar = (tileset) => {
   if (selectedIndex != undefined) {
     document.getElementById("toolbar").childNodes[0].selectedIndex =
       selectedIndex + 1;
+  }
+};
+
+export const applyAlpha = (evt, asset, data) => {
+  document.getElementById("alpha-value").innerHTML = evt.target.value + " %";
+  var alpha = evt.target.value / 100;
+
+  if (data.type === "PointCloud" || data.type === "EPTPointCloud") {
+    if (tilesets[asset.id] && tilesets[asset.id][new Date(data.date)]) {
+      tilesets[asset.id][
+        new Date(data.date)
+      ].style = new Cesium.Cesium3DTileStyle({
+        color: `rgba(\${COLOR}.r * 255,\${COLOR}.g* 255,\${COLOR}.b* 255,${alpha})`,
+      });
+    }
+  } else if (data.type === "Imagery") {
+    if (imageryLayers[asset.id] && imageryLayers[asset.id][data.id]) {
+      imageryLayers[asset.id][data.id].alpha = alpha;
+    }
+  } else if (data.type === "Model") {
+    if (entities[asset.id]) {
+      entities[asset.id].model.color = Cesium.Color.fromAlpha(
+        Cesium.Color.WHITE,
+        alpha
+      );
+    }
+  } else if (data.type === "GeoJSON") {
+    if (dataSources[asset.id] && dataSources[asset.id][data.id]) {
+      dataSources[asset.id][data.id].entities.values.map((entity) => {
+        if (entity.polygon) {
+          entity.polygon.material = Cesium.Color.fromAlpha(
+            entity.polygon.material.color.getValue(),
+            alpha
+          );
+        }
+        if (entity.polyline) {
+          entity.polyline.material = Cesium.Color.fromAlpha(
+            entity.polyline.material.color.getValue(),
+            alpha
+          );
+        }
+      });
+    }
   }
 };

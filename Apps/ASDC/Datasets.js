@@ -399,6 +399,7 @@ export const loadData = (
         })
       );
     } else {
+      viewer.imageryLayers.raiseToTop(imageryLayers[asset.id][data.id]);
       imageryLayers[asset.id][data.id].show = true;
     }
   }

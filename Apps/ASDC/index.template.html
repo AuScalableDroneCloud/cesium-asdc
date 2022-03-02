@@ -97,6 +97,7 @@
       <div class="dlDropdownRow" id="dl-geojson">GeoJSON Format (.geojson)</div>
       <div class="dlDropdownRow" id="dl-json">JSON Format (.json)</div>
       <div class="dlDropdownRow" id="dl-gltf">GLTF/GLB Format (.gltf/.glb)</div>
+      <div class="dlDropdownRow" id="dl-tif">GeoTIFF Format (.tif)</div>
     </div>
     <div class="modal" id="processing-wait-modal">
       <div class="processing-modal">
@@ -104,6 +105,21 @@
         Processing
       </div>
     </div>
+    <div id="alpha-slider-container" class="dropdown">
+      <div class="alpha-slider">
+        Opacity:
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value="100"
+          id="alpha-slider"
+          style="vertical-align: middle"
+        />
+        <span id="alpha-value">100 %</span>
+      </div>
+    </div>
+
     <% for (var js in htmlWebpackPlugin.files.js) { %>
     <script src="/cesium/Apps/ASDC/<%= htmlWebpackPlugin.files.js[js] %>"></script>
     <% } %>
