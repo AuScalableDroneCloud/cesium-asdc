@@ -445,6 +445,7 @@ export const setupSidebar = (uploads) => {
               if (data.type === "PointCloud" || data.type === "EPTPointCloud") {
                 if (
                   tilesets[asset.id] &&
+                  tilesets[asset.id][new Date(data.date)] &&
                   tilesets[asset.id][new Date(data.date)].style &&
                   tilesets[asset.id][new Date(data.date)].style.color
                 ) {
