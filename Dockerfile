@@ -9,6 +9,7 @@ COPY package.json /app
 RUN npm install
 RUN npm install ept-tools -g
 COPY . /app
-RUN node ./node_modules/webpack/bin/webpack.js --mode production
+# RUN node ./node_modules/webpack/bin/webpack.js --mode production
 EXPOSE 8080
-CMD ept serve & node server.cjs --production
+# CMD ept serve & node server.cjs --production
+CMD ept serve & node server.cjs
