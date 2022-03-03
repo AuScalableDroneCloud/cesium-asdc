@@ -29,6 +29,8 @@ import { findAssetAndDataFromUrl } from "./URL.js";
 
 Cesium.Ion.defaultAccessToken = cesiumIonAccessToken;
 
+window.CESIUM_BASE_URL = "/cesium/Build/Cesium";
+
 findAssetAndDataFromUrl();
 
 Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(
@@ -217,9 +219,8 @@ viewer.camera.moveEnd.addEventListener(() => {
   if (viewMenu.length > 0) {
     Sandcastle.addToolbarMenu(viewMenu, "cam-toolbar");
     if (selectedIndex) {
-      document.getElementById(
-        "cam-toolbar"
-      ).childNodes[0].selectedIndex = selectedIndex;
+      document.getElementById("cam-toolbar").childNodes[0].selectedIndex =
+        selectedIndex;
 
       if (selectedData && selectedData != viewMenu[selectedIndex].data) {
         viewMenu[selectedIndex].onselect();
