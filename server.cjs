@@ -118,12 +118,14 @@
   ];
   app.get(knownTilesetFormats, checkGzipAndNext);
 
+  // if(!argv.production){
   app.use(
     "/cesium",
     express.static(path.join(__dirname, "node_modules", "cesium"), {
       extensions: ["html", "htm"],
     })
   );
+  // }
 
   app.use(
     "/cesium",
@@ -165,7 +167,8 @@
     return remoteUrl;
   }
 
-  const dontProxyHeaderRegex = /^(?:Host|Proxy-Connection|Connection|Keep-Alive|Transfer-Encoding|TE|Trailer|Proxy-Authorization|Proxy-Authenticate|Upgrade)$/i;
+  const dontProxyHeaderRegex =
+    /^(?:Host|Proxy-Connection|Connection|Keep-Alive|Transfer-Encoding|TE|Trailer|Proxy-Authorization|Proxy-Authenticate|Upgrade)$/i;
 
   function filterHeaders(req, headers) {
     const result = {};
