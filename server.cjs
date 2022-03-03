@@ -119,6 +119,33 @@
   app.get(knownTilesetFormats, checkGzipAndNext);
 
   // if(!argv.production){
+  // app.get("/cesium/Build/Cesium/Workers/cesiumWorkerBootstrapper.js", function (req, res, next) {
+  //   res.set('Cache-control', `no-store`);
+  //   res.sendFile(
+  //     path.join(__dirname, "node_modules", "cesium","Build","Cesium","Workers","cesiumWorkerBootstrapper.js")
+  //   );
+  // });
+
+  app.use(
+    "/cesium/Build/Cesium/Workers",
+    express.static(
+      path.join(
+        __dirname,
+        "node_modules",
+        "cesium",
+        "Build",
+        "Cesium",
+        "Workers"
+      ),
+      {
+        extensions: ["html", "htm"],
+        setHeaders: function (res, path, stat) {
+          res.set("Cache-control", `no-store`);
+        },
+      }
+    )
+  );
+
   app.use(
     "/cesium",
     express.static(path.join(__dirname, "node_modules", "cesium"), {
