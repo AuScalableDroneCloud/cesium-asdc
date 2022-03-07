@@ -300,6 +300,22 @@
       .catch((error) => response.status(500).json({ error }));
   });
 
+  app.get("/cesium/influx/images", (request, response) => {
+    influx
+      .query(
+        `
+        select time,file_bytes,camera_name,org_name
+        from image_metrics where time <= ${request.query.time}ms and time>=${request.query.startTime}ms and camera_name =~ /^${request.query.camera}$/ ORDER BY time DESC LIMIT 1
+      `
+      )
+      .then((result) => {
+        response.status(200).json(result);
+      })
+      .catch((error) => {
+        response.status(500);
+      });
+  });
+
   const server = app.listen(
     argv.port,
     // argv.public ? undefined : "localhost",

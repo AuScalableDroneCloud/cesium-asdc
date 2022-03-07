@@ -15,6 +15,9 @@ export var entities = {};
 export var dataSources = {};
 export var imageryLayers = {};
 
+export var controllers = {};
+export var lastCurrentTime;
+
 export var selectedDimension;
 
 export var MSSE = 83;
@@ -68,4 +71,8 @@ export function setMarkersDataSource(newMarkersDataSource) {
 
 export function setAlpha(newAlpha) {
   alpha = newAlpha;
+}
+
+export function setLastCurrentTime(newCurrentTime) {
+  lastCurrentTime = newCurrentTime;
 }

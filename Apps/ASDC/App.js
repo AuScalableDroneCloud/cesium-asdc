@@ -15,6 +15,9 @@ import {
   setSelectedAssetIDs,
   MSSE,
   imageryLayers,
+  controllers,
+  lastCurrentTime,
+  setLastCurrentTime,
 } from "./State.js";
 import { loadAsset, loadData, setScreenSpaceError } from "./Datasets.js";
 import {
@@ -237,53 +240,122 @@ viewer.clock.onTick.addEventListener((clock) => {
   var currentTime = Cesium.JulianDate.toDate(clock.currentTime).getTime();
   if (!selectedAssetIDs) return;
   selectedAssetIDs.map((assetID) => {
-    if (!tilesets[assetID]) return;
-    var tilesetDates = Object.keys(tilesets[assetID])
-      .filter((k) => {
-        var selectedAssetDates = selectedDatasets
-          .filter(
-            (data) =>
-              new Date(data.date) != "Invalid Date" &&
-              data.asset.id == assetID &&
-              (data.type == "PointCloud" || data.type == "EPTPointCloud")
-          )
-          .map((data) => new Date(data.date));
-        return !!selectedAssetDates.find((item) => {
-          return item.getTime() == new Date(k).getTime();
+    if (tilesets[assetID]) {
+      var tilesetDates = Object.keys(tilesets[assetID])
+        .filter((k) => {
+          var selectedAssetDates = selectedDatasets
+            .filter(
+              (data) =>
+                new Date(data.date) != "Invalid Date" &&
+                data.asset.id == assetID &&
+                (data.type == "PointCloud" || data.type == "EPTPointCloud")
+            )
+            .map((data) => new Date(data.date));
+          return !!selectedAssetDates.find((item) => {
+            return item.getTime() == new Date(k).getTime();
+          });
+        })
+        .sort(function (a, b) {
+          return new Date(a).getTime() - new Date(b).getTime();
         });
-      })
-      .sort(function (a, b) {
-        return new Date(a).getTime() - new Date(b).getTime();
-      });
 
-    for (var i = 0; i < tilesetDates.length; i++) {
-      if (
-        (i === 0 || new Date(tilesetDates[i]).getTime() <= currentTime) &&
-        (i === tilesetDates.length - 1 ||
-          new Date(tilesetDates[i + 1]).getTime() > currentTime)
-      ) {
-        if (Array.isArray(tilesets[assetID][tilesetDates[i]])) {
-          tilesets[assetID][tilesetDates[i]].map((tileset) => {
+      for (var i = 0; i < tilesetDates.length; i++) {
+        if (
+          (i === 0 || new Date(tilesetDates[i]).getTime() <= currentTime) &&
+          (i === tilesetDates.length - 1 ||
+            new Date(tilesetDates[i + 1]).getTime() > currentTime)
+        ) {
+          if (Array.isArray(tilesets[assetID][tilesetDates[i]])) {
+            tilesets[assetID][tilesetDates[i]].map((tileset) => {
+              if (MSSE !== 0) {
+                tileset.show = true;
+              }
+            });
+          } else {
             if (MSSE !== 0) {
-              tileset.show = true;
+              tilesets[assetID][tilesetDates[i]].show = true;
             }
-          });
-        } else {
-          if (MSSE !== 0) {
-            tilesets[assetID][tilesetDates[i]].show = true;
           }
-        }
-      } else {
-        if (Array.isArray(tilesets[assetID][tilesetDates[i]])) {
-          tilesets[assetID][tilesetDates[i]].map((tileset) => {
-            tileset.show = false;
-          });
         } else {
-          tilesets[assetID][tilesetDates[i]].show = false;
+          if (Array.isArray(tilesets[assetID][tilesetDates[i]])) {
+            tilesets[assetID][tilesetDates[i]].map((tileset) => {
+              tileset.show = false;
+            });
+          } else {
+            tilesets[assetID][tilesetDates[i]].show = false;
+          }
         }
       }
     }
   });
+  if (
+    !lastCurrentTime ||
+    Math.abs(
+      new Date(lastCurrentTime).getHours() - new Date(currentTime).getHours()
+    ) >= 1
+  ) {
+    setLastCurrentTime(currentTime);
+    selectedDatasets.map((data) => {
+      if (data.type === "ImageSeries") {
+        if (entities[data.asset.id]) {
+          if (!controllers[data.asset.id]) {
+            controllers[data.asset.id] = new AbortController();
+          }
+          // else {
+          //   controllers[data.asset.id].abort();
+          //   controllers[data.asset.id] = new AbortController();
+          // }
+          fetch(
+            `/cesium/influx/images?camera=${data.camera}&time=${
+              data.timeOffset ? currentTime + data.timeOffset : currentTime
+            }&startTime=${new Date(data.startDateTime).getTime()}`,
+            // ,{cache:"no-store", signal:controllers[data.asset.id].signal})
+            { cache: "no-store" }
+          )
+            .then((response) => {
+              if (response.status !== 200) {
+                console.log(response);
+              }
+              return response;
+            })
+            .then((response) => response.json())
+            .then((response) => {
+              if (response.length != 0) {
+                var imageUrl = `https://img.amrf.org.au/cameras/amrf/${
+                  data.camera
+                }/${data.camera}~720x/$dirstamp/${
+                  data.camera
+                }~720x_$filestamp.jpg?timestamp_ms=${new Date(
+                  response[0].time
+                ).getTime()}`;
+              } else {
+                var imageUrl = `https://img.amrf.org.au/cameras/amrf/${
+                  data.camera
+                }/${data.camera}~720x/$dirstamp/${
+                  data.camera
+                }~720x_$filestamp.jpg?timestamp_ms=${new Date(
+                  data.startDateTime
+                ).getTime()}`;
+              }
+              if (
+                entities[data.asset.id].rectangle.material.image.getValue() !==
+                imageUrl
+              ) {
+                entities[data.asset.id].rectangle.material =
+                  new Cesium.ImageMaterialProperty({
+                    image: imageUrl,
+                  });
+              }
+            })
+            .catch((error) => {
+              if (error.name !== "AbortError") {
+                console.log(error);
+              }
+            });
+        }
+      }
+    });
+  }
 });
 
 var clickHandler = viewer.screenSpaceEventHandler.getInputAction(

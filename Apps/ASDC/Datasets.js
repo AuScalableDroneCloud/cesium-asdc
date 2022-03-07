@@ -169,9 +169,10 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
         viewer.terrainProvider,
         cartographics
       ).then((updatedPositions) => {
-        var cartesians = Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-          updatedPositions
-        );
+        var cartesians =
+          Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+            updatedPositions
+          );
         var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
         viewer.camera.flyToBoundingSphere(boundingSphere);
       });
@@ -200,16 +201,15 @@ export const loadData = (
   if (data["type"] === "PointCloud") {
     if (!tilesets[asset["id"]]) tilesets[asset["id"]] = {};
     if (!tilesets[asset["id"]][new Date(data["date"])]) {
-      tilesets[asset["id"]][
-        new Date(data["date"])
-      ] = viewer.scene.primitives.add(
-        new Cesium.Cesium3DTileset({
-          url: data["url"],
-          maximumScreenSpaceError:
-            ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
-          show: new Date(data["date"]) != "Invalid Date" ? false : true,
-        })
-      );
+      tilesets[asset["id"]][new Date(data["date"])] =
+        viewer.scene.primitives.add(
+          new Cesium.Cesium3DTileset({
+            url: data["url"],
+            maximumScreenSpaceError:
+              ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
+            show: new Date(data["date"]) != "Invalid Date" ? false : true,
+          })
+        );
       // tilesets[asset["id"]][
       //     new Date(data["date"])
       //   ].readyPromise.then(function (tileset) {
@@ -339,20 +339,19 @@ export const loadData = (
               }
             });
           } else {
-            tilesets[asset["id"]][
-              new Date(data["date"])
-            ] = viewer.scene.primitives.add(
-              new Cesium.Cesium3DTileset({
-                url: `${eptServer}/tileset.json?ept=${
-                  data.url
-                }&dimensions=${dimensions.join(",")}&${
-                  truncate ? "truncate" : null
-                }`,
-                maximumScreenSpaceError:
-                  ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
-                show: new Date(data["date"]) != "Invalid Date" ? false : true,
-              })
-            );
+            tilesets[asset["id"]][new Date(data["date"])] =
+              viewer.scene.primitives.add(
+                new Cesium.Cesium3DTileset({
+                  url: `${eptServer}/tileset.json?ept=${
+                    data.url
+                  }&dimensions=${dimensions.join(",")}&${
+                    truncate ? "truncate" : null
+                  }`,
+                  maximumScreenSpaceError:
+                    ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
+                  show: new Date(data["date"]) != "Invalid Date" ? false : true,
+                })
+              );
             tilesets[asset["id"]][new Date(data["date"])].readyPromise.then(
               function (tileset) {
                 // console.log(tilesets[asset["id"]][
@@ -383,28 +382,82 @@ export const loadData = (
   } else if (data["type"] === "Imagery") {
     if (!imageryLayers[asset.id]) imageryLayers[asset.id] = {};
     if (!imageryLayers[asset.id][data.id]) {
-      imageryLayers[asset.id][
-        data.id
-      ] = viewer.imageryLayers.addImageryProvider(
-        new Cesium.UrlTemplateImageryProvider({
-          url: data.url,
-          rectangle: new Cesium.Rectangle.fromDegrees(
-            data.bounds[0],
-            data.bounds[1],
-            data.bounds[2],
-            data.bounds[3]
-          ),
-          minimumLevel: data.minzoom,
-          maximumLevel: data.maxzoom,
-        })
-      );
+      imageryLayers[asset.id][data.id] =
+        viewer.imageryLayers.addImageryProvider(
+          new Cesium.UrlTemplateImageryProvider({
+            url: data.url,
+            rectangle: new Cesium.Rectangle.fromDegrees(
+              data.bounds[0],
+              data.bounds[1],
+              data.bounds[2],
+              data.bounds[3]
+            ),
+            minimumLevel: data.minzoom,
+            maximumLevel: data.maxzoom,
+          })
+        );
     } else {
       viewer.imageryLayers.raiseToTop(imageryLayers[asset.id][data.id]);
       imageryLayers[asset.id][data.id].show = true;
     }
+  } else if (data["type"] === "ImageSeries") {
+    if (!entities[asset.id]) {
+      var currentTime = Cesium.JulianDate.toDate(
+        viewer.clock.currentTime
+      ).getTime();
+      var halfWidth = (0.0025 * 960) / 720;
+      var halfHeight = 0.0025;
+      fetch(
+        `/cesium/influx/images?camera=${data.camera}&time=${
+          data.timeOffset ? currentTime + data.timeOffset : currentTime
+        }&startTime=${new Date(data.startDateTime).getTime()}`,
+        { cache: "no-store" }
+      )
+        .then((response) => {
+          return response;
+        })
+        .then((response) => response.json())
+        .then((response) => {
+          if (response.length != 0) {
+            var imageUrl = `https://img.amrf.org.au/cameras/amrf/${
+              data.camera
+            }/${data.camera}~720x/$dirstamp/${
+              data.camera
+            }~720x_$filestamp.jpg?timestamp_ms=${new Date(
+              response[0].time
+            ).getTime()}`;
+          } else {
+            var imageUrl = `https://img.amrf.org.au/cameras/amrf/${
+              data.camera
+            }/${data.camera}~720x/$dirstamp/${
+              data.camera
+            }~720x_$filestamp.jpg?timestamp_ms=${new Date(
+              data.startDateTime
+            ).getTime()}`;
+          }
+          entities[asset.id] = viewer.entities.add({
+            rectangle: {
+              coordinates: Cesium.Rectangle.fromDegrees(
+                data.position["lng"] - halfWidth,
+                data.position["lat"] - halfHeight,
+                data.position["lng"] + halfWidth,
+                data.position["lat"] + halfHeight
+              ),
+              material: new Cesium.ImageMaterialProperty({
+                image: imageUrl,
+              }),
+            },
+          });
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      entities[asset.id].show = true;
+    }
   }
 
-  if (data["type"] != "Influx") {
+  if (data["type"] != "Influx" && data["type"] != "ImageSeries") {
     closeGraphModal();
   }
 
@@ -452,9 +505,9 @@ export const loadData = (
       viewer.flyTo(entities[asset["id"]]);
     } else if (assetDataset[0]["type"] === "Influx") {
       var position = Cesium.Cartesian3.fromDegrees(
-        data["position"]["lng"],
-        data["position"]["lat"],
-        data["position"]["height"] + 1000
+        assetDataset[0]["position"]["lng"],
+        assetDataset[0]["position"]["lat"],
+        assetDataset[0]["position"]["height"] + 1000
       );
 
       viewer.camera.flyTo({ destination: position });
@@ -477,9 +530,10 @@ export const loadData = (
         viewer.terrainProvider,
         cartographics
       ).then((updatedPositions) => {
-        var cartesians = Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-          updatedPositions
-        );
+        var cartesians =
+          Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+            updatedPositions
+          );
         var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
         viewer.camera.flyToBoundingSphere(boundingSphere);
       });
@@ -687,9 +741,10 @@ export const loadGeoJson = (asset, data, fly) => {
             ).then((updatedPositions) => {
               var polylineEntity = dataSources[asset.id][dataID].entities.add({
                 polyline: {
-                  positions: Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-                    updatedPositions
-                  ),
+                  positions:
+                    Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                      updatedPositions
+                    ),
                   material: Cesium.Color.YELLOW,
                 },
               });
