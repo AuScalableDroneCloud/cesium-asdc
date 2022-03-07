@@ -142,11 +142,10 @@ export const applyAlpha = (evt, asset, data) => {
 
   if (data.type === "PointCloud" || data.type === "EPTPointCloud") {
     if (tilesets[asset.id] && tilesets[asset.id][new Date(data.date)]) {
-      tilesets[asset.id][
-        new Date(data.date)
-      ].style = new Cesium.Cesium3DTileStyle({
-        color: `rgba(\${COLOR}.r * 255,\${COLOR}.g* 255,\${COLOR}.b* 255,${alpha})`,
-      });
+      tilesets[asset.id][new Date(data.date)].style =
+        new Cesium.Cesium3DTileStyle({
+          color: `rgba(\${COLOR}.r * 255,\${COLOR}.g* 255,\${COLOR}.b* 255,${alpha})`,
+        });
     }
   } else if (data.type === "Imagery") {
     if (imageryLayers[asset.id] && imageryLayers[asset.id][data.id]) {
@@ -175,6 +174,10 @@ export const applyAlpha = (evt, asset, data) => {
           );
         }
       });
+    }
+  } else if (data.type === "ImageSeries") {
+    if (entities[asset.id]) {
+      entities[asset.id].rectangle.material.color._value.alpha = alpha;
     }
   }
 };

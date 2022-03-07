@@ -433,121 +433,151 @@ export const setupSidebar = (uploads) => {
             dateDiv.appendChild(dateContentDiv);
             datesPanelDiv.appendChild(dateDiv);
 
-            var opacitySliderBtn = document.createElement("div");
-            opacitySliderBtn.className = "fa fa-sliders";
-            opacitySliderBtn.style.float = "right";
-            dateContentDiv.appendChild(opacitySliderBtn);
-            var opacityDropdown = document.getElementById(
-              "alpha-slider-container"
-            );
+            if (data.type != "Influx") {
+              var opacitySliderBtn = document.createElement("div");
+              opacitySliderBtn.className = "fa fa-sliders";
+              opacitySliderBtn.style.float = "right";
+              dateContentDiv.appendChild(opacitySliderBtn);
+              var opacityDropdown = document.getElementById(
+                "alpha-slider-container"
+              );
 
-            opacitySliderBtn.onmouseover = (evt) => {
-              if (data.type === "PointCloud" || data.type === "EPTPointCloud") {
+              opacitySliderBtn.onmouseover = (evt) => {
                 if (
-                  tilesets[asset.id] &&
-                  tilesets[asset.id][new Date(data.date)] &&
-                  tilesets[asset.id][new Date(data.date)].style &&
-                  tilesets[asset.id][new Date(data.date)].style.color
+                  data.type === "PointCloud" ||
+                  data.type === "EPTPointCloud"
                 ) {
-                  var alpha = tilesets[asset.id][
-                    new Date(data.date)
-                  ].style.color.expression
-                    .match(/\((.*)\)/)
-                    .pop()
-                    .split(",")
-                    .pop();
-                  document.getElementById("alpha-slider").value = alpha * 100;
-                  document.getElementById("alpha-value").innerHTML =
-                    alpha * 100 + " %";
-                } else {
-                  document.getElementById("alpha-slider").value = 100;
-                  document.getElementById("alpha-value").innerHTML = "100 %";
-                }
-              } else if (data.type === "Imagery") {
-                if (
-                  imageryLayers[asset.id] &&
-                  imageryLayers[asset.id][data.id]
-                ) {
-                  document.getElementById("alpha-slider").value =
-                    imageryLayers[asset.id][data.id].alpha * 100;
-                  document.getElementById("alpha-value").innerHTML =
-                    imageryLayers[asset.id][data.id].alpha * 100 + " %";
-                } else {
-                  document.getElementById("alpha-slider").value = 100;
-                  document.getElementById("alpha-value").innerHTML = "100 %";
-                }
-              } else if (data.type === "Model") {
-                if (entities[asset.id] && entities[asset.id].model.color) {
-                  document.getElementById("alpha-slider").value =
-                    entities[asset.id].model.color.getValue().alpha * 100;
-                  document.getElementById("alpha-value").innerHTML =
-                    entities[asset.id].model.color.getValue().alpha * 100 +
-                    " %";
-                } else {
-                  document.getElementById("alpha-slider").value = 100;
-                  document.getElementById("alpha-value").innerHTML = "100 %";
-                }
-              } else if (data.type === "GeoJSON") {
-                if (dataSources[asset.id] && dataSources[asset.id][data.id]) {
-                  var entity =
-                    dataSources[asset.id][data.id].entities.values[0];
-                  if (entity) {
-                    if (entity.polygon) {
-                      document.getElementById("alpha-slider").value =
-                        entity.polygon.material.color.getValue().alpha * 100;
-                      document.getElementById("alpha-value").innerHTML =
-                        entity.polygon.material.color.getValue().alpha * 100 +
-                        " %";
-                    } else if (entity.polyline) {
-                      document.getElementById("alpha-slider").value =
-                        entity.polyline.material.color.getValue().alpha * 100;
-                      document.getElementById("alpha-value").innerHTML =
-                        entity.polyline.material.color.getValue().alpha * 100 +
-                        " %";
-                    } else {
-                      document.getElementById("alpha-slider").value = 100;
-                      document.getElementById("alpha-value").innerHTML =
-                        "100 %";
-                    }
+                  if (
+                    tilesets[asset.id] &&
+                    tilesets[asset.id][new Date(data.date)] &&
+                    tilesets[asset.id][new Date(data.date)].style &&
+                    tilesets[asset.id][new Date(data.date)].style.color
+                  ) {
+                    var alpha = tilesets[asset.id][
+                      new Date(data.date)
+                    ].style.color.expression
+                      .match(/\((.*)\)/)
+                      .pop()
+                      .split(",")
+                      .pop();
+                    document.getElementById("alpha-slider").value = alpha * 100;
+                    document.getElementById("alpha-value").innerHTML =
+                      alpha * 100 + " %";
+                  } else {
+                    document.getElementById("alpha-slider").value = 100;
+                    document.getElementById("alpha-value").innerHTML = "100 %";
                   }
-                } else {
-                  document.getElementById("alpha-slider").value = 100;
-                  document.getElementById("alpha-value").innerHTML = "100 %";
+                } else if (data.type === "Imagery") {
+                  if (
+                    imageryLayers[asset.id] &&
+                    imageryLayers[asset.id][data.id]
+                  ) {
+                    document.getElementById("alpha-slider").value =
+                      imageryLayers[asset.id][data.id].alpha * 100;
+                    document.getElementById("alpha-value").innerHTML =
+                      imageryLayers[asset.id][data.id].alpha * 100 + " %";
+                  } else {
+                    document.getElementById("alpha-slider").value = 100;
+                    document.getElementById("alpha-value").innerHTML = "100 %";
+                  }
+                } else if (data.type === "Model") {
+                  if (entities[asset.id] && entities[asset.id].model.color) {
+                    document.getElementById("alpha-slider").value =
+                      entities[asset.id].model.color.getValue().alpha * 100;
+                    document.getElementById("alpha-value").innerHTML =
+                      entities[asset.id].model.color.getValue().alpha * 100 +
+                      " %";
+                  } else {
+                    document.getElementById("alpha-slider").value = 100;
+                    document.getElementById("alpha-value").innerHTML = "100 %";
+                  }
+                } else if (data.type === "GeoJSON") {
+                  if (dataSources[asset.id] && dataSources[asset.id][data.id]) {
+                    var entity =
+                      dataSources[asset.id][data.id].entities.values[0];
+                    if (entity) {
+                      if (entity.polygon) {
+                        document.getElementById("alpha-slider").value =
+                          entity.polygon.material.color.getValue().alpha * 100;
+                        document.getElementById("alpha-value").innerHTML =
+                          entity.polygon.material.color.getValue().alpha * 100 +
+                          " %";
+                      } else if (entity.polyline) {
+                        document.getElementById("alpha-slider").value =
+                          entity.polyline.material.color.getValue().alpha * 100;
+                        document.getElementById("alpha-value").innerHTML =
+                          entity.polyline.material.color.getValue().alpha *
+                            100 +
+                          " %";
+                      } else {
+                        document.getElementById("alpha-slider").value = 100;
+                        document.getElementById("alpha-value").innerHTML =
+                          "100 %";
+                      }
+                    }
+                  } else {
+                    document.getElementById("alpha-slider").value = 100;
+                    document.getElementById("alpha-value").innerHTML = "100 %";
+                  }
+                } else if (data.type === "ImageSeries") {
+                  if (
+                    entities[asset.id] &&
+                    entities[asset.id].rectangle &&
+                    entities[asset.id].rectangle.material
+                  ) {
+                    document.getElementById("alpha-slider").value =
+                      entities[asset.id].rectangle.material.color.getValue()
+                        .alpha * 100;
+                    document.getElementById("alpha-value").innerHTML =
+                      entities[asset.id].rectangle.material.color.getValue()
+                        .alpha *
+                        100 +
+                      " %";
+                  } else {
+                    document.getElementById("alpha-slider").value = 100;
+                    document.getElementById("alpha-value").innerHTML = "100 %";
+                  }
                 }
-              }
 
-              opacityDropdown.style.left =
-                evt.target.offsetLeft +
-                evt.target.offsetWidth / 2 -
-                document.getElementById("sidebar-data-buttons").scrollLeft +
-                "px";
-              opacityDropdown.style.top =
-                evt.target.offsetTop +
-                evt.target.offsetHeight / 2 -
-                document.getElementById("sidebar-data-buttons").scrollTop +
-                "px";
-              opacityDropdown.style.display = "block";
-              opacitySliderBtn.style.color = "white";
+                document.getElementById("alpha-slider").value = Math.round(
+                  document.getElementById("alpha-slider").value
+                );
+                document.getElementById("alpha-value").innerHTML =
+                  document.getElementById("alpha-slider").value + " %";
 
-              opacityDropdown.onmouseover = (event) => {
+                opacityDropdown.style.left =
+                  evt.target.offsetLeft +
+                  evt.target.offsetWidth / 2 -
+                  document.getElementById("sidebar-data-buttons").scrollLeft +
+                  "px";
+                opacityDropdown.style.top =
+                  evt.target.offsetTop +
+                  evt.target.offsetHeight / 2 -
+                  document.getElementById("sidebar-data-buttons").scrollTop +
+                  "px";
                 opacityDropdown.style.display = "block";
                 opacitySliderBtn.style.color = "white";
-                dateDiv.style.background = "#5B8B51";
-              };
 
-              opacityDropdown.onmouseleave = (event) => {
+                opacityDropdown.onmouseover = (event) => {
+                  opacityDropdown.style.display = "block";
+                  opacitySliderBtn.style.color = "white";
+                  dateDiv.style.background = "#5B8B51";
+                };
+
+                opacityDropdown.onmouseleave = (event) => {
+                  opacityDropdown.style.display = "none";
+                  opacitySliderBtn.style.color = "black";
+                  dateDiv.style.background = null;
+                };
+
+                document.getElementById("alpha-slider").oninput = (evt) =>
+                  applyAlpha(evt, asset, data);
+              };
+              opacitySliderBtn.onmouseleave = (evt) => {
                 opacityDropdown.style.display = "none";
                 opacitySliderBtn.style.color = "black";
-                dateDiv.style.background = null;
               };
-
-              document.getElementById("alpha-slider").oninput = (evt) =>
-                applyAlpha(evt, asset, data);
-            };
-            opacitySliderBtn.onmouseleave = (evt) => {
-              opacityDropdown.style.display = "none";
-              opacitySliderBtn.style.color = "black";
-            };
+            }
 
             if (
               data.source ||
@@ -603,6 +633,7 @@ export const setupSidebar = (uploads) => {
                   dlDropdown.children["dl-geojson"].style.display = "none";
                   dlDropdown.children["dl-gltf"].style.display = "none";
                   dlDropdown.children["dl-json"].style.display = "none";
+                  dlDropdown.children["dl-tif"].style.display = "none";
                 } else if (data.type === "GeoJSON") {
                   pcFormats.map((format) => {
                     dlDropdown.children["dl-" + format].style.display = "none";
@@ -624,6 +655,7 @@ export const setupSidebar = (uploads) => {
                     dlDropdown.children["dl-json"].style.display = "none";
                   }
                   dlDropdown.children["dl-gltf"].style.display = "none";
+                  dlDropdown.children["dl-tif"].style.display = "none";
                 } else if (data.type === "Model") {
                   pcFormats.map((format) => {
                     dlDropdown.children["dl-" + format].style.display = "none";
@@ -634,6 +666,7 @@ export const setupSidebar = (uploads) => {
                     downloadFile(asset, data, index, data.type);
                   };
                   dlDropdown.children["dl-json"].style.display = "none";
+                  dlDropdown.children["dl-tif"].style.display = "none";
                 } else if (data.type === "Influx") {
                   pcFormats.map((format) => {
                     dlDropdown.children["dl-" + format].style.display = "none";
@@ -644,6 +677,7 @@ export const setupSidebar = (uploads) => {
                   dlDropdown.children["dl-json"].onclick = () => {
                     downloadFile(asset, data, index, data.type);
                   };
+                  dlDropdown.children["dl-tif"].style.display = "none";
                 } else if (data.type === "Imagery") {
                   pcFormats.map((format) => {
                     dlDropdown.children["dl-" + format].style.display = "none";

@@ -344,6 +344,7 @@ viewer.clock.onTick.addEventListener((clock) => {
                 entities[data.asset.id].rectangle.material =
                   new Cesium.ImageMaterialProperty({
                     image: imageUrl,
+                    color: entities[data.asset.id].rectangle.material.color,
                   });
               }
             })

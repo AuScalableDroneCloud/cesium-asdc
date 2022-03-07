@@ -21,7 +21,6 @@ export var lastCurrentTime;
 export var selectedDimension;
 
 export var MSSE = 83;
-export var alpha = 1;
 
 export var markersDataSource;
 

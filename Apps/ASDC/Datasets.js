@@ -445,6 +445,7 @@ export const loadData = (
               ),
               material: new Cesium.ImageMaterialProperty({
                 image: imageUrl,
+                color: new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
               }),
             },
           });
