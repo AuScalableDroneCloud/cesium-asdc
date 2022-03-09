@@ -1,4 +1,9 @@
-import { viewer, controllers } from "./State.js";
+import {
+  viewer,
+  controllers,
+  selectedDatasets,
+  setSelectedDatasets,
+} from "./State.js";
 
 const createGraph = (
   x,
@@ -319,4 +324,20 @@ export const loadGraph = (data) => {
 
 export const closeGraphModal = () => {
   document.getElementById("graphs-modal").style.display = "none";
+
+  var oldSelectedDatasets = [...selectedDatasets];
+  setSelectedDatasets(
+    selectedDatasets.filter((data) => {
+      return data.type !== "Influx";
+    })
+  );
+  oldSelectedDatasets.map((data) => {
+    if (data.type === "Influx") {
+      var checkbox = document.getElementById(`dataCheckbox-${data.id}`);
+      if (checkbox) {
+        checkbox.checked = false;
+        checkbox.onchange();
+      }
+    }
+  });
 };

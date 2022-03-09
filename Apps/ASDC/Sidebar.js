@@ -231,7 +231,6 @@ export const setupSidebar = (uploads) => {
               !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
 
             checkbox.onchange = (e) => {
-              console.log("checkbox onchange");
               assetCheckbox.checked = checkboxes.every((cb) => cb.checked);
               assetCheckbox.indeterminate =
                 !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
@@ -753,7 +752,6 @@ export const setupSidebar = (uploads) => {
         }
 
         assetCheckbox.onchange = (e) => {
-          console.log("asset onchange");
           checkboxes.map((cb) => {
             cb.checked = assetCheckbox.checked;
           });
@@ -919,12 +917,25 @@ export const setupSidebar = (uploads) => {
                   verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
                   disableDepthTestDistance: Number.POSITIVE_INFINITY,
                   heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                  distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
+                    data.boundingSphereRadius
+                      ? data.boundingSphereRadius * 4
+                      : 2500,
+                    Number.MAX_VALUE
+                  ),
                 },
                 id: "marker_" + asset.id,
               });
             }
           }
         }
+      });
+
+      markersDataSource.clustering.clusterEvent.addEventListener(function (
+        clusteredEntities,
+        cluster
+      ) {
+        cluster.billboard.id = clusteredEntities[0];
       });
 
       if (!viewer.dataSources.contains(markersDataSource)) {
