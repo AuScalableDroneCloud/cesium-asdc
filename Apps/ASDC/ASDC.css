@@ -166,7 +166,12 @@
   scroll-snap-type: y mandatory;
 }
 
-/* #dlDropdown { */
+.graph {
+  height: 100%;
+  width: 95%;
+  scroll-snap-align: start;
+}
+
 .dropdown {
   display: none;
   position: absolute;
@@ -185,6 +190,15 @@
 .dlDropdownRow:hover {
   background: #5b8b51;
   cursor: pointer;
+}
+
+.zoom-button {
+  float: right;
+  margin-right: 10px;
+}
+
+.zoom-button:hover {
+  color: white;
 }
 
 .alpha-slider {

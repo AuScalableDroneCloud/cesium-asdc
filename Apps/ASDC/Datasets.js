@@ -12,9 +12,10 @@ import {
   datasets,
   selectedDimension,
   imageryLayers,
+  billboard,
 } from "./State.js";
 import { loadGraph, closeGraphModal } from "./Graphs.js";
-import { setupStyleToolbar, applyStyle } from "./PointcloudStyle.js";
+import { setupStyleToolbar, applyStyle } from "./Style.js";
 import { highlightHeightPX, highlightColor, eptServer } from "./Constants.js";
 
 export const loadAsset = (asset, timeline, timelineTrack) => {
@@ -118,7 +119,8 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
   if (assetDataset.length > 0) {
     if (
       assetDataset[0]["type"] === "PointCloud" ||
-      assetDataset[0]["type"] === "EPTPointCloud"
+      assetDataset[0]["type"] === "EPTPointCloud" ||
+      assetDataset[0]["type"] === "ModelTileset"
     ) {
       document.getElementById("msse-slider-container").style.display = "block";
     } else {
@@ -127,7 +129,8 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
 
     if (
       assetDataset[0]["type"] === "PointCloud" ||
-      assetDataset[0]["type"] === "EPTPointCloud"
+      assetDataset[0]["type"] === "EPTPointCloud" ||
+      assetDataset[0]["type"] === "ModelTileset"
     ) {
       var pos = Cesium.Cartographic.toCartesian(
         Cesium.Cartographic.fromDegrees(
@@ -140,12 +143,15 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
         new Cesium.BoundingSphere(pos, assetDataset[0].boundingSphereRadius)
       );
     } else if (assetDataset[0]["type"] === "Model") {
-      viewer.flyTo(entities[asset["id"]]);
-    } else if (assetDataset[0]["type"] === "Influx") {
+      viewer.flyTo(entities[asset["id"]][assetDataset[0]["id"]]);
+    } else if (
+      assetDataset[0]["type"] === "Influx" ||
+      assetDataset[0]["type"] === "ImageSeries"
+    ) {
       var position = Cesium.Cartesian3.fromDegrees(
         assetDataset[0]["position"]["lng"],
         assetDataset[0]["position"]["lat"],
-        assetDataset[0]["position"]["height"] + 1000
+        assetDataset[0]["position"]["height"] + 1750
       );
 
       viewer.camera.flyTo({ destination: position });
@@ -198,16 +204,21 @@ export const loadData = (
     }
   }
 
-  if (data["type"] === "PointCloud") {
+  if (data["type"] === "PointCloud" || data["type"] === "ModelTileset") {
     if (!tilesets[asset["id"]]) tilesets[asset["id"]] = {};
     if (!tilesets[asset["id"]][new Date(data["date"])]) {
       tilesets[asset["id"]][new Date(data["date"])] =
         viewer.scene.primitives.add(
           new Cesium.Cesium3DTileset({
-            url: data["url"],
+            url: !data.useProxy
+              ? data["url"]
+              : new Cesium.Resource({
+                  url: data["url"],
+                  proxy: new Cesium.DefaultProxy("/cesium/proxy/"),
+                }),
             maximumScreenSpaceError:
               ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
-            show: new Date(data["date"]) != "Invalid Date" ? false : true,
+            // show: new Date(data["date"]) != "Invalid Date" ? false : true,
           })
         );
       // tilesets[asset["id"]][
@@ -241,15 +252,18 @@ export const loadData = (
           tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
         }
 
-        setupStyleToolbar(tileset);
-        applyStyle(selectedDimension);
+        if (data["type"] === "PointCloud") {
+          setupStyleToolbar(tileset);
+          applyStyle(selectedDimension);
+        }
       });
     } else {
       tilesets[asset["id"]][new Date(data["date"])].show = true;
     }
   } else if (data["type"] === "Model") {
     //TODO: multiple models for same location
-    if (!entities[asset["id"]]) {
+    if (!entities[asset["id"]]) entities[asset["id"]] = {};
+    if (!entities[asset["id"]][data["id"]]) {
       var position = Cesium.Cartesian3.fromDegrees(
         data["position"]["lng"],
         data["position"]["lat"],
@@ -265,7 +279,7 @@ export const loadData = (
         hpr
       );
 
-      entities[asset["id"]] = viewer.entities.add({
+      entities[asset["id"]][data["id"]] = viewer.entities.add({
         position: position,
         orientation: orientation,
         model: {
@@ -280,7 +294,7 @@ export const loadData = (
       //   console.log(model.boundingSphere);
       // })
     } else {
-      entities[asset["id"]].show = true;
+      entities[asset["id"]][data["id"]].show = true;
     }
   } else if (data["type"] === "GeoJSON") {
     loadGeoJson(asset, data, fly);
@@ -378,7 +392,8 @@ export const loadData = (
       }
     }
   } else if (data["type"] === "Influx") {
-    loadGraph(data.station);
+    document.getElementById("graphs-modal").style.display = "block";
+    loadGraph(data);
   } else if (data["type"] === "Imagery") {
     if (!imageryLayers[asset.id]) imageryLayers[asset.id] = {};
     if (!imageryLayers[asset.id][data.id]) {
@@ -401,15 +416,23 @@ export const loadData = (
       imageryLayers[asset.id][data.id].show = true;
     }
   } else if (data["type"] === "ImageSeries") {
-    if (!entities[asset.id]) {
-      var currentTime = Cesium.JulianDate.toDate(
-        viewer.clock.currentTime
-      ).getTime();
+    document.getElementById("image-series-toolbar").style.display = "block";
+    if (!entities[asset.id]) entities[asset.id] = {};
+    if (!entities[asset.id][data.id]) {
+      var currentDate = Cesium.JulianDate.toDate(viewer.clock.currentTime);
+
+      if (currentDate.getHours() < 12) {
+        currentDate.setDate(currentDate.getDate() - 1);
+      }
+      currentDate.setHours(12, 0, 0);
+
       var halfWidth = (0.0025 * 960) / 720;
       var halfHeight = 0.0025;
       fetch(
         `/cesium/influx/images?camera=${data.camera}&time=${
-          data.timeOffset ? currentTime + data.timeOffset : currentTime
+          data.timeOffset
+            ? currentDate.getTime() - data.timeOffset
+            : currentDate.getTime()
         }&startTime=${new Date(data.startDateTime).getTime()}`,
         { cache: "no-store" }
       )
@@ -435,18 +458,35 @@ export const loadData = (
               data.startDateTime
             ).getTime()}`;
           }
-          entities[asset.id] = viewer.entities.add({
+          entities[asset.id][data.id] = viewer.entities.add({
             rectangle: {
               coordinates: Cesium.Rectangle.fromDegrees(
                 data.position["lng"] - halfWidth,
-                data.position["lat"] - halfHeight,
+                data.position["lat"],
                 data.position["lng"] + halfWidth,
-                data.position["lat"] + halfHeight
+                data.position["lat"] + 2 * halfHeight
               ),
               material: new Cesium.ImageMaterialProperty({
                 image: imageUrl,
                 color: new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
               }),
+              show: !billboard,
+            },
+            position: Cesium.Cartesian3.fromDegrees(
+              data.position["lng"],
+              data.position["lat"]
+            ),
+            billboard: {
+              image: imageUrl,
+              height: 300,
+              width: (300 * 960) / 720,
+              pixelOffset: new Cesium.Cartesian2(0, -150),
+              heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+              distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
+                0,
+                5000
+              ),
+              show: billboard,
             },
           });
         })
@@ -454,17 +494,20 @@ export const loadData = (
           console.log(error);
         });
     } else {
-      entities[asset.id].show = true;
+      entities[asset.id][data.id].show = true;
     }
   }
 
-  if (data["type"] != "Influx" && data["type"] != "ImageSeries") {
-    closeGraphModal();
-  }
+  // if (data["type"] != "Influx" && data["type"] != "ImageSeries") {
+  //   closeGraphModal();
+  // }
 
   if (
     !!selectedDatasets.find(
-      (d) => d.type == "PointCloud" || d.type == "EPTPointCloud"
+      (d) =>
+        d.type == "PointCloud" ||
+        d.type == "EPTPointCloud" ||
+        d.type == "ModelTileset"
     )
   ) {
     document.getElementById("msse-slider-container").style.display = "block";
@@ -485,7 +528,8 @@ export const loadData = (
 
     if (
       assetDataset[0]["type"] === "PointCloud" ||
-      assetDataset[0]["type"] === "EPTPointCloud"
+      assetDataset[0]["type"] === "EPTPointCloud" ||
+      assetDataset[0]["type"] === "ModelTileset"
     ) {
       // if (assetDataset[0].position && assetDataset[0].boundingSphereRadius){
       var pos = Cesium.Cartographic.toCartesian(
@@ -503,12 +547,15 @@ export const loadData = (
       //   viewer.flyTo(tilesets[asset["id"]][new Date(data["date"])])
       // }
     } else if (assetDataset[0]["type"] === "Model") {
-      viewer.flyTo(entities[asset["id"]]);
-    } else if (assetDataset[0]["type"] === "Influx") {
+      viewer.flyTo(entities[asset["id"]][data["id"]]);
+    } else if (
+      assetDataset[0]["type"] === "Influx" ||
+      assetDataset[0]["type"] === "ImageSeries"
+    ) {
       var position = Cesium.Cartesian3.fromDegrees(
         assetDataset[0]["position"]["lng"],
         assetDataset[0]["position"]["lat"],
-        assetDataset[0]["position"]["height"] + 1000
+        assetDataset[0]["position"]["height"] + 1750
       );
 
       viewer.camera.flyTo({ destination: position });
@@ -562,8 +609,9 @@ export const loadData = (
           Cesium.JulianDate.fromDate(date),
           Cesium.JulianDate.fromDate(new Date(date.getTime() + 86400000))
         );
-
-        setupStyleToolbar(tilesets[asset["id"]][date]);
+        if (data["type"] === "PointCloud" || data["type"] === "EPTPointCloud") {
+          setupStyleToolbar(tilesets[asset["id"]][date]);
+        }
       } else {
         //point clouds with no date
         // var currentDate = new Date();
@@ -587,6 +635,7 @@ export const loadData = (
         viewer.timeline.zoomTo(
           Cesium.JulianDate.fromDate(
             new Date(currentDate.getTime() - 2 * 7 * 86400000)
+            // new Date(currentDate.getTime() + 86400000)
           ),
           Cesium.JulianDate.fromDate(new Date())
         );

@@ -1,4 +1,4 @@
-import { viewer } from "./State.js";
+import { viewer, controllers } from "./State.js";
 
 const createGraph = (
   x,
@@ -7,7 +7,8 @@ const createGraph = (
   type,
   graphTitle,
   suffix,
-  doubleAxis
+  doubleAxis,
+  divID
 ) => {
   const pallete = [
     "#7EB26D",
@@ -41,6 +42,9 @@ const createGraph = (
     }
   });
 
+  var twoWeeksBefore = Cesium.JulianDate.toDate(viewer.clock.currentTime);
+  twoWeeksBefore.setDate(twoWeeksBefore.getDate() - 14);
+
   if (doubleAxis) {
     data[data.length - 1].yaxis = "y2";
     var layout = {
@@ -63,6 +67,10 @@ const createGraph = (
       },
       xaxis: {
         gridcolor: "rgba(255,255,255,0.25)",
+        range: [
+          twoWeeksBefore,
+          Cesium.JulianDate.toDate(viewer.clock.currentTime),
+        ],
       },
       legend: {
         xanchor: "center",
@@ -89,6 +97,10 @@ const createGraph = (
       },
       xaxis: {
         gridcolor: "rgba(255,255,255,0.25)",
+        range: [
+          twoWeeksBefore,
+          Cesium.JulianDate.toDate(viewer.clock.currentTime),
+        ],
       },
       legend: {
         xanchor: "center",
@@ -103,28 +115,41 @@ const createGraph = (
     };
   }
 
-  var plotDiv = document.createElement("div");
-  plotDiv.style.height = "100%";
-  plotDiv.style.width = "95%";
-  plotDiv.style["scroll-snap-align"] = "start";
+  var plotDiv = document.getElementById(divID);
   document.getElementById("graphs-container").appendChild(plotDiv);
 
-  Plotly.newPlot(plotDiv, data, layout);
+  Plotly.react(plotDiv, data, layout);
 };
 
-export const loadGraph = (station) => {
+export const loadGraph = (data) => {
+  if (document.getElementById("graphs-modal").style.display === "none") return;
   viewer.selectedEntity = null;
+  var station = data.station;
 
-  while (document.getElementById("graphs-container").firstChild) {
-    document
-      .getElementById("graphs-container")
-      .removeChild(document.getElementById("graphs-container").firstChild);
+  // while (document.getElementById("graphs-container").firstChild) {
+  //   document
+  //     .getElementById("graphs-container")
+  //     .removeChild(document.getElementById("graphs-container").firstChild);
+  // }
+  // document.getElementById("graphs-modal").style.display = "block";
+
+  if (!controllers[data.id]) {
+    controllers[data.id] = new AbortController();
+  } else {
+    controllers[data.id].abort();
+    controllers[data.id] = new AbortController();
   }
-  document.getElementById("graphs-modal").style.display = "block";
 
-  fetch(`/cesium/influx/fivemin?station=${station}`, {
-    cache: "no-store",
-  })
+  fetch(
+    `/cesium/influx/fivemin?station=${station}&time=${Cesium.JulianDate.toDate(
+      viewer.clock.currentTime
+    ).getTime()}`,
+    {
+      // cache: "no-store",
+      cache: "no-store",
+      signal: controllers[data.id].signal,
+    }
+  )
     .then((response) => {
       if (response.status !== 200) {
         // console.log(response);
@@ -133,18 +158,11 @@ export const loadGraph = (station) => {
     })
     .then((response) => response.json())
     .then((parsedResponse) => {
+      if (parsedResponse.length === 0) return;
+
       const unpackData = (arr, key) => {
         return arr.map((obj) => obj[key]);
       };
-
-      const pallete = [
-        "#7EB26D",
-        "#EAB839",
-        "#6ED0E0",
-        "#EF843C",
-        "#E24D42",
-        "#1F78C1",
-      ];
 
       createGraph(
         unpackData(parsedResponse, "time"),
@@ -156,7 +174,8 @@ export const loadGraph = (station) => {
         "scatter",
         "Photosynthetically Active Radiation & Shortwave Radiation",
         ["μmol/m²/s", "W/m²"],
-        true
+        true,
+        "PAR_TSR"
       );
 
       var mean_Soil_VWC = [];
@@ -188,7 +207,8 @@ export const loadGraph = (station) => {
         "scatter",
         "Soil Volumetric Water Content",
         "%",
-        false
+        false,
+        "Soil_VWC"
       );
 
       createGraph(
@@ -198,7 +218,8 @@ export const loadGraph = (station) => {
         "scatter",
         "Soil Temperature Mean",
         "°C",
-        false
+        false,
+        "Soil_Temp"
       );
 
       createGraph(
@@ -208,7 +229,8 @@ export const loadGraph = (station) => {
         "scatter",
         "Soil Electrical Conductivity",
         "dS/m",
-        false
+        false,
+        "Soil_EC"
       );
 
       createGraph(
@@ -221,12 +243,18 @@ export const loadGraph = (station) => {
         "scatter",
         "Air Temperature & Relative Humidity",
         ["°C", "%H"],
-        true
+        true,
+        "Air_Temp_Hum"
       );
 
-      fetch(`/cesium/influx/daily?station=${station}`, {
-        cache: "no-store",
-      })
+      fetch(
+        `/cesium/influx/daily?station=${station}&time=${Cesium.JulianDate.toDate(
+          viewer.clock.currentTime
+        ).getTime()}`,
+        {
+          cache: "no-store",
+        }
+      )
         .then((dailyresponse) => {
           if (dailyresponse.status !== 200) {
             // console.log(dailyresponse);
@@ -242,7 +270,8 @@ export const loadGraph = (station) => {
             "bar",
             "Daily Rainfall Total",
             "mm",
-            false
+            false,
+            "Rain"
           );
 
           createGraph(
@@ -252,7 +281,8 @@ export const loadGraph = (station) => {
             "scatter",
             "Snow Depth",
             "m",
-            false
+            false,
+            "Snow"
           );
 
           createGraph(
@@ -262,7 +292,8 @@ export const loadGraph = (station) => {
             "scatter",
             "Mean Battery Voltage",
             "V",
-            false
+            false,
+            "Bat_Volt"
           );
         });
     })

@@ -21,7 +21,7 @@ import {
 import { loadAsset, loadData, syncTimeline } from "./Datasets.js";
 import { indexFile, pcFormats, processingAPI } from "./Constants.js";
 import { closeGraphModal } from "./Graphs.js";
-import { applyAlpha } from "./PointcloudStyle.js";
+import { applyAlpha } from "./Style.js";
 
 export const setupSidebar = (uploads) => {
   fetch(indexFile, { cache: "no-store" })
@@ -231,6 +231,7 @@ export const setupSidebar = (uploads) => {
               !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
 
             checkbox.onchange = (e) => {
+              console.log("checkbox onchange");
               assetCheckbox.checked = checkboxes.every((cb) => cb.checked);
               assetCheckbox.indeterminate =
                 !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
@@ -283,8 +284,8 @@ export const setupSidebar = (uploads) => {
                 if (dataSources[asset.id] && dataSources[asset.id][data.id]) {
                   dataSources[asset.id][data.id].show = false;
                 }
-                if (entities[asset.id]) {
-                  entities[asset.id].show = false;
+                if (entities[asset.id] && entities[asset.id][data.id]) {
+                  entities[asset.id][data.id].show = false;
                 }
                 if (
                   imageryLayers[asset.id] &&
@@ -292,7 +293,14 @@ export const setupSidebar = (uploads) => {
                 ) {
                   imageryLayers[asset.id][data.id].show = false;
                 }
-                closeGraphModal();
+                if (data["type"] == "Influx") {
+                  closeGraphModal();
+                }
+                if (data["type"] == "ImageSeries") {
+                  document.getElementById(
+                    "image-series-toolbar"
+                  ).style.display = "none";
+                }
                 setSelectedDatasets(
                   selectedDatasets.filter((d) => {
                     return d.id !== data.id;
@@ -310,6 +318,10 @@ export const setupSidebar = (uploads) => {
                     })
                   );
                 }
+
+                // if (!selectedDatasets.find(d=>d.type==="ImageSeries")){
+                //   document.getElementById("image-series-toolbar").style.display="none";
+                // }
 
                 var dataIDs = "";
                 var newDataIDs = [];
@@ -392,8 +404,41 @@ export const setupSidebar = (uploads) => {
               dateContentDivText.innerHTML = "No Date";
             }
 
+            dateContentDiv.appendChild(checkbox);
+            dateContentDiv.appendChild(dateContentDivText);
+            dateDiv.appendChild(dateContentDiv);
+            datesPanelDiv.appendChild(dateDiv);
+
+            if (data.type === "ImageSeries") {
+              var zoomButton = document.createElement("div");
+              zoomButton.className = "fa fa-video-camera zoom-button";
+              zoomButton.onclick = (evt) => {
+                if (entities[asset.id] && entities[asset.id][data.id]) {
+                  Cesium.sampleTerrainMostDetailed(
+                    viewer.terrainProvider,
+                    Cesium.Ellipsoid.WGS84.cartesianArrayToCartographicArray(
+                      Cesium.Rectangle.subsample(
+                        entities[asset.id][
+                          data.id
+                        ].rectangle.coordinates.getValue()
+                      )
+                    )
+                  ).then((updatedPositions) => {
+                    viewer.camera.flyToBoundingSphere(
+                      Cesium.BoundingSphere.fromPoints(
+                        Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                          updatedPositions
+                        )
+                      )
+                    );
+                  });
+                }
+              };
+              dateContentDiv.appendChild(zoomButton);
+            }
+
             dateDiv.onclick = (e) => {
-              if (e && e.target === checkbox) {
+              if (e && (e.target === checkbox || e.target === zoomButton)) {
                 return;
               }
               checkbox.checked = true;
@@ -428,11 +473,6 @@ export const setupSidebar = (uploads) => {
               loadData(asset, data, true, true, true);
             };
 
-            dateContentDiv.appendChild(checkbox);
-            dateContentDiv.appendChild(dateContentDivText);
-            dateDiv.appendChild(dateContentDiv);
-            datesPanelDiv.appendChild(dateDiv);
-
             if (data.type != "Influx") {
               var opacitySliderBtn = document.createElement("div");
               opacitySliderBtn.className = "fa fa-sliders";
@@ -445,7 +485,8 @@ export const setupSidebar = (uploads) => {
               opacitySliderBtn.onmouseover = (evt) => {
                 if (
                   data.type === "PointCloud" ||
-                  data.type === "EPTPointCloud"
+                  data.type === "EPTPointCloud" ||
+                  data.type === "ModelTileset"
                 ) {
                   if (
                     tilesets[asset.id] &&
@@ -481,11 +522,17 @@ export const setupSidebar = (uploads) => {
                     document.getElementById("alpha-value").innerHTML = "100 %";
                   }
                 } else if (data.type === "Model") {
-                  if (entities[asset.id] && entities[asset.id].model.color) {
+                  if (
+                    entities[asset.id] &&
+                    entities[asset.id][data.id] &&
+                    entities[asset.id][data.id].model.color
+                  ) {
                     document.getElementById("alpha-slider").value =
-                      entities[asset.id].model.color.getValue().alpha * 100;
+                      entities[asset.id][data.id].model.color.getValue().alpha *
+                      100;
                     document.getElementById("alpha-value").innerHTML =
-                      entities[asset.id].model.color.getValue().alpha * 100 +
+                      entities[asset.id][data.id].model.color.getValue().alpha *
+                        100 +
                       " %";
                   } else {
                     document.getElementById("alpha-slider").value = 100;
@@ -522,15 +569,18 @@ export const setupSidebar = (uploads) => {
                 } else if (data.type === "ImageSeries") {
                   if (
                     entities[asset.id] &&
-                    entities[asset.id].rectangle &&
-                    entities[asset.id].rectangle.material
+                    entities[asset.id][data.id] &&
+                    entities[asset.id][data.id].rectangle &&
+                    entities[asset.id][data.id].rectangle.material
                   ) {
                     document.getElementById("alpha-slider").value =
-                      entities[asset.id].rectangle.material.color.getValue()
-                        .alpha * 100;
+                      entities[asset.id][
+                        data.id
+                      ].rectangle.material.color.getValue().alpha * 100;
                     document.getElementById("alpha-value").innerHTML =
-                      entities[asset.id].rectangle.material.color.getValue()
-                        .alpha *
+                      entities[asset.id][
+                        data.id
+                      ].rectangle.material.color.getValue().alpha *
                         100 +
                       " %";
                   } else {
@@ -703,6 +753,7 @@ export const setupSidebar = (uploads) => {
         }
 
         assetCheckbox.onchange = (e) => {
+          console.log("asset onchange");
           checkboxes.map((cb) => {
             cb.checked = assetCheckbox.checked;
           });
@@ -755,8 +806,8 @@ export const setupSidebar = (uploads) => {
                 if (dataSources[d.asset.id] && dataSources[d.asset.id][d.id]) {
                   dataSources[d.asset.id][d.id].show = false;
                 }
-                if (entities[asset["id"]]) {
-                  entities[asset["id"]].show = false;
+                if (entities[d.asset.id] && entities[d.asset.id][d.id]) {
+                  entities[d.asset.id][d.id].show = false;
                 }
                 if (
                   imageryLayers[d.asset.id] &&
@@ -764,7 +815,6 @@ export const setupSidebar = (uploads) => {
                 ) {
                   imageryLayers[d.asset.id][d.id].show = false;
                 }
-                closeGraphModal();
               }
             });
             setSelectedDatasets(
@@ -777,6 +827,15 @@ export const setupSidebar = (uploads) => {
                 return a !== data.asset.id;
               })
             );
+
+            if (!selectedDatasets.find((d) => d.type === "ImageSeries")) {
+              document.getElementById("image-series-toolbar").style.display =
+                "none";
+            }
+
+            if (!selectedDatasets.find((d) => d.type === "Influx")) {
+              closeGraphModal();
+            }
 
             var dataIDs = [];
             selectedDatasets.map((d) => {
@@ -1037,14 +1096,26 @@ export const downloadFile = (asset, data, index, format) => {
     }
   } else if (data.type === "Influx") {
     waitModal.style.display = "block";
-    fetch(`/cesium/influx/fivemin?station=${data.station}`, {
-      cache: "no-store",
-    })
+    fetch(
+      `/cesium/influx/fivemin?station=${
+        data.station
+      }&time=${Cesium.JulianDate.toDate(viewer.clock.currentTime).getTime()}`,
+      {
+        cache: "no-store",
+      }
+    )
       .then((response) => response.json())
       .then((parsedResponse) => {
-        fetch(`/cesium/influx/daily?station=${data.station}`, {
-          cache: "no-store",
-        })
+        fetch(
+          `/cesium/influx/daily?station=${
+            data.station
+          }&time=${Cesium.JulianDate.toDate(
+            viewer.clock.currentTime
+          ).getTime()}`,
+          {
+            cache: "no-store",
+          }
+        )
           .then((dailyresponse) => dailyresponse.json())
           .then((parsedDailyresponse) => {
             waitModal.style.display = "none";

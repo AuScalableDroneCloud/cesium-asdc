@@ -216,7 +216,7 @@
     });
   }
 
-  app.get("/proxy/*", function (req, res, next) {
+  app.get("/cesium/proxy/*", function (req, res, next) {
     // look for request like http://localhost:8080/proxy/http://example.com/file?query=1
     let remoteUrl = getRemoteUrlFromParam(req);
     if (!remoteUrl) {
@@ -276,7 +276,7 @@
         sum("Rain") AS "sum_Rain",
         mean("Snow_Depth") AS "mean_Snow_Depth",
         mean("Battery_Voltage") AS mean_Battery_Voltage 
-        from cr1000x where time > now()-2w and ("station_name"= \'${request.query.station}\') group by time(5m)
+        from cr1000x where time > ${request.query.time}ms-2w and time < ${request.query.time}ms and ("station_name"= \'${request.query.station}\') group by time(5m)
       `
       )
       .then((result) => {
@@ -291,7 +291,7 @@
         `
         select 
         sum("Rain") AS "sum_Rain" 
-        from cr1000x where time > now()-2w and ("station_name"= \'${request.query.station}\') group by time(1d)
+        from cr1000x where time > ${request.query.time}ms-2w and time < ${request.query.time}ms and ("station_name"= \'${request.query.station}\') group by time(1d)
       `
       )
       .then((result) => {

@@ -117,6 +117,13 @@
       "status": "active",
       "categoryID": 2,
       "data": [36, 37, 38, 39, 40]
+    },
+    {
+      "id": 20,
+      "name": "Graham Road Construction Site",
+      "status": "active",
+      "categoryID": 8,
+      "data": [43, 44]
     }
   ],
   "datasets": [
@@ -856,6 +863,32 @@
       },
       "camera": "AMRF_FRY_C01",
       "startDateTime": "2022-01-10T20:00:00.000Z"
+    },
+    {
+      "id": 43,
+      "type": "ModelTileset",
+      "date": "2022-02-13T00:00:00.000Z",
+      "url": "https://swift.rc.nectar.org.au/v1/AUTH_9f7c80bfd20f45bebc780b06c405f0df/ddp-projects/1012_GrahamRoad_CraneSimulation/2022_02_13/Scene/tileset_20220213_RC.json",
+      "useProxy": true,
+      "position": {
+        "lng": 145.04233940133838,
+        "lat": -37.95164761990005,
+        "height": 42.725464447228724
+      },
+      "boundingSphereRadius": 117.35476697192833
+    },
+    {
+      "id": 44,
+      "type": "ModelTileset",
+      "date": "2022-02-20T00:00:00.000Z",
+      "url": "https://swift.rc.nectar.org.au/v1/AUTH_9f7c80bfd20f45bebc780b06c405f0df/ddp-projects/1012_GrahamRoad_CraneSimulation/2022_02_20/Model/Scene/tileset_20220220_RC.json",
+      "useProxy": true,
+      "position": {
+        "lng": 145.04228419808715,
+        "lat": -37.9516236980487,
+        "height": 40.95438585820129
+      },
+      "boundingSphereRadius": 118.18959624227422
     }
   ],
   "categories": [
@@ -878,6 +911,10 @@
     {
       "id": 7,
       "name": "ARA"
+    },
+    {
+      "id": 8,
+      "name": "DDP"
     },
     {
       "id": 5,

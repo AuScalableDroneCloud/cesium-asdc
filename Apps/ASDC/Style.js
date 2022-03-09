@@ -3,8 +3,6 @@ import {
   setSelectedDimension,
   selectedAssetIDs,
   tilesets,
-  // setAlpha,
-  // alpha,
   imageryLayers,
   entities,
   dataSources,
@@ -147,13 +145,20 @@ export const applyAlpha = (evt, asset, data) => {
           color: `rgba(\${COLOR}.r * 255,\${COLOR}.g* 255,\${COLOR}.b* 255,${alpha})`,
         });
     }
+  } else if (data.type === "ModelTileset") {
+    if (tilesets[asset.id] && tilesets[asset.id][new Date(data.date)]) {
+      tilesets[asset.id][new Date(data.date)].style =
+        new Cesium.Cesium3DTileStyle({
+          color: `rgba(255, 255, 255, ${alpha})`,
+        });
+    }
   } else if (data.type === "Imagery") {
     if (imageryLayers[asset.id] && imageryLayers[asset.id][data.id]) {
       imageryLayers[asset.id][data.id].alpha = alpha;
     }
   } else if (data.type === "Model") {
-    if (entities[asset.id]) {
-      entities[asset.id].model.color = Cesium.Color.fromAlpha(
+    if (entities[asset.id] && entities[asset.id][data.id]) {
+      entities[asset.id][data.id].model.color = Cesium.Color.fromAlpha(
         Cesium.Color.WHITE,
         alpha
       );
@@ -176,8 +181,8 @@ export const applyAlpha = (evt, asset, data) => {
       });
     }
   } else if (data.type === "ImageSeries") {
-    if (entities[asset.id]) {
-      entities[asset.id].rectangle.material.color._value.alpha = alpha;
+    if (entities[asset.id] && entities[asset.id][data.id]) {
+      entities[asset.id][data.id].rectangle.material.color._value.alpha = alpha;
     }
   }
 };

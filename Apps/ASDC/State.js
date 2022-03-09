@@ -19,6 +19,7 @@ export var controllers = {};
 export var lastCurrentTime;
 
 export var selectedDimension;
+export var billboard = false;
 
 export var MSSE = 83;
 
@@ -74,4 +75,8 @@ export function setAlpha(newAlpha) {
 
 export function setLastCurrentTime(newCurrentTime) {
   lastCurrentTime = newCurrentTime;
+}
+
+export function setBillboard(newBillboard) {
+  billboard = newBillboard;
 }

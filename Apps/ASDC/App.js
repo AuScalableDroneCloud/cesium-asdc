@@ -11,13 +11,12 @@ import {
   datasets,
   selectedDatasets,
   dataSources,
-  setSelectedDatasets,
-  setSelectedAssetIDs,
   MSSE,
   imageryLayers,
   controllers,
   lastCurrentTime,
   setLastCurrentTime,
+  setBillboard,
 } from "./State.js";
 import { loadAsset, loadData, setScreenSpaceError } from "./Datasets.js";
 import {
@@ -27,7 +26,7 @@ import {
   openModal,
   closeModal,
 } from "./Sidebar.js";
-import { closeGraphModal } from "./Graphs.js";
+import { closeGraphModal, loadGraph } from "./Graphs.js";
 import { findAssetAndDataFromUrl } from "./URL.js";
 
 Cesium.Ion.defaultAccessToken = cesiumIonAccessToken;
@@ -61,6 +60,24 @@ if (window.location.href.toLowerCase().includes("cesium/apps/asdc/uploads")) {
 }
 
 setupSidebar(uploadPage);
+
+const handleBillboard = (billboard) => {
+  setBillboard(billboard);
+  selectedDatasets.map((data) => {
+    if (entities[data.asset.id] && entities[data.asset.id][data.id]) {
+      entities[data.asset.id][data.id].rectangle.show = !billboard;
+      entities[data.asset.id][data.id].billboard.show = billboard;
+    }
+  });
+};
+
+Sandcastle.addToolbarMenu(
+  [
+    { text: "Ground Image", onselect: () => handleBillboard(false) },
+    { text: "Billboard Image", onselect: () => handleBillboard(true) },
+  ],
+  "image-series-toolbar"
+);
 
 viewer.camera.moveEnd.addEventListener(() => {
   if (!assets) return;
@@ -113,7 +130,7 @@ viewer.camera.moveEnd.addEventListener(() => {
                       `dataCheckbox-${selectedData.id}`
                     );
                     if (
-                      selectedDatasets.includes(selectedData) &&
+                      // selectedDatasets.includes(selectedData) &&
                       !checkbox.checked
                     ) {
                       if (
@@ -140,8 +157,13 @@ viewer.camera.moveEnd.addEventListener(() => {
                           ].show = false;
                         }
                       }
-                      if (entities[selectedData.asset.id]) {
-                        entities[selectedData.asset.id].show = false;
+                      if (
+                        entities[selectedData.asset.id] &&
+                        entities[selectedData.asset.id][selectedData.id]
+                      ) {
+                        entities[selectedData.asset.id][
+                          selectedData.id
+                        ].show = false;
                       }
                       if (
                         dataSources[selectedData.asset.id] &&
@@ -159,34 +181,15 @@ viewer.camera.moveEnd.addEventListener(() => {
                           selectedData.id
                         ].show = false;
                       }
-                      console.log(
-                        imageryLayers[selectedData.asset.id] &&
-                          imageryLayers[selectedData.asset.id][selectedData.id]
-                      );
-                      setSelectedDatasets(
-                        selectedDatasets.filter((d) => {
-                          return d.id !== selectedData.id;
-                        })
-                      );
-                      if (
-                        !selectedDatasets.find((d) =>
-                          selectedAssetIDs.includes(d.asset.id)
-                        )
-                      ) {
-                        setSelectedAssetIDs(
-                          selectedAssetIDs.filter((a) => {
-                            return a !== data.asset.id;
-                          })
-                        );
-                      }
                     }
                   }
 
-                  loadData(asset, data, false, true, false, true);
+                  loadData(asset, data, false, true, false, false);
 
                   if (
                     data["type"] === "PointCloud" ||
-                    data["type"] === "EPTPointCloud"
+                    data["type"] === "EPTPointCloud" ||
+                    data["type"] === "ModelTileset"
                   ) {
                     document.getElementById(
                       "msse-slider-container"
@@ -197,6 +200,7 @@ viewer.camera.moveEnd.addEventListener(() => {
                     ).style.display = "none";
                   }
                 }
+
                 setSelectedData(data);
               },
               data: data,
@@ -225,9 +229,9 @@ viewer.camera.moveEnd.addEventListener(() => {
       document.getElementById("cam-toolbar").childNodes[0].selectedIndex =
         selectedIndex;
 
-      if (selectedData && selectedData != viewMenu[selectedIndex].data) {
-        viewMenu[selectedIndex].onselect();
-      }
+      // if (selectedData && selectedData != viewMenu[selectedIndex].data) {
+      //   viewMenu[selectedIndex].onselect();
+      // }
     } else {
       if (!timeseriesInView) {
         viewMenu[0].onselect();
@@ -237,8 +241,7 @@ viewer.camera.moveEnd.addEventListener(() => {
 });
 
 viewer.clock.onTick.addEventListener((clock) => {
-  var currentTime = Cesium.JulianDate.toDate(clock.currentTime).getTime();
-  if (!selectedAssetIDs) return;
+  var currentDate = Cesium.JulianDate.toDate(clock.currentTime);
   selectedAssetIDs.map((assetID) => {
     if (tilesets[assetID]) {
       var tilesetDates = Object.keys(tilesets[assetID])
@@ -248,11 +251,17 @@ viewer.clock.onTick.addEventListener((clock) => {
               (data) =>
                 new Date(data.date) != "Invalid Date" &&
                 data.asset.id == assetID &&
-                (data.type == "PointCloud" || data.type == "EPTPointCloud")
+                (data.type == "PointCloud" ||
+                  data.type == "EPTPointCloud" ||
+                  data.type === "ModelTileset")
             )
             .map((data) => new Date(data.date));
           return !!selectedAssetDates.find((item) => {
-            return item.getTime() == new Date(k).getTime();
+            return (
+              item.getTime() == new Date(k).getTime() ||
+              (selectedData &&
+                new Date(selectedData.date).getTime() == new Date(k).getTime())
+            );
           });
         })
         .sort(function (a, b) {
@@ -261,9 +270,10 @@ viewer.clock.onTick.addEventListener((clock) => {
 
       for (var i = 0; i < tilesetDates.length; i++) {
         if (
-          (i === 0 || new Date(tilesetDates[i]).getTime() <= currentTime) &&
+          (i === 0 ||
+            new Date(tilesetDates[i]).getTime() <= currentDate.getTime()) &&
           (i === tilesetDates.length - 1 ||
-            new Date(tilesetDates[i + 1]).getTime() > currentTime)
+            new Date(tilesetDates[i + 1]).getTime() > currentDate.getTime())
         ) {
           if (Array.isArray(tilesets[assetID][tilesetDates[i]])) {
             tilesets[assetID][tilesetDates[i]].map((tileset) => {
@@ -288,29 +298,55 @@ viewer.clock.onTick.addEventListener((clock) => {
       }
     }
   });
+  if (lastCurrentTime) {
+    var noon = new Date(
+      lastCurrentTime.getFullYear(),
+      lastCurrentTime.getMonth(),
+      lastCurrentTime.getDate(),
+      12,
+      0,
+      0
+    );
+  }
   if (
     !lastCurrentTime ||
-    Math.abs(
-      new Date(lastCurrentTime).getHours() - new Date(currentTime).getHours()
-    ) >= 1
+    Math.abs(lastCurrentTime.getTime() - currentDate.getTime()) >= 86400000 ||
+    currentDate.getTime() < noon.getTime()
   ) {
-    setLastCurrentTime(currentTime);
+    if (currentDate.getHours() < 12) {
+      currentDate.setDate(currentDate.getDate() - 1);
+    }
+    currentDate.setHours(12, 0, 0);
+
+    setLastCurrentTime(currentDate);
+
+    if (currentDate.getTime() > new Date().getTime()) {
+      currentDate = new Date();
+      if (currentDate.getHours() < 12) {
+        currentDate.setDate(currentDate.getDate() - 1);
+      }
+
+      currentDate.setHours(12, 0, 0);
+    }
+
     selectedDatasets.map((data) => {
       if (data.type === "ImageSeries") {
-        if (entities[data.asset.id]) {
-          if (!controllers[data.asset.id]) {
-            controllers[data.asset.id] = new AbortController();
+        if (entities[data.asset.id] && entities[data.asset.id][data.id]) {
+          if (!controllers[data.id]) {
+            controllers[data.id] = new AbortController();
+          } else {
+            controllers[data.id].abort();
+            controllers[data.id] = new AbortController();
           }
-          // else {
-          //   controllers[data.asset.id].abort();
-          //   controllers[data.asset.id] = new AbortController();
-          // }
+
           fetch(
             `/cesium/influx/images?camera=${data.camera}&time=${
-              data.timeOffset ? currentTime + data.timeOffset : currentTime
+              data.timeOffset
+                ? currentDate.getTime() - data.timeOffset
+                : currentDate.getTime()
             }&startTime=${new Date(data.startDateTime).getTime()}`,
-            // ,{cache:"no-store", signal:controllers[data.asset.id].signal})
-            { cache: "no-store" }
+            { cache: "no-store", signal: controllers[data.id].signal }
+            // { cache: "no-store" }
           )
             .then((response) => {
               if (response.status !== 200) {
@@ -338,14 +374,18 @@ viewer.clock.onTick.addEventListener((clock) => {
                 ).getTime()}`;
               }
               if (
-                entities[data.asset.id].rectangle.material.image.getValue() !==
-                imageUrl
+                entities[data.asset.id][
+                  data.id
+                ].rectangle.material.image.getValue() !== imageUrl
               ) {
-                entities[data.asset.id].rectangle.material =
+                entities[data.asset.id][data.id].rectangle.material =
                   new Cesium.ImageMaterialProperty({
                     image: imageUrl,
-                    color: entities[data.asset.id].rectangle.material.color,
+                    color:
+                      entities[data.asset.id][data.id].rectangle.material.color,
                   });
+
+                entities[data.asset.id][data.id].billboard.image = imageUrl;
               }
             })
             .catch((error) => {
@@ -354,6 +394,9 @@ viewer.clock.onTick.addEventListener((clock) => {
               }
             });
         }
+      }
+      if (data.type == "Influx") {
+        loadGraph(data);
       }
     });
   }
@@ -440,6 +483,7 @@ viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
         }
         selectedEntity.description += "</tbody></table>";
 
+        closeGraphModal();
         viewer.selectedEntity = selectedEntity;
       }
     }
