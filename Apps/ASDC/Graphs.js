@@ -247,12 +247,20 @@ export const loadGraph = (data) => {
         "Air_Temp_Hum"
       );
 
+      if (!controllers[data.id + "_daily"]) {
+        controllers[data.id + "_daily"] = new AbortController();
+      } else {
+        controllers[data.id + "_daily"].abort();
+        controllers[data.id + "_daily"] = new AbortController();
+      }
+
       fetch(
         `/cesium/influx/daily?station=${station}&time=${Cesium.JulianDate.toDate(
           viewer.clock.currentTime
         ).getTime()}`,
         {
           cache: "no-store",
+          signal: controllers[data.id + "_daily"].signal,
         }
       )
         .then((dailyresponse) => {
@@ -295,9 +303,18 @@ export const loadGraph = (data) => {
             false,
             "Bat_Volt"
           );
+        })
+        .catch((error) => {
+          if (error.name !== "AbortError") {
+            console.log(error);
+          }
         });
     })
-    .catch((error) => console.log(error));
+    .catch((error) => {
+      if (error.name !== "AbortError") {
+        console.log(error);
+      }
+    });
 };
 
 export const closeGraphModal = () => {

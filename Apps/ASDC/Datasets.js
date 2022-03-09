@@ -486,6 +486,7 @@ export const loadData = (
                 0,
                 5000
               ),
+              color: new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
               show: billboard,
             },
           });

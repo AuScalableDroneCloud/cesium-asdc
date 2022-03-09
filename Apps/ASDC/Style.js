@@ -183,6 +183,7 @@ export const applyAlpha = (evt, asset, data) => {
   } else if (data.type === "ImageSeries") {
     if (entities[asset.id] && entities[asset.id][data.id]) {
       entities[asset.id][data.id].rectangle.material.color._value.alpha = alpha;
+      entities[asset.id][data.id].billboard.color._value.alpha = alpha;
     }
   }
 };
