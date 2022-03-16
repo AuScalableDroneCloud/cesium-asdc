@@ -276,7 +276,30 @@
         sum("Rain") AS "sum_Rain",
         mean("Snow_Depth") AS "mean_Snow_Depth",
         mean("Battery_Voltage") AS mean_Battery_Voltage 
-        from cr1000x where time > ${request.query.time}ms-2w and time < ${request.query.time}ms and ("station_name"= \'${request.query.station}\') group by time(5m)
+        from cr1000x where time >= ${request.query.time}ms-2w and time <= ${request.query.time}ms and ("station_name"= \'${request.query.station}\') group by time(5m)
+      `
+      )
+      .then((result) => {
+        response.status(200).json(result);
+      })
+      .catch((error) => response.status(500).json({ error }));
+  });
+
+  app.get("/cesium/influx/fivemin2w", (request, response) => {
+    influx
+      .query(
+        `
+        select mean("PAR") AS mean_PAR, 
+        mean("Total_Solar_Radiation") AS mean_TSR, 
+        mean(/Soil_VWC/), 
+        mean(/Soil_Temp_*/),
+        mean(/Soil_EC_*/),
+        mean("Mast_Air_Temp") AS "mean_Air_Temperature", 
+        mean("Mast_RH") AS "mean_Relative_Humidity",
+        sum("Rain") AS "sum_Rain",
+        mean("Snow_Depth") AS "snow_Depth_Mean",
+        mean("Battery_Voltage") AS mean_Battery_Voltage 
+        from cr1000x where time >= now()-2w and ("station_name"= \'${request.query.station}\') group by time(5m)
       `
       )
       .then((result) => {
@@ -291,7 +314,22 @@
         `
         select 
         sum("Rain") AS "sum_Rain" 
-        from cr1000x where time > ${request.query.time}ms-2w and time < ${request.query.time}ms and ("station_name"= \'${request.query.station}\') group by time(1d)
+        from cr1000x where time >= ${request.query.time}ms-2w and time <= ${request.query.time}ms and ("station_name"= \'${request.query.station}\') group by time(1d)
+      `
+      )
+      .then((result) => {
+        response.status(200).json(result);
+      })
+      .catch((error) => response.status(500).json({ error }));
+  });
+
+  app.get("/cesium/influx/daily2w", (request, response) => {
+    influx
+      .query(
+        `
+        select 
+        sum("Rain") AS "sum_Rain" 
+        from cr1000x where time >= now()-2w and ("station_name"= \'${request.query.station}\') group by time(1d)
       `
       )
       .then((result) => {

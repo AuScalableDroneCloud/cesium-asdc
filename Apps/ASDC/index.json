@@ -123,7 +123,7 @@
       "name": "Graham Road Construction Site",
       "status": "active",
       "categoryID": 8,
-      "data": [43, 44]
+      "data": [43, 44, 45]
     }
   ],
   "datasets": [
@@ -889,6 +889,19 @@
         "height": 40.95438585820129
       },
       "boundingSphereRadius": 118.18959624227422
+    },
+    {
+      "id": 45,
+      "type": "ModelTileset",
+      "date": "2022-03-13T00:00:00.000Z",
+      "url": "https://swift.rc.nectar.org.au/v1/AUTH_9f7c80bfd20f45bebc780b06c405f0df/ddp-projects/1012_GrahamRoad_CraneSimulation/2022_03_13/Scene/tileset_20220313_RC.json",
+      "useProxy": true,
+      "position": {
+        "lng": 145.04230835238604,
+        "lat": -37.951637116914206,
+        "height": 42.223313470669574
+      },
+      "boundingSphereRadius": 121.64781841736759
     }
   ],
   "categories": [

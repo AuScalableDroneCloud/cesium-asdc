@@ -338,8 +338,8 @@ export const loadData = (
                     )}&${truncate ? "truncate" : null}`,
                     maximumScreenSpaceError:
                       ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
-                    show:
-                      new Date(data["date"]) != "Invalid Date" ? false : true,
+                    // show:
+                    //   new Date(data["date"]) != "Invalid Date" ? false : true,
                   })
                 )
               );
@@ -363,7 +363,7 @@ export const loadData = (
                   }`,
                   maximumScreenSpaceError:
                     ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
-                  show: new Date(data["date"]) != "Invalid Date" ? false : true,
+                  // show: new Date(data["date"]) != "Invalid Date" ? false : true,
                 })
               );
             tilesets[asset["id"]][new Date(data["date"])].readyPromise.then(
