@@ -124,6 +124,13 @@
       "status": "active",
       "categoryID": 8,
       "data": [43, 44, 45]
+    },
+    {
+      "id": 17,
+      "name": "Basil",
+      "status": "active",
+      "categoryID": 6,
+      "data": [46, 47, 48, 49, 50, 51, 52, 53, 54, 55]
     }
   ],
   "datasets": [
@@ -902,6 +909,136 @@
         "height": 42.223313470669574
       },
       "boundingSphereRadius": 121.64781841736759
+    },
+    {
+      "id": 46,
+      "date": "2021-04-15T00:00:00.000Z",
+      "name": "Point Cloud",
+      "type": "EPTPointCloud",
+      "position": {
+        "lng": 149.11656,
+        "lat": -35.278541,
+        "height": 584.5890930951741
+      },
+      "boundingSphereRadius": 4.579436804133652,
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210415/ept.json"
+    },
+    {
+      "id": 47,
+      "date": "2021-04-16T00:00:00.000Z",
+      "name": "Point Cloud",
+      "type": "EPTPointCloud",
+      "position": {
+        "lng": 149.11656,
+        "lat": -35.278541,
+        "height": 584.5890930951741
+      },
+      "boundingSphereRadius": 4.579436804133652,
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210416/ept.json"
+    },
+    {
+      "id": 48,
+      "date": "2021-04-17T00:00:00.000Z",
+      "name": "Point Cloud",
+      "type": "EPTPointCloud",
+      "position": {
+        "lng": 149.11656,
+        "lat": -35.278541,
+        "height": 584.5890930951741
+      },
+      "boundingSphereRadius": 4.579436804133652,
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210417/ept.json"
+    },
+    {
+      "id": 49,
+      "date": "2021-04-18T00:00:00.000Z",
+      "name": "Point Cloud",
+      "type": "EPTPointCloud",
+      "position": {
+        "lng": 149.11656,
+        "lat": -35.278541,
+        "height": 584.5890930951741
+      },
+      "boundingSphereRadius": 4.579436804133652,
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210418/ept.json"
+    },
+    {
+      "id": 50,
+      "date": "2021-04-19T00:00:00.000Z",
+      "name": "Point Cloud",
+      "type": "EPTPointCloud",
+      "position": {
+        "lng": 149.11656,
+        "lat": -35.278541,
+        "height": 584.5890930951741
+      },
+      "boundingSphereRadius": 4.579436804133652,
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210419/ept.json"
+    },
+    {
+      "id": 51,
+      "date": "2021-04-20T00:00:00.000Z",
+      "name": "Point Cloud",
+      "type": "EPTPointCloud",
+      "position": {
+        "lng": 149.11656,
+        "lat": -35.278541,
+        "height": 584.5890930951741
+      },
+      "boundingSphereRadius": 4.579436804133652,
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210420/ept.json"
+    },
+    {
+      "id": 52,
+      "date": "2021-04-21T00:00:00.000Z",
+      "name": "Point Cloud",
+      "type": "EPTPointCloud",
+      "position": {
+        "lng": 149.11656,
+        "lat": -35.278541,
+        "height": 584.5890930951741
+      },
+      "boundingSphereRadius": 4.579436804133652,
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210421/ept.json"
+    },
+    {
+      "id": 53,
+      "date": "2021-04-23T00:00:00.000Z",
+      "name": "Point Cloud",
+      "type": "EPTPointCloud",
+      "position": {
+        "lng": 149.11656,
+        "lat": -35.278541,
+        "height": 584.5890930951741
+      },
+      "boundingSphereRadius": 4.579436804133652,
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210423/ept.json"
+    },
+    {
+      "id": 54,
+      "date": "2021-04-24T00:00:00.000Z",
+      "name": "Point Cloud",
+      "type": "EPTPointCloud",
+      "position": {
+        "lng": 149.11656,
+        "lat": -35.278541,
+        "height": 584.5890930951741
+      },
+      "boundingSphereRadius": 4.579436804133652,
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210424/ept.json"
+    },
+    {
+      "id": 55,
+      "date": "2021-04-25T00:00:00.000Z",
+      "name": "Point Cloud",
+      "type": "EPTPointCloud",
+      "position": {
+        "lng": 149.11656,
+        "lat": -35.278541,
+        "height": 584.5890930951741
+      },
+      "boundingSphereRadius": 4.579436804133652,
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210425/ept.json"
     }
   ],
   "categories": [

@@ -375,6 +375,22 @@ export const loadData = (
                 // console.log(carto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
                 // console.log(carto.longitude * Cesium.Math.DEGREES_PER_RADIAN);
                 // console.log(carto.height);
+                if (data["position"]) {
+                  var offset = Cesium.Cartographic.toCartesian(
+                    new Cesium.Cartographic.fromDegrees(
+                      data["position"]["lng"],
+                      data["position"]["lat"],
+                      data["position"]["height"]
+                    )
+                  );
+                  var translation = Cesium.Cartesian3.subtract(
+                    offset,
+                    tileset.boundingSphere.center,
+                    new Cesium.Cartesian3()
+                  );
+                  tileset.modelMatrix =
+                    Cesium.Matrix4.fromTranslation(translation);
+                }
 
                 setupStyleToolbar(tileset);
                 applyStyle(selectedDimension);
