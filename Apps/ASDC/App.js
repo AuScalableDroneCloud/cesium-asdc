@@ -60,7 +60,6 @@ if (window.location.href.toLowerCase().includes("cesium/apps/asdc/uploads")) {
 }
 
 Cesium.TrustedServers.add("asdc.cloud.edu.au",443)
-Cesium.TrustedServers.add("localhost",3000)
 
 setupSidebar(uploadPage);
 
@@ -271,25 +270,37 @@ viewer.clock.onTick.addEventListener((clock) => {
           new Date(timelineAssetDatasets[i + 1].date).getTime() > currentDate.getTime())
       ) {
         if (Array.isArray(tilesets[assetID][timelineAssetDatasets[i].id])) {
-          tilesets[assetID][timelineAssetDatasets[i].id].map((tileset) => {
-            if (MSSE !== 0) {
-              tileset.show = true;
-            }
-          });
+          if(tilesets[assetID][timelineAssetDatasets[i].id]){
+            tilesets[assetID][timelineAssetDatasets[i].id].map((tileset) => {
+              if (MSSE !== 0) {
+                if (tileset){
+                  tileset.show = true;
+                }
+              }
+            });
+          }
         } else {
           if (MSSE !== 0) {
             if(tilesets[assetID][timelineAssetDatasets[i].id]){
-              tilesets[assetID][timelineAssetDatasets[i].id].show = true;
+              if(tilesets[assetID][timelineAssetDatasets[i].id]){
+                tilesets[assetID][timelineAssetDatasets[i].id].show = true;
+              }
             }
           }
         }
       } else {
         if (Array.isArray(tilesets[assetID][timelineAssetDatasets[i].id])) {
-          tilesets[assetID][timelineAssetDatasets[i].id].map((tileset) => {
-            tileset.show = false;
-          });
+          if (tilesets[assetID][timelineAssetDatasets[i].id]){
+            tilesets[assetID][timelineAssetDatasets[i].id].map((tileset) => {
+              if (tileset){
+                tileset.show = false;
+              }
+            });
+          }
         } else {
-          tilesets[assetID][timelineAssetDatasets[i].id].show = false;
+          if (tilesets[assetID][timelineAssetDatasets[i].id]){
+            tilesets[assetID][timelineAssetDatasets[i].id].show = false;
+          }
         }
       }
     }

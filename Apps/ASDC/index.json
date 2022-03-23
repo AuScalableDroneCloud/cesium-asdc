@@ -921,7 +921,26 @@
         "height": 584.5890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
-      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210415/ept.json"
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210415/ept.json",
+      "zoom":{
+        "position":{
+          "x": -4473967.666811766,
+          "y": 2675860.5247395057,
+          "z": -3663474.9131234586
+        },
+        "orientation":{
+          "direction":{
+            "x": 0.2463668715843988,
+            "y": -0.9614965767580186,
+            "z": -0.1217690332897825
+          },
+          "up":{
+            "x": -0.6675963535907656,
+            "y": -0.07727892682405241,
+            "z": -0.740501908263062
+          }
+        }
+      }
     },
     {
       "id": 47,
@@ -934,7 +953,26 @@
         "height": 584.5890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
-      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210416/ept.json"
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210416/ept.json",
+      "zoom":{
+        "position":{
+          "x": -4473967.666811766,
+          "y": 2675860.5247395057,
+          "z": -3663474.9131234586
+        },
+        "orientation":{
+          "direction":{
+            "x": 0.2463668715843988,
+            "y": -0.9614965767580186,
+            "z": -0.1217690332897825
+          },
+          "up":{
+            "x": -0.6675963535907656,
+            "y": -0.07727892682405241,
+            "z": -0.740501908263062
+          }
+        }
+      }
     },
     {
       "id": 48,
@@ -947,7 +985,26 @@
         "height": 584.5890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
-      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210417/ept.json"
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210417/ept.json",
+      "zoom":{
+        "position":{
+          "x": -4473967.666811766,
+          "y": 2675860.5247395057,
+          "z": -3663474.9131234586
+        },
+        "orientation":{
+          "direction":{
+            "x": 0.2463668715843988,
+            "y": -0.9614965767580186,
+            "z": -0.1217690332897825
+          },
+          "up":{
+            "x": -0.6675963535907656,
+            "y": -0.07727892682405241,
+            "z": -0.740501908263062
+          }
+        }
+      }
     },
     {
       "id": 49,
@@ -960,7 +1017,26 @@
         "height": 584.5890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
-      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210418/ept.json"
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210418/ept.json",
+      "zoom":{
+        "position":{
+          "x": -4473967.666811766,
+          "y": 2675860.5247395057,
+          "z": -3663474.9131234586
+        },
+        "orientation":{
+          "direction":{
+            "x": 0.2463668715843988,
+            "y": -0.9614965767580186,
+            "z": -0.1217690332897825
+          },
+          "up":{
+            "x": -0.6675963535907656,
+            "y": -0.07727892682405241,
+            "z": -0.740501908263062
+          }
+        }
+      }
     },
     {
       "id": 50,
@@ -973,7 +1049,26 @@
         "height": 584.5890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
-      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210419/ept.json"
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210419/ept.json",
+      "zoom":{
+        "position":{
+          "x": -4473967.666811766,
+          "y": 2675860.5247395057,
+          "z": -3663474.9131234586
+        },
+        "orientation":{
+          "direction":{
+            "x": 0.2463668715843988,
+            "y": -0.9614965767580186,
+            "z": -0.1217690332897825
+          },
+          "up":{
+            "x": -0.6675963535907656,
+            "y": -0.07727892682405241,
+            "z": -0.740501908263062
+          }
+        }
+      }
     },
     {
       "id": 51,
@@ -986,7 +1081,26 @@
         "height": 584.5890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
-      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210420/ept.json"
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210420/ept.json",
+      "zoom":{
+        "position":{
+          "x": -4473967.666811766,
+          "y": 2675860.5247395057,
+          "z": -3663474.9131234586
+        },
+        "orientation":{
+          "direction":{
+            "x": 0.2463668715843988,
+            "y": -0.9614965767580186,
+            "z": -0.1217690332897825
+          },
+          "up":{
+            "x": -0.6675963535907656,
+            "y": -0.07727892682405241,
+            "z": -0.740501908263062
+          }
+        }
+      }
     },
     {
       "id": 52,
@@ -999,7 +1113,26 @@
         "height": 584.5890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
-      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210421/ept.json"
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210421/ept.json",
+      "zoom":{
+        "position":{
+          "x": -4473967.666811766,
+          "y": 2675860.5247395057,
+          "z": -3663474.9131234586
+        },
+        "orientation":{
+          "direction":{
+            "x": 0.2463668715843988,
+            "y": -0.9614965767580186,
+            "z": -0.1217690332897825
+          },
+          "up":{
+            "x": -0.6675963535907656,
+            "y": -0.07727892682405241,
+            "z": -0.740501908263062
+          }
+        }
+      }
     },
     {
       "id": 53,
@@ -1012,7 +1145,26 @@
         "height": 584.5890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
-      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210423/ept.json"
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210423/ept.json",
+      "zoom":{
+        "position":{
+          "x": -4473967.666811766,
+          "y": 2675860.5247395057,
+          "z": -3663474.9131234586
+        },
+        "orientation":{
+          "direction":{
+            "x": 0.2463668715843988,
+            "y": -0.9614965767580186,
+            "z": -0.1217690332897825
+          },
+          "up":{
+            "x": -0.6675963535907656,
+            "y": -0.07727892682405241,
+            "z": -0.740501908263062
+          }
+        }
+      }
     },
     {
       "id": 54,
@@ -1025,7 +1177,26 @@
         "height": 584.5890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
-      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210424/ept.json"
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210424/ept.json",
+      "zoom":{
+        "position":{
+          "x": -4473967.666811766,
+          "y": 2675860.5247395057,
+          "z": -3663474.9131234586
+        },
+        "orientation":{
+          "direction":{
+            "x": 0.2463668715843988,
+            "y": -0.9614965767580186,
+            "z": -0.1217690332897825
+          },
+          "up":{
+            "x": -0.6675963535907656,
+            "y": -0.07727892682405241,
+            "z": -0.740501908263062
+          }
+        }
+      }
     },
     {
       "id": 55,
@@ -1038,7 +1209,26 @@
         "height": 584.5890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
-      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210425/ept.json"
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210425/ept.json",
+      "zoom":{
+        "position":{
+          "x": -4473967.666811766,
+          "y": 2675860.5247395057,
+          "z": -3663474.9131234586
+        },
+        "orientation":{
+          "direction":{
+            "x": 0.2463668715843988,
+            "y": -0.9614965767580186,
+            "z": -0.1217690332897825
+          },
+          "up":{
+            "x": -0.6675963535907656,
+            "y": -0.07727892682405241,
+            "z": -0.740501908263062
+          }
+        }
+      }
     }
   ],
   "categories": [
