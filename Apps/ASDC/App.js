@@ -1,4 +1,4 @@
-import { cesiumIonAccessToken } from "./Constants.js";
+import { cesiumIonAccessToken, eptServer } from "./Constants.js";
 import {
   viewer,
   setViewer,
@@ -59,6 +59,9 @@ if (window.location.href.toLowerCase().includes("cesium/apps/asdc/uploads")) {
   uploadPage = false;
 }
 
+Cesium.TrustedServers.add("asdc.cloud.edu.au",443)
+Cesium.TrustedServers.add("localhost",3000)
+
 setupSidebar(uploadPage);
 
 const handleBillboard = (billboard) => {
@@ -92,7 +95,7 @@ viewer.camera.moveEnd.addEventListener(() => {
       var assetDataset = [];
       asset.data?.map((dataID) => {
         for (var i = 0; i < datasets.length; i++) {
-          if (datasets[i].id === dataID) {
+          if (datasets[i].id == dataID) {
             assetDataset.push(datasets[i]);
             break;
           }
@@ -136,24 +139,24 @@ viewer.camera.moveEnd.addEventListener(() => {
                       if (
                         tilesets[selectedData.asset.id] &&
                         tilesets[selectedData.asset.id][
-                          new Date(selectedData.date)
+                          selectedData.id
                         ]
                       ) {
                         if (
                           Array.isArray(
                             tilesets[selectedData.asset.id][
-                              new Date(selectedData.date)
+                              selectedData.id
                             ]
                           )
                         ) {
                           tilesets[selectedData.asset.id][
-                            new Date(selectedData.date)
+                            selectedData.id
                           ].map((tileset) => {
                             tileset.show = false;
                           });
                         } else {
                           tilesets[selectedData.asset.id][
-                            new Date(selectedData.date)
+                            selectedData.id
                           ].show = false;
                         }
                       }
@@ -225,13 +228,14 @@ viewer.camera.moveEnd.addEventListener(() => {
 
   if (viewMenu.length > 0) {
     Sandcastle.addToolbarMenu(viewMenu, "cam-toolbar");
+    // if (selectedIndex && !timeseriesInView) {
     if (selectedIndex) {
       document.getElementById("cam-toolbar").childNodes[0].selectedIndex =
         selectedIndex;
 
-      // if (selectedData && selectedData != viewMenu[selectedIndex].data) {
-      //   viewMenu[selectedIndex].onselect();
-      // }
+      if (selectedData && selectedData != viewMenu[selectedIndex].data) {
+        viewMenu[selectedIndex].onselect();
+      }
     } else {
       if (!timeseriesInView) {
         viewMenu[0].onselect();
@@ -243,61 +247,54 @@ viewer.camera.moveEnd.addEventListener(() => {
 viewer.clock.onTick.addEventListener((clock) => {
   var currentDate = Cesium.JulianDate.toDate(clock.currentTime);
   selectedAssetIDs.map((assetID) => {
-    if (tilesets[assetID]) {
-      var tilesetDates = Object.keys(tilesets[assetID])
-        .filter((k) => {
-          var selectedAssetDates = selectedDatasets
-            .filter(
-              (data) =>
-                new Date(data.date) != "Invalid Date" &&
-                data.asset.id == assetID &&
-                (data.type == "PointCloud" ||
-                  data.type == "EPTPointCloud" ||
-                  data.type === "ModelTileset")
-            )
-            .map((data) => new Date(data.date));
-          return !!selectedAssetDates.find((item) => {
-            return (
-              item.getTime() == new Date(k).getTime() ||
-              (selectedData &&
-                new Date(selectedData.date).getTime() == new Date(k).getTime())
-            );
-          });
-        })
-        .sort(function (a, b) {
-          return new Date(a).getTime() - new Date(b).getTime();
-        });
+    var timelineAssetDatasets = selectedDatasets
+      .filter(
+        (data) =>
+          new Date(data.date) != "Invalid Date" &&
+          data.asset.id == assetID &&
+          (data.type == "PointCloud" ||
+            data.type == "EPTPointCloud" ||
+            data.type === "ModelTileset")
+      )
 
-      for (var i = 0; i < tilesetDates.length; i++) {
-        if (
-          (i === 0 ||
-            new Date(tilesetDates[i]).getTime() <= currentDate.getTime()) &&
-          (i === tilesetDates.length - 1 ||
-            new Date(tilesetDates[i + 1]).getTime() > currentDate.getTime())
-        ) {
-          if (Array.isArray(tilesets[assetID][tilesetDates[i]])) {
-            tilesets[assetID][tilesetDates[i]].map((tileset) => {
-              if (MSSE !== 0) {
-                tileset.show = true;
-              }
-            });
-          } else {
+    timelineAssetDatasets
+    .sort(function (a, b) {
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
+
+
+    for (var i = 0; i < timelineAssetDatasets.length; i++) {
+      if (
+        (i === 0 ||
+          new Date(timelineAssetDatasets[i].date).getTime() <= currentDate.getTime()) &&
+        (i === timelineAssetDatasets.length - 1 ||
+          new Date(timelineAssetDatasets[i + 1].date).getTime() > currentDate.getTime())
+      ) {
+        if (Array.isArray(tilesets[assetID][timelineAssetDatasets[i].id])) {
+          tilesets[assetID][timelineAssetDatasets[i].id].map((tileset) => {
             if (MSSE !== 0) {
-              tilesets[assetID][tilesetDates[i]].show = true;
+              tileset.show = true;
+            }
+          });
+        } else {
+          if (MSSE !== 0) {
+            if(tilesets[assetID][timelineAssetDatasets[i].id]){
+              tilesets[assetID][timelineAssetDatasets[i].id].show = true;
             }
           }
+        }
+      } else {
+        if (Array.isArray(tilesets[assetID][timelineAssetDatasets[i].id])) {
+          tilesets[assetID][timelineAssetDatasets[i].id].map((tileset) => {
+            tileset.show = false;
+          });
         } else {
-          if (Array.isArray(tilesets[assetID][tilesetDates[i]])) {
-            tilesets[assetID][tilesetDates[i]].map((tileset) => {
-              tileset.show = false;
-            });
-          } else {
-            tilesets[assetID][tilesetDates[i]].show = false;
-          }
+          tilesets[assetID][timelineAssetDatasets[i].id].show = false;
         }
       }
     }
-  });
+  })
+    
   if (lastCurrentTime) {
     var noon = new Date(
       lastCurrentTime.getFullYear(),

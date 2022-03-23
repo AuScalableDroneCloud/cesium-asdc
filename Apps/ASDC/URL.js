@@ -10,6 +10,7 @@ export const findAssetAndDataFromUrl = () => {
     match[1].toUpperCase() !== "ASDC" &&
     match[1].toLowerCase() != "asdc.html"
   ) {
-    setSelectedDataIDs(match[1].split("&").map((id) => parseInt(id)));
+    // setSelectedDataIDs(match[1].split("&").map((id) => parseInt(id)));
+    setSelectedDataIDs(match[1].split("&").map((id) => id));
   }
 };

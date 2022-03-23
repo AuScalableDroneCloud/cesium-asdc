@@ -7,8 +7,15 @@ RUN apt install -y nodejs
 WORKDIR /app
 COPY package.json /app
 RUN npm install
-RUN npm install ept-tools -g
+
 COPY . /app
+
+WORKDIR /app/ept-tools-mod
+RUN npm install
+RUN npm run build
+
+WORKDIR /app
 RUN node ./node_modules/webpack/bin/webpack.js --mode production
 EXPOSE 8080
-CMD ept serve & node server.cjs --production
+EXPOSE 3000
+CMD  node ./ept-tools-mod/lib/app/index.js serve & node server.cjs --production

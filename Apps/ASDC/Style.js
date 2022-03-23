@@ -11,9 +11,9 @@ import {
 export const applyStyle = (schemaName) => {
   selectedAssetIDs.map((assetID) => {
     if (!tilesets[assetID]) return;
-    var tilesetDates = Object.keys(tilesets[assetID]);
-    for (var i = 0; i < tilesetDates.length; i++) {
-      var selectedTileset = tilesets[assetID][tilesetDates[i]];
+    var tilesetIDs = Object.keys(tilesets[assetID]);
+    for (var i = 0; i < tilesetIDs.length; i++) {
+      var selectedTileset = tilesets[assetID][tilesetIDs[i]];
       var schema;
       if (schemaName) {
         if (
@@ -63,8 +63,8 @@ export const applyStyle = (schemaName) => {
             schema.name === "Blue"
           ) {
             selectedTileset.style = new Cesium.Cesium3DTileStyle({
-              // color: `\${COLOR} * color('${schema.name.toLowerCase()}')`,
-              color: `rgba(\${COLOR}.r * 255,\${COLOR}.g* 255,\${COLOR}.b* 255,0.75)`,
+              color: `\${COLOR} * color('${schema.name.toLowerCase()}')`,
+              // color: `rgba(\${COLOR}.r * color('${schema.name.toLowerCase()}').r,\${COLOR}.g * color('${schema.name.toLowerCase()}').g,\${COLOR}.b * color('${schema.name.toLowerCase()}').b,1)`,
             });
           } else {
             selectedTileset.style = new Cesium.Cesium3DTileStyle({
@@ -139,15 +139,15 @@ export const applyAlpha = (evt, asset, data) => {
   var alpha = evt.target.value / 100;
 
   if (data.type === "PointCloud" || data.type === "EPTPointCloud") {
-    if (tilesets[asset.id] && tilesets[asset.id][new Date(data.date)]) {
-      tilesets[asset.id][new Date(data.date)].style =
+    if (tilesets[asset.id] && tilesets[asset.id][data.id]) {
+      tilesets[asset.id][data.id].style =
         new Cesium.Cesium3DTileStyle({
           color: `rgba(\${COLOR}.r * 255,\${COLOR}.g* 255,\${COLOR}.b* 255,${alpha})`,
         });
     }
   } else if (data.type === "ModelTileset") {
-    if (tilesets[asset.id] && tilesets[asset.id][new Date(data.date)]) {
-      tilesets[asset.id][new Date(data.date)].style =
+    if (tilesets[asset.id] && tilesets[asset.id][data.id]) {
+      tilesets[asset.id][data.id].style =
         new Cesium.Cesium3DTileStyle({
           color: `rgba(255, 255, 255, ${alpha})`,
         });

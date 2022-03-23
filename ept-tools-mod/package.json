@@ -1,0 +1,63 @@
+{
+  "name": "ept-tools",
+  "version": "0.0.13",
+  "description": "Entwine Point Tiles utility library",
+  "repository": "github:connormanning/ept-tools",
+  "main": "lib/index.js",
+  "bin": {
+    "ept": "lib/app/index.js"
+  },
+  "scripts": {
+    "build": "ttsc -p tsconfig.build.json && copyfiles -f src/lib/* lib/lib/",
+    "dev": "ts-node -r tsconfig-paths/register src/app/index.ts",
+    "lambda": "ncc build src/app/lambda.ts -o ./lambda && copyfiles -f src/lib/* lambda/lib/",
+    "lambda-zip": "(cd lambda && zip -r ../ept-tools.zip .)",
+    "prepublish": "$npm_execpath build",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@koa/router": "^10.0.0",
+    "ajv": "^7.1.1",
+    "fatproj": "^0.0.2",
+    "forager": "^0.0.8",
+    "fs-extra": "^9.1.0",
+    "koa": "^2.13.1",
+    "koa-logger": "^3.2.1",
+    "log-symbols": "^4.0.0",
+    "node-fetch": "^2.6.1",
+    "protopath": "^0.0.0",
+    "querystring": "^0.2.1",
+    "yargs": "^17.0.1",
+    "zlib": "^1.0.5",
+    "zstd-codec": "^0.1.2"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.72",
+    "@types/fs-extra": "^9.0.7",
+    "@types/jest": "^26.0.20",
+    "@types/koa": "^2.13.0",
+    "@types/koa-logger": "^3.1.1",
+    "@types/koa__router": "^8.0.4",
+    "@types/node": "^14.14.31",
+    "@types/node-fetch": "^2.5.8",
+    "@types/yargs": "^16.0.1",
+    "@vercel/ncc": "^0.27.0",
+    "@zerollup/ts-transform-paths": "^1.7.18",
+    "aws-lambda": "^1.0.6",
+    "copyfiles": "^2.4.1",
+    "husky": "^5.1.1",
+    "jest": "^26.6.3",
+    "prettier": "^2.2.1",
+    "pretty-quick": "^3.1.0",
+    "ts-jest": "^26.5.2",
+    "ts-node": "^9.1.1",
+    "tsconfig-paths": "^3.9.0",
+    "ttypescript": "^1.5.12",
+    "typescript": "4.2.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
+  }
+}

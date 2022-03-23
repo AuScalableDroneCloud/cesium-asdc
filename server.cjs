@@ -118,14 +118,6 @@
   ];
   app.get(knownTilesetFormats, checkGzipAndNext);
 
-  // if(!argv.production){
-  // app.get("/cesium/Build/Cesium/Workers/cesiumWorkerBootstrapper.js", function (req, res, next) {
-  //   res.set('Cache-control', `no-store`);
-  //   res.sendFile(
-  //     path.join(__dirname, "node_modules", "cesium","Build","Cesium","Workers","cesiumWorkerBootstrapper.js")
-  //   );
-  // });
-
   app.use(
     "/cesium/Build/Cesium/Workers",
     express.static(
@@ -152,7 +144,6 @@
       extensions: ["html", "htm"],
     })
   );
-  // }
 
   app.use(
     "/cesium",
@@ -162,6 +153,10 @@
         extensions: ["html", "htm"],
       }
     )
+  );
+
+  app.use('/cesium/proj4', 
+    express.static(path.join(__dirname, "node_modules", "proj4", "dist"))
   );
 
   app.get("/cesium/Apps/ASDC/:dataIDs", function (req, res, next) {
