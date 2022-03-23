@@ -244,7 +244,7 @@ export const setupSidebar = (uploads) => {
               });
 
               var projectDivs = {};
-              if (Array.isArray(odmProjects)) {
+              if (!uploads && Array.isArray(odmProjects)) {
                 odmProjects.map(odmProject => {
                   projectDivs[odmProject.id] = createAccordion(odmProject, 18);
                   projectDivs[odmProject.id].id = `project-${odmProject.id}`;
@@ -413,14 +413,16 @@ export const setupSidebar = (uploads) => {
                   });
                 }
 
-                if (asset.data && asset.data.length > 1) {
-                  var timeseriesDiv = createTimeseriesDiv(asset, assetCheckbox, checkboxes, uploads);
-                  datesPanelDiv.appendChild(timeseriesDiv);
-                }
+                if (asset.data) {
+                  if(asset.data.length > 1){
+                    var timeseriesDiv = createTimeseriesDiv(asset, assetCheckbox, checkboxes, uploads);
+                    datesPanelDiv.appendChild(timeseriesDiv);
+                  }
 
-                dateDivs.map(div => {
-                  datesPanelDiv.appendChild(div);
-                })
+                  dateDivs.map(div => {
+                    datesPanelDiv.appendChild(div);
+                  })
+                }    
 
                 assetCheckbox.onchange = (e) => {
                   handleAssetCheckboxChange(checkboxes, assetCheckbox, asset, uploads);
