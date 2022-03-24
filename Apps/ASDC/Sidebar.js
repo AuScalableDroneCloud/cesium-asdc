@@ -17,6 +17,8 @@ import {
   entities,
   selectedAssetIDs,
   imageryLayers,
+  categories,
+  odmProjects
 } from "./State.js";
 import { loadAsset, loadData, syncTimeline } from "./Datasets.js";
 import { indexFile, pcFormats, processingAPI } from "./Constants.js";
@@ -24,539 +26,323 @@ import { closeGraphModal } from "./Graphs.js";
 import { applyAlpha } from "./Style.js";
 
 export const setupSidebar = (uploads) => {
-  fetch(indexFile, { cache: "no-store" })
-    .then((response) => response.json())
-    .then((jsonResponse) => {
-      fetch("https://asdc.cloud.edu.au/api/projects/?ordering=-created_at", {
-        cache: "no-store",
-        credentials: 'include'
-      }).then(response => response.json())
-        .then((odmProjects) => {
-          var odmAssets = [];
-          var odmDatasets = [];
-          var taskInfoPromises = [];
-          var metaDataPromises = [];
-          if (Array.isArray(odmProjects)) {
-            odmProjects.map((project) => {
-              taskInfoPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/?ordering=-created_at`, {
-                cache: "no-store",
-                credentials: 'include'
-              }).then(response => response.json()));
-            })
-          }
-          var lastAssetIndex = jsonResponse["assets"][jsonResponse["assets"].length - 1].id;
-          Promise.all(taskInfoPromises).then((taskInfos, taskIndex) => {
-            if (Array.isArray(odmProjects)) {
-              odmProjects.map((project, projectIndex) => {
-                taskInfos[projectIndex].map(task => {
-                  if (task.available_assets.includes("georeferenced_model.laz")) {
-                    metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`, {
-                      cache: "no-store",
-                      credentials: 'include'
-                    }).then(response => response.json()).catch((e)=>{
-                      console.log(e);
-                    }))
-                  }
-                  if (task.available_assets.includes("orthophoto.tif")) {
-                    metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/orthophoto/metadata`, {
-                      cache: "no-store",
-                      credentials: 'include'
-                    }).then(response => response.json()).catch((e)=>{
-                      console.log(e);
-                    }))
-                  }
-                  if (task.available_assets.includes("dsm.tif")) {
-                    metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dsm/metadata`, {
-                      cache: "no-store",
-                      credentials: 'include'
-                    }).then(response => response.json()).catch((e)=>{
-                      console.log(e);
-                    }))
-                  }
-                  if (task.available_assets.includes("dtm.tif")) {
-                    metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dtm/metadata`, {
-                      cache: "no-store",
-                      credentials: 'include'
-                    }).then(response => response.json()).catch((e)=>{
-                      console.log(e);
-                    }))
-                  }
-                })
-              })
-            }
+  if (!assets) return;
 
-            Promise.all(metaDataPromises).then((metadata) => {
-              var metadataIndex = 0;
+  var sidebarDataButtons = document.getElementById("sidebar-data-buttons");
+  while (sidebarDataButtons.firstChild) {
+    sidebarDataButtons
+      .removeChild(
+        sidebarDataButtons.firstChild
+      );
+  }
 
-              if (Array.isArray(odmProjects)) {
-                odmProjects.map((project, projectIndex) => {
-                  taskInfos[projectIndex].map((task, taskIndex) => {
-                    var projectData = [];
-                    if (task.available_assets.includes("georeferenced_model.laz")) {
-                      if (metadata[metadataIndex]){
-                        var sourcePos = [];
-                        sourcePos[0] = (metadata[metadataIndex].bounds[0] + metadata[metadataIndex].bounds[3]) / 2;
-                        sourcePos[1] = (metadata[metadataIndex].bounds[1] + metadata[metadataIndex].bounds[4]) / 2;
-                        sourcePos[2] = (metadata[metadataIndex].bounds[2] + metadata[metadataIndex].bounds[5]) / 2;
-                        var pos = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), sourcePos);
+  createMarkersDataSource();
 
-                        var nw = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), [metadata[metadataIndex].bounds[0], metadata[metadataIndex].bounds[1]])
-                        var se = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), [metadata[metadataIndex].bounds[3], metadata[metadataIndex].bounds[4]])
+  var categoryDivs = {};
+  var assetDivs = {};
 
-                        var rectangle = new Cesium.Rectangle.fromDegrees(
-                          nw[0],
-                          nw[1],
-                          se[0],
-                          se[1]
-                        );
-
-                        const cartographics = [
-                          Cesium.Rectangle.center(rectangle),
-                          Cesium.Rectangle.southeast(rectangle),
-                          Cesium.Rectangle.southwest(rectangle),
-                          Cesium.Rectangle.northeast(rectangle),
-                          Cesium.Rectangle.northwest(rectangle),
-                        ];
-
-                        var cartesians =
-                          Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-                            cartographics
-                          );
-                        var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
-
-                        odmDatasets.push({
-                          id: task.id + "-pc",
-                          type: "EPTPointCloud",
-                          name: "Point Cloud",
-                          url: `https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`,
-                          asset: odmAssets[odmAssets.length - 1],
-                          "position": {
-                            "lng": pos[0],
-                            "lat": pos[1],
-                            "height": pos[2]
-                          },
-                          boundingSphereRadius: boundingSphere.radius
-                        })
-                        projectData.push(task.id + "-pc");
-                      }
-                      metadataIndex++;
-                    }
-
-                    if (task.available_assets.includes("orthophoto.tif")) {
-                      if (metadata[metadataIndex]){
-                        odmDatasets.push({
-                          id: task.id + "-op",
-                          type: "Imagery",
-                          name: "Orthophoto",
-                          url: `https://asdc.cloud.edu.au${metadata[metadataIndex].tiles[0]}?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`,
-                          asset: odmAssets[odmAssets.length - 1],
-                          bounds: metadata[metadataIndex].bounds.value,
-                          minzoom: metadata[metadataIndex].minzoom,
-                          maxzoom: metadata[metadataIndex].maxzoom,
-                          position: {
-                            "lng": metadata[metadataIndex].center[0],
-                            "lat": metadata[metadataIndex].center[1],
-                            "height": metadata[metadataIndex].center[2],//zoom level?
-                          }
-                        })
-                        projectData.push(task.id + "-op");
-                      }
-                      metadataIndex++;
-                    }
-                    if (task.available_assets.includes("dsm.tif")) {
-                      if (metadata[metadataIndex]){
-                        odmDatasets.push({
-                          id: task.id + "-dsm",
-                          type: "Imagery",
-                          name: "DSM",
-                          url: `https://asdc.cloud.edu.au/${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`,
-                          asset: odmAssets[odmAssets.length - 1],
-                          bounds: metadata[metadataIndex].bounds.value,
-                          minzoom: metadata[metadataIndex].minzoom,
-                          maxzoom: metadata[metadataIndex].maxzoom,
-                          position: {
-                            "lng": metadata[metadataIndex].center[0],
-                            "lat": metadata[metadataIndex].center[1],
-                            "height": metadata[metadataIndex].center[2],//zoom level?
-                          }
-                        })
-                        projectData.push(task.id + "-dsm");
-                      }
-                      metadataIndex++;
-                    }
-                    if (task.available_assets.includes("dtm.tif")) {
-                      if (metadata[metadataIndex]){
-                        odmDatasets.push({
-                          id: task.id + "-dtm",
-                          type: "Imagery",
-                          name: "DTM",
-                          url: `https://asdc.cloud.edu.au/${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`,
-                          asset: odmAssets[odmAssets.length - 1],
-                          bounds: metadata[metadataIndex].bounds.value,
-                          minzoom: metadata[metadataIndex].minzoom,
-                          maxzoom: metadata[metadataIndex].maxzoom,
-                          position: {
-                            "lng": metadata[metadataIndex].center[0],
-                            "lat": metadata[metadataIndex].center[1],
-                            "height": metadata[metadataIndex].center[2],//zoom level?
-                          }
-                        })
-                        projectData.push(task.id + "-dtm");
-                      }
-                      metadataIndex++;
-                    }
-                    if (projectData.length > 0) {
-                      odmAssets.push({
-                        "id": ++lastAssetIndex,
-                        "name": task.name,
-                        "status": "active",
-                        "categoryID": -1,
-                        "data": projectData,
-                        project: project.id
-                      })
-                    }
-                  })
-                })
-
-              }
-              // setAssets(jsonResponse["assets"]);
-              setAssets([...jsonResponse["assets"], ...odmAssets]);
-              // setDatasets(jsonResponse["datasets"]);
-              setDatasets([...jsonResponse["datasets"], ...odmDatasets]);
-
-              if (!assets) return;
-
-              var sidebarDataButtons = document.getElementById("sidebar-data-buttons");
-              while (sidebarDataButtons.firstChild) {
-                sidebarDataButtons
-                  .removeChild(
-                    sidebarDataButtons.firstChild
-                  );
-              }
-
-              createMarkersDataSource();
-
-              var categories = {};
-              var assetDivs = {};
-
-              if (Array.isArray(odmProjects)) {
-                var sidebarCategories = jsonResponse["categories"];
-                sidebarCategories.splice(sidebarCategories.length - 2, 0, {
-                  id: -1,
-                  name: "WebODM Projects"
-                });
-              }
-
-              jsonResponse["categories"].map((cat) => {
-                categories[cat.id] = createAccordion(cat);
-                categories[cat.id].id = `category-${cat.id}`;
-                if (!uploads && cat.id !== 6) {
-                  //Uploads
-                  sidebarDataButtons.appendChild(categories[cat.id]);
-                  var accordionPanelDiv = document.createElement("div");
-                  accordionPanelDiv.className = "sidebar-accordion-panel";
-                  sidebarDataButtons.appendChild(accordionPanelDiv);
-                }
-              });
-
-              var projectDivs = {};
-              if (!uploads && Array.isArray(odmProjects)) {
-                odmProjects.map(odmProject => {
-                  projectDivs[odmProject.id] = createAccordion(odmProject, 18);
-                  projectDivs[odmProject.id].id = `project-${odmProject.id}`;
-                  var catPanelDiv = categories[-1].nextElementSibling;
-                  catPanelDiv.appendChild(projectDivs[odmProject.id]);
-
-                  var projectsPanelDiv = document.createElement("div");
-                  projectsPanelDiv.className = "sidebar-accordion-panel";
-                  catPanelDiv.appendChild(projectsPanelDiv);
-                })
-              }
-
-              //Add uploads accordion last to the list
-              if (uploads) {
-                var uploadAccordion = categories[6];
-                sidebarDataButtons.appendChild(uploadAccordion);
-                var accordionPanelDiv = document.createElement("div");
-                accordionPanelDiv.className = "sidebar-accordion-panel";
-                sidebarDataButtons.appendChild(accordionPanelDiv);
-              }
-
-              assets.map((asset) => {
-                if (!uploads && asset.categoryID == 6) return;
-                if (uploads && asset.categoryID != 6) return;
-
-                if (asset.categoryID == -1) {
-                  var accordionDiv = projectDivs[asset.project];
-                  var accordionPanelDiv = projectDivs[asset.project].nextElementSibling;
-                } else {
-                  var accordionDiv = categories[asset.categoryID];
-                  var accordionPanelDiv = accordionDiv.nextElementSibling;
-                }
-
-                var assetDiv = createAccordion(asset, asset.categoryID == -1 ? 36 : 18)
-
-                var assetCheckbox = document.createElement("input");
-                assetCheckbox.id = `assetCheckbox-${asset.id}`;
-                assetCheckbox.type = "checkbox";
-                assetCheckbox.style.float = "left";
-                assetCheckbox.style.margin = "0 5px 0 0";
-
-                assetDiv.firstChild.prepend(assetCheckbox);
-
-                var datesPanelDiv = document.createElement("div");
-                datesPanelDiv.className = "sidebar-accordion-panel";
-
-                if (asset.data) {
-                  var checkboxes = [];
-                  var assetDatasets = [];
-                  var dateDivs = [];
-                  asset.data.map((dataID, index) => {
-                    var data = dataID;
-                    for (var i = 0; i < datasets.length; i++) {
-                      if (datasets[i].id == dataID) {
-                        data = datasets[i];
-                        data.asset = asset;
-                        assetDatasets.push(data);
-                        break;
-                      }
-                    }
-
-                    var dateDiv = document.createElement("div");
-                    dateDiv.className = "sidebar-item";
-                    dateDiv.id = `dataButton-${data.id}`;
-
-                    var checkbox = document.createElement("input");
-                    checkbox.id = `dataCheckbox-${data.id}`;
-                    checkbox.type = "checkbox";
-                    checkbox.style.float = "left";
-                    checkbox.style.margin = "0 5px 0 0";
-                    checkbox.checked =
-                      selectedDataIDs && (selectedDataIDs.includes(data.id.toString()));
-                    checkboxes.push(checkbox);
-
-                    assetCheckbox.checked = checkboxes.every((cb) => cb.checked);
-                    assetCheckbox.indeterminate =
-                      !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
-
-                    checkbox.onchange = (e) => {
-                      handleDataCheckboxChange(checkbox, assetCheckbox, checkboxes, asset, data, uploads)
-                    };
-
-                    var dateContentDiv = document.createElement("div");
-                    if (asset.categoryID == -1) {
-                      dateContentDiv.style.padding = "0 54px";
-                    } else {
-                      dateContentDiv.style.padding = "0 36px";
-                    }
-                    dateContentDiv.style.display = "flex";
-
-                    var dateContentDivText = document.createElement("div");
-                    dateContentDivText.style["flex-grow"] = 1;
-                    if (data.date) {
-                      var date = new Date(data.date);
-                      dateContentDivText.innerHTML =
-                        (date.toString() !== "Invalid Date"
-                          ? new Date(data.date).toLocaleDateString("en-au", {
-                            year: "numeric",
-                            month: "numeric",
-                            day: "numeric",
-                          })
-                          : data.date) + (data.name ? " - " + data.name : "");
-                    } else {
-                      dateContentDivText.innerHTML = data.name ? data.name : "No Date";
-                    }
-
-                    dateContentDiv.appendChild(checkbox);
-                    dateContentDiv.appendChild(dateContentDivText);
-                    dateDiv.appendChild(dateContentDiv);
-                    dateDivs.push(dateDiv);
-
-                    if (data.type === "ImageSeries") {
-                      var zoomButton = createZoomButton(asset, data);
-                      dateContentDiv.appendChild(zoomButton);
-                    }
-
-                    dateDiv.onclick = (e) => {
-                      if (e && (e.target === checkbox || e.target === zoomButton)) {
-                        return;
-                      }
-                      checkbox.checked = true;
-                      assetCheckbox.checked = checkboxes.every((cb) => cb.checked);
-                      assetCheckbox.indeterminate =
-                        !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
-                      if (!selectedDatasets.includes(data)) {
-                        selectedDatasets.push(data);
-                      }
-                      var dataIDs = "";
-                      var newDataIDs = [];
-                      selectedDatasets.map((d) => {
-                        newDataIDs.push(d.id);
-                      });
-
-                      newDataIDs.sort((a, b) => a - b);
-
-                      newDataIDs.map((id) => {
-                        dataIDs += id + "&";
-                      });
-
-                      dataIDs = dataIDs.slice(0, dataIDs.length - 1);
-
-                      window.history.pushState(
-                        "",
-                        "",
-                        uploads
-                          ? `/cesium/Apps/ASDC/Uploads/${dataIDs}`
-                          : `/cesium/Apps/ASDC/${dataIDs}`
-                      );
-
-                      loadData(asset, data, true, true, true);
-                    };
-
-                    if (data.type != "Influx") {
-                      var opacitySliderBtn = createOpacitySliderBtn(asset, data, dateDiv);
-                      dateContentDiv.appendChild(opacitySliderBtn);
-                    }
-
-                    if (
-                      data.source ||
-                      data.type === "Influx" ||
-                      data.type === "GeoJSON"
-                    ) {
-                      var downloadBtn = createDownloadBtn(asset, data, dateDiv, index);
-                      dateContentDiv.appendChild(downloadBtn);
-                    }
-                  });
-                }
-
-                if (asset.data) {
-                  if(asset.data.length > 1){
-                    var timeseriesDiv = createTimeseriesDiv(asset, assetCheckbox, checkboxes, uploads);
-                    datesPanelDiv.appendChild(timeseriesDiv);
-                  }
-
-                  dateDivs.map(div => {
-                    datesPanelDiv.appendChild(div);
-                  })
-                }    
-
-                assetCheckbox.onchange = (e) => {
-                  handleAssetCheckboxChange(checkboxes, assetCheckbox, asset, uploads);
-                };
-
-                accordionPanelDiv.appendChild(assetDiv);
-                accordionPanelDiv.appendChild(datesPanelDiv);
-
-                assetDivs[asset.id] = assetDiv;
-
-                //markers
-                if (assetDatasets && assetDatasets.length > 0) {
-                  assetDatasets.sort(function (a, b) {
-                    return new Date(a.date).getTime() - new Date(b.date).getTime();
-                  });
-
-                  if (assetDatasets[0].position) {
-                    var data = assetDatasets[0];
-
-                    var position = Cesium.Cartesian3.fromDegrees(
-                      data["position"]["lng"],
-                      data["position"]["lat"]
-                    );
-
-                    if (!viewer.dataSources.contains(markersDataSource)) {
-                      markersDataSource.entities.add({
-                        position: position,
-                        billboard: {
-                          image: pinBuilder
-                            .fromColor(Cesium.Color.fromCssColorString("#5B8B51"), 48)
-                            .toDataURL(),
-                          verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                          disableDepthTestDistance: Number.POSITIVE_INFINITY,
-                          heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-                          distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
-                            data.boundingSphereRadius
-                              ? data.boundingSphereRadius * 4
-                              : 2500,
-                            Number.MAX_VALUE
-                          ),
-                        },
-                        id: "marker_" + asset.id,
-                      });
-                    }
-                  }
-                }
-              });
-
-              markersDataSource.clustering.clusterEvent.addEventListener(function (
-                clusteredEntities,
-                cluster
-              ) {
-                cluster.billboard.id = clusteredEntities[0];
-              });
-
-              if (!viewer.dataSources.contains(markersDataSource)) {
-                viewer.dataSources.add(markersDataSource);
-
-                setTimeout(() => {
-                  markersDataSource.clustering.pixelRange = 0;
-                }, 0);
-              }
-              if (selectedDataIDs) {
-                var assetIDs = [];
-                var selectedCats = [];
-                var selectedProjects = [];
-                var newSelectedDatasets = [];
-                selectedDataIDs.map((dataID, index) => {
-                  var asset;
-                  for (var i = 0; i < assets.length; i++) {
-                    if (assets[i].data && (!!assets[i].data.find(d => d.toString() == dataID))) {
-                      asset = assets[i];
-                      if (!assetIDs.includes(assets[i]["id"])) {
-                        assetIDs.push(assets[i]["id"]);
-                      }
-                      if (!selectedCats.includes(asset.categoryID)) {
-                        selectedCats.push(asset.categoryID);
-                      }
-
-                      if (asset.categoryID == -1) {
-                        if (!selectedProjects.includes(asset.project)) {
-                          selectedProjects.push(asset.project);
-                        }
-                      }
-                      break;
-                    }
-                  }
-                  for (var i = 0; i < datasets.length; i++) {
-                    if (datasets[i].id == dataID) {
-                      newSelectedDatasets.push(datasets[i]);
-                      loadData(asset, datasets[i], index == 0, false, true);
-                      break;
-                    }
-                  }
-                });
-
-                selectedCats.map((c) => {
-                  categories[c].onclick();
-                });
-
-                selectedProjects.map(p => {
-                  projectDivs[p].onclick();
-                })
-
-                assetIDs.map((a) => {
-                  assetDivs[a].onclick();
-                });
-
-                setSelectedDatasets(newSelectedDatasets);
-                syncTimeline(true);
-
-                setSelectedAssetIDs(assetIDs);
-              }
-            });
-          })
-
-        })
+  if (Array.isArray(odmProjects)) {
+    categories.splice(categories.length - 2, 0, {
+      id: -1,
+      name: "WebODM Projects"
     });
+  }
+
+  categories.map((cat) => {
+    categoryDivs[cat.id] = createAccordion(cat);
+    categoryDivs[cat.id].id = `category-${cat.id}`;
+    //Uploads page
+    if ((!uploads && cat.id !== 6)|| (uploads && cat.id == 6)) {
+      sidebarDataButtons.appendChild(categoryDivs[cat.id]);
+      var accordionPanelDiv = document.createElement("div");
+      accordionPanelDiv.className = "sidebar-accordion-panel";
+      sidebarDataButtons.appendChild(accordionPanelDiv);
+    }
+  });
+
+  var projectDivs = {};
+  if (!uploads && Array.isArray(odmProjects)) {
+    odmProjects.map(odmProject => {
+      projectDivs[odmProject.id] = createAccordion(odmProject, 18);
+      projectDivs[odmProject.id].id = `project-${odmProject.id}`;
+      var catPanelDiv = categoryDivs[-1].nextElementSibling;
+      catPanelDiv.appendChild(projectDivs[odmProject.id]);
+
+      var projectsPanelDiv = document.createElement("div");
+      projectsPanelDiv.className = "sidebar-accordion-panel";
+      catPanelDiv.appendChild(projectsPanelDiv);
+    })
+  }
+
+  assets.map((asset) => {
+    if (!uploads && asset.categoryID == 6) return;
+    if (uploads && asset.categoryID != 6) return;
+
+    if (asset.categoryID == -1) {
+      var accordionDiv = projectDivs[asset.project];
+      var accordionPanelDiv = projectDivs[asset.project].nextElementSibling;
+    } else {
+      var accordionDiv = categoryDivs[asset.categoryID];
+      var accordionPanelDiv = accordionDiv.nextElementSibling;
+    }
+
+    var assetDiv = createAccordion(asset, asset.categoryID == -1 ? 36 : 18)
+
+    var assetCheckbox = document.createElement("input");
+    assetCheckbox.id = `assetCheckbox-${asset.id}`;
+    assetCheckbox.type = "checkbox";
+    assetCheckbox.style.float = "left";
+    assetCheckbox.style.margin = "0 5px 0 0";
+
+    assetDiv.firstChild.prepend(assetCheckbox);
+
+    var datesPanelDiv = document.createElement("div");
+    datesPanelDiv.className = "sidebar-accordion-panel";
+
+    if (asset.data) {
+      var checkboxes = [];
+      var assetDatasets = [];
+      var dateDivs = [];
+      asset.data.map((dataID, index) => {
+        var data = dataID;
+        for (var i = 0; i < datasets.length; i++) {
+          if (datasets[i].id == dataID) {
+            data = datasets[i];
+            data.asset = asset;
+            assetDatasets.push(data);
+            break;
+          }
+        }
+
+        var dateDiv = document.createElement("div");
+        dateDiv.className = "sidebar-item";
+        dateDiv.id = `dataButton-${data.id}`;
+
+        var checkbox = document.createElement("input");
+        checkbox.id = `dataCheckbox-${data.id}`;
+        checkbox.type = "checkbox";
+        checkbox.style.float = "left";
+        checkbox.style.margin = "0 5px 0 0";
+        checkbox.checked =
+          selectedDataIDs && (selectedDataIDs.includes(data.id.toString()));
+        checkboxes.push(checkbox);
+
+        assetCheckbox.checked = checkboxes.every((cb) => cb.checked);
+        assetCheckbox.indeterminate =
+          !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
+
+        checkbox.onchange = (e) => {
+          handleDataCheckboxChange(checkbox, assetCheckbox, checkboxes, asset, data, uploads)
+        };
+
+        var dateContentDiv = document.createElement("div");
+        if (asset.categoryID == -1) {
+          dateContentDiv.style.padding = "0 54px";
+        } else {
+          dateContentDiv.style.padding = "0 36px";
+        }
+        dateContentDiv.style.display = "flex";
+
+        var dateContentDivText = document.createElement("div");
+        dateContentDivText.style["flex-grow"] = 1;
+        if (data.date) {
+          var date = new Date(data.date);
+          dateContentDivText.innerHTML =
+            (date.toString() !== "Invalid Date"
+              ? new Date(data.date).toLocaleDateString("en-au", {
+                year: "numeric",
+                month: "numeric",
+                day: "numeric",
+              })
+              : data.date) + (data.name ? " - " + data.name : "");
+        } else {
+          dateContentDivText.innerHTML = data.name ? data.name : "No Date";
+        }
+
+        dateContentDiv.appendChild(checkbox);
+        dateContentDiv.appendChild(dateContentDivText);
+        dateDiv.appendChild(dateContentDiv);
+        dateDivs.push(dateDiv);
+
+        if (data.type === "ImageSeries") {
+          var zoomButton = createZoomButton(asset, data);
+          dateContentDiv.appendChild(zoomButton);
+        }
+
+        dateDiv.onclick = (e) => {
+          if (e && (e.target === checkbox || e.target === zoomButton)) {
+            return;
+          }
+          checkbox.checked = true;
+          assetCheckbox.checked = checkboxes.every((cb) => cb.checked);
+          assetCheckbox.indeterminate =
+            !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
+          if (!selectedDatasets.includes(data)) {
+            selectedDatasets.push(data);
+          }
+          var dataIDs = "";
+          var newDataIDs = [];
+          selectedDatasets.map((d) => {
+            newDataIDs.push(d.id);
+          });
+
+          newDataIDs.sort((a, b) => a - b);
+
+          newDataIDs.map((id) => {
+            dataIDs += id + "&";
+          });
+
+          dataIDs = dataIDs.slice(0, dataIDs.length - 1);
+
+          window.history.pushState(
+            "",
+            "",
+            uploads
+              ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search
+              : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search
+          );
+
+          loadData(asset, data, true, true, true);
+        };
+
+        if (data.type != "Influx") {
+          var opacitySliderBtn = createOpacitySliderBtn(asset, data, dateDiv);
+          dateContentDiv.appendChild(opacitySliderBtn);
+        }
+
+        if (
+          data.source ||
+          data.type === "Influx" ||
+          data.type === "GeoJSON"
+        ) {
+          var downloadBtn = createDownloadBtn(asset, data, dateDiv, index);
+          dateContentDiv.appendChild(downloadBtn);
+        }
+      });
+
+      if(asset.data.length > 1){
+        var timeseriesDiv = createTimeseriesDiv(asset, assetCheckbox, checkboxes, uploads);
+        datesPanelDiv.appendChild(timeseriesDiv);
+      }
+
+      dateDivs.map(div => {
+        datesPanelDiv.appendChild(div);
+      })
+    }   
+
+    assetCheckbox.onchange = (e) => {
+      handleAssetCheckboxChange(checkboxes, assetCheckbox, asset, uploads);
+    };
+
+    accordionPanelDiv.appendChild(assetDiv);
+    accordionPanelDiv.appendChild(datesPanelDiv);
+
+    assetDivs[asset.id] = assetDiv;
+
+    //markers
+    if (assetDatasets && assetDatasets.length > 0) {
+      assetDatasets.sort(function (a, b) {
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
+      });
+
+      if (assetDatasets[0].position) {
+        var data = assetDatasets[0];
+
+        var position = Cesium.Cartesian3.fromDegrees(
+          data["position"]["lng"],
+          data["position"]["lat"]
+        );
+
+        if (!viewer.dataSources.contains(markersDataSource)) {
+          markersDataSource.entities.add({
+            position: position,
+            billboard: {
+              image: pinBuilder
+                .fromColor(Cesium.Color.fromCssColorString("#5B8B51"), 48)
+                .toDataURL(),
+              verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+              disableDepthTestDistance: Number.POSITIVE_INFINITY,
+              heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+              distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
+                data.boundingSphereRadius
+                  ? data.boundingSphereRadius * 4
+                  : 2500,
+                Number.MAX_VALUE
+              ),
+            },
+            id: "marker_" + asset.id,
+          });
+        }
+      }
+    }
+  });
+
+  markersDataSource.clustering.clusterEvent.addEventListener(function (
+    clusteredEntities,
+    cluster
+  ) {
+    cluster.billboard.id = clusteredEntities[0];
+  });
+
+  if (!viewer.dataSources.contains(markersDataSource)) {
+    viewer.dataSources.add(markersDataSource);
+
+    setTimeout(() => {
+      markersDataSource.clustering.pixelRange = 0;
+    }, 0);
+  }
+  if (selectedDataIDs) {
+    var assetIDs = [];
+    var selectedCats = [];
+    var selectedProjects = [];
+    var newSelectedDatasets = [];
+    selectedDataIDs.map((dataID, index) => {
+      var asset;
+      for (var i = 0; i < assets.length; i++) {
+        if (assets[i].data && (!!assets[i].data.find(d => d.toString() == dataID))) {
+          asset = assets[i];
+          if (!assetIDs.includes(assets[i]["id"])) {
+            assetIDs.push(assets[i]["id"]);
+          }
+          if (!selectedCats.includes(asset.categoryID)) {
+            selectedCats.push(asset.categoryID);
+          }
+
+          if (asset.categoryID == -1) {
+            if (!selectedProjects.includes(asset.project)) {
+              selectedProjects.push(asset.project);
+            }
+          }
+          break;
+        }
+      }
+
+      for (var i = 0; i < datasets.length; i++) {
+        if (datasets[i].id == dataID) {
+          newSelectedDatasets.push(datasets[i]);
+          loadData(asset, datasets[i], index == 0, false, true);
+          break;
+        }
+      }
+    });
+
+    selectedCats.map((c) => {
+      categoryDivs[c].onclick();
+    });
+
+    selectedProjects.map(p => {
+      projectDivs[p].onclick();
+    })
+
+    assetIDs.map((a) => {
+      assetDivs[a].onclick();
+    });
+
+    setSelectedDatasets(newSelectedDatasets);
+    syncTimeline(true);
+
+    setSelectedAssetIDs(assetIDs);
+  }
 };
 
 export const downloadFile = (asset, data, index, format) => {
@@ -897,8 +683,8 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
       "",
       "",
       uploads
-        ? `/cesium/Apps/ASDC/Uploads/${dataIDs}`
-        : `/cesium/Apps/ASDC/${dataIDs}`
+        ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search
+        : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search
     );
 
     loadData(asset, data, true, false, true);
@@ -981,8 +767,8 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
       "",
       "",
       uploads
-        ? `/cesium/Apps/ASDC/Uploads/${dataIDs}`
-        : `/cesium/Apps/ASDC/${dataIDs}`
+        ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search
+        : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search
     );
 
     if (!selectedDatasets.find((d) => d.asset === asset)) {
@@ -1055,8 +841,8 @@ const handleAssetCheckboxChange = (checkboxes, assetCheckbox, asset, uploads) =>
       "",
       "",
       uploads
-        ? `/cesium/Apps/ASDC/Uploads/${dataIDs}`
-        : `/cesium/Apps/ASDC/${dataIDs}`
+        ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search
+        : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search
     );
     loadAsset(asset, false, true);
   } else {
@@ -1121,8 +907,8 @@ const handleAssetCheckboxChange = (checkboxes, assetCheckbox, asset, uploads) =>
       "",
       "",
       uploads
-        ? `/cesium/Apps/ASDC/Uploads/${dataIDs.join("&")}`
-        : `/cesium/Apps/ASDC/${dataIDs.join("&")}`
+        ? `/cesium/Apps/ASDC/Uploads/${dataIDs.join("&")}` + window.location.search
+        : `/cesium/Apps/ASDC/${dataIDs.join("&")}` + window.location.search
     );
 
     if (
@@ -1219,8 +1005,8 @@ const createTimeseriesDiv = (asset, assetCheckbox, checkboxes, uploads) => {
       "",
       "",
       uploads
-        ? `/cesium/Apps/ASDC/Uploads/${dataIDs}`
-        : `/cesium/Apps/ASDC/${dataIDs}`
+        ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search
+        : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search
     );
     loadAsset(asset, true, true);
   };

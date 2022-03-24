@@ -1136,6 +1136,38 @@
     },
     {
       "id": 53,
+      "date": "2021-04-22T00:00:00.000Z",
+      "name": "Point Cloud",
+      "type": "EPTPointCloud",
+      "position": {
+        "lng": 149.116560,
+        "lat": -35.278541,
+        "height": 584.5890930951741
+      },
+      "boundingSphereRadius": 4.579436804133652,
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210422/ept.json",
+      "zoom":{
+        "position":{
+          "x": -4473967.666811766,
+          "y": 2675860.5247395057,
+          "z": -3663474.9131234586
+        },
+        "orientation":{
+          "direction":{
+            "x": 0.2463668715843988,
+            "y": -0.9614965767580186,
+            "z": -0.1217690332897825
+          },
+          "up":{
+            "x": -0.6675963535907656,
+            "y": -0.07727892682405241,
+            "z": -0.740501908263062
+          }
+        }
+      }
+    },
+    {
+      "id": 54,
       "date": "2021-04-23T00:00:00.000Z",
       "name": "Point Cloud",
       "type": "EPTPointCloud",
@@ -1167,7 +1199,7 @@
       }
     },
     {
-      "id": 54,
+      "id": 55,
       "date": "2021-04-24T00:00:00.000Z",
       "name": "Point Cloud",
       "type": "EPTPointCloud",
@@ -1199,7 +1231,7 @@
       }
     },
     {
-      "id": 55,
+      "id": 56,
       "date": "2021-04-25T00:00:00.000Z",
       "name": "Point Cloud",
       "type": "EPTPointCloud",

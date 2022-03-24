@@ -17,8 +17,9 @@ import {
   lastCurrentTime,
   setLastCurrentTime,
   setBillboard,
+  publicTask,
 } from "./State.js";
-import { loadAsset, loadData, setScreenSpaceError } from "./Datasets.js";
+import { loadAsset, loadData, setScreenSpaceError, fetchIndexAssets,fetchWebODMProjects, fetchPublicTask } from "./Datasets.js";
 import {
   setupSidebar,
   upload,
@@ -61,7 +62,26 @@ if (window.location.href.toLowerCase().includes("cesium/apps/asdc/uploads")) {
 
 Cesium.TrustedServers.add("asdc.cloud.edu.au",443)
 
-setupSidebar(uploadPage);
+if (publicTask) {
+  fetchPublicTask().then(()=>{
+    setupSidebar(false);
+  })
+} else {
+  fetchIndexAssets().then(()=>{
+      if (!uploadPage){
+        fetchWebODMProjects()
+        .then(()=>{
+          setupSidebar(uploadPage);
+        })
+        .catch(()=>{
+          setupSidebar(uploadPage);
+        })
+      } else {
+        setupSidebar(uploadPage);
+      }
+    }
+  )
+}
 
 const handleBillboard = (billboard) => {
   setBillboard(billboard);

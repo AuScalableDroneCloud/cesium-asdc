@@ -13,7 +13,14 @@ import {
   selectedDimension,
   imageryLayers,
   billboard,
+  setAssets,
+  setDatasets,
+  setCategories,
+  assets,
+  setODMProjects,
+  publicTask
 } from "./State.js";
+import { indexFile } from "./Constants.js";
 import { loadGraph, closeGraphModal } from "./Graphs.js";
 import { setupStyleToolbar, applyStyle } from "./Style.js";
 import { highlightHeightPX, highlightColor, eptServer } from "./Constants.js";
@@ -235,7 +242,6 @@ export const loadData = (
   var assetDataset = [];
   asset.data?.map((dataID) => {
     for (var i = 0; i < datasets.length; i++) {
-      // if (datasets[i].id == dataID && selectedDatasets.find(d=>d.id == dataID)) {
       if (datasets[i].id == dataID) {
         assetDataset.push(datasets[i]);
         break;
@@ -666,7 +672,9 @@ export const loadData = (
     var date = new Date(data.date);
     viewer.timeline._highlightRanges = [];
     viewer.timeline._makeTics();
-    if (tilesets[asset["id"]] && tilesets[asset["id"]][data.id]) {
+    if (data.type == "PointCloud" ||
+      data.type == "EPTPointCloud" ||
+      data.type == "ModelTileset"){
       if (date.toString() !== "Invalid Date") {
         viewer.timeline
           .addHighlightRange(highlightColor, highlightHeightPX)
@@ -954,7 +962,11 @@ Cesium.TimelineTrack.prototype.render = function (context, renderState) {
   if (!this.intervals) return;
 
   context.fillStyle = this.backgroundColor.toCssColorString();
-  context.fillRect(0, renderState.y, renderState.timeBarWidth, this.height);
+  // context.fillRect(0, renderState.y, renderState.timeBarWidth, this.height);
+  context.rect(0, renderState.y, renderState.timeBarWidth, this.height);
+  context.fill();
+  // context.strokeStyle = 'white';
+  // context.stroke();
 
   this.intervals.map((interval) => {
     const startInterval = interval.start;
@@ -973,7 +985,14 @@ Cesium.TimelineTrack.prototype.render = function (context, renderState) {
     ) {
       //The track takes up the entire visible span.
       context.fillStyle = this.color.toCssColorString();
-      context.fillRect(0, renderState.y, renderState.timeBarWidth, this.height);
+      context.strokeStyle = 'white';
+      // context.fillRect(0, renderState.y, renderState.timeBarWidth, this.height);
+      context.beginPath();
+      context.rect(0, renderState.y, renderState.timeBarWidth, this.height);
+      context.fill();
+      context.stroke();
+      context.closePath();
+
     } else if (
       Cesium.JulianDate.lessThanOrEquals(startInterval, spanStop) &&
       Cesium.JulianDate.greaterThanOrEquals(stopInterval, spanStart)
@@ -1005,12 +1024,17 @@ Cesium.TimelineTrack.prototype.render = function (context, renderState) {
           stop = renderState.timeBarWidth;
         }
         context.fillStyle = this.color.toCssColorString();
-        context.fillRect(
+        context.strokeStyle = 'white';
+        context.beginPath();
+        context.rect(
           start,
           renderState.y,
           Math.max(stop - start, 1),
           this.height
         );
+        context.fill();
+        context.stroke();
+        context.closePath();
       }
     }
   });
@@ -1050,3 +1074,413 @@ export const syncTimeline = (setCurrentTime) => {
 
   viewer.timeline._makeTics();
 };
+
+export const fetchIndexAssets = ()=>{
+  return(
+  fetch(indexFile, { cache: "no-store" })
+    .then((response) => response.json())
+    .then((jsonResponse) => {
+      setAssets(jsonResponse["assets"]);
+      setDatasets(jsonResponse["datasets"]);
+      setCategories(jsonResponse["categories"]);
+    })
+  ).catch(error => {
+    console.error(error);
+  })
+}
+
+export const fetchWebODMProjects = () => {
+  return (
+    new Promise(function (resolve, reject) {
+      fetch("https://asdc.cloud.edu.au/api/projects/?ordering=-created_at", {
+        cache: "no-store",
+        credentials: 'include'
+      })
+        .then(response => {
+          if (response.status===200){
+            return response.json()
+          } else {
+            resolve();
+          }
+        })
+        .then((odmProjects) => {
+          if (!odmProjects) return
+          setODMProjects(odmProjects)
+          var odmAssets = [];
+          var odmDatasets = [];
+          var taskInfoPromises = [];
+          var metaDataPromises = [];
+          if (Array.isArray(odmProjects)) {
+            odmProjects.map((project) => {
+              taskInfoPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/?ordering=-created_at`, {
+                cache: "no-store",
+                credentials: 'include'
+              }).then(response => response.json()));
+            })
+          }
+          var lastAssetIndex = assets[assets.length - 1].id;
+          Promise.all(taskInfoPromises).then((taskInfos, taskIndex) => {
+            if (Array.isArray(odmProjects)) {
+              odmProjects.map((project, projectIndex) => {
+                taskInfos[projectIndex].map(task => {
+                  if (task.available_assets.includes("georeferenced_model.laz")) {
+                    metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`, {
+                      cache: "no-store",
+                      credentials: 'include'
+                    }).then(response => response.json()).catch((e) => {
+                      console.log(e);
+                    }))
+                  }
+                  if (task.available_assets.includes("orthophoto.tif")) {
+                    metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/orthophoto/metadata`, {
+                      cache: "no-store",
+                      credentials: 'include'
+                    }).then(response => response.json()).catch((e) => {
+                      console.log(e);
+                    }))
+                  }
+                  if (task.available_assets.includes("dsm.tif")) {
+                    metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dsm/metadata`, {
+                      cache: "no-store",
+                      credentials: 'include'
+                    }).then(response => response.json()).catch((e) => {
+                      console.log(e);
+                    }))
+                  }
+                  if (task.available_assets.includes("dtm.tif")) {
+                    metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dtm/metadata`, {
+                      cache: "no-store",
+                      credentials: 'include'
+                    }).then(response => response.json()).catch((e) => {
+                      console.log(e);
+                    }))
+                  }
+                })
+              })
+            }
+
+            Promise.all(metaDataPromises).then((metadata) => {
+              var metadataIndex = 0;
+
+              if (Array.isArray(odmProjects)) {
+                odmProjects.map((project, projectIndex) => {
+                  taskInfos[projectIndex].map((task, taskIndex) => {
+                    var projectData = [];
+                    if (task.available_assets.includes("georeferenced_model.laz")) {
+                      if (metadata[metadataIndex]) {
+                        var sourcePos = [];
+                        sourcePos[0] = (metadata[metadataIndex].bounds[0] + metadata[metadataIndex].bounds[3]) / 2;
+                        sourcePos[1] = (metadata[metadataIndex].bounds[1] + metadata[metadataIndex].bounds[4]) / 2;
+                        sourcePos[2] = (metadata[metadataIndex].bounds[2] + metadata[metadataIndex].bounds[5]) / 2;
+                        var pos = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), sourcePos);
+
+                        var nw = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), [metadata[metadataIndex].bounds[0], metadata[metadataIndex].bounds[1]])
+                        var se = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), [metadata[metadataIndex].bounds[3], metadata[metadataIndex].bounds[4]])
+
+                        var rectangle = new Cesium.Rectangle.fromDegrees(
+                          nw[0],
+                          nw[1],
+                          se[0],
+                          se[1]
+                        );
+
+                        const cartographics = [
+                          Cesium.Rectangle.center(rectangle),
+                          Cesium.Rectangle.southeast(rectangle),
+                          Cesium.Rectangle.southwest(rectangle),
+                          Cesium.Rectangle.northeast(rectangle),
+                          Cesium.Rectangle.northwest(rectangle),
+                        ];
+
+                        var cartesians =
+                          Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                            cartographics
+                          );
+                        var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
+
+                        odmDatasets.push({
+                          id: task.id + "-pc",
+                          type: "EPTPointCloud",
+                          name: "Point Cloud",
+                          url: `https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`,
+                          asset: odmAssets[odmAssets.length - 1],
+                          "position": {
+                            "lng": pos[0],
+                            "lat": pos[1],
+                            "height": pos[2]
+                          },
+                          boundingSphereRadius: boundingSphere.radius
+                        })
+                        projectData.push(task.id + "-pc");
+                      }
+                      metadataIndex++;
+                    }
+
+                    if (task.available_assets.includes("orthophoto.tif")) {
+                      if (metadata[metadataIndex]) {
+                        odmDatasets.push({
+                          id: task.id + "-op",
+                          type: "Imagery",
+                          name: "Orthophoto",
+                          url: `https://asdc.cloud.edu.au${metadata[metadataIndex].tiles[0]}?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`,
+                          asset: odmAssets[odmAssets.length - 1],
+                          bounds: metadata[metadataIndex].bounds.value,
+                          minzoom: metadata[metadataIndex].minzoom,
+                          maxzoom: metadata[metadataIndex].maxzoom,
+                          position: {
+                            "lng": metadata[metadataIndex].center[0],
+                            "lat": metadata[metadataIndex].center[1],
+                            "height": metadata[metadataIndex].center[2],//zoom level?
+                          }
+                        })
+                        projectData.push(task.id + "-op");
+                      }
+                      metadataIndex++;
+                    }
+                    if (task.available_assets.includes("dsm.tif")) {
+                      if (metadata[metadataIndex]) {
+                        odmDatasets.push({
+                          id: task.id + "-dsm",
+                          type: "Imagery",
+                          name: "DSM",
+                          url: `https://asdc.cloud.edu.au/${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`,
+                          asset: odmAssets[odmAssets.length - 1],
+                          bounds: metadata[metadataIndex].bounds.value,
+                          minzoom: metadata[metadataIndex].minzoom,
+                          maxzoom: metadata[metadataIndex].maxzoom,
+                          position: {
+                            "lng": metadata[metadataIndex].center[0],
+                            "lat": metadata[metadataIndex].center[1],
+                            "height": metadata[metadataIndex].center[2],//zoom level?
+                          }
+                        })
+                        projectData.push(task.id + "-dsm");
+                      }
+                      metadataIndex++;
+                    }
+                    if (task.available_assets.includes("dtm.tif")) {
+                      if (metadata[metadataIndex]) {
+                        odmDatasets.push({
+                          id: task.id + "-dtm",
+                          type: "Imagery",
+                          name: "DTM",
+                          url: `https://asdc.cloud.edu.au/${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`,
+                          asset: odmAssets[odmAssets.length - 1],
+                          bounds: metadata[metadataIndex].bounds.value,
+                          minzoom: metadata[metadataIndex].minzoom,
+                          maxzoom: metadata[metadataIndex].maxzoom,
+                          position: {
+                            "lng": metadata[metadataIndex].center[0],
+                            "lat": metadata[metadataIndex].center[1],
+                            "height": metadata[metadataIndex].center[2],//zoom level?
+                          }
+                        })
+                        projectData.push(task.id + "-dtm");
+                      }
+                      metadataIndex++;
+                    }
+                    if (projectData.length > 0) {
+                      odmAssets.push({
+                        "id": ++lastAssetIndex,
+                        "name": task.name,
+                        "status": "active",
+                        "categoryID": -1,
+                        "data": projectData,
+                        project: project.id
+                      })
+                    }
+                  })
+                })
+                setAssets(assets.concat(odmAssets));
+                setDatasets(datasets.concat(odmDatasets));
+                resolve();
+              }
+            })
+          })
+        })
+        .catch(error => {
+          console.error(error);
+          reject();
+        })
+    })
+  );
+}
+
+export const fetchPublicTask = ()=>{
+  return(new Promise(function (resolve,reject){
+  fetch(`https://asdc.cloud.edu.au/public/task/${publicTask}/json`, {
+        cache: "no-store",
+      })
+      .then(response => response.json())
+      .then((publicTask) => {
+        var projectID = publicTask.project;
+        var metaDataPromises = [];
+        var odmAssets = [];
+        var odmDatasets = [];
+        if (publicTask.available_assets.includes("georeferenced_model.laz")) {
+          metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`, {
+            cache: "no-store",
+          }).then(response => response.json()).catch((e) => {
+            console.log(e);
+          }))
+        }
+        if (publicTask.available_assets.includes("orthophoto.tif")) {
+          metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/orthophoto/metadata`, {
+            cache: "no-store",
+          }).then(response => response.json()).catch((e) => {
+            console.log(e);
+          }))
+        }
+        if (publicTask.available_assets.includes("dsm.tif")) {
+          metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/dsm/metadata`, {
+            cache: "no-store",
+          }).then(response => response.json()).catch((e) => {
+            console.log(e);
+          }))
+        }
+        if (publicTask.available_assets.includes("dtm.tif")) {
+          metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/dtm/metadata`, {
+            cache: "no-store",
+          }).then(response => response.json()).catch((e) => {
+            console.log(e);
+          }))
+        }
+
+        Promise.all(metaDataPromises).then((metadata)=>{
+          var projectData = [];
+          var metadataIndex=0
+          if (publicTask.available_assets.includes("georeferenced_model.laz")) {
+            if (metadata[metadataIndex]) {
+              var sourcePos = [];
+              sourcePos[0] = (metadata[metadataIndex].bounds[0] + metadata[metadataIndex].bounds[3]) / 2;
+              sourcePos[1] = (metadata[metadataIndex].bounds[1] + metadata[metadataIndex].bounds[4]) / 2;
+              sourcePos[2] = (metadata[metadataIndex].bounds[2] + metadata[metadataIndex].bounds[5]) / 2;
+              var pos = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), sourcePos);
+
+              var nw = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), [metadata[metadataIndex].bounds[0], metadata[metadataIndex].bounds[1]])
+              var se = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), [metadata[metadataIndex].bounds[3], metadata[metadataIndex].bounds[4]])
+
+              var rectangle = new Cesium.Rectangle.fromDegrees(
+                nw[0],
+                nw[1],
+                se[0],
+                se[1]
+              );
+
+              const cartographics = [
+                Cesium.Rectangle.center(rectangle),
+                Cesium.Rectangle.southeast(rectangle),
+                Cesium.Rectangle.southwest(rectangle),
+                Cesium.Rectangle.northeast(rectangle),
+                Cesium.Rectangle.northwest(rectangle),
+              ];
+
+              var cartesians =
+                Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                  cartographics
+                );
+              var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
+
+              odmDatasets.push({
+                id: publicTask.id + "-pc",
+                type: "EPTPointCloud",
+                name: "Point Cloud",
+                url: `https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`,
+                asset: odmAssets[odmAssets.length - 1],
+                "position": {
+                  "lng": pos[0],
+                  "lat": pos[1],
+                  "height": pos[2]
+                },
+                boundingSphereRadius: boundingSphere.radius
+              })
+              projectData.push(publicTask.id + "-pc");
+            }
+            metadataIndex++;
+          }
+
+          if (publicTask.available_assets.includes("orthophoto.tif")) {
+            if (metadata[metadataIndex]) {
+              odmDatasets.push({
+                id: publicTask.id + "-op",
+                type: "Imagery",
+                name: "Orthophoto",
+                url: `https://asdc.cloud.edu.au${metadata[metadataIndex].tiles[0]}?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`,
+                asset: odmAssets[odmAssets.length - 1],
+                bounds: metadata[metadataIndex].bounds.value,
+                minzoom: metadata[metadataIndex].minzoom,
+                maxzoom: metadata[metadataIndex].maxzoom,
+                position: {
+                  "lng": metadata[metadataIndex].center[0],
+                  "lat": metadata[metadataIndex].center[1],
+                  "height": metadata[metadataIndex].center[2],//zoom level?
+                }
+              })
+              projectData.push(publicTask.id + "-op");
+            }
+            metadataIndex++;
+          }
+          if (publicTask.available_assets.includes("dsm.tif")) {
+            if (metadata[metadataIndex]) {
+              odmDatasets.push({
+                id: publicTask.id + "-dsm",
+                type: "Imagery",
+                name: "DSM",
+                url: `https://asdc.cloud.edu.au/${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`,
+                asset: odmAssets[odmAssets.length - 1],
+                bounds: metadata[metadataIndex].bounds.value,
+                minzoom: metadata[metadataIndex].minzoom,
+                maxzoom: metadata[metadataIndex].maxzoom,
+                position: {
+                  "lng": metadata[metadataIndex].center[0],
+                  "lat": metadata[metadataIndex].center[1],
+                  "height": metadata[metadataIndex].center[2],//zoom level?
+                }
+              })
+              projectData.push(publicTask.id + "-dsm");
+            }
+            metadataIndex++;
+          }
+          if (publicTask.available_assets.includes("dtm.tif")) {
+            if (metadata[metadataIndex]) {
+              odmDatasets.push({
+                id: publicTask.id + "-dtm",
+                type: "Imagery",
+                name: "DTM",
+                url: `https://asdc.cloud.edu.au/${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`,
+                asset: odmAssets[odmAssets.length - 1],
+                bounds: metadata[metadataIndex].bounds.value,
+                minzoom: metadata[metadataIndex].minzoom,
+                maxzoom: metadata[metadataIndex].maxzoom,
+                position: {
+                  "lng": metadata[metadataIndex].center[0],
+                  "lat": metadata[metadataIndex].center[1],
+                  "height": metadata[metadataIndex].center[2],//zoom level?
+                }
+              })
+              projectData.push(publicTask.id + "-dtm");
+            }
+            metadataIndex++;
+          }
+          setCategories([{
+            "id": -2,
+            "name": "Task"
+          }])
+          if (projectData.length > 0) {
+            odmAssets.push({
+              "id": 1,
+              "name": publicTask.name,
+              "status": "active",
+              "categoryID": -2,
+              "data": projectData,
+              project: projectID
+            })
+          }
+
+          setAssets(odmAssets);
+          setDatasets(odmDatasets);
+          resolve();
+        })
+    })
+  }))
+}

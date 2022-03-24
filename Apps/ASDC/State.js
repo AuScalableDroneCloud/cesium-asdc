@@ -1,7 +1,11 @@
 export var viewer;
 
-export var assets;
-export var datasets;
+export var assets = [];
+export var datasets = [];
+export var categories = [];
+
+export var odmProjects;
+export var publicTask;
 
 export var selectedDataIDs; //url data ids
 
@@ -39,6 +43,18 @@ export function setAssets(newAssets) {
 
 export function setDatasets(newDatasets) {
   datasets = newDatasets;
+}
+
+export function setCategories(newCategories) {
+  categories = newCategories;
+}
+
+export function setODMProjects(newODMProjects){
+  odmProjects = newODMProjects;
+}
+
+export function setPublicTask(newPublicTask){
+  publicTask = newPublicTask;
 }
 
 export function setSelectedData(newData) {
