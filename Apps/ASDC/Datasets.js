@@ -266,21 +266,16 @@ export const loadData = (
             // show: new Date(data["date"]) != "Invalid Date" ? false : true,
           })
         );
-      // tilesets[asset["id"]][
-      //     new Date(data["date"])
-      //   ].readyPromise.then(function (tileset) {
-      //     console.log(tilesets[asset["id"]][
-      //             new Date(data["date"])
-      //             ].boundingSphere);
-      //             var carto = Cesium.Cartographic.fromCartesian(tilesets[asset["id"]][new Date(data["date"])].boundingSphere.center);
-      //     console.log(carto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
-      //     console.log(carto.longitude * Cesium.Math.DEGREES_PER_RADIAN);
-      //     console.log(carto.height);
-      //   });
 
       tilesets[asset["id"]][data.id].readyPromise.then(function (
         tileset
       ) {
+        // console.log(tilesets[asset["id"]][data.id].boundingSphere);
+        // var carto = Cesium.Cartographic.fromCartesian(tilesets[asset["id"]][data.id].boundingSphere.center);
+        // console.log(carto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
+        // console.log(carto.longitude * Cesium.Math.DEGREES_PER_RADIAN);
+        // console.log(carto.height);
+
         if (data["position"]) {
           var offset = Cesium.Cartographic.toCartesian(
             new Cesium.Cartographic.fromDegrees(
@@ -618,6 +613,8 @@ export const loadData = (
           viewer.camera.flyToBoundingSphere(
             new Cesium.BoundingSphere(pos, assetDataset[0].boundingSphereRadius)
           );
+        } else {
+          viewer.flyTo(tilesets[asset.id][data.id])
         }
       } else if (assetDataset[0]["type"] === "Model") {
         viewer.flyTo(entities[asset["id"]][data["id"]]);

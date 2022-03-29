@@ -123,7 +123,7 @@
       "name": "Graham Road Construction Site",
       "status": "active",
       "categoryID": 8,
-      "data": [43, 44, 45]
+      "data": [43, 44, 45, 57]
     },
     {
       "id": 21,
@@ -131,6 +131,13 @@
       "status": "active",
       "categoryID": 6,
       "data": [46,47,48,49,50,51,52,53,54,55]
+    },
+    {
+      "id": 22,
+      "name": "STAR",
+      "status": "active",
+      "categoryID": 1,
+      "data": [58, 59, 60, 61, 62, 63]
     }
   ],
   "datasets": [
@@ -1260,6 +1267,109 @@
             "z": -0.740501908263062
           }
         }
+      }
+    },
+    {
+      "id": 57,
+      "type": "ModelTileset",
+      "date": "2022-03-27T00:00:00.000Z",
+      "url": "https://swift.rc.nectar.org.au/v1/AUTH_9f7c80bfd20f45bebc780b06c405f0df/ddp-projects/1012_GrahamRoad_CraneSimulation/2022_03_27/Scene/tileset_20220327_RC.json",
+      "useProxy": true,
+      "position": {
+        "lng": 145.04230835238604,
+        "lat": -37.951637116914206,
+        "height": 42.223313470669574
+      },
+      "boundingSphereRadius": 121.64781841736759
+    },
+    {
+      "id": 58,
+      "type": "PointCloud",
+      "date": "2019-07-03T00:00:00.000Z",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_STAR/20190703_STAR_1_DenseCloud/tileset.json",
+      "position": {
+        "lng": 138.7404054818655,
+        "lat": -34.24687205513666,
+        "height": 218.9997795968657
+      },
+      "boundingSphereRadius": 91.79346879227867,
+      "source": {
+        "url": "s3://appf-anu/Cesium/WheatHub_DPP_STAR/20190703_STAR_1_DenseCloud.laz"
+      }
+    },
+    {
+      "id": 59,
+      "type": "PointCloud",
+      "date": "2019-08-05T00:00:00.000Z",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_STAR/20190805_STAR_2_DenseCloud/tileset.json",
+      "position": {
+        "lng": 138.740383537676,
+        "lat": -34.24688066647979,
+        "height": 218.99978783450211
+      },
+      "boundingSphereRadius": 90.0615000738889,
+      "source": {
+        "url": "s3://appf-anu/Cesium/WheatHub_DPP_STAR/20190805_STAR_2_DenseCloud.laz"
+      }
+    },
+    {
+      "id": 60,
+      "type": "PointCloud",
+      "date": "2019-08-27T00:00:00.000Z",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_STAR/20190827_STAR_3_DenseCloud/tileset.json",
+      "position": {
+        "lng": 138.74042694436676,
+        "lat": -34.24688146689739,
+        "height": 218.99978783543114
+      },
+      "boundingSphereRadius": 90.06150130548298,
+      "source": {
+        "url": "s3://appf-anu/Cesium/WheatHub_DPP_STAR/20190827_STAR_3_DenseCloud.laz"
+      }
+    },
+    {
+      "id": 61,
+      "type": "PointCloud",
+      "date": "2019-09-10T00:00:00.000Z",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_STAR/20190910_STAR_4_DenseCloud/tileset.json",
+      "position": {
+        "lng": 138.7404160929295,
+        "lat": -34.246881266855056,
+        "height": 218.99980384126587
+      },
+      "boundingSphereRadius": 86.59756660669856,
+      "source": {
+        "url": "s3://appf-anu/Cesium/WheatHub_DPP_STAR/20190910_STAR_4_DenseCloud.laz"
+      }
+    },
+    {
+      "id": 62,
+      "type": "PointCloud",
+      "date": "2019-09-24T00:00:00.000Z",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_STAR/20190924_STAR_5_DenseCloud/tileset.json",
+      "position": {
+        "lng": 138.74041585172938,
+        "lat": -34.246890278317125,
+        "height": 218.99978783464175
+      },
+      "boundingSphereRadius": 90.06150099819969,
+      "source": {
+        "url": "s3://appf-anu/Cesium/WheatHub_DPP_STAR/20190924_STAR_5_DenseCloud.laz"
+      }
+    },
+    {
+      "id": 63,
+      "type": "PointCloud",
+      "date": "2019-10-21T00:00:00.000Z",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_STAR/20191021_STAR_6_DenseCloud/tileset.json",
+      "position": {
+        "lng": 138.7403832968269,
+        "lat": -34.24688967803289,
+        "height": 218.99979591686247
+      },
+      "boundingSphereRadius": 88.32953258986043,
+      "source": {
+        "url": "s3://appf-anu/Cesium/WheatHub_DPP_STAR/20191021_STAR_6_DenseCloud.laz"
       }
     }
   ],

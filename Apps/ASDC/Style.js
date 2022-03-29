@@ -90,7 +90,7 @@ export const setupStyleToolbar = (tileset) => {
     toolbar.removeChild(toolbar.firstChild);
   }
 
-  if (!tileset.asset || !tileset.asset.ept.schema) return;
+  if (!tileset.asset || !tileset.asset.ept || !tileset.asset.ept.schema) return;
   if (tileset.asset && tileset.asset.options.dimensions.length === 0) return;
 
   var styleToolbarMenu = [
