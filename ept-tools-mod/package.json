@@ -12,7 +12,7 @@
     "dev": "ts-node -r tsconfig-paths/register src/app/index.ts",
     "lambda": "ncc build src/app/lambda.ts -o ./lambda && copyfiles -f src/lib/* lambda/lib/",
     "lambda-zip": "(cd lambda && zip -r ../ept-tools.zip .)",
-    "prepublish": "$npm_execpath build",
+    "prepublish": "$npm_execpath run build",
     "test": "jest"
   },
   "dependencies": {
