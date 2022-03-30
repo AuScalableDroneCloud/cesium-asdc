@@ -659,6 +659,8 @@ export const loadData = (
             viewer.camera.flyToBoundingSphere(boundingSphere);
           });
         } else {
+          console.log(asset);
+          console.log(data);
           viewer.flyTo(imageryLayers[asset.id][data.id]);
         }
       }
@@ -1124,7 +1126,11 @@ export const fetchWebODMProjects = () => {
                     metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`, {
                       cache: "no-store",
                       credentials: 'include'
-                    }).then(response => response.json()).catch((e) => {
+                    }).then(response => {
+                      if(response.status===200){
+                        return response.json();
+                      }
+                    }).catch((e) => {
                       console.log(e);
                     }))
                   }
@@ -1132,7 +1138,11 @@ export const fetchWebODMProjects = () => {
                     metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/orthophoto/metadata`, {
                       cache: "no-store",
                       credentials: 'include'
-                    }).then(response => response.json()).catch((e) => {
+                    }).then(response => {
+                      if(response.status===200){
+                        return response.json();
+                      }
+                    }).catch((e) => {
                       console.log(e);
                     }))
                   }
@@ -1140,7 +1150,11 @@ export const fetchWebODMProjects = () => {
                     metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dsm/metadata`, {
                       cache: "no-store",
                       credentials: 'include'
-                    }).then(response => response.json()).catch((e) => {
+                    }).then(response => {
+                      if(response.status===200){
+                        return response.json();
+                      }
+                    }).catch((e) => {
                       console.log(e);
                     }))
                   }
@@ -1148,7 +1162,11 @@ export const fetchWebODMProjects = () => {
                     metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dtm/metadata`, {
                       cache: "no-store",
                       credentials: 'include'
-                    }).then(response => response.json()).catch((e) => {
+                    }).then(response => {
+                      if(response.status===200){
+                        return response.json();
+                      }
+                    }).catch((e) => {
                       console.log(e);
                     }))
                   }
@@ -1162,53 +1180,59 @@ export const fetchWebODMProjects = () => {
               if (Array.isArray(odmProjects)) {
                 odmProjects.map((project, projectIndex) => {
                   taskInfos[projectIndex].map((task, taskIndex) => {
-                    var projectData = [];
+                    var taskData = [];
                     if (task.available_assets.includes("georeferenced_model.laz")) {
                       if (metadata[metadataIndex]) {
-                        var sourcePos = [];
-                        sourcePos[0] = (metadata[metadataIndex].bounds[0] + metadata[metadataIndex].bounds[3]) / 2;
-                        sourcePos[1] = (metadata[metadataIndex].bounds[1] + metadata[metadataIndex].bounds[4]) / 2;
-                        sourcePos[2] = (metadata[metadataIndex].bounds[2] + metadata[metadataIndex].bounds[5]) / 2;
-                        var pos = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), sourcePos);
+                        if (metadata[metadataIndex].srs && metadata[metadataIndex].srs.wkt){
+                          var sourcePos = [];
+                          sourcePos[0] = (metadata[metadataIndex].bounds[0] + metadata[metadataIndex].bounds[3]) / 2;
+                          sourcePos[1] = (metadata[metadataIndex].bounds[1] + metadata[metadataIndex].bounds[4]) / 2;
+                          sourcePos[2] = (metadata[metadataIndex].bounds[2] + metadata[metadataIndex].bounds[5]) / 2;
+                          var pos = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), sourcePos);
 
-                        var nw = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), [metadata[metadataIndex].bounds[0], metadata[metadataIndex].bounds[1]])
-                        var se = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), [metadata[metadataIndex].bounds[3], metadata[metadataIndex].bounds[4]])
+                          var nw = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), [metadata[metadataIndex].bounds[0], metadata[metadataIndex].bounds[1]])
+                          var se = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), [metadata[metadataIndex].bounds[3], metadata[metadataIndex].bounds[4]])
 
-                        var rectangle = new Cesium.Rectangle.fromDegrees(
-                          nw[0],
-                          nw[1],
-                          se[0],
-                          se[1]
-                        );
-
-                        const cartographics = [
-                          Cesium.Rectangle.center(rectangle),
-                          Cesium.Rectangle.southeast(rectangle),
-                          Cesium.Rectangle.southwest(rectangle),
-                          Cesium.Rectangle.northeast(rectangle),
-                          Cesium.Rectangle.northwest(rectangle),
-                        ];
-
-                        var cartesians =
-                          Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-                            cartographics
+                          var rectangle = new Cesium.Rectangle.fromDegrees(
+                            nw[0],
+                            nw[1],
+                            se[0],
+                            se[1]
                           );
-                        var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
 
-                        odmDatasets.push({
-                          id: task.id + "-pc",
-                          type: "EPTPointCloud",
-                          name: "Point Cloud",
-                          url: `https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`,
-                          asset: odmAssets[odmAssets.length - 1],
-                          "position": {
-                            "lng": pos[0],
-                            "lat": pos[1],
-                            "height": pos[2]
-                          },
-                          boundingSphereRadius: boundingSphere.radius
-                        })
-                        projectData.push(task.id + "-pc");
+                          const cartographics = [
+                            Cesium.Rectangle.center(rectangle),
+                            Cesium.Rectangle.southeast(rectangle),
+                            Cesium.Rectangle.southwest(rectangle),
+                            Cesium.Rectangle.northeast(rectangle),
+                            Cesium.Rectangle.northwest(rectangle),
+                          ];
+
+                          var cartesians =
+                            Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                              cartographics
+                            );
+                          var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
+
+                          odmDatasets.push({
+                            id: task.id + "-pc",
+                            type: "EPTPointCloud",
+                            name: "Point Cloud",
+                            url: `https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`,
+                            asset: odmAssets[odmAssets.length - 1],
+                            "position": {
+                              "lng": pos[0],
+                              "lat": pos[1],
+                              "height": pos[2]
+                            },
+                            boundingSphereRadius: boundingSphere.radius
+                          })
+                          taskData.push(task.id + "-pc");
+                        } else {
+                          // console.log(metadata[metadataIndex])
+                          // console.log(project);
+                          // console.log(task);
+                        }
                       }
                       metadataIndex++;
                     }
@@ -1230,7 +1254,7 @@ export const fetchWebODMProjects = () => {
                             "height": metadata[metadataIndex].center[2],//zoom level?
                           }
                         })
-                        projectData.push(task.id + "-op");
+                        taskData.push(task.id + "-op");
                       }
                       metadataIndex++;
                     }
@@ -1251,7 +1275,7 @@ export const fetchWebODMProjects = () => {
                             "height": metadata[metadataIndex].center[2],//zoom level?
                           }
                         })
-                        projectData.push(task.id + "-dsm");
+                        taskData.push(task.id + "-dsm");
                       }
                       metadataIndex++;
                     }
@@ -1272,17 +1296,17 @@ export const fetchWebODMProjects = () => {
                             "height": metadata[metadataIndex].center[2],//zoom level?
                           }
                         })
-                        projectData.push(task.id + "-dtm");
+                        taskData.push(task.id + "-dtm");
                       }
                       metadataIndex++;
                     }
-                    if (projectData.length > 0) {
+                    if (taskData.length > 0) {
                       odmAssets.push({
                         "id": ++lastAssetIndex,
                         "name": task.name,
                         "status": "active",
                         "categoryID": -1,
-                        "data": projectData,
+                        "data": taskData,
                         project: project.id
                       })
                     }
@@ -1317,81 +1341,99 @@ export const fetchPublicTask = ()=>{
         if (publicTask.available_assets.includes("georeferenced_model.laz")) {
           metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`, {
             cache: "no-store",
-          }).then(response => response.json()).catch((e) => {
+          }).then(response => {
+            if(response.status===200){
+              return response.json();
+            }
+          }).catch((e) => {
             console.log(e);
           }))
         }
         if (publicTask.available_assets.includes("orthophoto.tif")) {
           metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/orthophoto/metadata`, {
             cache: "no-store",
-          }).then(response => response.json()).catch((e) => {
+          }).then(response => {
+            if(response.status===200){
+              return response.json();
+            }
+          }).catch((e) => {
             console.log(e);
           }))
         }
         if (publicTask.available_assets.includes("dsm.tif")) {
           metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/dsm/metadata`, {
             cache: "no-store",
-          }).then(response => response.json()).catch((e) => {
+          }).then(response => {
+            if(response.status===200){
+              return response.json();
+            }
+          }).catch((e) => {
             console.log(e);
           }))
         }
         if (publicTask.available_assets.includes("dtm.tif")) {
           metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/dtm/metadata`, {
             cache: "no-store",
-          }).then(response => response.json()).catch((e) => {
+          }).then(response => {
+            if(response.status===200){
+              return response.json();
+            }
+          }).catch((e) => {
             console.log(e);
           }))
         }
 
         Promise.all(metaDataPromises).then((metadata)=>{
-          var projectData = [];
+          var taskData = [];
           var metadataIndex=0
           if (publicTask.available_assets.includes("georeferenced_model.laz")) {
             if (metadata[metadataIndex]) {
-              var sourcePos = [];
-              sourcePos[0] = (metadata[metadataIndex].bounds[0] + metadata[metadataIndex].bounds[3]) / 2;
-              sourcePos[1] = (metadata[metadataIndex].bounds[1] + metadata[metadataIndex].bounds[4]) / 2;
-              sourcePos[2] = (metadata[metadataIndex].bounds[2] + metadata[metadataIndex].bounds[5]) / 2;
-              var pos = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), sourcePos);
+              if (metadata[metadataIndex].srs && metadata[metadataIndex].srs.wkt){
+                var sourcePos = [];
+                sourcePos[0] = (metadata[metadataIndex].bounds[0] + metadata[metadataIndex].bounds[3]) / 2;
+                sourcePos[1] = (metadata[metadataIndex].bounds[1] + metadata[metadataIndex].bounds[4]) / 2;
+                sourcePos[2] = (metadata[metadataIndex].bounds[2] + metadata[metadataIndex].bounds[5]) / 2;
+                var pos = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), sourcePos);
 
-              var nw = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), [metadata[metadataIndex].bounds[0], metadata[metadataIndex].bounds[1]])
-              var se = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), [metadata[metadataIndex].bounds[3], metadata[metadataIndex].bounds[4]])
+                var nw = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), [metadata[metadataIndex].bounds[0], metadata[metadataIndex].bounds[1]])
+                var se = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), [metadata[metadataIndex].bounds[3], metadata[metadataIndex].bounds[4]])
 
-              var rectangle = new Cesium.Rectangle.fromDegrees(
-                nw[0],
-                nw[1],
-                se[0],
-                se[1]
-              );
-
-              const cartographics = [
-                Cesium.Rectangle.center(rectangle),
-                Cesium.Rectangle.southeast(rectangle),
-                Cesium.Rectangle.southwest(rectangle),
-                Cesium.Rectangle.northeast(rectangle),
-                Cesium.Rectangle.northwest(rectangle),
-              ];
-
-              var cartesians =
-                Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-                  cartographics
+                var rectangle = new Cesium.Rectangle.fromDegrees(
+                  nw[0],
+                  nw[1],
+                  se[0],
+                  se[1]
                 );
-              var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
 
-              odmDatasets.push({
-                id: publicTask.id + "-pc",
-                type: "EPTPointCloud",
-                name: "Point Cloud",
-                url: `https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`,
-                asset: odmAssets[odmAssets.length - 1],
-                "position": {
-                  "lng": pos[0],
-                  "lat": pos[1],
-                  "height": pos[2]
-                },
-                boundingSphereRadius: boundingSphere.radius
-              })
-              projectData.push(publicTask.id + "-pc");
+                const cartographics = [
+                  Cesium.Rectangle.center(rectangle),
+                  Cesium.Rectangle.southeast(rectangle),
+                  Cesium.Rectangle.southwest(rectangle),
+                  Cesium.Rectangle.northeast(rectangle),
+                  Cesium.Rectangle.northwest(rectangle),
+                ];
+
+                var cartesians =
+                  Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                    cartographics
+                  );
+                var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
+
+                odmDatasets.push({
+                  id: publicTask.id + "-pc",
+                  type: "EPTPointCloud",
+                  name: "Point Cloud",
+                  url: `https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`,
+                  asset: odmAssets[odmAssets.length - 1],
+                  "position": {
+                    "lng": pos[0],
+                    "lat": pos[1],
+                    "height": pos[2]
+                  },
+                  boundingSphereRadius: boundingSphere.radius
+                })
+                taskData.push(publicTask.id + "-pc");
+              }
             }
             metadataIndex++;
           }
@@ -1413,7 +1455,7 @@ export const fetchPublicTask = ()=>{
                   "height": metadata[metadataIndex].center[2],//zoom level?
                 }
               })
-              projectData.push(publicTask.id + "-op");
+              taskData.push(publicTask.id + "-op");
             }
             metadataIndex++;
           }
@@ -1434,7 +1476,7 @@ export const fetchPublicTask = ()=>{
                   "height": metadata[metadataIndex].center[2],//zoom level?
                 }
               })
-              projectData.push(publicTask.id + "-dsm");
+              taskData.push(publicTask.id + "-dsm");
             }
             metadataIndex++;
           }
@@ -1455,7 +1497,7 @@ export const fetchPublicTask = ()=>{
                   "height": metadata[metadataIndex].center[2],//zoom level?
                 }
               })
-              projectData.push(publicTask.id + "-dtm");
+              taskData.push(publicTask.id + "-dtm");
             }
             metadataIndex++;
           }
@@ -1463,13 +1505,13 @@ export const fetchPublicTask = ()=>{
             "id": -2,
             "name": "Task"
           }])
-          if (projectData.length > 0) {
+          if (taskData.length > 0) {
             odmAssets.push({
               "id": 1,
               "name": publicTask.name,
               "status": "active",
               "categoryID": -2,
-              "data": projectData,
+              "data": taskData,
               project: projectID
             })
           }
