@@ -356,303 +356,257 @@
   app.get("/cesium/terriaCatalog.json", (req, res) => {
     const eptServer = "https://asdc.cloud.edu.au/ept";
     // const eptServer = "http://localhost:3000";
-    //todo: error handling
-    fetch("https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/asdc_terria.json")
-    .then(response => {
-      if (response.status === 200) {
-        return response.text()
-      }
-    })
-    .then(catalogText => {
-      var catalogJson = JSON5.parse(catalogText);
-      var webODMgroup = {
-        "type": "group",
-        "name": "WebODM Projects",
-        "members": []
-      };
-      fetch("https://asdc.cloud.edu.au/api/projects/?ordering=-created_at", {
-        headers: { Cookie: req.headers.cookie }
-      })
+    try {
+      fetch("https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/asdc_terria.json")
       .then(response => {
         if (response.status === 200) {
-          return response.json()
+          return response.text()
         }
       })
-      .then((odmProjects) => {
-        if (!odmProjects) {
-          res.status(404).json("No projects were found");
-          return;
-        }
-        var taskInfoPromises = [];
-        var metaDataPromises = [];
-        if (Array.isArray(odmProjects)) {
-          odmProjects.map((project) => {
-            webODMgroup.members.push({
-              "type": "group",
-              "name": project.name,
-              "members": []
-            })
-            taskInfoPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/?ordering=-created_at`, {
-              headers: { Cookie: req.headers.cookie }
-            }).then(response => response.json()));
-          })
-          Promise.all(taskInfoPromises).then((taskInfos, taskIndex) => {
-            if (Array.isArray(odmProjects)) {
-              odmProjects.map((project, projectIndex) => {
-                taskInfos[projectIndex].map(task => {
-                  if (task.available_assets.includes("georeferenced_model.laz")) {
-                    metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`, {
-                      headers: { Cookie: req.headers.cookie }
-                    }).then(response => response.json()).catch((e) => {
-                      console.log(e);
-                    }))
-                  }
-                  if (task.available_assets.includes("orthophoto.tif")) {
-                    metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/orthophoto/metadata`, {
-                      headers: { Cookie: req.headers.cookie }
-                    }).then(response => response.json()).catch((e) => {
-                      console.log(e);
-                    }))
-                  }
-                  if (task.available_assets.includes("dsm.tif")) {
-                    metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dsm/metadata`, {
-                      headers: { Cookie: req.headers.cookie }
-                    }).then(response => response.json()).catch((e) => {
-                      console.log(e);
-                    }))
-                  }
-                  if (task.available_assets.includes("dtm.tif")) {
-                    metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dtm/metadata`, {
-                      headers: { Cookie: req.headers.cookie }
-                    }).then(response => response.json()).catch((e) => {
-                      console.log(e);
-                    }))
-                  }
-                })
+      .then(catalogText => {
+        var catalogJson = JSON5.parse(catalogText);
+        var webODMgroup = {
+          "type": "group",
+          "name": "WebODM Projects",
+          "members": []
+        };
+        fetch("https://asdc.cloud.edu.au/api/projects/?ordering=-created_at", {
+          headers: { Cookie: req.headers.cookie }
+        })
+        .then(response => {
+          if (response.status === 200) {
+            return response.json()
+          }
+        })
+        .then((odmProjects) => {
+          if (!odmProjects) {
+            res.status(404).json("No projects were found");
+            return;
+          }
+          var taskInfoPromises = [];
+          var metaDataPromises = [];
+          if (Array.isArray(odmProjects)) {
+            odmProjects.map((project) => {
+              taskInfoPromises.push(
+                fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/?ordering=-created_at`, {
+                headers: { Cookie: req.headers.cookie }
+              }).then(response => {
+                return response.json()
               })
-            }
-            
-            Promise.all(metaDataPromises).then((metadata) => {
-              var metadataIndex = 0;
-              var centers = [];
-              var samplePromises = [];
-              var terrainProvider = Cesium.createWorldTerrain();
+              .catch(()=>{
+                res.status(500).json("An error occurred while getting projects from webODM");
+              }));
+            })
+            Promise.all(taskInfoPromises).then((taskInfos, taskIndex) => {
               if (Array.isArray(odmProjects)) {
                 odmProjects.map((project, projectIndex) => {
-                  taskInfos[projectIndex].map((task, taskIndex) => {
-                    var taskMember = {
-                      "type": "group",
-                      "name": task.name,
-                      "members": []
-                    };
-                    
+                  taskInfos[projectIndex].map(task => {
                     if (task.available_assets.includes("georeferenced_model.laz")) {
-                      if (metadata[metadataIndex]) {
-                        var truncate = true;
-                        if (!metadata[metadataIndex].schema) return
-                        metadata[metadataIndex].schema.map((s) => {
-                          if (s.name === "Red" || s.name === "Green" || s.name === "Blue") {
-                            if (s.maximum && s.maximum <= 255) {
-                              truncate = false;
-                            }
-                          }
-                        });
-                        taskMember.members.push({
-                          "type": "3d-tiles",
-                          "name": task.name + " - Point Cloud",
-                          "url":`${eptServer}/tileset.json?ept=${`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`}&${truncate ? "truncate" : null}`
-                        })
-                      }
-                      metadataIndex++;
+                      metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`, {
+                        headers: { Cookie: req.headers.cookie }
+                      }).then(response => {
+                        if(response.status===200){
+                          return response.json();
+                        }
+                      }).catch((e) => {
+                        console.log(e);
+                      }))
                     }
-
                     if (task.available_assets.includes("orthophoto.tif")) {
-                      if (metadata[metadataIndex]) {
-                        centers.push(new Cesium.Cartographic.fromDegrees(metadata[metadataIndex].center[0],metadata[metadataIndex].center[1]))
-                        var rectangle = new Cesium.Rectangle.fromDegrees(
-                          metadata[metadataIndex].bounds.value[0],
-                          metadata[metadataIndex].bounds.value[1],
-                          metadata[metadataIndex].bounds.value[2],
-                          metadata[metadataIndex].bounds.value[3]
-                        );
-                        const cartographics = [
-                          Cesium.Rectangle.center(rectangle),
-                          Cesium.Rectangle.southeast(rectangle),
-                          Cesium.Rectangle.southwest(rectangle),
-                          Cesium.Rectangle.northeast(rectangle),
-                          Cesium.Rectangle.northwest(rectangle),
-                        ];
-
-                        samplePromises.push(Cesium.sampleTerrainMostDetailed(
-                          terrainProvider,
-                          cartographics
-                        ))
-
-                        taskMember.members.push({
-                          "type": "open-street-map",
-                          "name": task.name + " - Orthophoto",
-                          "url":`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/orthophoto/tiles?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`,
-                          "maximumLevel": metadata[metadataIndex].maxzoom,
-                          "rectangle":{
-                            west:metadata[metadataIndex].bounds.value[0],
-                            south:metadata[metadataIndex].bounds.value[1],
-                            east:metadata[metadataIndex].bounds.value[2],
-                            north:metadata[metadataIndex].bounds.value[3]
-                          },
-                          "idealZoom":{
-                            "lookAt":{
-                              "targetLongitude" :metadata[metadataIndex].center[0],
-                              "targetLatitude" :metadata[metadataIndex].center[1],
-                            }
-                          }
-                        })
-                      }
-                      metadataIndex++;
+                      metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/orthophoto/metadata`, {
+                        headers: { Cookie: req.headers.cookie }
+                      }).then(response => {
+                        if(response.status===200){
+                          return response.json();
+                        }
+                      }).catch((e) => {
+                        console.log(e);
+                      }))
                     }
                     if (task.available_assets.includes("dsm.tif")) {
-                      if (metadata[metadataIndex]) {
-                        centers.push(new Cesium.Cartographic.fromDegrees(metadata[metadataIndex].center[0],metadata[metadataIndex].center[1]))
-                        var rectangle = new Cesium.Rectangle.fromDegrees(
-                          metadata[metadataIndex].bounds.value[0],
-                          metadata[metadataIndex].bounds.value[1],
-                          metadata[metadataIndex].bounds.value[2],
-                          metadata[metadataIndex].bounds.value[3]
-                        );
-                        const cartographics = [
-                          Cesium.Rectangle.center(rectangle),
-                          Cesium.Rectangle.southeast(rectangle),
-                          Cesium.Rectangle.southwest(rectangle),
-                          Cesium.Rectangle.northeast(rectangle),
-                          Cesium.Rectangle.northwest(rectangle),
-                        ];
-
-                        samplePromises.push(Cesium.sampleTerrainMostDetailed(
-                          terrainProvider,
-                          cartographics
-                        ))
-                        taskMember.members.push({
-                          "type": "open-street-map",
-                          "name": task.name + " - DSM",
-                          "url":`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dsm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`,
-                          "maximumLevel": metadata[metadataIndex].maxzoom,
-                          "rectangle":{
-                            west:metadata[metadataIndex].bounds.value[0],
-                            south:metadata[metadataIndex].bounds.value[1],
-                            east:metadata[metadataIndex].bounds.value[2],
-                            north:metadata[metadataIndex].bounds.value[3]
-                          },
-                          "idealZoom":{
-                            "lookAt":{
-                              "targetLongitude" :metadata[metadataIndex].center[0],
-                              "targetLatitude" :metadata[metadataIndex].center[1],
-                            }
-                          }
-                        })
-                      }
-                      metadataIndex++;
+                      metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dsm/metadata`, {
+                        headers: { Cookie: req.headers.cookie }
+                      }).then(response => {
+                        if(response.status===200){
+                          return response.json();
+                        }
+                      }).catch((e) => {
+                        console.log(e);
+                      }))
                     }
                     if (task.available_assets.includes("dtm.tif")) {
-                      if (metadata[metadataIndex]) {
-                        centers.push(new Cesium.Cartographic.fromDegrees(metadata[metadataIndex].center[0],metadata[metadataIndex].center[1]))
-                        var rectangle = new Cesium.Rectangle.fromDegrees(
-                          metadata[metadataIndex].bounds.value[0],
-                          metadata[metadataIndex].bounds.value[1],
-                          metadata[metadataIndex].bounds.value[2],
-                          metadata[metadataIndex].bounds.value[3]
-                        );
-                        const cartographics = [
-                          Cesium.Rectangle.center(rectangle),
-                          Cesium.Rectangle.southeast(rectangle),
-                          Cesium.Rectangle.southwest(rectangle),
-                          Cesium.Rectangle.northeast(rectangle),
-                          Cesium.Rectangle.northwest(rectangle),
-                        ];
-
-                        samplePromises.push(Cesium.sampleTerrainMostDetailed(
-                          terrainProvider,
-                          cartographics
-                        ))
-                        taskMember.members.push({
-                          "type": "open-street-map",
-                          "name": task.name + " - DTM",
-                          "url":`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dtm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`,
-                          "maximumLevel": metadata[metadataIndex].maxzoom,
-                          "rectangle":{
-                            west:metadata[metadataIndex].bounds.value[0],
-                            south:metadata[metadataIndex].bounds.value[1],
-                            east:metadata[metadataIndex].bounds.value[2],
-                            north:metadata[metadataIndex].bounds.value[3]
-                          },
-                          "idealZoom":{
-                            "lookAt":{
-                              "targetLongitude" :metadata[metadataIndex].center[0],
-                              "targetLatitude" :metadata[metadataIndex].center[1],
-                            }
-                          }
-                        })
-                      }
-                      metadataIndex++;
+                      metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dtm/metadata`, {
+                        headers: { Cookie: req.headers.cookie }
+                      }).then(response => {
+                        if(response.status===200){
+                          return response.json();
+                        }
+                      }).catch((e) => {
+                        console.log(e);
+                      }))
                     }
-                    webODMgroup.members[projectIndex].members.push(taskMember);
                   })
                 })
               }
-
-              Promise.all(samplePromises).then((heights)=>{
-                var heightIndex = 0;
+              
+              Promise.all(metaDataPromises)
+              .then((metadata) => {
+                var metadataIndex = 0;
+                var centers = [];
+                var samplePromises = [];
+                var terrainProvider = Cesium.createWorldTerrain();
                 if (Array.isArray(odmProjects)) {
                   odmProjects.map((project, projectIndex) => {
-                    taskInfos[projectIndex].map((task, taskIndex) => {
-                      var memberIndex = task.available_assets.includes("georeferenced_model.laz") ? 1 : 0;
+                    var projectMember = {
+                      "type": "group",
+                      "name": project.name,
+                      "members": []
+                    };
 
-                      if (task.available_assets.includes("orthophoto.tif")) {
-                        var cartesians =
-                          Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-                            heights[heightIndex]
-                          );
-                        var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
-                        webODMgroup.members[projectIndex].members[taskIndex].members[memberIndex].idealZoom.lookAt.targetHeight = Cesium.Cartographic.fromCartesian(boundingSphere.center).height;
-                        webODMgroup.members[projectIndex].members[taskIndex].members[memberIndex].idealZoom.lookAt.range = boundingSphere.radius;
-                        memberIndex++;
-                        heightIndex++;
+                    taskInfos[projectIndex].map((task, taskIndex) => {
+                      var taskMember = {
+                        "type": "group",
+                        "name": task.name,
+                        "members": []
+                      };
+                      
+                      if (task.available_assets.includes("georeferenced_model.laz")) {
+                        if (metadata[metadataIndex]) {
+                          var truncate = true;
+                          if (!metadata[metadataIndex].schema) return
+                          metadata[metadataIndex].schema.map((s) => {
+                            if (s.name === "Red" || s.name === "Green" || s.name === "Blue") {
+                              if (s.maximum && s.maximum <= 255) {
+                                truncate = false;
+                              }
+                            }
+                          });
+                          taskMember.members.push({
+                            "type": "3d-tiles",
+                            "name": task.name + " - Point Cloud",
+                            "url":`${eptServer}/tileset.json?ept=${`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`}&${truncate ? "truncate" : null}`
+                          })
+                        }
+                        metadataIndex++;
                       }
-                      if (task.available_assets.includes("dsm.tif")) {
-                        var cartesians =
-                        Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-                          heights[heightIndex]
-                        );
-                        var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
-                        webODMgroup.members[projectIndex].members[taskIndex].members[memberIndex].idealZoom.lookAt.targetHeight = Cesium.Cartographic.fromCartesian(boundingSphere.center).height;
-                        webODMgroup.members[projectIndex].members[taskIndex].members[memberIndex].idealZoom.lookAt.range = boundingSphere.radius;
-                          
-                        memberIndex++;
-                        heightIndex++;
-                      }
-                      if (task.available_assets.includes("dtm.tif")) {
-                        var cartesians =
-                        Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-                          heights[heightIndex]
-                        );
-                        var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
-                        webODMgroup.members[projectIndex].members[taskIndex].members[memberIndex].idealZoom.lookAt.targetHeight = Cesium.Cartographic.fromCartesian(boundingSphere.center).height;
-                        webODMgroup.members[projectIndex].members[taskIndex].members[memberIndex].idealZoom.lookAt.range = boundingSphere.radius;
-                        memberIndex++;
-                        heightIndex++;
+
+                      var imageryTypes = ["Orthophoto","DSM","DTM"];
+                      imageryTypes.map(imageryType=>{
+                        if (task.available_assets.includes(`${imageryType.toLowerCase()}.tif`)) {
+                          if (metadata[metadataIndex]) {
+                            centers.push(new Cesium.Cartographic.fromDegrees(metadata[metadataIndex].center[0],metadata[metadataIndex].center[1]))
+                            var rectangle = new Cesium.Rectangle.fromDegrees(
+                              metadata[metadataIndex].bounds.value[0],
+                              metadata[metadataIndex].bounds.value[1],
+                              metadata[metadataIndex].bounds.value[2],
+                              metadata[metadataIndex].bounds.value[3]
+                            );
+                            const cartographics = [
+                              Cesium.Rectangle.center(rectangle),
+                              Cesium.Rectangle.southeast(rectangle),
+                              Cesium.Rectangle.southwest(rectangle),
+                              Cesium.Rectangle.northeast(rectangle),
+                              Cesium.Rectangle.northwest(rectangle),
+                            ];
+  
+                            samplePromises.push(Cesium.sampleTerrainMostDetailed(
+                              terrainProvider,
+                              cartographics
+                            ))
+
+                            var tilesUrl;
+                            if (imageryType==="Orthophoto") {
+                              tilesUrl = `https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/orthophoto/tiles?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
+                            } else if (imageryType==="DSM") {
+                              tilesUrl = `https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dsm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                            } else if (imageryType==="DTM") {
+                              tilesUrl = `https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dtm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                            }
+  
+                            taskMember.members.push({
+                              "type": "open-street-map",
+                              "name": `${task.name} - ${imageryType}`,
+                              "url":tilesUrl,
+                              "maximumLevel": metadata[metadataIndex].maxzoom,
+                              "rectangle":{
+                                west:metadata[metadataIndex].bounds.value[0],
+                                south:metadata[metadataIndex].bounds.value[1],
+                                east:metadata[metadataIndex].bounds.value[2],
+                                north:metadata[metadataIndex].bounds.value[3]
+                              },
+                              "idealZoom":{
+                                "lookAt":{
+                                  "targetLongitude" :metadata[metadataIndex].center[0],
+                                  "targetLatitude" :metadata[metadataIndex].center[1],
+                                }
+                              }
+                            })
+                          }
+                          metadataIndex++;
+                        }
+                      })
+
+                      if (taskMember.members.length>0){
+                        projectMember.members.push(taskMember);
                       }
                     })
+
+                    if (projectMember.members.length>0){
+                      webODMgroup.members.push(projectMember);
+                    }
                   })
                 }
 
-                catalogJson.catalog.splice(catalogJson.catalog.length-1, 0 , webODMgroup);
-                res.header("Access-Control-Allow-Origin", req.headers.origin);
-                res.header("Access-Control-Allow-Credentials", true);
-                res.status(200).json(catalogJson);
+                Promise.all(samplePromises)
+                .then((heights)=>{
+                  var heightIndex = 0;
+                  if (Array.isArray(odmProjects)) {
+                    odmProjects.map((project, projectIndex) => {
+                      taskInfos[projectIndex].map((task, taskIndex) => {
+                        webODMgroup.members[projectIndex]?.members[taskIndex]?.members.map(member=>{
+                          if (member.type!="3d-tiles"){
+                            var cartesians =
+                            Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                              heights[heightIndex]
+                            );
+                            var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
+                            member.idealZoom.lookAt.targetHeight = Cesium.Cartographic.fromCartesian(boundingSphere.center).height;
+                            member.idealZoom.lookAt.range = boundingSphere.radius;
+                          
+                            heightIndex++;
+                          }
+                        })
+                      })
+                    })
+                  }
+
+                  catalogJson.catalog.splice(catalogJson.catalog.length-1, 0 , webODMgroup);
+                  res.header("Access-Control-Allow-Origin", req.headers.origin);
+                  res.header("Access-Control-Allow-Credentials", true);
+                  res.status(200).json(catalogJson);
+                })
+                .catch((e)=>{
+                  console.error(e);
+                  res.status(500).json("An error occurred while getting the catalog file");
+                })
+              })
+              .catch(e=>{
+                console.error(e);
+                res.status(500).json("An error occurred while getting the catalog file");
               })
             })
-          })
-        }
+          }
+        })
+        .catch(()=>{
+          res.status(500).json("An error occurred while getting the catalog file");
+        })
       })
-    })
+      .catch(()=>{
+        res.status(500).json("An error occurred while getting the catalog file");
+      })
+    }catch{
+      res.status(500).json("An error occurred while getting the catalog file");
+    }
   })
 
 
