@@ -401,50 +401,28 @@
               if (Array.isArray(odmProjects)) {
                 odmProjects.map((project, projectIndex) => {
                   taskInfos[projectIndex].map(task => {
-                    if (task.available_assets.includes("georeferenced_model.laz")) {
-                      metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`, {
-                        headers: { Cookie: req.headers.cookie }
-                      }).then(response => {
-                        if(response.status===200){
-                          return response.json();
+                    var assetFiles= ["georeferenced_model.laz", "orthophoto.tif", "dsm.tif", "dtm.tif"];
+                    assetFiles.map(typeFile=>{
+                      if (task.available_assets.includes(typeFile)) {
+                        var fileURL;
+                        if (typeFile==="georeferenced_model.laz"){
+                          fileURL = `https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`;
+                        } else {
+                          fileURL = `https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/${typeFile.slice(0,-4)}/metadata`;
                         }
-                      }).catch((e) => {
-                        console.log(e);
-                      }))
-                    }
-                    if (task.available_assets.includes("orthophoto.tif")) {
-                      metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/orthophoto/metadata`, {
-                        headers: { Cookie: req.headers.cookie }
-                      }).then(response => {
-                        if(response.status===200){
-                          return response.json();
-                        }
-                      }).catch((e) => {
-                        console.log(e);
-                      }))
-                    }
-                    if (task.available_assets.includes("dsm.tif")) {
-                      metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dsm/metadata`, {
-                        headers: { Cookie: req.headers.cookie }
-                      }).then(response => {
-                        if(response.status===200){
-                          return response.json();
-                        }
-                      }).catch((e) => {
-                        console.log(e);
-                      }))
-                    }
-                    if (task.available_assets.includes("dtm.tif")) {
-                      metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dtm/metadata`, {
-                        headers: { Cookie: req.headers.cookie }
-                      }).then(response => {
-                        if(response.status===200){
-                          return response.json();
-                        }
-                      }).catch((e) => {
-                        console.log(e);
-                      }))
-                    }
+                        metaDataPromises.push(
+                          fetch(fileURL, {
+                            headers: { Cookie: req.headers.cookie }
+                          }).then(response => {
+                            if(response.status===200){
+                              return response.json();
+                            }
+                          }).catch((e) => {
+                            console.log(e);
+                          })
+                        )
+                      }
+                    })
                   })
                 })
               }
@@ -452,7 +430,6 @@
               Promise.all(metaDataPromises)
               .then((metadata) => {
                 var metadataIndex = 0;
-                var centers = [];
                 var samplePromises = [];
                 var terrainProvider = Cesium.createWorldTerrain();
                 if (Array.isArray(odmProjects)) {
@@ -494,7 +471,6 @@
                       imageryTypes.map(imageryType=>{
                         if (task.available_assets.includes(`${imageryType.toLowerCase()}.tif`)) {
                           if (metadata[metadataIndex]) {
-                            centers.push(new Cesium.Cartographic.fromDegrees(metadata[metadataIndex].center[0],metadata[metadataIndex].center[1]))
                             var rectangle = new Cesium.Rectangle.fromDegrees(
                               metadata[metadataIndex].bounds.value[0],
                               metadata[metadataIndex].bounds.value[1],
@@ -607,6 +583,172 @@
     }catch{
       res.status(500).json("An error occurred while getting the catalog file");
     }
+  })
+
+  app.get("/cesium/terria/publictask/:taskID.json", (req, res) => {
+    const eptServer = "https://asdc.cloud.edu.au/ept";
+    fetch(`https://asdc.cloud.edu.au/public/task/${req.params.taskID}/json`)
+      .then(response => response.json())
+      .then((publicTask) => {
+        var initUrlsFile = {
+          "homeCamera": {
+            "north": -8,
+            "east": 158,
+            "south": -45,
+            "west": 109
+          },
+          catalog: [
+            {
+              "type": "group",
+              "name" : publicTask.name,
+              members:[]
+            }
+          ],
+          "baseMaps": {
+            "defaultBaseMapId": "basemap-bing-aerial-with-labels"
+          }
+        }
+        var projectID = publicTask.project;
+        var assetFiles= ["georeferenced_model.laz", "orthophoto.tif", "dsm.tif", "dtm.tif"];
+        var metaDataPromises = [];
+        assetFiles.map(typeFile=>{
+          if (publicTask.available_assets.includes(typeFile)) {
+            var fileURL;
+            if (typeFile==="georeferenced_model.laz"){
+              fileURL = `https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`;
+            } else {
+              fileURL = `https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/${typeFile.slice(0,-4)}/metadata`;
+            }
+            metaDataPromises.push(
+              fetch(fileURL, {
+                headers: { Cookie: req.headers.cookie }
+              }).then(response => {
+                if(response.status===200){
+                  return response.json();
+                }
+              }).catch((e) => {
+                console.log(e);
+              })
+            )
+          }
+        })
+        Promise.all(metaDataPromises)
+        .then((metadata) => {
+          var metadataIndex=0;
+          var samplePromises=[];
+          var terrainProvider = Cesium.createWorldTerrain();
+          if (publicTask.available_assets.includes("georeferenced_model.laz")) {
+            if (metadata[metadataIndex]) {
+              var truncate = true;
+              if (!metadata[metadataIndex].schema) return
+              metadata[metadataIndex].schema.map((s) => {
+                if (s.name === "Red" || s.name === "Green" || s.name === "Blue") {
+                  if (s.maximum && s.maximum <= 255) {
+                    truncate = false;
+                  }
+                }
+              });
+              initUrlsFile.catalog[0].members.push({
+                "type": "3d-tiles",
+                "name": publicTask.name + " - Point Cloud",
+                "url":`${eptServer}/tileset.json?ept=${`https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`}&${truncate ? "truncate" : null}`
+              })
+            }
+            metadataIndex++;
+          }
+
+          var imageryTypes = ["Orthophoto","DSM","DTM"];
+          imageryTypes.map(imageryType=>{
+            if (publicTask.available_assets.includes(`${imageryType.toLowerCase()}.tif`)) {
+              if (metadata[metadataIndex]) {
+                var rectangle = new Cesium.Rectangle.fromDegrees(
+                  metadata[metadataIndex].bounds.value[0],
+                  metadata[metadataIndex].bounds.value[1],
+                  metadata[metadataIndex].bounds.value[2],
+                  metadata[metadataIndex].bounds.value[3]
+                );
+                const cartographics = [
+                  Cesium.Rectangle.center(rectangle),
+                  Cesium.Rectangle.southeast(rectangle),
+                  Cesium.Rectangle.southwest(rectangle),
+                  Cesium.Rectangle.northeast(rectangle),
+                  Cesium.Rectangle.northwest(rectangle),
+                ];
+
+                samplePromises.push(Cesium.sampleTerrainMostDetailed(
+                  terrainProvider,
+                  cartographics
+                ))
+
+                var tilesUrl;
+                if (imageryType==="Orthophoto") {
+                  tilesUrl = `https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/orthophoto/tiles?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
+                } else if (imageryType==="DSM") {
+                  tilesUrl = `https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/dsm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                } else if (imageryType==="DTM") {
+                  tilesUrl = `https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/dtm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                }
+
+                initUrlsFile.catalog[0].members.push({
+                  "type": "open-street-map",
+                  "name": `${publicTask.name} - ${imageryType}`,
+                  "url":tilesUrl,
+                  "maximumLevel": metadata[metadataIndex].maxzoom,
+                  "rectangle":{
+                    west:metadata[metadataIndex].bounds.value[0],
+                    south:metadata[metadataIndex].bounds.value[1],
+                    east:metadata[metadataIndex].bounds.value[2],
+                    north:metadata[metadataIndex].bounds.value[3]
+                  },
+                  "idealZoom":{
+                    "lookAt":{
+                      "targetLongitude" :metadata[metadataIndex].center[0],
+                      "targetLatitude" :metadata[metadataIndex].center[1],
+                    }
+                  }
+                })
+              }
+              metadataIndex++;
+            }
+          })
+
+          Promise.all(samplePromises)
+            .then((heights)=>{
+              var heightIndex = 0;
+
+              initUrlsFile.catalog[0].members.map(member=>{
+                if (member.type!="3d-tiles"){
+                  var cartesians =
+                  Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                    heights[heightIndex]
+                  );
+                  var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
+                  member.idealZoom.lookAt.targetHeight = Cesium.Cartographic.fromCartesian(boundingSphere.center).height;
+                  member.idealZoom.lookAt.range = boundingSphere.radius;
+                
+                  heightIndex++;
+                }
+              })
+
+              // catalogJson.catalog.splice(catalogJson.catalog.length-1, 0 , webODMgroup);
+              res.header("Access-Control-Allow-Origin", req.headers.origin);
+              res.header("Access-Control-Allow-Credentials", true);
+              res.status(200).json(initUrlsFile);
+            })
+            .catch((e)=>{
+              console.error(e);
+              res.status(500).json("An error occurred while getting the catalog file");
+            })
+        })
+        .catch((e)=>{
+          console.error(e);
+          res.status(500).json("An error occurred while getting the catalog file");
+        })
+      })
+      .catch((e)=>{
+        console.error(e);
+        res.status(500).json("An error occurred while getting the catalog file");
+      })
   })
 
 

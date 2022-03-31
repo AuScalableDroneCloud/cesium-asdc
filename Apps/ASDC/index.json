@@ -137,7 +137,7 @@
       "name": "STAR",
       "status": "active",
       "categoryID": 1,
-      "data": [58, 59, 60, 61, 62, 63]
+      "data": [58, 59, 60, 61, 62, 63, 64, 65]
     }
   ],
   "datasets": [
@@ -1371,6 +1371,30 @@
       "source": {
         "url": "s3://appf-anu/Cesium/WheatHub_DPP_STAR/20191021_STAR_6_DenseCloud.laz"
       }
+    },
+    {
+      "id": 64,
+      "type": "GeoJSON",
+      "date": "Constant",
+      "position": {
+        "lng": 138.74037825881035,
+        "lat": -34.24700066630621,
+        "height": 218.2016695279111
+      },
+      "boundingSphereRadius": 38.08377708471858,
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_STAR/STAR_EE3_Buffered_15cm.geojson"
+    },
+    {
+      "id": 65,
+      "type": "GeoJSON",
+      "date": "Constant",
+      "position": {
+        "lng": 138.74040822883975,
+        "lat": -34.24675646529759,
+        "height": 218.93017169074312
+      },
+      "boundingSphereRadius": 36.04630730205071,
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_STAR/STAR_S2E3_Buffered_15cm.geojson"
     }
   ],
   "categories": [
