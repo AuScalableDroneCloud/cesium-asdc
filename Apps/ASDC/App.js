@@ -47,11 +47,22 @@ setViewer(
   new Cesium.Viewer("cesiumContainer", {
     terrainProvider: Cesium.createWorldTerrain({ requestWaterMask: true }),
     vrButton: true,
-    fullscreenElement: "cesiumContainer",
+    fullscreenElement: "cesiumContainer"
   })
 );
+
 viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
 viewer.scene.globe.depthTestAgainstTerrain = false;
+
+viewer.animation.viewModel.dateFormatter = (date, viewModel) => {
+  const localDate = Cesium.JulianDate.toDate(date);
+  return localDate.toLocaleString('en-au', {year: 'numeric', month: 'long', day: 'numeric'} )
+};
+
+viewer.animation.viewModel.timeFormatter = (date, viewModel) => {
+  const localDate = Cesium.JulianDate.toDate(date);
+  return localDate.toLocaleTimeString();
+};
 
 var uploadPage;
 if (window.location.href.toLowerCase().includes("cesium/apps/asdc/uploads")) {

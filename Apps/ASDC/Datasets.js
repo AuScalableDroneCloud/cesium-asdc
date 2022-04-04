@@ -1225,7 +1225,10 @@ export const fetchWebODMProjects = () => {
                               "lat": pos[1],
                               "height": pos[2]
                             },
-                            boundingSphereRadius: boundingSphere.radius
+                            boundingSphereRadius: boundingSphere.radius,
+                            source:{
+                              url:`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/download/georeferenced_model.laz`
+                            }
                           })
                           taskData.push(task.id + "-pc");
                         } else {
@@ -1237,69 +1240,43 @@ export const fetchWebODMProjects = () => {
                       metadataIndex++;
                     }
 
-                    if (task.available_assets.includes("orthophoto.tif")) {
-                      if (metadata[metadataIndex]) {
-                        odmDatasets.push({
-                          id: task.id + "-op",
-                          type: "Imagery",
-                          name: "Orthophoto",
-                          url: `https://asdc.cloud.edu.au${metadata[metadataIndex].tiles[0]}?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`,
-                          asset: odmAssets[odmAssets.length - 1],
-                          bounds: metadata[metadataIndex].bounds.value,
-                          minzoom: metadata[metadataIndex].minzoom,
-                          maxzoom: metadata[metadataIndex].maxzoom,
-                          position: {
-                            "lng": metadata[metadataIndex].center[0],
-                            "lat": metadata[metadataIndex].center[1],
-                            "height": metadata[metadataIndex].center[2],//zoom level?
+                    var imageryTypes = ["Orthophoto","DSM","DTM"];
+                    imageryTypes.map(imageryType=>{
+                      if (task.available_assets.includes(`${imageryType.toLowerCase()}.tif`)) {
+                        if (metadata[metadataIndex]) {
+                          var tilesUrl;
+                          if (imageryType==="Orthophoto") {
+                            tilesUrl = `https://asdc.cloud.edu.au${metadata[metadataIndex].tiles[0]}?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
+                          } else if (imageryType==="DSM") {
+                            tilesUrl = `https://asdc.cloud.edu.au${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                          } else if (imageryType==="DTM") {
+                            tilesUrl = `https://asdc.cloud.edu.au${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
                           }
-                        })
-                        taskData.push(task.id + "-op");
+
+                          odmDatasets.push({
+                            id: task.id + (imageryType === "Orthophoto" ? "-op" : imageryType.toLowerCase()),
+                            type: "Imagery",
+                            name: imageryType,
+                            url: tilesUrl,
+                            asset: odmAssets[odmAssets.length - 1],
+                            bounds: metadata[metadataIndex].bounds.value,
+                            minzoom: metadata[metadataIndex].minzoom,
+                            maxzoom: metadata[metadataIndex].maxzoom,
+                            position: {
+                              "lng": metadata[metadataIndex].center[0],
+                              "lat": metadata[metadataIndex].center[1],
+                              "height": metadata[metadataIndex].center[2],//zoom level?
+                            },
+                            source:{
+                              url:`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/download/${imageryType.toLowerCase()}.tif`
+                            }
+                          })
+                          taskData.push(task.id + (imageryType === "Orthophoto" ? "-op" : imageryType.toLowerCase()));
+                        }
+                        metadataIndex++;
                       }
-                      metadataIndex++;
-                    }
-                    if (task.available_assets.includes("dsm.tif")) {
-                      if (metadata[metadataIndex]) {
-                        odmDatasets.push({
-                          id: task.id + "-dsm",
-                          type: "Imagery",
-                          name: "DSM",
-                          url: `https://asdc.cloud.edu.au/${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`,
-                          asset: odmAssets[odmAssets.length - 1],
-                          bounds: metadata[metadataIndex].bounds.value,
-                          minzoom: metadata[metadataIndex].minzoom,
-                          maxzoom: metadata[metadataIndex].maxzoom,
-                          position: {
-                            "lng": metadata[metadataIndex].center[0],
-                            "lat": metadata[metadataIndex].center[1],
-                            "height": metadata[metadataIndex].center[2],//zoom level?
-                          }
-                        })
-                        taskData.push(task.id + "-dsm");
-                      }
-                      metadataIndex++;
-                    }
-                    if (task.available_assets.includes("dtm.tif")) {
-                      if (metadata[metadataIndex]) {
-                        odmDatasets.push({
-                          id: task.id + "-dtm",
-                          type: "Imagery",
-                          name: "DTM",
-                          url: `https://asdc.cloud.edu.au/${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`,
-                          asset: odmAssets[odmAssets.length - 1],
-                          bounds: metadata[metadataIndex].bounds.value,
-                          minzoom: metadata[metadataIndex].minzoom,
-                          maxzoom: metadata[metadataIndex].maxzoom,
-                          position: {
-                            "lng": metadata[metadataIndex].center[0],
-                            "lat": metadata[metadataIndex].center[1],
-                            "height": metadata[metadataIndex].center[2],//zoom level?
-                          }
-                        })
-                        taskData.push(task.id + "-dtm");
-                      }
-                      metadataIndex++;
-                    }
+                    })
+
                     if (taskData.length > 0) {
                       odmAssets.push({
                         "id": ++lastAssetIndex,

@@ -354,55 +354,36 @@ export const downloadFile = (asset, data, index, format) => {
       !data.source.url.endsWith("." + format)
     ) {
       waitModal.style.display = "block";
-      let filename;
-      fetch(
-        `${processingAPI}/download?` +
-        new URLSearchParams({
-          assetID: asset.id,
-          dataID: data.id,
-          format: format,
-        }),
-        { cache: "no-store" }
-      )
-        .then((response) => {
-          if (response.status === 404) {
-            response.text().then((text) => {
-              alert(text);
-              waitModal.style.display = "none";
-            });
-          } else if (response.status === 302) {
-            response.text().then((text) => {
-              waitModal.style.display = "none";
-              var link = document.createElement("a");
-              link.href = text;
-              waitModal.style.display = "none";
-              link.click();
-              link.remove();
-            });
-          } else {
-            filename = response.headers
-              .get("Content-Disposition")
-              .split(";")[1]
-              .split("=")[1];
-            filename = filename.slice(1, filename.length - 1);
-            response
-              .blob()
-              .then((blob) => URL.createObjectURL(blob))
-              .then((url) => {
-                var link = document.createElement("a");
-                link.href = url;
-                link.download = filename;
-                waitModal.style.display = "none";
-                link.click();
-                URL.revokeObjectURL(url);
-                link.remove();
-              });
+      var params = {
+        url: data.source.url,
+        format: format,
+      }
+
+      var link = document.createElement("a");
+      var url = new URL(`${processingAPI}/download`);
+      url.search = new URLSearchParams(params);
+      link.href = url;
+      link.click();
+      link.remove();
+      
+      var cookieTimer = setInterval( checkCookies, 500 );
+      function checkCookies() {
+        if (document.cookie){
+          var cookies = document.cookie.split(';')
+          .map(v => v.split('='))
+          .reduce((acc, v) => {
+            console.log(v);
+            acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+            return acc;
+          }, {})
+          console.log(cookies[data.source.url  + `_${format}`]);
+          if (cookies[data.source.url  + `_${format}`]){
+            waitModal.style.display = "none";
+            document.cookie = data.source.url + `_${format}` + "= ; Path=/ ; expires = " + new Date().toUTCString();
+            clearInterval( cookieTimer );
           }
-        })
-        .catch((err) => {
-          alert(err);
-          waitModal.style.display = "none";
-        });
+        }
+      }
     } else {
       var link = document.createElement("a");
       link.href = data.source.url;
@@ -427,39 +408,35 @@ export const downloadFile = (asset, data, index, format) => {
       link.remove();
     } else {
       waitModal.style.display = "block";
-      let filename;
-      fetch(
-        `${processingAPI}/download?` +
-        new URLSearchParams({
-          assetID: asset.id,
-          dataID: data.id,
-          format: "zip",
-        }),
-        { cache: "no-store" }
-      )
-        .then((response) => {
-          filename = response.headers
-            .get("Content-Disposition")
-            .split(";")[1]
-            .split("=")[1];
-          filename = filename.slice(1, filename.length - 1);
-          response
-            .blob()
-            .then((blob) => URL.createObjectURL(blob))
-            .then((url) => {
-              var link = document.createElement("a");
-              link.href = url;
-              link.download = filename;
-              waitModal.style.display = "none";
-              link.click();
-              URL.revokeObjectURL(url);
-              link.remove();
-            });
-        })
-        .catch((err) => {
-          alert(err);
-          waitModal.style.display = "none";
-        });
+      var params = {
+        assetID: asset.id,
+        dataID: data.id,
+        format: "zip",
+      };
+      var link = document.createElement("a");
+      var url = new URL(`${processingAPI}/download`);
+      url.search = new URLSearchParams(params);
+      link.href = url;
+      link.click();
+      link.remove();
+      
+      var cookieTimer = setInterval( checkCookies, 500 );
+      function checkCookies() {
+        if (document.cookie){
+          var cookies = document.cookie.split(';')
+          .map(v => v.split('='))
+          .reduce((acc, v) => {
+            console.log(v);
+            acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+            return acc;
+          }, {})
+          if (cookies[data.source[0].url  + `_zip`]){
+            waitModal.style.display = "none";
+            document.cookie = data.source[0].url + `_zip` + "= ; Path=/ ; expires = " + new Date().toUTCString();
+            clearInterval( cookieTimer );
+          }
+        }
+      }
     }
   } else if (data.type === "Influx") {
     waitModal.style.display = "block";
