@@ -64,6 +64,11 @@ viewer.animation.viewModel.timeFormatter = (date, viewModel) => {
   return localDate.toLocaleTimeString();
 };
 
+Cesium.Timeline.prototype.makeLabel = function (time) {
+  const localDate = Cesium.JulianDate.toDate(time);
+  return localDate.toLocaleString('en-au', {year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'});
+};
+
 var uploadPage;
 if (window.location.href.toLowerCase().includes("cesium/apps/asdc/uploads")) {
   uploadPage = true;
