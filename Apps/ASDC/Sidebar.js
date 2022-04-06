@@ -18,7 +18,12 @@ import {
   selectedAssetIDs,
   imageryLayers,
   categories,
-  odmProjects
+  odmProjects,
+  assetDivs,
+  sourceDivs,
+  projectDivs,
+  categoryDivs,
+  publicTask
 } from "./State.js";
 import { loadAsset, loadData, syncTimeline } from "./Datasets.js";
 import { indexFile, pcFormats, processingAPI } from "./Constants.js";
@@ -29,52 +34,102 @@ export const setupSidebar = (uploads) => {
   if (!assets) return;
 
   var sidebarDataButtons = document.getElementById("sidebar-data-buttons");
-  while (sidebarDataButtons.firstChild) {
-    sidebarDataButtons
-      .removeChild(
-        sidebarDataButtons.firstChild
-      );
-  }
 
   createMarkersDataSource();
 
-  var categoryDivs = {};
-  var assetDivs = {};
+  if (!uploads && !publicTask){
+    if (Object.keys(sourceDivs).length==0){
+      var sources= ["Public Data", "WebODM Projects"];
+      // var sourceDivs = {};
+      sources.map(s=>{
+        sourceDivs[s] = createAccordion(s);
+        var sourceAccordionPanelDiv = document.createElement("div");
+        sourceAccordionPanelDiv.className = "sidebar-accordion-panel";
 
-  if (Array.isArray(odmProjects)) {
-    categories.splice(categories.length - 2, 0, {
-      id: -1,
-      name: "WebODM Projects"
-    });
+        var loaderParent = document.createElement("div");
+        loaderParent.className = "loader-parent";
+        var loader = document.createElement("div");
+        loader.className = "loader";
+        loaderParent.appendChild(loader);
+        sourceAccordionPanelDiv.appendChild(loaderParent);
+
+        sidebarDataButtons.appendChild(sourceDivs[s]);
+        sidebarDataButtons.appendChild(sourceAccordionPanelDiv);
+      })
+      sourceDivs["Public Data"].onclick();
+      categories.map((cat) => {
+        categoryDivs[cat.id] = createAccordion(cat.name,18);
+        categoryDivs[cat.id].id = `category-${cat.id}`;
+        //Uploads page
+        if ((!uploads && cat.id !== 6)|| (uploads && cat.id == 6)) {
+          sourceDivs["Public Data"].nextElementSibling.appendChild(categoryDivs[cat.id]);
+          var accordionPanelDiv = document.createElement("div");
+          accordionPanelDiv.className = "sidebar-accordion-panel";
+          sourceDivs["Public Data"].nextElementSibling.appendChild(accordionPanelDiv);
+        }
+      });
+    }
+  } else {
+      categories.map((cat) => {
+        if ((uploads && cat.id == 6) || publicTask) {
+          categoryDivs[cat.id] = createAccordion(cat.name,18);
+          categoryDivs[cat.id].id = `category-${cat.id}`;
+          sidebarDataButtons.appendChild(categoryDivs[cat.id]);
+          var accordionPanelDiv = document.createElement("div");
+          accordionPanelDiv.className = "sidebar-accordion-panel";
+          sidebarDataButtons.appendChild(accordionPanelDiv);
+        }
+      })
   }
 
-  categories.map((cat) => {
-    categoryDivs[cat.id] = createAccordion(cat);
-    categoryDivs[cat.id].id = `category-${cat.id}`;
-    //Uploads page
-    if ((!uploads && cat.id !== 6)|| (uploads && cat.id == 6)) {
-      sidebarDataButtons.appendChild(categoryDivs[cat.id]);
-      var accordionPanelDiv = document.createElement("div");
-      accordionPanelDiv.className = "sidebar-accordion-panel";
-      sidebarDataButtons.appendChild(accordionPanelDiv);
-    }
-  });
-
-  var projectDivs = {};
   if (!uploads && Array.isArray(odmProjects)) {
     odmProjects.map(odmProject => {
-      projectDivs[odmProject.id] = createAccordion(odmProject, 18);
+      if (projectDivs[odmProject.id]) return
+      projectDivs[odmProject.id] = createAccordion(odmProject.name, 18);
       projectDivs[odmProject.id].id = `project-${odmProject.id}`;
-      var catPanelDiv = categoryDivs[-1].nextElementSibling;
-      catPanelDiv.appendChild(projectDivs[odmProject.id]);
+
+      if (sourceDivs["WebODM Projects"].nextElementSibling.firstChild.className === "loader-parent"){
+        sourceDivs["WebODM Projects"].nextElementSibling.removeChild(sourceDivs["WebODM Projects"].nextElementSibling.firstChild);
+      }
+
+      var sourcePanelDiv = sourceDivs["WebODM Projects"].nextElementSibling;
+      sourcePanelDiv.appendChild(projectDivs[odmProject.id]);
 
       var projectsPanelDiv = document.createElement("div");
       projectsPanelDiv.className = "sidebar-accordion-panel";
-      catPanelDiv.appendChild(projectsPanelDiv);
+      sourcePanelDiv.appendChild(projectsPanelDiv);
+
+      var projectTasks = assets.filter(a=> a.project === odmProject.id);
+      var suffixes = ["pc","op","dtm","dsm"];
+
+      suffixes.map(suffix=>{
+        if (!!projectTasks.find(p=>p.data.find(d=>d.endsWith("-" + suffix)))){
+          var layerDiv = document.createElement("div");
+          layerDiv.className = "sidebar-item";
+          var layerContentDiv = document.createElement("div");
+          layerContentDiv.style.padding = "0 54px";
+          layerContentDiv.innerHTML = "All " + (suffix == "pc" ? "Point Clouds":
+            suffix == "op" ? "Orthophotos" : suffix == "dtm" ? "DTMs" : suffix == "dsm" ? "DSMs": null); 
+          layerDiv.appendChild(layerContentDiv);
+  
+          layerDiv.onclick = ()=>{
+            projectTasks.map(asset=>{
+              asset.data.map(dataID=>{
+                if (dataID.endsWith("-" + suffix)) {
+                  var data = datasets.find(d=>d.id === dataID);
+                  document.getElementById(`dataButton-${data.id}`).onclick();
+                }
+              })
+            });
+          }
+          projectsPanelDiv.appendChild(layerDiv);
+        }
+      })
     })
-  }
+  } 
 
   assets.map((asset) => {
+    if (!!assetDivs[asset.id]) return;
     if (!uploads && asset.categoryID == 6) return;
     if (uploads && asset.categoryID != 6) return;
 
@@ -84,161 +139,30 @@ export const setupSidebar = (uploads) => {
     } else {
       var accordionDiv = categoryDivs[asset.categoryID];
       var accordionPanelDiv = accordionDiv.nextElementSibling;
+
+      if (!uploads && !publicTask && sourceDivs["Public Data"].nextElementSibling.firstChild.className === "loader-parent"){
+        sourceDivs["Public Data"].nextElementSibling.removeChild(sourceDivs["Public Data"].nextElementSibling.firstChild);
+      }
     }
-
-    var assetDiv = createAccordion(asset, asset.categoryID == -1 ? 36 : 18)
-
-    var assetCheckbox = document.createElement("input");
-    assetCheckbox.id = `assetCheckbox-${asset.id}`;
-    assetCheckbox.type = "checkbox";
-    assetCheckbox.style.float = "left";
-    assetCheckbox.style.margin = "0 5px 0 0";
-
-    assetDiv.firstChild.prepend(assetCheckbox);
 
     var datesPanelDiv = document.createElement("div");
     datesPanelDiv.className = "sidebar-accordion-panel";
 
-    if (asset.data) {
-      var checkboxes = [];
-      var assetDatasets = [];
-      var dateDivs = [];
-      asset.data.map((dataID, index) => {
-        var data = dataID;
-        for (var i = 0; i < datasets.length; i++) {
-          if (datasets[i].id == dataID) {
-            data = datasets[i];
-            data.asset = asset;
-            assetDatasets.push(data);
-            break;
-          }
-        }
-
-        var dateDiv = document.createElement("div");
-        dateDiv.className = "sidebar-item";
-        dateDiv.id = `dataButton-${data.id}`;
-
-        var checkbox = document.createElement("input");
-        checkbox.id = `dataCheckbox-${data.id}`;
-        checkbox.type = "checkbox";
-        checkbox.style.float = "left";
-        checkbox.style.margin = "0 5px 0 0";
-        checkbox.checked =
-          selectedDataIDs && (selectedDataIDs.includes(data.id.toString()));
-        checkboxes.push(checkbox);
-
-        assetCheckbox.checked = checkboxes.every((cb) => cb.checked);
-        assetCheckbox.indeterminate =
-          !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
-
-        checkbox.onchange = (e) => {
-          handleDataCheckboxChange(checkbox, assetCheckbox, checkboxes, asset, data, uploads)
-        };
-
-        var dateContentDiv = document.createElement("div");
-        if (asset.categoryID == -1) {
-          dateContentDiv.style.padding = "0 54px";
-        } else {
-          dateContentDiv.style.padding = "0 36px";
-        }
-        dateContentDiv.style.display = "flex";
-
-        var dateContentDivText = document.createElement("div");
-        dateContentDivText.style["flex-grow"] = 1;
-        if (data.date) {
-          var date = new Date(data.date);
-          dateContentDivText.innerHTML =
-            (date.toString() !== "Invalid Date"
-              ? new Date(data.date).toLocaleDateString("en-au", {
-                year: "numeric",
-                month: "numeric",
-                day: "numeric",
-              })
-              : data.date) + (data.name ? " - " + data.name : "");
-        } else {
-          dateContentDivText.innerHTML = data.name ? data.name : "No Date";
-        }
-
-        dateContentDiv.appendChild(checkbox);
-        dateContentDiv.appendChild(dateContentDivText);
-        dateDiv.appendChild(dateContentDiv);
-        dateDivs.push(dateDiv);
-
-        if (data.type === "ImageSeries") {
-          var zoomButton = createZoomButton(asset, data);
-          dateContentDiv.appendChild(zoomButton);
-        }
-
-        dateDiv.onclick = (e) => {
-          if (e && (e.target === checkbox || e.target === zoomButton)) {
-            return;
-          }
-          checkbox.checked = true;
-          assetCheckbox.checked = checkboxes.every((cb) => cb.checked);
-          assetCheckbox.indeterminate =
-            !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
-          if (!selectedDatasets.includes(data)) {
-            selectedDatasets.push(data);
-          }
-          var dataIDs = "";
-          var newDataIDs = [];
-          selectedDatasets.map((d) => {
-            newDataIDs.push(d.id);
-          });
-
-          newDataIDs.sort((a, b) => a - b);
-
-          newDataIDs.map((id) => {
-            dataIDs += id + "&";
-          });
-
-          dataIDs = dataIDs.slice(0, dataIDs.length - 1);
-
-          window.history.pushState(
-            "",
-            "",
-            uploads
-              ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search
-              : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search
-          );
-
-          loadData(asset, data, true, true, true);
-        };
-
-        if (data.type != "Influx") {
-          var opacitySliderBtn = createOpacitySliderBtn(asset, data, dateDiv);
-          dateContentDiv.appendChild(opacitySliderBtn);
-        }
-
-        if (
-          data.source ||
-          data.type === "Influx" ||
-          data.type === "GeoJSON"
-        ) {
-          var downloadBtn = createDownloadBtn(asset, data, dateDiv, index);
-          dateContentDiv.appendChild(downloadBtn);
-        }
-      });
-
-      if(asset.data.length > 1){
-        var timeseriesDiv = createTimeseriesDiv(asset, assetCheckbox, checkboxes, uploads);
-        datesPanelDiv.appendChild(timeseriesDiv);
-      }
-
-      dateDivs.map(div => {
-        datesPanelDiv.appendChild(div);
-      })
-    }   
-
-    assetCheckbox.onchange = (e) => {
-      handleAssetCheckboxChange(checkboxes, assetCheckbox, asset, uploads);
-    };
+    var assetDiv = createAssetDiv(asset, uploads, datesPanelDiv);
 
     accordionPanelDiv.appendChild(assetDiv);
     accordionPanelDiv.appendChild(datesPanelDiv);
 
     assetDivs[asset.id] = assetDiv;
 
+    var assetDatasets = [];
+    asset?.data?.map((dataID, index) => {
+      for (var i = 0; i < datasets.length; i++) {
+        if (datasets[i].id == dataID) {
+          assetDatasets.push(datasets[i]);
+        }
+      }
+    })
     //markers
     if (assetDatasets && assetDatasets.length > 0) {
       assetDatasets.sort(function (a, b) {
@@ -253,26 +177,24 @@ export const setupSidebar = (uploads) => {
           data["position"]["lat"]
         );
 
-        if (!viewer.dataSources.contains(markersDataSource)) {
-          markersDataSource.entities.add({
-            position: position,
-            billboard: {
-              image: pinBuilder
-                .fromColor(Cesium.Color.fromCssColorString("#5B8B51"), 48)
-                .toDataURL(),
-              verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-              disableDepthTestDistance: Number.POSITIVE_INFINITY,
-              heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-              distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
-                data.boundingSphereRadius
-                  ? data.boundingSphereRadius * 4
-                  : 2500,
-                Number.MAX_VALUE
-              ),
-            },
-            id: "marker_" + asset.id,
-          });
-        }
+        markersDataSource.entities.add({
+          position: position,
+          billboard: {
+            image: pinBuilder
+              .fromColor(Cesium.Color.fromCssColorString("#5B8B51"), 48)
+              .toDataURL(),
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+            distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
+              data.boundingSphereRadius
+                ? data.boundingSphereRadius * 4
+                : 2500,
+              Number.MAX_VALUE
+            ),
+          },
+          id: "marker_" + asset.id,
+        });
       }
     }
   });
@@ -327,7 +249,13 @@ export const setupSidebar = (uploads) => {
     });
 
     selectedCats.map((c) => {
-      categoryDivs[c].onclick();
+      if (c!=-1) {
+        if (!categoryDivs[c].firstChild.classList.contains("sidebar-accordion-active")){
+          categoryDivs[c].onclick();
+        }
+      } else {
+        sourceDivs["WebODM Projects"].onclick();
+      }
     });
 
     selectedProjects.map(p => {
@@ -335,7 +263,9 @@ export const setupSidebar = (uploads) => {
     })
 
     assetIDs.map((a) => {
-      assetDivs[a].onclick();
+      if (!assetDivs[a].firstChild.classList.contains("sidebar-accordion-active")){
+        assetDivs[a].onclick();
+      }
     });
 
     setSelectedDatasets(newSelectedDatasets);
@@ -596,7 +526,7 @@ export const closeModal = () => {
   document.getElementById("upload-modal").style.display = "none";
 };
 
-const createAccordion = (proj, padding = 0) => {
+const createAccordion = (name, padding = 0) => {
   var accordionDiv = document.createElement("div");
   accordionDiv.className = "sidebar-item";
 
@@ -606,7 +536,7 @@ const createAccordion = (proj, padding = 0) => {
   accordionContentDiv.className = "sidebar-accordion";
 
   var accordionContentDivText = document.createElement("div");
-  accordionContentDivText.innerHTML = proj.name
+  accordionContentDivText.innerHTML = name
   accordionContentDivText.style["flex-grow"] = 1;
   accordionContentDivText.style["overflow"] = 'hidden';
   accordionContentDivText.style["text-overflow"] = 'ellipsis';
@@ -943,11 +873,7 @@ const createTimeseriesDiv = (asset, assetCheckbox, checkboxes, uploads) => {
   timeseriesDiv.className = "sidebar-item";
 
   var timeseriesContentDiv = document.createElement("div");
-  if (asset.categoryID == -1) {
-    timeseriesContentDiv.style.padding = "0 54px";
-  } else {
-    timeseriesContentDiv.style.padding = "0 36px";
-  }
+  timeseriesContentDiv.style.padding = "0 54px";
   timeseriesContentDiv.innerHTML = "All Layers";
 
   timeseriesDiv.onclick = () => {
@@ -1291,6 +1217,149 @@ const createMarkersDataSource = () => {
         Cesium.HeightReference.CLAMP_TO_GROUND;
     });
   }
+}
 
+const createAssetDiv = (asset, uploads, datesPanelDiv) => {
+  var assetDiv = createAccordion(asset.name, 36)
 
+  var assetCheckbox = document.createElement("input");
+  assetCheckbox.id = `assetCheckbox-${asset.id}`;
+  assetCheckbox.type = "checkbox";
+  assetCheckbox.style.float = "left";
+  assetCheckbox.style.margin = "0 5px 0 0";
+
+  assetDiv.firstChild.prepend(assetCheckbox);
+
+  if (asset.data) {
+    var checkboxes = [];
+    var assetDatasets = [];
+    var dateDivs = [];
+    asset.data.map((dataID, index) => {
+      var data = dataID;
+      for (var i = 0; i < datasets.length; i++) {
+        if (datasets[i].id == dataID) {
+          data = datasets[i];
+          data.asset = asset;
+          assetDatasets.push(data);
+          break;
+        }
+      }
+
+      var dateDiv = document.createElement("div");
+      dateDiv.className = "sidebar-item";
+      dateDiv.id = `dataButton-${data.id}`;
+
+      var checkbox = document.createElement("input");
+      checkbox.id = `dataCheckbox-${data.id}`;
+      checkbox.type = "checkbox";
+      checkbox.style.float = "left";
+      checkbox.style.margin = "0 5px 0 0";
+      checkbox.checked =
+        selectedDataIDs && (selectedDataIDs.includes(data.id.toString()));
+      checkboxes.push(checkbox);
+
+      assetCheckbox.checked = checkboxes.every((cb) => cb.checked);
+      assetCheckbox.indeterminate =
+        !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
+
+      checkbox.onchange = (e) => {
+        handleDataCheckboxChange(checkbox, assetCheckbox, checkboxes, asset, data, uploads)
+      };
+
+      var dateContentDiv = document.createElement("div");
+      dateContentDiv.style.padding = "0 54px";
+      dateContentDiv.style.display = "flex";
+
+      var dateContentDivText = document.createElement("div");
+      dateContentDivText.style["flex-grow"] = 1;
+      if (data.date) {
+        var date = new Date(data.date);
+        dateContentDivText.innerHTML =
+          (date.toString() !== "Invalid Date"
+            ? new Date(data.date).toLocaleDateString("en-au", {
+              year: "numeric",
+              month: "numeric",
+              day: "numeric",
+            })
+            : data.date) + (data.name ? " - " + data.name : "");
+      } else {
+        dateContentDivText.innerHTML = data.name ? data.name : "No Date";
+      }
+
+      dateContentDiv.appendChild(checkbox);
+      dateContentDiv.appendChild(dateContentDivText);
+      dateDiv.appendChild(dateContentDiv);
+      dateDivs.push(dateDiv);
+
+      if (data.type === "ImageSeries") {
+        var zoomButton = createZoomButton(asset, data);
+        dateContentDiv.appendChild(zoomButton);
+      }
+
+      dateDiv.onclick = (e) => {
+        if (e && (e.target === checkbox || e.target === zoomButton)) {
+          return;
+        }
+        checkbox.checked = true;
+        assetCheckbox.checked = checkboxes.every((cb) => cb.checked);
+        assetCheckbox.indeterminate =
+          !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
+        if (!selectedDatasets.includes(data)) {
+          selectedDatasets.push(data);
+        }
+        var dataIDs = "";
+        var newDataIDs = [];
+        selectedDatasets.map((d) => {
+          newDataIDs.push(d.id);
+        });
+
+        newDataIDs.sort((a, b) => a - b);
+
+        newDataIDs.map((id) => {
+          dataIDs += id + "&";
+        });
+
+        dataIDs = dataIDs.slice(0, dataIDs.length - 1);
+
+        window.history.pushState(
+          "",
+          "",
+          uploads
+            ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search
+            : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search
+        );
+
+        loadData(asset, data, true, true, true);
+      };
+
+      if (data.type != "Influx") {
+        var opacitySliderBtn = createOpacitySliderBtn(asset, data, dateDiv);
+        dateContentDiv.appendChild(opacitySliderBtn);
+      }
+
+      if (
+        data.source ||
+        data.type === "Influx" ||
+        data.type === "GeoJSON"
+      ) {
+        var downloadBtn = createDownloadBtn(asset, data, dateDiv, index);
+        dateContentDiv.appendChild(downloadBtn);
+      }
+    });
+
+    if(asset.data.length > 1){
+      var timeseriesDiv = createTimeseriesDiv(asset, assetCheckbox, checkboxes, uploads);
+      datesPanelDiv.appendChild(timeseriesDiv);
+    }
+
+    dateDivs.map(div => {
+      datesPanelDiv.appendChild(div);
+    })
+  }   
+
+  assetCheckbox.onchange = (e) => {
+    handleAssetCheckboxChange(checkboxes, assetCheckbox, asset, uploads);
+  };
+
+  return assetDiv;
 }

@@ -22,6 +22,11 @@ export var imageryLayers = {};
 export var controllers = {};
 export var lastCurrentTime;
 
+export var sourceDivs = {};
+export var assetDivs = {};
+export var projectDivs = {};
+export var categoryDivs = {};
+
 export var selectedDimension;
 export var billboard = false;
 

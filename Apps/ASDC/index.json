@@ -109,14 +109,14 @@
       "name": "Coolama",
       "status": "active",
       "categoryID": 2,
-      "data": [31, 32, 33, 34, 35]
+      "data": [31, 67, 32, 33, 34, 35]
     },
     {
       "id": 19,
       "name": "Doran",
       "status": "active",
       "categoryID": 2,
-      "data": [36, 37, 38, 39, 40]
+      "data": [36, 68, 37, 38, 39, 40]
     },
     {
       "id": 20,
@@ -1420,6 +1420,44 @@
           "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/container/buffer.bin"
         }
       ]
+    },
+    {
+      "id": 67,
+      "date": "2022-02-11T00:00:00.000Z",
+      "name": "Orthophoto",
+      "type": "Imagery",
+      "position": {
+        "lng": 148.8762589,
+        "lat": -36.34448705,
+        "height": 16
+      },
+      "bounds": [
+        148.874895, -36.345713, 148.8776228,
+        -36.3432611
+      ],
+      "minzoom": 12,
+      "maxzoom": 24,
+      "useProxy":true,
+      "url": "https://s3-us-west-1.amazonaws.com/6-tiles.mapsmadeeasy.com/{x}/3ed73f18925c481ba0ac0386226a8caa/7b405e881b3c4cad944de2dd5be37926/{z}/{x}/{reverseY}.png"
+    },
+    {
+      "id": 68,
+      "date": "2022-02-11T00:00:00.000Z",
+      "name": "Orthophoto",
+      "type": "Imagery",
+      "position": {
+        "lng": 148.81282985,
+        "lat": -36.3728385,
+        "height": 16
+      },
+      "bounds": [
+        148.8117525, -36.37342, 148.8139072,
+        -36.372257
+      ],
+      "minzoom": 12,
+      "maxzoom": 24,
+      "useProxy":true,
+      "url": "https://s3-us-west-1.amazonaws.com/1-tiles.mapsmadeeasy.com/{x}/3ed73f18925c481ba0ac0386226a8caa/d8f0479d98aa45358c142146f69b6461/{z}/{x}/{reverseY}.png"
     }
   ],
   "categories": [

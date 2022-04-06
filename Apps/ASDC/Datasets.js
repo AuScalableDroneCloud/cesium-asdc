@@ -18,7 +18,8 @@ import {
   setCategories,
   assets,
   setODMProjects,
-  publicTask
+  publicTask,
+  selectedData
 } from "./State.js";
 import { indexFile } from "./Constants.js";
 import { loadGraph, closeGraphModal } from "./Graphs.js";
@@ -459,7 +460,12 @@ export const loadData = (
       imageryLayers[asset.id][data.id] =
         viewer.imageryLayers.addImageryProvider(
           new Cesium.UrlTemplateImageryProvider({
-            url: data.url,
+            url: !data.useProxy
+            ? data["url"]
+            : new Cesium.Resource({
+                url: data["url"],
+                proxy: new Cesium.DefaultProxy("/cesium/proxy/"),
+              }),
             rectangle: data.bounds ? new Cesium.Rectangle.fromDegrees(
               data.bounds[0],
               data.bounds[1],
@@ -942,6 +948,10 @@ export const setScreenSpaceError = (evt) => {
             ((100 - MSSE) / 100) * viewer.canvas.height * 0.25;
           if (MSSE === 0) {
             t.show = false;
+          } else {
+            if (!!selectedDatasets.find(d=>d.id==id) || selectedData.id ==id ){
+              t.show=true;
+            }
           }
         });
       } else {
@@ -949,7 +959,13 @@ export const setScreenSpaceError = (evt) => {
         tilesets[tileset][id].maximumScreenSpaceError =
           ((100 - MSSE) / 100) * viewer.canvas.height * 0.25;
         if (MSSE === 0) {
-          tilesets[tileset][id].show = false;
+          if (!!selectedDatasets.find(d=>d.id==id) || (selectedData && selectedData.id ==id) ){
+            tilesets[tileset][id].show = false;
+          }
+        } else {
+          if (!!selectedDatasets.find(d=>d.id==id) || (selectedData && selectedData.id ==id)){
+            tilesets[tileset][id].show=true;
+          }
         }
       }
     });
@@ -1254,7 +1270,7 @@ export const fetchWebODMProjects = () => {
                           }
 
                           odmDatasets.push({
-                            id: task.id + (imageryType === "Orthophoto" ? "-op" : imageryType.toLowerCase()),
+                            id: task.id + (imageryType === "Orthophoto" ? "-op" : "-" + imageryType.toLowerCase()),
                             type: "Imagery",
                             name: imageryType,
                             url: tilesUrl,
@@ -1271,7 +1287,7 @@ export const fetchWebODMProjects = () => {
                               url:`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/download/${imageryType.toLowerCase()}.tif`
                             }
                           })
-                          taskData.push(task.id + (imageryType === "Orthophoto" ? "-op" : imageryType.toLowerCase()));
+                          taskData.push(task.id + (imageryType === "Orthophoto" ? "-op" : "-" + imageryType.toLowerCase()));
                         }
                         metadataIndex++;
                       }
