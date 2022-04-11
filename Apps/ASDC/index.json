@@ -130,7 +130,7 @@
       "name": "Growth Capsules - Phenospex Scanner",
       "status": "active",
       "categoryID": 6,
-      "data": [46,47,48,49,50,51,52,53,54,55, 66]
+      "data": [46,47,48,49,50,51,52,53,54,55, 56, 69, 70, 66, 71]
     },
     {
       "id": 22,
@@ -138,6 +138,13 @@
       "status": "active",
       "categoryID": 1,
       "data": [58, 59, 60, 61, 62, 63, 64, 65]
+    },
+    {
+      "id": 23,
+      "name": "Plant Growth Facility",
+      "status": "active",
+      "categoryID": 6,
+      "data": [72]
     }
   ],
   "datasets": [
@@ -923,28 +930,28 @@
       "name": "Point Cloud",
       "type": "EPTPointCloud",
       "position": {
-        "lng": 149.116560,
-        "lat": -35.278541,
-        "height": 585.5890930951741
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210415/ept.json",
       "zoom":{
         "position":{
-          "x": -4473969.810880187,
-          "y": 2675858.558879898,
-          "z": -3663474.3817964923
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
         },
-        "orientation":{
-          "direction":{
-            "x": 0.8870856477863927,
-            "y": -0.15349651094700872,
-            "z": -0.43533650733483276
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
           },
-          "up":{
-            "x": -0.35001425039689016,
-            "y": 0.39118659185608706,
-            "z": -0.8511539666071717
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
           }
         }
       }
@@ -955,28 +962,28 @@
       "name": "Point Cloud",
       "type": "EPTPointCloud",
       "position": {
-        "lng": 149.116560,
-        "lat": -35.278541,
-        "height": 585.5890930951741
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210416/ept.json",
       "zoom":{
         "position":{
-          "x": -4473969.810880187,
-          "y": 2675858.558879898,
-          "z": -3663474.3817964923
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
         },
-        "orientation":{
-          "direction":{
-            "x": 0.8870856477863927,
-            "y": -0.15349651094700872,
-            "z": -0.43533650733483276
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
           },
-          "up":{
-            "x": -0.35001425039689016,
-            "y": 0.39118659185608706,
-            "z": -0.8511539666071717
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
           }
         }
       }
@@ -987,28 +994,28 @@
       "name": "Point Cloud",
       "type": "EPTPointCloud",
       "position": {
-        "lng": 149.116560,
-        "lat": -35.278541,
-        "height": 585.5890930951741
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210417/ept.json",
       "zoom":{
         "position":{
-          "x": -4473969.810880187,
-          "y": 2675858.558879898,
-          "z": -3663474.3817964923
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
         },
-        "orientation":{
-          "direction":{
-            "x": 0.8870856477863927,
-            "y": -0.15349651094700872,
-            "z": -0.43533650733483276
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
           },
-          "up":{
-            "x": -0.35001425039689016,
-            "y": 0.39118659185608706,
-            "z": -0.8511539666071717
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
           }
         }
       }
@@ -1019,28 +1026,28 @@
       "name": "Point Cloud",
       "type": "EPTPointCloud",
       "position": {
-        "lng": 149.116560,
-        "lat": -35.278541,
-        "height": 585.5890930951741
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210418/ept.json",
       "zoom":{
         "position":{
-          "x": -4473969.810880187,
-          "y": 2675858.558879898,
-          "z": -3663474.3817964923
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
         },
-        "orientation":{
-          "direction":{
-            "x": 0.8870856477863927,
-            "y": -0.15349651094700872,
-            "z": -0.43533650733483276
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
           },
-          "up":{
-            "x": -0.35001425039689016,
-            "y": 0.39118659185608706,
-            "z": -0.8511539666071717
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
           }
         }
       }
@@ -1051,28 +1058,28 @@
       "name": "Point Cloud",
       "type": "EPTPointCloud",
       "position": {
-        "lng": 149.116560,
-        "lat": -35.278541,
-        "height": 585.5890930951741
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210419/ept.json",
       "zoom":{
         "position":{
-          "x": -4473969.810880187,
-          "y": 2675858.558879898,
-          "z": -3663474.3817964923
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
         },
-        "orientation":{
-          "direction":{
-            "x": 0.8870856477863927,
-            "y": -0.15349651094700872,
-            "z": -0.43533650733483276
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
           },
-          "up":{
-            "x": -0.35001425039689016,
-            "y": 0.39118659185608706,
-            "z": -0.8511539666071717
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
           }
         }
       }
@@ -1083,28 +1090,28 @@
       "name": "Point Cloud",
       "type": "EPTPointCloud",
       "position": {
-        "lng": 149.116560,
-        "lat": -35.278541,
-        "height": 585.5890930951741
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210420/ept.json",
       "zoom":{
         "position":{
-          "x": -4473969.810880187,
-          "y": 2675858.558879898,
-          "z": -3663474.3817964923
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
         },
-        "orientation":{
-          "direction":{
-            "x": 0.8870856477863927,
-            "y": -0.15349651094700872,
-            "z": -0.43533650733483276
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
           },
-          "up":{
-            "x": -0.35001425039689016,
-            "y": 0.39118659185608706,
-            "z": -0.8511539666071717
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
           }
         }
       }
@@ -1115,28 +1122,28 @@
       "name": "Point Cloud",
       "type": "EPTPointCloud",
       "position": {
-        "lng": 149.116560,
-        "lat": -35.278541,
-        "height": 585.5890930951741
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210421/ept.json",
       "zoom":{
         "position":{
-          "x": -4473969.810880187,
-          "y": 2675858.558879898,
-          "z": -3663474.3817964923
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
         },
-        "orientation":{
-          "direction":{
-            "x": 0.8870856477863927,
-            "y": -0.15349651094700872,
-            "z": -0.43533650733483276
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
           },
-          "up":{
-            "x": -0.35001425039689016,
-            "y": 0.39118659185608706,
-            "z": -0.8511539666071717
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
           }
         }
       }
@@ -1147,28 +1154,28 @@
       "name": "Point Cloud",
       "type": "EPTPointCloud",
       "position": {
-        "lng": 149.116560,
-        "lat": -35.278541,
-        "height": 585.5890930951741
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210422/ept.json",
       "zoom":{
         "position":{
-          "x": -4473967.666811766,
-          "y": 2675860.5247395057,
-          "z": -3663474.9131234586
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
         },
-        "orientation":{
-          "direction":{
-            "x": 0.2463668715843988,
-            "y": -0.9614965767580186,
-            "z": -0.1217690332897825
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
           },
-          "up":{
-            "x": -0.6675963535907656,
-            "y": -0.07727892682405241,
-            "z": -0.740501908263062
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
           }
         }
       }
@@ -1179,28 +1186,28 @@
       "name": "Point Cloud",
       "type": "EPTPointCloud",
       "position": {
-        "lng": 149.116560,
-        "lat": -35.278541,
-        "height": 585.5890930951741
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210423/ept.json",
       "zoom":{
         "position":{
-          "x": -4473967.666811766,
-          "y": 2675860.5247395057,
-          "z": -3663474.9131234586
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
         },
-        "orientation":{
-          "direction":{
-            "x": 0.2463668715843988,
-            "y": -0.9614965767580186,
-            "z": -0.1217690332897825
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
           },
-          "up":{
-            "x": -0.6675963535907656,
-            "y": -0.07727892682405241,
-            "z": -0.740501908263062
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
           }
         }
       }
@@ -1211,28 +1218,28 @@
       "name": "Point Cloud",
       "type": "EPTPointCloud",
       "position": {
-        "lng": 149.116560,
-        "lat": -35.278541,
-        "height": 585.5890930951741
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210424/ept.json",
       "zoom":{
         "position":{
-          "x": -4473967.666811766,
-          "y": 2675860.5247395057,
-          "z": -3663474.9131234586
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
         },
-        "orientation":{
-          "direction":{
-            "x": 0.2463668715843988,
-            "y": -0.9614965767580186,
-            "z": -0.1217690332897825
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
           },
-          "up":{
-            "x": -0.6675963535907656,
-            "y": -0.07727892682405241,
-            "z": -0.740501908263062
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
           }
         }
       }
@@ -1243,28 +1250,28 @@
       "name": "Point Cloud",
       "type": "EPTPointCloud",
       "position": {
-        "lng": 149.116560,
-        "lat": -35.278541,
-        "height": 585.5890930951741
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9890930951741
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210425/ept.json",
       "zoom":{
         "position":{
-          "x": -4473967.666811766,
-          "y": 2675860.5247395057,
-          "z": -3663474.9131234586
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
         },
-        "orientation":{
-          "direction":{
-            "x": 0.2463668715843988,
-            "y": -0.9614965767580186,
-            "z": -0.1217690332897825
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
           },
-          "up":{
-            "x": -0.6675963535907656,
-            "y": -0.07727892682405241,
-            "z": -0.740501908263062
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
           }
         }
       }
@@ -1399,27 +1406,23 @@
     {
       "id": 66,
       "type": "Model",
-      "name":"Growth Capsule Model",
-      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/container/container_MERGED.gltf",
+      "name":"Growth Capsule Model 3",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/container/container_light_baked.gltf",
       "position": {
-        "lng": 149.1165299753,
-        "lat": -35.2785827596,
+        "lng": 149.116541432,
+        "lat": -35.2785529873,
         "height": 584.5890930951741
       },
       "rotation": {
-        "heading": 125,
+        "heading": 33,
         "pitch": 0,
         "roll": 0
       },
-      "boundingSphereRadius": 1.854135010370868,
-      "source": [
-        {
-          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/container/container_MERGED.gltf"
-        },
-        {
-          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/container/buffer.bin"
-        }
-      ]
+      "boundingSphereRadius": 6.354320339206865,
+      "zoom":"boundingSphere",
+      "source": {
+        "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/container/container_light_baked.gltf"
+      }
     },
     {
       "id": 67,
@@ -1458,6 +1461,97 @@
       "maxzoom": 24,
       "useProxy":true,
       "url": "https://s3-us-west-1.amazonaws.com/1-tiles.mapsmadeeasy.com/{x}/3ed73f18925c481ba0ac0386226a8caa/d8f0479d98aa45358c142146f69b6461/{z}/{x}/{reverseY}.png"
+    },
+    {
+      "id": 69,
+      "type": "Model",
+      "name":"Research School of Biology",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/RSB/robertson_gh-fullresMesh_simplified_3d_mesh.gltf",
+      "position": {
+        "lng": 149.1171203434,
+        "lat": -35.2786543851,
+        "height": 637.7020755803
+      },
+      "rotation": {
+        "heading": 88,
+        "pitch": 0,
+        "roll": 0
+      },
+      "boundingSphereRadius": 169.4525991168452,
+      "zoom":"boundingSphere",
+      "source": [
+        {
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/RSB/robertson_gh-fullresMesh_simplified_3d_mesh.gltf"
+        },
+        {
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/RSB/buffer.bin"
+        },
+        {
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/RSB/robertson_gh-fullresMesh_texture.jpg"
+        }
+      ]
+    },
+    {
+      "id": 70,
+      "type": "Model",
+      "name":"Growth Capsule Model 1",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/container/container_light_baked.gltf",
+      "position": {
+        "lng": 149.1165920163,
+        "lat": -35.2784246748,
+        "height": 583.9890930951741
+      },
+      "rotation": {
+        "heading": 213,
+        "pitch": 0,
+        "roll": 0
+      },
+      "boundingSphereRadius": 6.354320339206865,
+      "zoom":"boundingSphere",
+      "source": {
+        "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/container/container_light_baked.gltf"
+      }
+    },
+    {
+      "id": 71,
+      "type": "Model",
+      "name":"Growth Capsule Model 4",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/Capsule+4/2022-02-GrowthCapsule04-polycam.glb",
+      "position": {
+        "lng": 149.1164981353,
+        "lat": -35.2785333134,
+        "height": 586.1603884191
+      },
+      "rotation": {
+        "heading": 123.6,
+        "pitch": 0,
+        "roll": 0
+      },
+      "boundingSphereRadius": 8.111670345457522,
+      "zoom":"boundingSphere",
+      "source": {
+        "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/Capsule+4/2022-02-GrowthCapsule04-polycam.glb"
+      }
+    },
+    {
+      "id": 72,
+      "type": "Model",
+      "name":"Plant Growth Facility",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/PGF/2022-03-APPF+PlantGrowthFacility-polycam.glb",
+      "position": {
+        "lng": 149.1166696509,
+        "lat": -35.2768990094,
+        "height": 588.1603884191
+      },
+      "rotation": {
+        "heading": 215,
+        "pitch": 0,
+        "roll": 0
+      },
+      "boundingSphereRadius": 13.368634786888395,
+      "source": {
+        "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/PGF/2022-03-APPF+PlantGrowthFacility-polycam.glb"
+      }
     }
   ],
   "categories": [

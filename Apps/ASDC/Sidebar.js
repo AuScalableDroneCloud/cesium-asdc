@@ -306,7 +306,6 @@ export const downloadFile = (asset, data, index, format) => {
             acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
             return acc;
           }, {})
-          console.log(cookies[data.source.url  + `_${format}`]);
           if (cookies[data.source.url  + `_${format}`]){
             waitModal.style.display = "none";
             document.cookie = data.source.url + `_${format}` + "= ; Path=/ ; expires = " + new Date().toUTCString();

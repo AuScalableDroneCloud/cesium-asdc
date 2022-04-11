@@ -30,6 +30,17 @@ import {
 import { closeGraphModal, loadGraph } from "./Graphs.js";
 import { findAssetAndDataFromUrl } from "./URL.js";
 
+// var webAuth = new auth0.WebAuth({
+//   domain:       'https://au-scalable-drone-cloud.au.auth0.com/',
+//   clientID:     'be8iHLsWn2t6ZsyZh0UofW1oaWScfsfC'
+// });
+
+// webAuth.authorize({
+//   // redirectUri:"/cesium/Apps/ASDC/",
+//   redirectUri:"https://asdc.cloud.edu.au/complete/auth0",
+//   responseType: "code"
+// });
+
 Cesium.Ion.defaultAccessToken = cesiumIonAccessToken;
 
 window.CESIUM_BASE_URL = "/cesium/Build/Cesium";
