@@ -754,7 +754,7 @@ export const loadData = (
         // );
       }
     } else {
-      if (data["type"] === "Influx") {
+      if (data["type"] === "Influx" || data["type"]==="ImageSeries") {
         //Influx charts from 2 weeks before
         var currentDate = new Date();
         viewer.clock.currentTime = new Cesium.JulianDate.fromDate(currentDate);

@@ -36,10 +36,59 @@ import { findAssetAndDataFromUrl } from "./URL.js";
 // });
 
 // webAuth.authorize({
-//   // redirectUri:"/cesium/Apps/ASDC/",
-//   redirectUri:"https://asdc.cloud.edu.au/complete/auth0",
+//   // redirectUri:"https://asdc.cloud.edu.au/cesium/Apps/ASDC/",
+//   redirectUri:"https://asdc.cloud.edu.au/complete/auth0", //wrond state parameter
+//   // redirectUri: "/cesium/Apps/ASDC/",
+//   // redirectUri: window.location.origin,
 //   responseType: "code"
 // });
+
+// auth0 = await createAuth0Client({
+//   domain:       'https://au-scalable-drone-cloud.au.auth0.com/',
+//   clientID:     'be8iHLsWn2t6ZsyZh0UofW1oaWScfsfC'
+// });
+// let auth0 = null
+// const configureClient = async () => {
+//   // const response = await fetchAuthConfig();
+//   // const config = await response.json();
+
+//   auth0 = await createAuth0Client({
+//     domain:       'https://au-scalable-drone-cloud.au.auth0.com',
+//     client_id:     'be8iHLsWn2t6ZsyZh0UofW1oaWScfsfC'
+//   });
+// };
+// console.log(window.location.origin);
+// const login = async () => {
+//   console.log(auth0.transactionManager.transaction.state);
+//   await auth0.loginWithRedirect({
+//     // redirect_uri: "https://asdc.cloud.edu.au/cesium/Apps/ASDC/"
+//     // redirect_uri: window.location.origin
+//     // redirect_uri: auth0.transactionManager.transaction ? `https://asdc.cloud.edu.au/complete/auth0?state=${auth0.transactionManager.transaction.state}` : `https://asdc.cloud.edu.au/complete/auth0`
+//     redirect_uri: `https://asdc.cloud.edu.au/complete/auth0`
+//   });
+// };
+
+// window.onload = async () => {
+//   await configureClient();
+//   console.log(auth0);
+//   const isAuthenticated = await auth0.isAuthenticated();
+//   console.log(isAuthenticated);
+//   // if (isAuthenticated) {
+//   //   // show the gated content
+//   //   return;
+//   // }
+//   // await login();
+//   // return;
+
+//   // const query = window.location.search;
+//   // if (query.includes("code=") && query.includes("state=")) {
+
+//   //   await auth0.handleRedirectCallback();
+
+//   //   // Use replaceState to redirect the user away and remove the querystring parameters
+//   //   window.history.replaceState({}, document.title, "/");
+//   // }
+// }
 
 Cesium.Ion.defaultAccessToken = cesiumIonAccessToken;
 

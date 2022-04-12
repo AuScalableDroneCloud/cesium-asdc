@@ -41,7 +41,6 @@ export const setupSidebar = (uploads) => {
   if (!uploads && !publicTask){
     if (Object.keys(sourceDivs).length==0){
       var sources= ["Public Data", "WebODM Projects"];
-      // var sourceDivs = {};
       sources.map(s=>{
         sourceDivs[s] = createAccordion(s);
         var sourceAccordionPanelDiv = document.createElement("div");
@@ -88,6 +87,52 @@ export const setupSidebar = (uploads) => {
       if (projectDivs[odmProject.id]) return
       projectDivs[odmProject.id] = createAccordion(odmProject.name, 18);
       projectDivs[odmProject.id].id = `project-${odmProject.id}`;
+
+      const oldProjectClick = projectDivs[odmProject.id].onclick;
+      projectDivs[odmProject.id].onclick=()=>{
+        oldProjectClick();
+        var projectAssets = assets.filter(a=>a.project==odmProject.id);
+        projectAssets.map(asset=>{
+          var assetDatasets = [];
+          asset?.data?.map((dataID, index) => {
+            for (var i = 0; i < datasets.length; i++) {
+              if (datasets[i].id == dataID) {
+                assetDatasets.push(datasets[i]);
+              }
+            }
+          })
+
+          if (projectDivs[odmProject.id].firstChild.classList.contains("sidebar-accordion-active")){
+            var data = assetDatasets[0];
+
+            var position = Cesium.Cartesian3.fromDegrees(
+              data["position"]["lng"],
+              data["position"]["lat"]
+            );
+
+            markersDataSource.entities.add({
+              position: position,
+              billboard: {
+                image: pinBuilder
+                  .fromColor(Cesium.Color.fromCssColorString("#5B8B51"), 48)
+                  .toDataURL(),
+                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
+                  data.boundingSphereRadius
+                    ? data.boundingSphereRadius * 4
+                    : 2500,
+                  Number.MAX_VALUE
+                ),
+              },
+              id: "marker_" + asset.id,
+            });
+          } else {
+            markersDataSource.entities.removeById("marker_" + asset.id);
+          }
+        })
+      }
 
       if (sourceDivs["WebODM Projects"].nextElementSibling.firstChild.className === "loader-parent"){
         sourceDivs["WebODM Projects"].nextElementSibling.removeChild(sourceDivs["WebODM Projects"].nextElementSibling.firstChild);
@@ -194,25 +239,27 @@ export const setupSidebar = (uploads) => {
           data["position"]["lng"],
           data["position"]["lat"]
         );
-
-        markersDataSource.entities.add({
-          position: position,
-          billboard: {
-            image: pinBuilder
-              .fromColor(Cesium.Color.fromCssColorString("#5B8B51"), 48)
-              .toDataURL(),
-            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-            disableDepthTestDistance: Number.POSITIVE_INFINITY,
-            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-            distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
-              data.boundingSphereRadius
-                ? data.boundingSphereRadius * 4
-                : 2500,
-              Number.MAX_VALUE
-            ),
-          },
-          id: "marker_" + asset.id,
-        });
+        
+        if (asset.categoryID != -1) {
+          markersDataSource.entities.add({
+            position: position,
+            billboard: {
+              image: pinBuilder
+                .fromColor(Cesium.Color.fromCssColorString("#5B8B51"), 48)
+                .toDataURL(),
+              verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+              disableDepthTestDistance: Number.POSITIVE_INFINITY,
+              heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+              distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
+                data.boundingSphereRadius
+                  ? data.boundingSphereRadius * 4
+                  : 2500,
+                Number.MAX_VALUE
+              ),
+            },
+            id: "marker_" + asset.id,
+          });
+        }
       }
     }
   });
@@ -1235,8 +1282,7 @@ const createMarkersDataSource = () => {
 }
 
 const createAssetDiv = (asset, uploads, datesPanelDiv) => {
-  var assetDiv = createAccordion(asset.name, 36)
-
+  var assetDiv = createAccordion(asset.name, 36);  
   var assetCheckbox = document.createElement("input");
   assetCheckbox.id = `assetCheckbox-${asset.id}`;
   assetCheckbox.type = "checkbox";

@@ -13,6 +13,7 @@
   const fetch = (...args) =>import('node-fetch').then(({ default: fetch }) => fetch(...args));
   const JSON5 = require('json5');
   const Cesium = require('cesium');
+  const https = require('https');
 
   const influx = new Influx.InfluxDB({
     database: "main",
@@ -751,9 +752,16 @@
       })
   })
 
-
+//   const key = fs.readFileSync('./key.pem');
+//   const cert = fs.readFileSync('./certificate.pem');
+//   const server = https.createServer({
+//     key: key,
+//     cert: cert
+// }, app);
   const server = app.listen(
+  // server.listen(
     argv.port,
+    // 443,
     // argv.public ? undefined : "localhost",
     argv.public ? undefined : "0.0.0.0",
     function () {
