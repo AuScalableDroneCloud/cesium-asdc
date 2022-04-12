@@ -27,6 +27,8 @@ export var assetDivs = {};
 export var projectDivs = {};
 export var categoryDivs = {};
 
+export var taskInfos;
+
 export var selectedDimension;
 export var billboard = false;
 
@@ -100,4 +102,8 @@ export function setLastCurrentTime(newCurrentTime) {
 
 export function setBillboard(newBillboard) {
   billboard = newBillboard;
+}
+
+export function setTaskInfos(newTaskInfos){
+  taskInfos = newTaskInfos;
 }

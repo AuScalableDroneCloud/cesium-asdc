@@ -30,6 +30,11 @@
   border-bottom: 1px solid #efe5d5;
 }
 
+.sidebar-text {
+  padding: 10px;
+  border-bottom: 1px solid #efe5d5;
+}
+
 .sidebar-upload-button {
   padding: 10px;
   border-top: 1px solid #efe5d5;

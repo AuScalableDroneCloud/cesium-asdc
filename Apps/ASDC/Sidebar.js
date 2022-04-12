@@ -23,7 +23,8 @@ import {
   sourceDivs,
   projectDivs,
   categoryDivs,
-  publicTask
+  publicTask,
+  taskInfos
 } from "./State.js";
 import { loadAsset, loadData, syncTimeline } from "./Datasets.js";
 import { indexFile, pcFormats, processingAPI } from "./Constants.js";
@@ -147,6 +148,23 @@ export const setupSidebar = (uploads) => {
 
     var datesPanelDiv = document.createElement("div");
     datesPanelDiv.className = "sidebar-accordion-panel";
+
+    if (asset.categoryID == -1 || asset.categoryID == -2) {
+      var metadataDiv = document.createElement("div");
+      metadataDiv.className = "sidebar-text";
+      var taskInfo = taskInfos[asset.taskID]
+      metadataDiv.innerHTML = 
+      `<table>
+      <tr><td><strong> Created on: </strong></td><td>${new Date(taskInfo.created_at).toLocaleString('en-au', {year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'})}</td></tr>
+      ${taskInfo.processing_node_name ? `<tr><td><strong>Processing Node: </strong></td><td>${taskInfo.processing_node_name}</td></tr>`: ""}
+      ${taskInfo.options ? `<tr><td><strong>Options: </strong></td><td>${taskInfo.options.map(o=>`${o.name} : ${o.value}`)}</td></tr>` : ""}
+      ${taskInfo.statistics.pointcloud ? `<tr><td><strong>Average GSD: </strong></td><td>${Math.round(taskInfo.statistics.gsd*100)/100} cm</td></tr>`: ""}
+      ${taskInfo.statistics.pointcloud ? `<tr><td><strong>Area: </strong></td><td>${Math.round(taskInfo.statistics.area*100)/100} m²</td></tr>`: ""}
+      ${taskInfo.statistics.pointcloud ? `<tr><td><strong>Reconstructed Points: </strong></td><td>${taskInfo.statistics.pointcloud.points}</td></tr>` : ""}
+      </table>
+      `;
+      datesPanelDiv.appendChild(metadataDiv);
+    }
 
     var assetDiv = createAssetDiv(asset, uploads, datesPanelDiv);
 
@@ -302,7 +320,6 @@ export const downloadFile = (asset, data, index, format) => {
           var cookies = document.cookie.split(';')
           .map(v => v.split('='))
           .reduce((acc, v) => {
-            console.log(v);
             acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
             return acc;
           }, {})
@@ -355,7 +372,6 @@ export const downloadFile = (asset, data, index, format) => {
           var cookies = document.cookie.split(';')
           .map(v => v.split('='))
           .reduce((acc, v) => {
-            console.log(v);
             acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
             return acc;
           }, {})

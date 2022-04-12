@@ -19,7 +19,8 @@ import {
   assets,
   setODMProjects,
   publicTask,
-  selectedData
+  selectedData,
+  setTaskInfos
 } from "./State.js";
 import { indexFile } from "./Constants.js";
 import { loadGraph, closeGraphModal } from "./Graphs.js";
@@ -1175,8 +1176,11 @@ export const fetchWebODMProjects = () => {
           var lastAssetIndex = assets[assets.length - 1].id;
           Promise.all(taskInfoPromises).then((taskInfos, taskIndex) => {
             if (Array.isArray(odmProjects)) {
+              var taskDict = {};
               odmProjects.map((project, projectIndex) => {
+                // setTaskInfos(taskInfos);
                 taskInfos[projectIndex].map(task => {
+                  taskDict[task.id] = task;
                   if (task.available_assets.includes("georeferenced_model.laz")) {
                     metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`, {
                       cache: "no-store",
@@ -1227,6 +1231,7 @@ export const fetchWebODMProjects = () => {
                   }
                 })
               })
+              setTaskInfos(taskDict);
             }
 
             Promise.all(metaDataPromises).then((metadata) => {
@@ -1339,7 +1344,8 @@ export const fetchWebODMProjects = () => {
                         "status": "active",
                         "categoryID": -1,
                         "data": taskData,
-                        project: project.id
+                        project: project.id,
+                        taskID: task.id
                       })
                     }
                   })
@@ -1370,6 +1376,9 @@ export const fetchPublicTask = ()=>{
         var metaDataPromises = [];
         var odmAssets = [];
         var odmDatasets = [];
+        var taskDict= {};
+        taskDict[publicTask.id] = publicTask;
+        setTaskInfos(taskDict);
         if (publicTask.available_assets.includes("georeferenced_model.laz")) {
           metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`, {
             cache: "no-store",
@@ -1544,7 +1553,8 @@ export const fetchPublicTask = ()=>{
               "status": "active",
               "categoryID": -2,
               "data": taskData,
-              project: projectID
+              project: projectID,
+              taskID:publicTask.id
             })
           }
 
