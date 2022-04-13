@@ -39,10 +39,6 @@ var cookies = document.cookie.split(';')
     return acc;
   }, {})
 
-if (document.referrer != "https://asdc.cloud.edu.au/"){
-  window.location.href = `https://asdc.cloud.edu.au/login/auth0?next=${window.location.href}`; 
-}
-
 Cesium.Ion.defaultAccessToken = cesiumIonAccessToken;
 
 window.CESIUM_BASE_URL = "/cesium/Build/Cesium";

@@ -1155,6 +1155,9 @@ export const fetchWebODMProjects = () => {
           if (response.status===200){
             return response.json()
           } else {
+            if (response.status===403){
+              window.location.href = `https://asdc.cloud.edu.au/login/auth0?next=${window.location.href}`; 
+            }
             resolve();
           }
         })
