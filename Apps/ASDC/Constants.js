@@ -1,10 +1,6 @@
 export const cesiumIonAccessToken =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI1NWZkNGFlZS1iNzVhLTRmNTAtOThmYi1kMTI1MjlmOTVlNjciLCJpZCI6NzIyNTQsImlhdCI6MTYzNTkwNDI4OX0.EXVvJZa8yaugMmQNkc9pjWfrjqeOpZ8Jg7_0Hdwnb1A";
 
-export const indexFile =
-  "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/index.json";
-// export const indexFile = "/cesium/Apps/ASDC/index.json";
-
 // export const eptServer = "http://localhost:3000";
 // export const eptServer = "http://192.168.99.100:3000";
 export const eptServer = "https://asdc.cloud.edu.au/ept";

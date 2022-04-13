@@ -20,9 +20,9 @@ import {
   setODMProjects,
   publicTask,
   selectedData,
-  setTaskInfos
+  setTaskInfos,
+  indexFile
 } from "./State.js";
-import { indexFile } from "./Constants.js";
 import { loadGraph, closeGraphModal } from "./Graphs.js";
 import { setupStyleToolbar, applyStyle } from "./Style.js";
 import { highlightHeightPX, highlightColor, eptServer } from "./Constants.js";

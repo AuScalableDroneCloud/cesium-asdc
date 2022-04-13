@@ -40,6 +40,10 @@ export const pinBuilder = new Cesium.PinBuilder();
 
 export const timelineTracks = {};
 
+export var indexFile =
+  "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/index.json";
+// export const indexFile = "/cesium/Apps/ASDC/index.json";
+
 export function setViewer(newViewer) {
   viewer = newViewer;
 }
@@ -106,4 +110,8 @@ export function setBillboard(newBillboard) {
 
 export function setTaskInfos(newTaskInfos){
   taskInfos = newTaskInfos;
+}
+
+export function setIndexFile(newIndexFile){
+  indexFile = newIndexFile;
 }

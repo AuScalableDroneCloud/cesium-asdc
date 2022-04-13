@@ -1,6 +1,6 @@
-import { setSelectedDataIDs, setPublicTask } from "./State.js";
+import { setSelectedDataIDs, setPublicTask, setIndexFile } from "./State.js";
 
-export const findAssetAndDataFromUrl = () => {
+export const readUrlParams = () => {
   var currentUrl = window.location.href.split('?')[0];
   if (currentUrl[currentUrl.length - 1] === "/")
     currentUrl = currentUrl.slice(0, currentUrl.length - 1);
@@ -17,4 +17,8 @@ export const findAssetAndDataFromUrl = () => {
   const urlParams = new URLSearchParams(queryString);
   const task = urlParams.get('task');
   setPublicTask(task);
+  const indexFile = urlParams.get('index');
+  if (indexFile){
+    setIndexFile(indexFile);
+  }
 };

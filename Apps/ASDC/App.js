@@ -28,73 +28,26 @@ import {
   closeModal,
 } from "./Sidebar.js";
 import { closeGraphModal, loadGraph } from "./Graphs.js";
-import { findAssetAndDataFromUrl } from "./URL.js";
+import { readUrlParams } from "./URL.js";
 
-// var webAuth = new auth0.WebAuth({
-//   domain:       'https://au-scalable-drone-cloud.au.auth0.com/',
-//   clientID:     'be8iHLsWn2t6ZsyZh0UofW1oaWScfsfC'
-// });
+var cookies = document.cookie.split(';')
+  .map(v => v.split('='))
+  .reduce((acc, v) => {
+    if (v[0] && v[1]) {
+      acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+    }
+    return acc;
+  }, {})
 
-// webAuth.authorize({
-//   // redirectUri:"https://asdc.cloud.edu.au/cesium/Apps/ASDC/",
-//   redirectUri:"https://asdc.cloud.edu.au/complete/auth0", //wrond state parameter
-//   // redirectUri: "/cesium/Apps/ASDC/",
-//   // redirectUri: window.location.origin,
-//   responseType: "code"
-// });
-
-// auth0 = await createAuth0Client({
-//   domain:       'https://au-scalable-drone-cloud.au.auth0.com/',
-//   clientID:     'be8iHLsWn2t6ZsyZh0UofW1oaWScfsfC'
-// });
-// let auth0 = null
-// const configureClient = async () => {
-//   // const response = await fetchAuthConfig();
-//   // const config = await response.json();
-
-//   auth0 = await createAuth0Client({
-//     domain:       'https://au-scalable-drone-cloud.au.auth0.com',
-//     client_id:     'be8iHLsWn2t6ZsyZh0UofW1oaWScfsfC'
-//   });
-// };
-// console.log(window.location.origin);
-// const login = async () => {
-//   console.log(auth0.transactionManager.transaction.state);
-//   await auth0.loginWithRedirect({
-//     // redirect_uri: "https://asdc.cloud.edu.au/cesium/Apps/ASDC/"
-//     // redirect_uri: window.location.origin
-//     // redirect_uri: auth0.transactionManager.transaction ? `https://asdc.cloud.edu.au/complete/auth0?state=${auth0.transactionManager.transaction.state}` : `https://asdc.cloud.edu.au/complete/auth0`
-//     redirect_uri: `https://asdc.cloud.edu.au/complete/auth0`
-//   });
-// };
-
-// window.onload = async () => {
-//   await configureClient();
-//   console.log(auth0);
-//   const isAuthenticated = await auth0.isAuthenticated();
-//   console.log(isAuthenticated);
-//   // if (isAuthenticated) {
-//   //   // show the gated content
-//   //   return;
-//   // }
-//   // await login();
-//   // return;
-
-//   // const query = window.location.search;
-//   // if (query.includes("code=") && query.includes("state=")) {
-
-//   //   await auth0.handleRedirectCallback();
-
-//   //   // Use replaceState to redirect the user away and remove the querystring parameters
-//   //   window.history.replaceState({}, document.title, "/");
-//   // }
-// }
+if (!cookies['sessionid']){
+  window.location.href = `https://asdc.cloud.edu.au/login/auth0?next=${window.location.href}`; 
+}
 
 Cesium.Ion.defaultAccessToken = cesiumIonAccessToken;
 
 window.CESIUM_BASE_URL = "/cesium/Build/Cesium";
 
-findAssetAndDataFromUrl();
+readUrlParams();
 
 Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(
   113.338953078,

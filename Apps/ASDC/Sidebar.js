@@ -27,7 +27,7 @@ import {
   taskInfos
 } from "./State.js";
 import { loadAsset, loadData, syncTimeline } from "./Datasets.js";
-import { indexFile, pcFormats, processingAPI } from "./Constants.js";
+import { pcFormats, processingAPI } from "./Constants.js";
 import { closeGraphModal } from "./Graphs.js";
 import { applyAlpha } from "./Style.js";
 
@@ -367,7 +367,9 @@ export const downloadFile = (asset, data, index, format) => {
           var cookies = document.cookie.split(';')
           .map(v => v.split('='))
           .reduce((acc, v) => {
-            acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+            if (v[0] && v[1]) {
+              acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+            }
             return acc;
           }, {})
           if (cookies[data.source.url  + `_${format}`]){
@@ -419,7 +421,9 @@ export const downloadFile = (asset, data, index, format) => {
           var cookies = document.cookie.split(';')
           .map(v => v.split('='))
           .reduce((acc, v) => {
-            acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+            if (v[0] && v[1]) {
+              acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+            }
             return acc;
           }, {})
           if (cookies[data.source[0].url  + `_zip`]){
