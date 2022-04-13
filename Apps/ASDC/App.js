@@ -39,7 +39,7 @@ var cookies = document.cookie.split(';')
     return acc;
   }, {})
 
-if (!cookies['sessionid']){
+if (document.referrer != "https://asdc.cloud.edu.au/"){
   window.location.href = `https://asdc.cloud.edu.au/login/auth0?next=${window.location.href}`; 
 }
 
