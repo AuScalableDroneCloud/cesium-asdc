@@ -130,7 +130,7 @@
       "name": "Growth Capsules - Phenospex Scanner",
       "status": "active",
       "categoryID": 6,
-      "data": [46,47,48,49,50,51,52,53,54,55, 56, 69, 70, 66, 71]
+      "data": [46,47,48,49,50,51,52,53,54,55, 56, 69, 73, 70, 66, 71]
     },
     {
       "id": 22,
@@ -868,6 +868,8 @@
         "lat": -36.3731306,
         "height": 1594
       },
+      "width":960,
+      "height":720,
       "camera": "AMRF_PER_C01",
       "timeOffset": 3600000,
       "startDateTime": "2021-03-03T03:00:00.000Z"
@@ -882,6 +884,8 @@
         "lat": -36.877349,
         "height": 1730
       },
+      "width":960,
+      "height":720,
       "camera": "AMRF_FRY_C01",
       "startDateTime": "2022-01-10T20:00:00.000Z"
     },
@@ -1465,7 +1469,7 @@
     {
       "id": 69,
       "type": "Model",
-      "name":"Research School of Biology",
+      "name":"Research School of Biology - untiled",
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/RSB/robertson_gh-fullresMesh_simplified_3d_mesh.gltf",
       "position": {
         "lng": 149.1171203434,
@@ -1552,6 +1556,31 @@
       "source": {
         "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/PGF/2022-03-APPF+PlantGrowthFacility-polycam.glb"
       }
+    },
+    {
+      "id": 73,
+      "type": "ModelTileset",
+      "name":"Research School of Biology - tiled",
+      "url": "ion",
+      "assetId":942295,
+      "position": {
+        "lng": 149.1170704094,
+        "lat":-35.27873980283574,
+        "height": 592.1895133636085
+      },
+      "boundingSphereRadius": 169.45259911684582,
+      "zoom":"boundingSphere",
+      "source": [
+        {
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/RSB/robertson_gh-fullresMesh_simplified_3d_mesh.gltf"
+        },
+        {
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/RSB/buffer.bin"
+        },
+        {
+          "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/RSB/robertson_gh-fullresMesh_texture.jpg"
+        }
+      ]
     }
   ],
   "categories": [

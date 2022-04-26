@@ -27,17 +27,8 @@ import {
   openModal,
   closeModal,
 } from "./Sidebar.js";
-import { closeGraphModal, loadGraph } from "./Graphs.js";
+import { closeGraphModal, loadCSVGraphs, loadInfluxGraphs } from "./Graphs.js";
 import { readUrlParams } from "./URL.js";
-
-var cookies = document.cookie.split(';')
-  .map(v => v.split('='))
-  .reduce((acc, v) => {
-    if (v[0] && v[1]) {
-      acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
-    }
-    return acc;
-  }, {})
 
 Cesium.Ion.defaultAccessToken = cesiumIonAccessToken;
 
@@ -92,18 +83,25 @@ if (publicTask) {
     setupSidebar(false);
   })
 } else {
-  fetchIndexAssets().then(()=>{
-    setupSidebar(uploadPage);
-    if (!uploadPage){
-      fetchWebODMProjects()
-      .then(()=>{
-        setupSidebar(uploadPage);
-      })
-      .catch(()=>{
-        setupSidebar(uploadPage);
-      })
-    }
-  })
+  if (new URLSearchParams(window.location.search).get('index')){
+    fetchIndexAssets().then(()=>{
+      setupSidebar(uploadPage,true);
+    })
+  } else {
+    fetchIndexAssets().then(()=>{
+      setupSidebar(uploadPage);
+      if (!uploadPage){
+        fetchWebODMProjects()
+        .then(()=>{
+          setupSidebar(uploadPage);
+        })
+        .catch(()=>{
+          setupSidebar(uploadPage);
+        })
+      }
+    })
+  }
+  
 }
 
 const handleBillboard = (billboard) => {
@@ -250,7 +248,7 @@ viewer.camera.moveEnd.addEventListener(() => {
               },
               data: data,
             });
-            if (selectedData && selectedData === data) {
+            if ((selectedData && selectedData === data) || selectedDatasets.find(d=>d.id==data.id)) {
               selectedIndex = viewMenu.length - 1;
             }
             if (selectedAssetIDs.includes(asset.id)) {
@@ -270,7 +268,6 @@ viewer.camera.moveEnd.addEventListener(() => {
 
   if (viewMenu.length > 0) {
     Sandcastle.addToolbarMenu(viewMenu, "cam-toolbar");
-    // if (selectedIndex && !timeseriesInView) {
     if (selectedIndex) {
       document.getElementById("cam-toolbar").childNodes[0].selectedIndex =
         selectedIndex;
@@ -296,6 +293,8 @@ viewer.clock.onTick.addEventListener((clock) => {
           data.asset.id == assetID &&
           (data.type == "PointCloud" ||
             data.type == "EPTPointCloud" ||
+            data.type == "Imagery" ||
+            data.type == "GeoJSON" ||
             data.type === "ModelTileset")
       )
 
@@ -304,46 +303,61 @@ viewer.clock.onTick.addEventListener((clock) => {
       return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
 
-
     for (var i = 0; i < timelineAssetDatasets.length; i++) {
-      if (
-        (i === 0 ||
-          new Date(timelineAssetDatasets[i].date).getTime() <= currentDate.getTime()) &&
-        (i === timelineAssetDatasets.length - 1 ||
-          new Date(timelineAssetDatasets[i + 1].date).getTime() > currentDate.getTime())
+      var prevDateDataset = timelineAssetDatasets.find((d,dataIndex)=>{
+        if (dataIndex<i && new Date(d.date).getTime()<new Date(timelineAssetDatasets[i].date).getTime()){
+          return d
+        }
+      });
+      var nextDateDataset = timelineAssetDatasets.find((d,dataIndex)=>{
+        if (dataIndex>i && new Date(d.date).getTime()>new Date(timelineAssetDatasets[i].date).getTime()){
+          return d
+        }
+      });
+
+      if ((!prevDateDataset ||
+            (new Date(timelineAssetDatasets[i].date).getTime()<=currentDate.getTime())) &&
+        ((!nextDateDataset || (new Date(nextDateDataset.date).getTime() > currentDate.getTime()))
+        )
       ) {
-        if (Array.isArray(tilesets[assetID][timelineAssetDatasets[i].id])) {
-          if(tilesets[assetID][timelineAssetDatasets[i].id]){
-            tilesets[assetID][timelineAssetDatasets[i].id].map((tileset) => {
-              if (MSSE !== 0) {
-                if (tileset){
-                  tileset.show = true;
+        if (tilesets[assetID] && tilesets[assetID][timelineAssetDatasets[i].id]){
+          if (Array.isArray(tilesets[assetID][timelineAssetDatasets[i].id])) {
+              tilesets[assetID][timelineAssetDatasets[i].id].map((tileset) => {
+                if (MSSE !== 0) {
+                  if (tileset){
+                    tileset.show = true;
+                  }
                 }
-              }
-            });
-          }
-        } else {
-          if (MSSE !== 0) {
-            if(tilesets[assetID][timelineAssetDatasets[i].id]){
-              if(tilesets[assetID][timelineAssetDatasets[i].id]){
-                tilesets[assetID][timelineAssetDatasets[i].id].show = true;
-              }
+              });
+          } else {
+            if (MSSE !== 0) {
+              tilesets[assetID][timelineAssetDatasets[i].id].show = true;
             }
           }
         }
+        if (imageryLayers[assetID] && imageryLayers[assetID][timelineAssetDatasets[i].id]){
+          imageryLayers[assetID][timelineAssetDatasets[i].id].show=true;
+        }
+        if (dataSources[assetID] && dataSources[assetID][timelineAssetDatasets[i].id]){
+          dataSources[assetID][timelineAssetDatasets[i].id].show=true;
+        }
       } else {
-        if (Array.isArray(tilesets[assetID][timelineAssetDatasets[i].id])) {
-          if (tilesets[assetID][timelineAssetDatasets[i].id]){
+        if (tilesets[assetID] && tilesets[assetID][timelineAssetDatasets[i].id]){
+          if (Array.isArray(tilesets[assetID][timelineAssetDatasets[i].id])) {
             tilesets[assetID][timelineAssetDatasets[i].id].map((tileset) => {
               if (tileset){
                 tileset.show = false;
               }
             });
-          }
-        } else {
-          if (tilesets[assetID][timelineAssetDatasets[i].id]){
+          } else {
             tilesets[assetID][timelineAssetDatasets[i].id].show = false;
           }
+        }
+        if (imageryLayers[assetID] && imageryLayers[assetID][timelineAssetDatasets[i].id]){
+          imageryLayers[assetID][timelineAssetDatasets[i].id].show=false;
+        }
+        if (dataSources[assetID] && dataSources[assetID][timelineAssetDatasets[i].id]){
+          dataSources[assetID][timelineAssetDatasets[i].id].show=false;
         }
       }
     }
@@ -389,65 +403,115 @@ viewer.clock.onTick.addEventListener((clock) => {
             controllers[data.id].abort();
             controllers[data.id] = new AbortController();
           }
-
-          fetch(
-            `/cesium/influx/images?camera=${data.camera}&time=${
-              data.timeOffset
-                ? currentDate.getTime() - data.timeOffset
-                : currentDate.getTime()
-            }&startTime=${new Date(data.startDateTime).getTime()}`,
-            { cache: "no-store", signal: controllers[data.id].signal }
-            // { cache: "no-store" }
-          )
-            .then((response) => {
-              if (response.status !== 200) {
-                console.log(response);
-              }
+          if (data.source && data.source.type === "csv") {
+            fetch(
+              data.source.url,
+              { cache: "no-store", signal: controllers[data.id].signal }
+            ).then((response) => {
               return response;
             })
-            .then((response) => response.json())
+            .then((response) => response.text())
             .then((response) => {
-              if (response.length != 0) {
-                var imageUrl = `https://img.amrf.org.au/cameras/amrf/${
-                  data.camera
-                }/${data.camera}~720x/$dirstamp/${
-                  data.camera
-                }~720x_$filestamp.jpg?timestamp_ms=${new Date(
-                  response[0].time
-                ).getTime()}`;
+              var csvRows = response.split('\n');
+              var timeIndex = csvRows[0].split(',').indexOf(data.source.columns.time);
+              var imageIndex = csvRows[0].split(',').indexOf(data.source.columns.image);
+              csvRows = csvRows.slice(1,csvRows.length-1)
+    
+              var earliestDate;
+              var earliestRow;
+              var firstImage;
+              for (var row=0;row<csvRows.length;row++){
+                var csvRowColumns = csvRows[row].split(',');
+                if (new Date(csvRowColumns[timeIndex]).getTime() <= currentDate && (!earliestDate || (earliestDate && earliestDate.getTime()<new Date(csvRowColumns[timeIndex]).getTime()))){
+                  earliestDate = new Date(csvRowColumns[timeIndex]);
+                  earliestRow = row;
+                }
+                if (new Date(csvRowColumns[timeIndex]).getTime() === new Date(data.startDateTime).getTime()){
+                  firstImage = csvRowColumns[imageIndex];
+                }
+              }
+              if (!!earliestDate && !!earliestRow){
+                var imageUrl = data.url.replace("{Image}",csvRows[earliestRow].split(',')[imageIndex])
               } else {
-                var imageUrl = `https://img.amrf.org.au/cameras/amrf/${
-                  data.camera
-                }/${data.camera}~720x/$dirstamp/${
-                  data.camera
-                }~720x_$filestamp.jpg?timestamp_ms=${new Date(
-                  data.startDateTime
-                ).getTime()}`;
+                var imageUrl = data.url.replace("{Image}",firstImage);
               }
-              if (
-                entities[data.asset.id][
-                  data.id
-                ].rectangle.material.image.getValue() !== imageUrl
-              ) {
-                entities[data.asset.id][data.id].rectangle.material =
-                  new Cesium.ImageMaterialProperty({
-                    image: imageUrl,
-                    color:
-                      entities[data.asset.id][data.id].rectangle.material.color,
-                  });
+              entities[data.asset.id][data.id].rectangle.material =
+                new Cesium.ImageMaterialProperty({
+                  image: imageUrl,
+                  color:
+                    entities[data.asset.id][data.id].rectangle.material.color,
+                });
 
-                entities[data.asset.id][data.id].billboard.image = imageUrl;
-              }
+              entities[data.asset.id][data.id].billboard.image = imageUrl;
             })
             .catch((error) => {
               if (error.name !== "AbortError") {
                 console.log(error);
               }
             });
+          } else {
+            fetch(
+              `/cesium/influx/images?camera=${data.camera}&time=${
+                data.timeOffset
+                  ? currentDate.getTime() - data.timeOffset
+                  : currentDate.getTime()
+              }&startTime=${new Date(data.startDateTime).getTime()}`,
+              { cache: "no-store", signal: controllers[data.id].signal }
+              // { cache: "no-store" }
+            )
+              .then((response) => {
+                if (response.status !== 200) {
+                  console.log(response);
+                }
+                return response;
+              })
+              .then((response) => response.json())
+              .then((response) => {
+                if (response.length != 0) {
+                  var imageUrl = `https://img.amrf.org.au/cameras/amrf/${
+                    data.camera
+                  }/${data.camera}~720x/$dirstamp/${
+                    data.camera
+                  }~720x_$filestamp.jpg?timestamp_ms=${new Date(
+                    response[0].time
+                  ).getTime()}`;
+                } else {
+                  var imageUrl = `https://img.amrf.org.au/cameras/amrf/${
+                    data.camera
+                  }/${data.camera}~720x/$dirstamp/${
+                    data.camera
+                  }~720x_$filestamp.jpg?timestamp_ms=${new Date(
+                    data.startDateTime
+                  ).getTime()}`;
+                }
+                if (
+                  entities[data.asset.id][
+                    data.id
+                  ].rectangle.material.image.getValue() !== imageUrl
+                ) {
+                  entities[data.asset.id][data.id].rectangle.material =
+                    new Cesium.ImageMaterialProperty({
+                      image: imageUrl,
+                      color:
+                        entities[data.asset.id][data.id].rectangle.material.color,
+                    });
+
+                  entities[data.asset.id][data.id].billboard.image = imageUrl;
+                }
+              })
+              .catch((error) => {
+                if (error.name !== "AbortError") {
+                  console.log(error);
+                }
+              });
+          }
         }
       }
       if (data.type == "Influx") {
-        loadGraph(data);
+        loadInfluxGraphs(data);
+      }
+      if (data.type==="CSV"){
+        loadCSVGraphs(data);
       }
     });
   }

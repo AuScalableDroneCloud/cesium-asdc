@@ -42,7 +42,7 @@ export const timelineTracks = {};
 
 export var indexFile =
   "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/index.json";
-// export const indexFile = "/cesium/Apps/ASDC/index.json";
+  // "/cesium/Apps/ASDC/index.json";
 
 export function setViewer(newViewer) {
   viewer = newViewer;

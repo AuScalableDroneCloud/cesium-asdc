@@ -31,14 +31,14 @@ import { pcFormats, processingAPI } from "./Constants.js";
 import { closeGraphModal } from "./Graphs.js";
 import { applyAlpha } from "./Style.js";
 
-export const setupSidebar = (uploads) => {
+export const setupSidebar = (uploads, indexParam=false) => {
   if (!assets) return;
 
   var sidebarDataButtons = document.getElementById("sidebar-data-buttons");
 
   createMarkersDataSource();
 
-  if (!uploads && !publicTask){
+  if (!uploads && !publicTask && !indexParam){
     if (Object.keys(sourceDivs).length==0){
       var sources= ["Public Data", "WebODM Projects"];
       sources.map(s=>{
@@ -71,7 +71,7 @@ export const setupSidebar = (uploads) => {
     }
   } else {
       categories.map((cat) => {
-        if ((uploads && cat.id == 6) || publicTask) {
+        if ((uploads && cat.id == 6) || publicTask || indexParam) {
           categoryDivs[cat.id] = createAccordion(cat.name,18);
           categoryDivs[cat.id].id = `category-${cat.id}`;
           sidebarDataButtons.appendChild(categoryDivs[cat.id]);
@@ -186,7 +186,7 @@ export const setupSidebar = (uploads) => {
       var accordionDiv = categoryDivs[asset.categoryID];
       var accordionPanelDiv = accordionDiv.nextElementSibling;
 
-      if (!uploads && !publicTask && sourceDivs["Public Data"].nextElementSibling.firstChild.className === "loader-parent"){
+      if (!uploads && !publicTask && !indexParam && sourceDivs["Public Data"].nextElementSibling.firstChild.className === "loader-parent"){
         sourceDivs["Public Data"].nextElementSibling.removeChild(sourceDivs["Public Data"].nextElementSibling.firstChild);
       }
     }
@@ -260,7 +260,10 @@ export const setupSidebar = (uploads) => {
             id: "marker_" + asset.id,
           });
         }
-      }
+      } 
+      // else {
+      //   console.log(assetDatasets[0]);
+      // }
     }
   });
 
@@ -308,6 +311,7 @@ export const setupSidebar = (uploads) => {
         if (datasets[i].id == dataID) {
           newSelectedDatasets.push(datasets[i]);
           loadData(asset, datasets[i], index == 0, false, true);
+          // loadData(asset, datasets[i], index == 0, datasets[i]["type"] === "CSV" || datasets[i]["type"] === "Influx", true);
           break;
         }
       }
@@ -661,6 +665,8 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
     );
 
     loadData(asset, data, true, false, true);
+    // loadData(asset, data, true, data["type"] === "CSV" || data["type"] === "Influx", true);
+    // loadData(asset, data, true, true , true);
 
     if (new Date(data.date) != "Invalid Date") {
       viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
@@ -692,9 +698,17 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
     ) {
       imageryLayers[asset.id][data.id].show = false;
     }
-    if (data["type"] == "Influx") {
-      closeGraphModal();
+    if (data["type"] == "Influx" || data["type"] == "CSV") {
+      var container = document.getElementById("graphs-container");
+      
+      const children = [...container.children];
+      for (var i=0;i<children.length;i++){
+        if (children[i].id.startsWith(`graph_${data.id}`)){
+          container.removeChild(children[i]);
+        }
+      }
     }
+
     if (data["type"] == "ImageSeries") {
       document.getElementById(
         "image-series-toolbar"
@@ -716,6 +730,14 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
           return a !== data.asset.id;
         })
       );
+    }
+
+    if (
+      !selectedDatasets.find((d) =>
+        d.type == "Influx" || d.type =="CSV"
+      )
+    ) {
+      closeGraphModal();
     }
 
     // if (!selectedDatasets.find(d=>d.type==="ImageSeries")){
@@ -865,7 +887,7 @@ const handleAssetCheckboxChange = (checkboxes, assetCheckbox, asset, uploads) =>
         "none";
     }
 
-    if (!selectedDatasets.find((d) => d.type === "Influx")) {
+    if (!selectedDatasets.find((d) => d.type === "Influx" || d.type === "CSV")) {
       closeGraphModal();
     }
 
@@ -1337,6 +1359,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
 
       var dateContentDivText = document.createElement("div");
       dateContentDivText.style["flex-grow"] = 1;
+      dateContentDivText.style["overflow-wrap"] = "anywhere";
       if (data.date) {
         var date = new Date(data.date);
         dateContentDivText.innerHTML =
@@ -1395,6 +1418,19 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         );
 
         loadData(asset, data, true, true, true);
+
+        if (data.type === "Influx" || data.type==="CSV"){
+          var container = document.getElementById("graphs-container");
+          
+          console.log("here");
+          const children = [...container.children];
+          for (var i=0;i<children.length;i++){
+            if (children[i].id.startsWith(`graph_${data.id}`)){
+              children[i].scrollIntoView({behavior: "smooth"});
+              break;
+            }
+          }
+        }
       };
 
       if (data.type != "Influx") {
@@ -1403,7 +1439,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
       }
 
       if (
-        data.source ||
+        data.source && (data.source.downloadable==undefined || data.source.downloadable==true) ||
         data.type === "Influx" ||
         data.type === "GeoJSON"
       ) {

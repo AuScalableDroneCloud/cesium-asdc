@@ -23,7 +23,7 @@ import {
   setTaskInfos,
   indexFile
 } from "./State.js";
-import { loadGraph, closeGraphModal } from "./Graphs.js";
+import { loadInfluxGraphs, loadCSVGraphs,closeGraphModal } from "./Graphs.js";
 import { setupStyleToolbar, applyStyle } from "./Style.js";
 import { highlightHeightPX, highlightColor, eptServer } from "./Constants.js";
 
@@ -43,73 +43,132 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
 
   syncTimeline(false);
 
-  if (tilesets[asset["id"]]) {
-      var tilesetDates = assetDataset.map(data=>{
+  // if (tilesets[asset["id"]]) {
+      var assetDates = assetDataset.map(data=>{
       return new Date(data.date)
     });
 
-    tilesetDates.sort(function (a, b) {
+    assetDates.sort(function (a, b) {
       return new Date(a).getTime() - new Date(b).getTime();
     });
 
     viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
-      new Date(tilesetDates[0])
+      new Date(assetDates[0])
     );
-  }
-  if (timeline) {
-    if (tilesets[asset["id"]]) {
-      //TODO: dates for entities
-      viewer.timeline._highlightRanges = [];
-      tilesetDates.map((date) => {
-        viewer.timeline
-          .addHighlightRange(highlightColor, highlightHeightPX)
-          .setRange(
-            Cesium.JulianDate.fromDate(new Date(date)),
-            Cesium.JulianDate.fromDate(
-              new Date(new Date(date).getTime() + 86400000)
-            )
-          );
-      });
+  // }
 
-      var minDate = new Date(tilesetDates[0]);
-      var maxDate = new Date(tilesetDates[tilesetDates.length - 1]);
-
-      if (
-        minDate.toString() !== "Invalid Date" &&
-        maxDate.toString() !== "Invalid Date"
-      ) {
-        viewer.clock.currentTime = new Cesium.JulianDate.fromDate(minDate);
-        viewer.timeline.updateFromClock();
-        viewer.timeline.zoomTo(
-          Cesium.JulianDate.fromDate(minDate),
-          Cesium.JulianDate.fromDate(new Date(maxDate.getTime() + 86400000))
-        );
-      } else {
-        //point clouds with no date
-        // var currentDate = new Date();
-        // viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
-        //     new Date()
-        // );
-        // viewer.timeline.updateFromClock();
-        // viewer.timeline.zoomTo(
-        //     Cesium.JulianDate.fromDate(currentDate),
-        //     Cesium.JulianDate.fromDate(
-        //         new Date(currentDate.getTime() + 86400000)
-        //     )
-        // );
-      }
+  if (assetDataset[0]["type"] === "Influx" || assetDataset[0]["type"]==="ImageSeries") {//todo: clean with function params
+    //Influx charts and Image Series from 2 weeks before
+    if (assetDataset[0].endDateTime){
+      var initialDate = new Date(assetDataset[0].endDateTime);
+      viewer.clock.currentTime = new Cesium.JulianDate.fromDate(initialDate);
+      viewer.timeline.updateFromClock();
+      viewer.timeline.zoomTo(
+        Cesium.JulianDate.fromDate(
+          new Date(initialDate.getTime() - 2 * 7 * 86400000)
+        ),
+        Cesium.JulianDate.fromDate(initialDate)
+      );
     } else {
-      if (assetDataset[0]["type"] === "Influx") {
-        //Influx charts from 2 weeks before
-        var currentDate = new Date();
-        viewer.clock.currentTime = new Cesium.JulianDate.fromDate(currentDate);
+      var currentDate = new Date();
+      viewer.clock.currentTime = new Cesium.JulianDate.fromDate(currentDate);
+      viewer.timeline.updateFromClock();
+      viewer.timeline.zoomTo(
+        Cesium.JulianDate.fromDate(
+          new Date(currentDate.getTime() - 2 * 7 * 86400000)
+          // new Date(currentDate.getTime() + 86400000)
+        ),
+        Cesium.JulianDate.fromDate(new Date())
+      );
+    }
+  } else if (assetDataset[0]["type"] === "CSV") {
+    if (assetDataset[0].endDateTime){
+      if (assetDataset[0].startDateTime){
+        viewer.clock.currentTime = new Cesium.JulianDate.fromDate(new Date(assetDataset[0].endDateTime));
         viewer.timeline.updateFromClock();
         viewer.timeline.zoomTo(
           Cesium.JulianDate.fromDate(
-            new Date(currentDate.getTime() - 2 * 7 * 86400000)
+            new Date(assetDataset[0].startDateTime)
           ),
-          Cesium.JulianDate.fromDate(new Date())
+          Cesium.JulianDate.fromDate(new Date(assetDataset[0].endDateTime))
         );
+      } else {
+        var initialDate = new Date(assetDataset[0].endDateTime);
+        viewer.clock.currentTime = new Cesium.JulianDate.fromDate(initialDate);
+        viewer.timeline.updateFromClock();
+        viewer.timeline.zoomTo(
+          Cesium.JulianDate.fromDate(
+            new Date(initialDate.getTime() - 2 * 7 * 86400000)
+          ),
+          Cesium.JulianDate.fromDate(initialDate)
+        );
+      }
+    } else {
+      var currentDate = new Date();
+      viewer.clock.currentTime = new Cesium.JulianDate.fromDate(currentDate);
+      viewer.timeline.updateFromClock();
+      viewer.timeline.zoomTo(
+        Cesium.JulianDate.fromDate(
+          new Date(currentDate.getTime() - 2 * 7 * 86400000)
+          // new Date(currentDate.getTime() + 86400000)
+        ),
+        Cesium.JulianDate.fromDate(new Date())
+      );
+    }
+  }
+  if (timeline) { 
+    var data = assetDataset[0];
+    var date = new Date(data.date);
+    viewer.timeline._highlightRanges = [];
+    viewer.timeline._makeTics();
+    if (data.type == "PointCloud" ||
+      data.type == "EPTPointCloud" ||
+      data.type == "ModelTileset" ||
+      data.type == "Imagery"||
+      data.type == "GeoJSON"
+      ){
+      if (date.toString() !== "Invalid Date") {
+    // if (tilesets[asset["id"]]) {
+      //TODO: dates for entities
+        viewer.timeline._highlightRanges = [];
+        assetDates.map((date) => {
+          viewer.timeline
+            .addHighlightRange(highlightColor, highlightHeightPX)
+            .setRange(
+              Cesium.JulianDate.fromDate(new Date(date)),
+              Cesium.JulianDate.fromDate(
+                new Date(new Date(date).getTime() + 86400000)
+              )
+            );
+        });
+
+        var minDate = new Date(assetDates[0]);
+        var maxDate = new Date(assetDates[assetDates.length - 1]);
+
+        if (
+          minDate.toString() !== "Invalid Date" &&
+          maxDate.toString() !== "Invalid Date"
+        ) {
+          viewer.clock.currentTime = new Cesium.JulianDate.fromDate(minDate);
+          viewer.timeline.updateFromClock();
+          viewer.timeline.zoomTo(
+            Cesium.JulianDate.fromDate(minDate),
+            Cesium.JulianDate.fromDate(new Date(maxDate.getTime() + 86400000))
+          );
+        } else {
+          //point clouds with no date
+          // var currentDate = new Date();
+          // viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+          //     new Date()
+          // );
+          // viewer.timeline.updateFromClock();
+          // viewer.timeline.zoomTo(
+          //     Cesium.JulianDate.fromDate(currentDate),
+          //     Cesium.JulianDate.fromDate(
+          //         new Date(currentDate.getTime() + 86400000)
+          //     )
+          // );
+        }
       } else {
         //Other data types with no date
         // var currentDate = new Date();
@@ -257,8 +316,10 @@ export const loadData = (
       tilesets[asset["id"]][data.id] =
         viewer.scene.primitives.add(
           new Cesium.Cesium3DTileset({
-            url: !data.useProxy
-              ? data["url"]
+            url:  data["url"]==="ion" ? 
+              Cesium.IonResource.fromAssetId(data.assetId) :
+              !data.useProxy ?
+              data["url"]
               : new Cesium.Resource({
                   url: data["url"],
                   proxy: new Cesium.DefaultProxy("/cesium/proxy/"),
@@ -277,7 +338,6 @@ export const loadData = (
         // console.log(carto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
         // console.log(carto.longitude * Cesium.Math.DEGREES_PER_RADIAN);
         // console.log(carto.height);
-
         if (data["position"]) {
           var offset = Cesium.Cartographic.toCartesian(
             new Cesium.Cartographic.fromDegrees(
@@ -406,18 +466,32 @@ export const loadData = (
                   maximumScreenSpaceError:
                     ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
                   // show: new Date(data["date"]) != "Invalid Date" ? false : true,
+                  // debugShowBoundingVolume:true
                 })
               );
 
             tilesets[asset["id"]][data.id].readyPromise.then(
               function (tileset) {
                 // console.log(tilesets[asset["id"]][
-                //   new Date(data["date"])
+                //   data.id
                 //   ].boundingSphere);
-                // var carto = Cesium.Cartographic.fromCartesian(tilesets[asset["id"]][new Date(data["date"])].boundingSphere.center);
+                // var carto = Cesium.Cartographic.fromCartesian(tilesets[asset["id"]][data.id].boundingSphere.center);
                 // console.log(carto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
                 // console.log(carto.longitude * Cesium.Math.DEGREES_PER_RADIAN);
                 // console.log(carto.height);
+                // Cesium.sampleTerrainMostDetailed(
+                //   viewer.terrainProvider,
+                //   [Cesium.Cartographic.fromCartesian(tilesets[asset["id"]][data.id].boundingSphere.center)]
+                // ).then((updatedPositions) => {
+                //   console.log(updatedPositions);
+                //   // var cartesians =
+                //   //   Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                //   //     updatedPositions
+                //   //   );
+                //   // var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
+                //   // viewer.camera.flyToBoundingSphere(boundingSphere);
+                // });
+
                 if (data["position"]) {
                   var offset = Cesium.Cartographic.toCartesian(
                     new Cesium.Cartographic.fromDegrees(
@@ -432,6 +506,7 @@ export const loadData = (
                     new Cesium.Cartesian3()
                   );
                   tileset.modelMatrix =
+                  // tileset.root.transofrm =
                     Cesium.Matrix4.fromTranslation(translation);
                 }
 
@@ -454,7 +529,10 @@ export const loadData = (
     }
   } else if (data["type"] === "Influx") {
     document.getElementById("graphs-modal").style.display = "block";
-    loadGraph(data);
+    loadInfluxGraphs(data);
+  } else if (data["type"] === "CSV") {
+    document.getElementById("graphs-modal").style.display = "block";
+    loadCSVGraphs(data);
   } else if (data["type"] === "Imagery") {
     if (!imageryLayers[asset.id]) imageryLayers[asset.id] = {};
     if (!imageryLayers[asset.id][data.id]) {
@@ -491,39 +569,44 @@ export const loadData = (
         currentDate.setDate(currentDate.getDate() - 1);
       }
       currentDate.setHours(12, 0, 0);
-
-      var halfWidth = (0.0025 * 960) / 720;
-      var halfHeight = 0.0025;
-      fetch(
-        `/cesium/influx/images?camera=${data.camera}&time=${
-          data.timeOffset
-            ? currentDate.getTime() - data.timeOffset
-            : currentDate.getTime()
-        }&startTime=${new Date(data.startDateTime).getTime()}`,
-        { cache: "no-store" }
-      )
-        .then((response) => {
+      if (data.source && data.source.type === "csv") {
+        fetch(
+          data.source.url,
+          { cache: "no-store" }
+        ).then((response) => {
           return response;
         })
-        .then((response) => response.json())
+        .then((response) => response.text())
         .then((response) => {
-          if (response.length != 0) {
-            var imageUrl = `https://img.amrf.org.au/cameras/amrf/${
-              data.camera
-            }/${data.camera}~720x/$dirstamp/${
-              data.camera
-            }~720x_$filestamp.jpg?timestamp_ms=${new Date(
-              response[0].time
-            ).getTime()}`;
-          } else {
-            var imageUrl = `https://img.amrf.org.au/cameras/amrf/${
-              data.camera
-            }/${data.camera}~720x/$dirstamp/${
-              data.camera
-            }~720x_$filestamp.jpg?timestamp_ms=${new Date(
-              data.startDateTime
-            ).getTime()}`;
+          var csvRows = response.split('\n');
+          var timeIndex = csvRows[0].split(',').indexOf(data.source.columns.time);
+          var imageIndex = csvRows[0].split(',').indexOf(data.source.columns.image);
+          csvRows = csvRows.slice(1,csvRows.length-1)
+
+          var earliestDate;
+          var earliestRow;
+          var firstImage;
+          for (var row=0;row<csvRows.length;row++){
+            var csvRowColumns = csvRows[row].split(',');
+            
+            if (new Date(csvRowColumns[timeIndex]).getTime() <= currentDate && (!earliestDate || (earliestDate && earliestDate.getTime()<new Date(csvRowColumns[timeIndex]).getTime()))){
+              earliestDate = new Date(csvRowColumns[timeIndex]);
+              earliestRow = row;
+            }
+            if (new Date(csvRowColumns[timeIndex]).getTime() === new Date(data.startDateTime).getTime()){
+              firstImage = csvRowColumns[imageIndex];
+            }
           }
+
+          if (!!earliestDate && !!earliestRow){
+            var imageUrl = data.url.replace("{Image}",csvRows[earliestRow].split(',')[imageIndex])
+          } else {
+            var imageUrl = data.url.replace("{Image}",firstImage);
+          }
+
+          var halfWidth = (data.heightDeg * data.width) / data.height;
+          var halfHeight = data.heightDeg;
+
           entities[asset.id][data.id] = viewer.entities.add({
             rectangle: {
               coordinates: Cesium.Rectangle.fromDegrees(
@@ -545,7 +628,7 @@ export const loadData = (
             billboard: {
               image: imageUrl,
               height: 300,
-              width: (300 * 960) / 720,
+              width: (300 * data.width) / data.height,
               pixelOffset: new Cesium.Cartesian2(0, -150),
               heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
               distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
@@ -557,9 +640,76 @@ export const loadData = (
             },
           });
         })
-        .catch((error) => {
-          console.log(error);
-        });
+      } else {// 
+        var halfWidth = (0.0025 * 960) / 720;
+        var halfHeight = 0.0025;
+        fetch(
+          `/cesium/influx/images?camera=${data.camera}&time=${
+            data.timeOffset
+              ? currentDate.getTime() - data.timeOffset
+              : currentDate.getTime()
+          }&startTime=${new Date(data.startDateTime).getTime()}`,
+          { cache: "no-store" }
+        )
+          .then((response) => {
+            return response;
+          })
+          .then((response) => response.json())
+          .then((response) => {
+            if (response.length != 0) {
+              var imageUrl = `https://img.amrf.org.au/cameras/amrf/${
+                data.camera
+              }/${data.camera}~720x/$dirstamp/${
+                data.camera
+              }~720x_$filestamp.jpg?timestamp_ms=${new Date(
+                response[0].time
+              ).getTime()}`;
+            } else {
+              var imageUrl = `https://img.amrf.org.au/cameras/amrf/${
+                data.camera
+              }/${data.camera}~720x/$dirstamp/${
+                data.camera
+              }~720x_$filestamp.jpg?timestamp_ms=${new Date(
+                data.startDateTime
+              ).getTime()}`;
+            }
+            entities[asset.id][data.id] = viewer.entities.add({
+              rectangle: {
+                coordinates: Cesium.Rectangle.fromDegrees(
+                  data.position["lng"] - halfWidth,
+                  data.position["lat"],
+                  data.position["lng"] + halfWidth,
+                  data.position["lat"] + 2 * halfHeight
+                ),
+                material: new Cesium.ImageMaterialProperty({
+                  image: imageUrl,
+                  color: new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
+                }),
+                show: !billboard,
+              },
+              position: Cesium.Cartesian3.fromDegrees(
+                data.position["lng"],
+                data.position["lat"]
+              ),
+              billboard: {
+                image: imageUrl,
+                height: 300,
+                width: (300 * 960) / 720,
+                pixelOffset: new Cesium.Cartesian2(0, -150),
+                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
+                  0,
+                  5000
+                ),
+                color: new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
+                show: billboard,
+              },
+            });
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
     } else {
       entities[asset.id][data.id].show = true;
     }
@@ -597,7 +747,12 @@ export const loadData = (
             new Cesium.BoundingSphere(pos, data.boundingSphereRadius)
           );
         } else {
-          viewer.flyTo(entities[asset["id"]][data["id"]]);
+          if (entities[asset["id"]] && entities[asset["id"]][data["id"]]){
+            viewer.flyTo(entities[asset["id"]][data["id"]]);
+          }
+          if (tilesets[asset["id"]] && tilesets[asset["id"]][data["id"]]){
+            viewer.flyTo(tilesets[asset["id"]][data["id"]]);
+          }
         }
       } else {
         var zoom = data.zoom;
@@ -665,24 +820,25 @@ export const loadData = (
           viewer.flyTo(entities[asset["id"]][data["id"]]);
         } else if (
           assetDataset[0]["type"] === "Influx" ||
-          assetDataset[0]["type"] === "ImageSeries"
+          assetDataset[0]["type"] === "ImageSeries" ||
+          assetDataset[0]["type"] === "CSV"
         ) {
           // if (assetDataset[0] && assetDataset[0]["position"]){
             var position = Cesium.Cartesian3.fromDegrees(
               assetDataset[0]["position"]["lng"],
               assetDataset[0]["position"]["lat"],
-              assetDataset[0]["position"]["height"] + 1750
+              assetDataset[0]["position"]["height"] ? assetDataset[0]["position"]["height"] + 1750 : 1750
             );
 
             viewer.camera.flyTo({ destination: position });
           // }
         } else if (assetDataset[0]["type"] === "Imagery") {
-          if (data.bounds){
+          if (assetDataset[0].bounds){
             var rectangle = new Cesium.Rectangle.fromDegrees(
-              data.bounds[0],
-              data.bounds[1],
-              data.bounds[2],
-              data.bounds[3]
+              assetDataset[0].bounds[0],
+              assetDataset[0].bounds[1],
+              assetDataset[0].bounds[2],
+              assetDataset[0].bounds[3]
             );
             const cartographics = [
               Cesium.Rectangle.center(rectangle),
@@ -706,10 +862,74 @@ export const loadData = (
           } else {
             console.log(asset);
             console.log(data);
-            viewer.flyTo(imageryLayers[asset.id][data.id]);
+            if (tilesets[asset.id] && tilesets[asset.id][data.id]){
+              viewer.flyTo(tilesets[asset.id][data.id]);
+            } else if (imageryLayers[asset.id] && imageryLayers[asset.id][data.id]){
+              viewer.flyTo(imageryLayers[asset.id][data.id]);
+            }
           }
         }
       }
+    }
+  }
+
+  if (data["type"] === "Influx" || data["type"]==="ImageSeries") {
+    //Influx charts and Image Series from 2 weeks before
+    if (data.endDateTime){
+      var initialDate = new Date(data.endDateTime);
+      viewer.clock.currentTime = new Cesium.JulianDate.fromDate(initialDate);
+      viewer.timeline.updateFromClock();
+      viewer.timeline.zoomTo(
+        Cesium.JulianDate.fromDate(
+          new Date(initialDate.getTime() - 2 * 7 * 86400000)
+        ),
+        Cesium.JulianDate.fromDate(initialDate)
+      );
+    } else {
+      var currentDate = new Date();
+      viewer.clock.currentTime = new Cesium.JulianDate.fromDate(currentDate);
+      viewer.timeline.updateFromClock();
+      viewer.timeline.zoomTo(
+        Cesium.JulianDate.fromDate(
+          new Date(currentDate.getTime() - 2 * 7 * 86400000)
+          // new Date(currentDate.getTime() + 86400000)
+        ),
+        Cesium.JulianDate.fromDate(new Date())
+      );
+    }
+  } else if (data["type"] === "CSV") {
+    if (data.endDateTime){
+      if (data.startDateTime){
+        viewer.clock.currentTime = new Cesium.JulianDate.fromDate(new Date(data.endDateTime));
+        viewer.timeline.updateFromClock();
+        viewer.timeline.zoomTo(
+          Cesium.JulianDate.fromDate(
+            new Date(data.startDateTime)
+          ),
+          Cesium.JulianDate.fromDate(new Date(data.endDateTime))
+        );
+      } else {
+        var initialDate = new Date(data.endDateTime);
+        viewer.clock.currentTime = new Cesium.JulianDate.fromDate(initialDate);
+        viewer.timeline.updateFromClock();
+        viewer.timeline.zoomTo(
+          Cesium.JulianDate.fromDate(
+            new Date(initialDate.getTime() - 2 * 7 * 86400000)
+          ),
+          Cesium.JulianDate.fromDate(initialDate)
+        );
+      }
+    } else {
+      var currentDate = new Date();
+      viewer.clock.currentTime = new Cesium.JulianDate.fromDate(currentDate);
+      viewer.timeline.updateFromClock();
+      viewer.timeline.zoomTo(
+        Cesium.JulianDate.fromDate(
+          new Date(currentDate.getTime() - 2 * 7 * 86400000)
+          // new Date(currentDate.getTime() + 86400000)
+        ),
+        Cesium.JulianDate.fromDate(new Date())
+      );
     }
   }
 
@@ -719,7 +939,10 @@ export const loadData = (
     viewer.timeline._makeTics();
     if (data.type == "PointCloud" ||
       data.type == "EPTPointCloud" ||
-      data.type == "ModelTileset"){
+      data.type == "ModelTileset" ||
+      data.type == "Imagery"||
+      data.type == "GeoJSON"
+      ){
       if (date.toString() !== "Invalid Date") {
         viewer.timeline
           .addHighlightRange(highlightColor, highlightHeightPX)
@@ -754,32 +977,18 @@ export const loadData = (
         // );
       }
     } else {
-      if (data["type"] === "Influx" || data["type"]==="ImageSeries") {
-        //Influx charts from 2 weeks before
-        var currentDate = new Date();
-        viewer.clock.currentTime = new Cesium.JulianDate.fromDate(currentDate);
-        viewer.timeline.updateFromClock();
-        viewer.timeline.zoomTo(
-          Cesium.JulianDate.fromDate(
-            new Date(currentDate.getTime() - 2 * 7 * 86400000)
-            // new Date(currentDate.getTime() + 86400000)
-          ),
-          Cesium.JulianDate.fromDate(new Date())
-        );
-      } else {
-        //Other data types with no date
-        // var currentDate = new Date();
-        // viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
-        //     new Date()
-        // );
-        // viewer.timeline.updateFromClock();
-        // viewer.timeline.zoomTo(
-        //     Cesium.JulianDate.fromDate(currentDate),
-        //     Cesium.JulianDate.fromDate(
-        //         new Date(currentDate.getTime() + 86400000)
-        //     )
-        // );
-      }
+      //Other data types with no date
+      // var currentDate = new Date();
+      // viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+      //     new Date()
+      // );
+      // viewer.timeline.updateFromClock();
+      // viewer.timeline.zoomTo(
+      //     Cesium.JulianDate.fromDate(currentDate),
+      //     Cesium.JulianDate.fromDate(
+      //         new Date(currentDate.getTime() + 86400000)
+      //     )
+      // );
     }
   }
 
@@ -983,7 +1192,6 @@ export const setScreenSpaceError = (evt) => {
     Object.keys(tilesets[tileset]).map((id) => {
       if (Array.isArray(tilesets[tileset][id])) {
         tilesets[tileset][id].map((t) => {
-          //   tileset.maximumScreenSpaceError = MSSE;
           t.maximumScreenSpaceError =
             ((100 - MSSE) / 100) * viewer.canvas.height * 0.25;
           if (MSSE === 0) {
@@ -995,7 +1203,6 @@ export const setScreenSpaceError = (evt) => {
           }
         });
       } else {
-        // tilesets[tileset][new Date(date)].maximumScreenSpaceError = MSSE;
         tilesets[tileset][id].maximumScreenSpaceError =
           ((100 - MSSE) / 100) * viewer.canvas.height * 0.25;
         if (MSSE === 0) {

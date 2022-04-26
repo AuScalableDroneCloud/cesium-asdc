@@ -13,7 +13,8 @@ const createGraph = (
   graphTitle,
   suffix,
   doubleAxis,
-  divID
+  divID,
+  range
 ) => {
   const pallete = [
     "#7EB26D",
@@ -47,8 +48,15 @@ const createGraph = (
     }
   });
 
-  var twoWeeksBefore = Cesium.JulianDate.toDate(viewer.clock.currentTime);
-  twoWeeksBefore.setDate(twoWeeksBefore.getDate() - 14);
+  if (!range){
+    var twoWeeksBefore = Cesium.JulianDate.toDate(viewer.clock.currentTime);
+    twoWeeksBefore.setDate(twoWeeksBefore.getDate() - 14);
+    var range = [
+      twoWeeksBefore,
+      Cesium.JulianDate.toDate(viewer.clock.currentTime),
+    ];
+  }
+  
 
   if (doubleAxis) {
     data[data.length - 1].yaxis = "y2";
@@ -72,10 +80,7 @@ const createGraph = (
       },
       xaxis: {
         gridcolor: "rgba(255,255,255,0.25)",
-        range: [
-          twoWeeksBefore,
-          Cesium.JulianDate.toDate(viewer.clock.currentTime),
-        ],
+        range: range
       },
       legend: {
         xanchor: "center",
@@ -102,10 +107,7 @@ const createGraph = (
       },
       xaxis: {
         gridcolor: "rgba(255,255,255,0.25)",
-        range: [
-          twoWeeksBefore,
-          Cesium.JulianDate.toDate(viewer.clock.currentTime),
-        ],
+        range: range
       },
       legend: {
         xanchor: "center",
@@ -121,22 +123,28 @@ const createGraph = (
   }
 
   var plotDiv = document.getElementById(divID);
-  document.getElementById("graphs-container").appendChild(plotDiv);
-
   Plotly.react(plotDiv, data, layout);
 };
 
-export const loadGraph = (data) => {
+export const loadInfluxGraphs = (data) => {
   if (document.getElementById("graphs-modal").style.display === "none") return;
   viewer.selectedEntity = null;
   var station = data.station;
 
-  // while (document.getElementById("graphs-container").firstChild) {
-  //   document
-  //     .getElementById("graphs-container")
-  //     .removeChild(document.getElementById("graphs-container").firstChild);
-  // }
   // document.getElementById("graphs-modal").style.display = "block";
+
+  var graphs = ["PAR_TSR", "Soil_VWC","Soil_Temp","Soil_EC", "Air_Temp_Hum","Rain","Snow","Bat_Volt"];
+  var container = document.getElementById("graphs-container");
+  
+  graphs.map(g=>{
+    var graphDiv = document.getElementById(`graph_${data.id}_${g}`);
+    if(!graphDiv){
+      var graphDiv = document.createElement("div");
+      graphDiv.className = "graph";
+      graphDiv.id = `graph_${data.id}_${g}`;
+      container.appendChild(graphDiv);
+    }
+  })
 
   if (!controllers[data.id]) {
     controllers[data.id] = new AbortController();
@@ -167,7 +175,7 @@ export const loadGraph = (data) => {
 
       const unpackData = (arr, key) => {
         return arr.map((obj) => obj[key]);
-      };
+      };  
 
       createGraph(
         unpackData(parsedResponse, "time"),
@@ -180,7 +188,7 @@ export const loadGraph = (data) => {
         "Photosynthetically Active Radiation & Shortwave Radiation",
         ["μmol/m²/s", "W/m²"],
         true,
-        "PAR_TSR"
+        `graph_${data.id}_PAR_TSR`
       );
 
       var mean_Soil_VWC = [];
@@ -213,7 +221,7 @@ export const loadGraph = (data) => {
         "Soil Volumetric Water Content",
         "%",
         false,
-        "Soil_VWC"
+        `graph_${data.id}_Soil_VWC`
       );
 
       createGraph(
@@ -224,7 +232,7 @@ export const loadGraph = (data) => {
         "Soil Temperature Mean",
         "°C",
         false,
-        "Soil_Temp"
+        `graph_${data.id}_Soil_Temp`
       );
 
       createGraph(
@@ -235,7 +243,7 @@ export const loadGraph = (data) => {
         "Soil Electrical Conductivity",
         "dS/m",
         false,
-        "Soil_EC"
+        `graph_${data.id}_Soil_EC`
       );
 
       createGraph(
@@ -249,7 +257,7 @@ export const loadGraph = (data) => {
         "Air Temperature & Relative Humidity",
         ["°C", "%H"],
         true,
-        "Air_Temp_Hum"
+        `graph_${data.id}_Air_Temp_Hum`
       );
 
       if (!controllers[data.id + "_daily"]) {
@@ -284,7 +292,7 @@ export const loadGraph = (data) => {
             "Daily Rainfall Total",
             "mm",
             false,
-            "Rain"
+            `graph_${data.id}_Rain`
           );
 
           createGraph(
@@ -295,7 +303,7 @@ export const loadGraph = (data) => {
             "Snow Depth",
             "m",
             false,
-            "Snow"
+            `graph_${data.id}_Snow`
           );
 
           createGraph(
@@ -306,7 +314,7 @@ export const loadGraph = (data) => {
             "Mean Battery Voltage",
             "V",
             false,
-            "Bat_Volt"
+            `graph_${data.id}_Bat_Volt`
           );
         })
         .catch((error) => {
@@ -321,6 +329,74 @@ export const loadGraph = (data) => {
       }
     });
 };
+
+export const loadCSVGraphs = (data)=> {
+  var container = document.getElementById("graphs-container");
+  
+
+  fetch(
+    data.url,
+    { cache: "no-store" }
+  ).then((response) => {
+    return response;
+  })
+  .then((response) => response.text())
+  .then((response) => {
+    var csvRows = response.split('\r\n');
+    var csvColumns = [];
+    for (var i=1;i<csvRows.length;i++){
+      var row = csvRows[i].split(',');
+      row.map((column,colIndex)=>{
+        if (!csvColumns[colIndex]){
+          csvColumns[colIndex]=[];
+        }
+        csvColumns[colIndex].push(column);
+      })
+    }
+
+    data.graphs.map((graph,graphIndex)=>{
+      var xIndex = csvRows[0].split(',').indexOf(graph.columns.x);
+      var x = csvColumns[xIndex];
+
+      var y = [];
+      if (Array.isArray(graph.columns.y)){
+        graph.columns.y.map(yaxis=>{
+          var yIndex = csvRows[0].split(',').indexOf(yaxis);
+          y.push(csvColumns[yIndex]);
+        })
+      } else {
+        var yIndex = csvRows[0].split(',').indexOf(graph.columns.y);
+        y.push(csvColumns[yIndex]);
+      }
+      
+      var graphDivID = `graph_${data.id}_${graphIndex}`;
+      var graphDiv = document.getElementById(graphDivID);
+      if(!graphDiv){
+        var newGraphDiv = document.createElement("div");
+        newGraphDiv.className = "graph";
+        newGraphDiv.id = `graph_${data.id}_${graphIndex}`;
+        container.appendChild(newGraphDiv);
+      }
+
+      createGraph (
+        x,
+        y,
+        Array.isArray(graph.traceNames) ? graph.traceNames : [graph.traceNames || ""],
+        graph.type || "scatter",
+        graph.title|| "",
+        graph.unit || "",
+        false,
+        graphDivID,
+        graph.range
+        // data.endDateTime ? [new Date(new Date(data.endDateTime).getTime() - 2 * 7 * 86400000), new Date(data.endDateTime)] : undefined
+      )
+
+      if (graphIndex==0 && !graphDiv){
+        newGraphDiv.scrollIntoView({behavior: "smooth"});
+      }
+    })
+  })
+}
 
 export const closeGraphModal = () => {
   document.getElementById("graphs-modal").style.display = "none";
