@@ -16,6 +16,7 @@ import {
   setAssets,
   setDatasets,
   setCategories,
+  setInitVars,
   assets,
   setODMProjects,
   publicTask,
@@ -43,19 +44,17 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
 
   syncTimeline(false);
 
-  // if (tilesets[asset["id"]]) {
-      var assetDates = assetDataset.map(data=>{
-      return new Date(data.date)
-    });
+  var assetDates = assetDataset.map(data=>{
+    return new Date(data.date)
+  });
 
-    assetDates.sort(function (a, b) {
-      return new Date(a).getTime() - new Date(b).getTime();
-    });
+  assetDates.sort(function (a, b) {
+    return new Date(a).getTime() - new Date(b).getTime();
+  });
 
-    viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
-      new Date(assetDates[0])
-    );
-  // }
+  viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+    new Date(assetDates[0])
+  );
 
   if (assetDataset[0]["type"] === "Influx" || assetDataset[0]["type"]==="ImageSeries") {//todo: clean with function params
     //Influx charts and Image Series from 2 weeks before
@@ -208,15 +207,15 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
         }
       })
     } else {
-      if (
-        assetDataset[0]["type"] === "PointCloud" ||
-        assetDataset[0]["type"] === "EPTPointCloud" ||
-        assetDataset[0]["type"] === "ModelTileset"
-      ) {
-        document.getElementById("msse-slider-container").style.display = "block";
-      } else {
-        document.getElementById("msse-slider-container").style.display = "none";
-      }
+      // if (
+      //   assetDataset[0]["type"] === "PointCloud" ||
+      //   assetDataset[0]["type"] === "EPTPointCloud" ||
+      //   assetDataset[0]["type"] === "ModelTileset"
+      // ) {
+      //   document.getElementById("msse-slider-row").style.display = "table-row";
+      // } else {
+      //   document.getElementById("msse-slider-row").style.display = "none";
+      // }
 
       if (
         assetDataset[0]["type"] === "PointCloud" ||
@@ -241,12 +240,13 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
         viewer.flyTo(entities[asset["id"]][assetDataset[0]["id"]]);
       } else if (
         assetDataset[0]["type"] === "Influx" ||
-        assetDataset[0]["type"] === "ImageSeries"
+        assetDataset[0]["type"] === "ImageSeries" ||
+        assetDataset[0]["type"] === "CSV"
       ) {
         var position = Cesium.Cartesian3.fromDegrees(
           assetDataset[0]["position"]["lng"],
           assetDataset[0]["position"]["lat"],
-          assetDataset[0]["position"]["height"] + 1750
+          assetDataset[0]["position"]["height"] ? assetDataset[0]["position"]["height"] + 1750 : 1750
         );
 
         viewer.camera.flyTo({ destination: position });
@@ -560,7 +560,7 @@ export const loadData = (
       imageryLayers[asset.id][data.id].show = true;
     }
   } else if (data["type"] === "ImageSeries") {
-    document.getElementById("image-series-toolbar").style.display = "block";
+    document.getElementById("image-series-toolbar-row").style.display = "table-row";
     if (!entities[asset.id]) entities[asset.id] = {};
     if (!entities[asset.id][data.id]) {
       var currentDate = Cesium.JulianDate.toDate(viewer.clock.currentTime);
@@ -569,6 +569,38 @@ export const loadData = (
         currentDate.setDate(currentDate.getDate() - 1);
       }
       currentDate.setHours(12, 0, 0);
+
+      var halfWidth = ((data.heightDeg ? data.heightDeg : 0.0025) * data.width) / data.height;
+      var halfHeight = (data.heightDeg ? data.heightDeg : 0.0025);
+
+      if (data.rotation){
+        var poly = turf.polygon([[
+          [data.position["lng"] - halfWidth, data.position["lat"]],
+          [data.position["lng"] + halfWidth,data.position["lat"]],
+          [data.position["lng"] + halfWidth,data.position["lat"] + 2 * halfHeight],
+          [data.position["lng"] - halfWidth,data.position["lat"] + 2 * halfHeight],
+          [data.position["lng"] - halfWidth, data.position["lat"]],
+        ]]);
+        var options = {pivot: [data.position["lng"], data.position["lat"]]};
+        var rotatedPoly = turf.transformRotate(poly, data.rotation, options);
+
+        var pointsArray = [];
+
+        for(let point of rotatedPoly.geometry.coordinates[0]) {
+          pointsArray.push(point[0]);
+          pointsArray.push(point[1]);
+        }
+      } else {
+        var pointsArray = [
+          data.position["lng"] - halfWidth, data.position["lat"],
+          data.position["lng"] + halfWidth, data.position["lat"],
+          data.position["lng"] + halfWidth,data.position["lat"] + 2 * halfHeight,
+          data.position["lng"] - halfWidth,data.position["lat"] + 2 * halfHeight
+        ]
+      }
+
+      var points = Cesium.Cartesian3.fromDegreesArray(pointsArray);
+
       if (data.source && data.source.type === "csv") {
         fetch(
           data.source.url,
@@ -603,28 +635,21 @@ export const loadData = (
           } else {
             var imageUrl = data.url.replace("{Image}",firstImage);
           }
-
-          var halfWidth = (data.heightDeg * data.width) / data.height;
-          var halfHeight = data.heightDeg;
-
+          
           entities[asset.id][data.id] = viewer.entities.add({
-            rectangle: {
-              coordinates: Cesium.Rectangle.fromDegrees(
-                data.position["lng"] - halfWidth,
-                data.position["lat"],
-                data.position["lng"] + halfWidth,
-                data.position["lat"] + 2 * halfHeight
-              ),
-              material: new Cesium.ImageMaterialProperty({
-                image: imageUrl,
-                color: new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
-              }),
-              show: !billboard,
-            },
             position: Cesium.Cartesian3.fromDegrees(
               data.position["lng"],
               data.position["lat"]
             ),
+            polygon:{
+              hierarchy:points,
+              material: new Cesium.ImageMaterialProperty({
+                image: imageUrl,
+                color: new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
+              }),
+              stRotation:Cesium.Math.toRadians(data.rotation),
+              show: !billboard,
+            },
             billboard: {
               image: imageUrl,
               height: 300,
@@ -674,17 +699,13 @@ export const loadData = (
               ).getTime()}`;
             }
             entities[asset.id][data.id] = viewer.entities.add({
-              rectangle: {
-                coordinates: Cesium.Rectangle.fromDegrees(
-                  data.position["lng"] - halfWidth,
-                  data.position["lat"],
-                  data.position["lng"] + halfWidth,
-                  data.position["lat"] + 2 * halfHeight
-                ),
+              polygon:{
+                hierarchy:points,
                 material: new Cesium.ImageMaterialProperty({
                   image: imageUrl,
                   color: new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
                 }),
+                stRotation:data.rotation ? Cesium.Math.toRadians(data.rotation): 0,
                 show: !billboard,
               },
               position: Cesium.Cartesian3.fromDegrees(
@@ -727,9 +748,9 @@ export const loadData = (
         d.type == "ModelTileset"
     )
   ) {
-    document.getElementById("msse-slider-container").style.display = "block";
+    document.getElementById("msse-slider-row").style.display = "table-row";
   } else {
-    document.getElementById("msse-slider-container").style.display = "none";
+    document.getElementById("msse-slider-row").style.display = "none";
   }
 
   if (fly) {
@@ -830,7 +851,12 @@ export const loadData = (
               assetDataset[0]["position"]["height"] ? assetDataset[0]["position"]["height"] + 1750 : 1750
             );
 
-            viewer.camera.flyTo({ destination: position });
+            viewer.camera.flyTo({ 
+              destination: position,
+              orientation:{
+                heading: assetDataset[0]["rotation"] ? Cesium.Math.toRadians(assetDataset[0]["rotation"]):0
+              }
+            });
           // }
         } else if (assetDataset[0]["type"] === "Imagery") {
           if (assetDataset[0].bounds){
@@ -1144,8 +1170,8 @@ export const loadGeoJson = (asset, data, fly) => {
         geoJsonPromise = null;
         if (fly) {
           viewer.flyTo(dataSources[asset.id][dataID]);
-          document.getElementById("msse-slider-container").style.display =
-            "none";
+          // document.getElementById("msse-slider-row").style.display =
+          //   "none";
         }
       });
     });
@@ -1153,7 +1179,7 @@ export const loadGeoJson = (asset, data, fly) => {
     dataSources[asset.id][dataID].show = true;
     if (fly) {
       viewer.flyTo(dataSources[asset.id][dataID]);
-      document.getElementById("msse-slider-container").style.display = "none";
+      // document.getElementById("msse-slider-row").style.display = "none";
     }
     // Cesium.when(viewer.dataSourceDisplay.ready, function () {
     //   console.log("ready");
@@ -1224,11 +1250,7 @@ Cesium.TimelineTrack.prototype.render = function (context, renderState) {
   if (!this.intervals) return;
 
   context.fillStyle = this.backgroundColor.toCssColorString();
-  // context.fillRect(0, renderState.y, renderState.timeBarWidth, this.height);
-  context.rect(0, renderState.y, renderState.timeBarWidth, this.height);
-  context.fill();
-  // context.strokeStyle = 'white';
-  // context.stroke();
+  context.fillRect(0, renderState.y, renderState.timeBarWidth, this.height);
 
   this.intervals.map((interval) => {
     const startInterval = interval.start;
@@ -1345,6 +1367,7 @@ export const fetchIndexAssets = ()=>{
       setAssets(jsonResponse["assets"]);
       setDatasets(jsonResponse["datasets"]);
       setCategories(jsonResponse["categories"]);
+      setInitVars(jsonResponse["initVars"])
     })
   ).catch(error => {
     console.error(error);

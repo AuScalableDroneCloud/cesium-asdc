@@ -84,7 +84,7 @@ export const applyStyle = (schemaName) => {
 };
 
 export const setupStyleToolbar = (tileset) => {
-  var toolbar = document.getElementById("toolbar");
+  var toolbar = document.getElementById("dims-toolbar");
 
   while (toolbar.firstChild) {
     toolbar.removeChild(toolbar.firstChild);
@@ -125,12 +125,16 @@ export const setupStyleToolbar = (tileset) => {
       }
     });
 
-  if (styleToolbarMenu.length === 1) return;
-  Sandcastle.addToolbarMenu(styleToolbarMenu);
+  if (styleToolbarMenu.length<=1){
+    document.getElementById("dims-toolbar-row").style.display="none";
+  } else {
+    document.getElementById("dims-toolbar-row").style.display="table-row";
+    Sandcastle.addToolbarMenu(styleToolbarMenu, "dims-toolbar");
 
-  if (selectedIndex != undefined) {
-    document.getElementById("toolbar").childNodes[0].selectedIndex =
-      selectedIndex + 1;
+    if (selectedIndex != undefined) {
+      document.getElementById("dims-toolbar").childNodes[0].selectedIndex =
+        selectedIndex + 1;
+    }
   }
 };
 
@@ -182,7 +186,7 @@ export const applyAlpha = (evt, asset, data) => {
     }
   } else if (data.type === "ImageSeries") {
     if (entities[asset.id] && entities[asset.id][data.id]) {
-      entities[asset.id][data.id].rectangle.material.color._value.alpha = alpha;
+      entities[asset.id][data.id].polygon.material.color._value.alpha = alpha;
       entities[asset.id][data.id].billboard.color._value.alpha = alpha;
     }
   }

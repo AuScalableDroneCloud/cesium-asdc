@@ -26,6 +26,7 @@ export var sourceDivs = {};
 export var assetDivs = {};
 export var projectDivs = {};
 export var categoryDivs = {};
+export var initVars = {};
 
 export var taskInfos;
 
@@ -114,4 +115,8 @@ export function setTaskInfos(newTaskInfos){
 
 export function setIndexFile(newIndexFile){
   indexFile = newIndexFile;
+}
+
+export function setInitVars(newInitVars){
+  initVars = newInitVars;
 }

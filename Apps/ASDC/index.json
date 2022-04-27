@@ -530,7 +530,7 @@
       "id": 19,
       "type": "Influx",
       "station": "AMRF_PER_D01",
-      "date": "Live",
+      "name": "Sensor Data (Live)",
       "position": {
         "lng": 148.43065,
         "lat": -36.3731306,
@@ -541,7 +541,7 @@
       "id": 20,
       "type": "Influx",
       "station": "AMRF_FRY_D01",
-      "date": "Live",
+      "name": "Sensor Data (Live)",
       "position": {
         "lng": 147.251893,
         "lat": -36.877349,
@@ -861,8 +861,7 @@
     {
       "id": 41,
       "type": "ImageSeries",
-      "name": "Image Series",
-      "date": "Live",
+      "name": "Phenocam (Live)",
       "position": {
         "lng": 148.43065,
         "lat": -36.3731306,
@@ -877,8 +876,7 @@
     {
       "id": 42,
       "type": "ImageSeries",
-      "name": "Image Series",
-      "date": "Live",
+      "name": "Phenocam (Live)",
       "position": {
         "lng": 147.251893,
         "lat": -36.877349,

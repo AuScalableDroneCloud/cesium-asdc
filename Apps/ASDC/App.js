@@ -18,6 +18,7 @@ import {
   setLastCurrentTime,
   setBillboard,
   publicTask,
+  initVars,
 } from "./State.js";
 import { loadAsset, loadData, setScreenSpaceError, fetchIndexAssets,fetchWebODMProjects, fetchPublicTask } from "./Datasets.js";
 import {
@@ -85,10 +86,20 @@ if (publicTask) {
 } else {
   if (new URLSearchParams(window.location.search).get('index')){
     fetchIndexAssets().then(()=>{
+      if (initVars && initVars.camera){
+        viewer.camera.position = new Cesium.Cartesian3(initVars.camera.position.x,initVars.camera.position.y,initVars.camera.position.z);
+        viewer.camera.direction = new Cesium.Cartesian3(initVars.camera.direction.x,initVars.camera.direction.y,initVars.camera.direction.z);
+        viewer.camera.up = new Cesium.Cartesian3(initVars.camera.up.x,initVars.camera.up.y,initVars.camera.up.z);
+      }
       setupSidebar(uploadPage,true);
     })
   } else {
     fetchIndexAssets().then(()=>{
+      if (initVars && initVars.camera){
+        viewer.camera.position = new Cesium.Cartesian3(initVars.camera.position.x,initVars.camera.position.y,initVars.camera.position.z);
+        viewer.camera.direction = new Cesium.Cartesian3(initVars.camera.direction.x,initVars.camera.direction.y,initVars.camera.direction.z);
+        viewer.camera.up = new Cesium.Cartesian3(initVars.camera.up.x,initVars.camera.up.y,initVars.camera.up.z);
+      }
       setupSidebar(uploadPage);
       if (!uploadPage){
         fetchWebODMProjects()
@@ -101,14 +112,13 @@ if (publicTask) {
       }
     })
   }
-  
 }
 
 const handleBillboard = (billboard) => {
   setBillboard(billboard);
   selectedDatasets.map((data) => {
     if (entities[data.asset.id] && entities[data.asset.id][data.id]) {
-      entities[data.asset.id][data.id].rectangle.show = !billboard;
+      entities[data.asset.id][data.id].polygon.show = !billboard;
       entities[data.asset.id][data.id].billboard.show = billboard;
     }
   });
@@ -156,9 +166,21 @@ viewer.camera.moveEnd.addEventListener(() => {
             viewer.camera.position,
             dataPosition
           );
+          if (data.bounds){
+            var rect = new Cesium.Rectangle.fromDegrees(
+              data.bounds[0],
+              data.bounds[1],
+              data.bounds[2],
+              data.bounds[3]
+            );
+
+            var rectBoundingSphere = Cesium.BoundingSphere.fromPoints(Cesium.Rectangle.subsample(rect));
+          }
           if (
             distance <=
-            (data.boundingSphereRadius ? data.boundingSphereRadius * 2.5 : 2000)
+            (data.boundingSphereRadius ? data.boundingSphereRadius * 2.5 : 
+              data.bounds ? rectBoundingSphere.radius * 2.5:
+              2000)
           ) {
             viewMenu.push({
               text:
@@ -227,7 +249,43 @@ viewer.camera.moveEnd.addEventListener(() => {
                     }
                   }
 
-                  loadData(asset, data, false, true, false, false);
+                  // loadData(asset, data, false, true, false, false);
+                  loadData(asset, data, false, true, true, true);
+
+                  var newDataIDs = [];
+                  selectedDatasets.map((d) => {
+                    newDataIDs.push(d.id);
+                  });
+
+                  newDataIDs.sort((a, b) => a - b);
+
+                  var dataIDs = newDataIDs.join('&');
+
+                  window.history.pushState(
+                    "",
+                    "",
+                    uploadPage
+                      ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search
+                      : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search
+                  );
+
+                  var checkbox = document.getElementById(`dataCheckbox-${data.id}`);
+                  if (checkbox) {
+                    checkbox.checked = true;
+                  }
+
+                  var assetCheckbox = document.getElementById(
+                    `assetCheckbox-${asset.id}`
+                  );
+                  if (asset.data.every(ad => selectedDatasets.map(d=>d.id).includes(ad))){
+                    if (assetCheckbox) {
+                      assetCheckbox.checked = true;
+                      assetCheckbox.indeterminate = false;
+                    }
+                  } else {
+                    assetCheckbox.checked = false;
+                    assetCheckbox.indeterminate = true;
+                  }
 
                   if (
                     data["type"] === "PointCloud" ||
@@ -235,11 +293,11 @@ viewer.camera.moveEnd.addEventListener(() => {
                     data["type"] === "ModelTileset"
                   ) {
                     document.getElementById(
-                      "msse-slider-container"
-                    ).style.display = "block";
+                      "msse-slider-row"
+                    ).style.display = "table-row";
                   } else {
                     document.getElementById(
-                      "msse-slider-container"
+                      "msse-slider-row"
                     ).style.display = "none";
                   }
                 }
@@ -261,6 +319,7 @@ viewer.camera.moveEnd.addEventListener(() => {
   });
 
   var toolbar = document.getElementById("cam-toolbar");
+  var toolbarRow = document.getElementById("cam-toolbar-row");
 
   while (toolbar.firstChild) {
     toolbar.removeChild(toolbar.firstChild);
@@ -268,6 +327,8 @@ viewer.camera.moveEnd.addEventListener(() => {
 
   if (viewMenu.length > 0) {
     Sandcastle.addToolbarMenu(viewMenu, "cam-toolbar");
+    toolbarRow.style.display = "table-row";
+
     if (selectedIndex) {
       document.getElementById("cam-toolbar").childNodes[0].selectedIndex =
         selectedIndex;
@@ -280,6 +341,8 @@ viewer.camera.moveEnd.addEventListener(() => {
         viewMenu[0].onselect();
       }
     }
+  } else {
+    toolbarRow.style.display = "none";
   }
 });
 
@@ -435,11 +498,11 @@ viewer.clock.onTick.addEventListener((clock) => {
               } else {
                 var imageUrl = data.url.replace("{Image}",firstImage);
               }
-              entities[data.asset.id][data.id].rectangle.material =
+              entities[data.asset.id][data.id].polygon.material =
                 new Cesium.ImageMaterialProperty({
                   image: imageUrl,
                   color:
-                    entities[data.asset.id][data.id].rectangle.material.color,
+                    entities[data.asset.id][data.id].polygon.material.color,
                 });
 
               entities[data.asset.id][data.id].billboard.image = imageUrl;
@@ -487,13 +550,13 @@ viewer.clock.onTick.addEventListener((clock) => {
                 if (
                   entities[data.asset.id][
                     data.id
-                  ].rectangle.material.image.getValue() !== imageUrl
+                  ].polygon.material.image.getValue() !== imageUrl
                 ) {
-                  entities[data.asset.id][data.id].rectangle.material =
+                  entities[data.asset.id][data.id].polygon.material =
                     new Cesium.ImageMaterialProperty({
                       image: imageUrl,
                       color:
-                        entities[data.asset.id][data.id].rectangle.material.color,
+                        entities[data.asset.id][data.id].polygon.material.color,
                     });
 
                   entities[data.asset.id][data.id].billboard.image = imageUrl;
@@ -521,6 +584,11 @@ var clickHandler = viewer.screenSpaceEventHandler.getInputAction(
   Cesium.ScreenSpaceEventType.LEFT_CLICK
 );
 viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
+  // console.log(viewer.scene.pickPosition(movement.position));
+  // var carto = Cesium.Cartographic.fromCartesian(viewer.scene.pickPosition(movement.position));
+  // console.log(carto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
+  // console.log(carto.longitude * Cesium.Math.DEGREES_PER_RADIAN);
+  // console.log(carto.height);
   var pickedFeature = viewer.scene
     .drillPick(movement.position)
     .filter((feature) => {

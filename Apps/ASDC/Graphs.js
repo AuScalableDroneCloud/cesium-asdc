@@ -123,15 +123,15 @@ const createGraph = (
   }
 
   var plotDiv = document.getElementById(divID);
-  Plotly.react(plotDiv, data, layout);
+  if (plotDiv){
+    Plotly.react(plotDiv, data, layout, {responsive: true});
+  }
 };
 
 export const loadInfluxGraphs = (data) => {
   if (document.getElementById("graphs-modal").style.display === "none") return;
   viewer.selectedEntity = null;
   var station = data.station;
-
-  // document.getElementById("graphs-modal").style.display = "block";
 
   var graphs = ["PAR_TSR", "Soil_VWC","Soil_Temp","Soil_EC", "Air_Temp_Hum","Rain","Snow","Bat_Volt"];
   var container = document.getElementById("graphs-container");
@@ -333,6 +333,21 @@ export const loadInfluxGraphs = (data) => {
 export const loadCSVGraphs = (data)=> {
   var container = document.getElementById("graphs-container");
   
+  data.graphs.map((graph,graphIndex)=>{
+    var graphDivID = `graph_${data.id}_${graphIndex}`;
+    var graphDiv = document.getElementById(graphDivID);
+    if(!graphDiv){
+      var newGraphDiv = document.createElement("div");
+      newGraphDiv.className = "graph";
+      newGraphDiv.id = `graph_${data.id}_${graphIndex}`;
+      container.appendChild(newGraphDiv);
+    }
+
+    if (graphIndex==0 && !graphDiv){
+      newGraphDiv.scrollIntoView({behavior: "smooth"});
+    }
+  })
+  
 
   fetch(
     data.url,
@@ -370,13 +385,6 @@ export const loadCSVGraphs = (data)=> {
       }
       
       var graphDivID = `graph_${data.id}_${graphIndex}`;
-      var graphDiv = document.getElementById(graphDivID);
-      if(!graphDiv){
-        var newGraphDiv = document.createElement("div");
-        newGraphDiv.className = "graph";
-        newGraphDiv.id = `graph_${data.id}_${graphIndex}`;
-        container.appendChild(newGraphDiv);
-      }
 
       createGraph (
         x,
@@ -390,10 +398,6 @@ export const loadCSVGraphs = (data)=> {
         graph.range
         // data.endDateTime ? [new Date(new Date(data.endDateTime).getTime() - 2 * 7 * 86400000), new Date(data.endDateTime)] : undefined
       )
-
-      if (graphIndex==0 && !graphDiv){
-        newGraphDiv.scrollIntoView({behavior: "smooth"});
-      }
     })
   })
 }
@@ -404,7 +408,7 @@ export const closeGraphModal = () => {
   var oldSelectedDatasets = [...selectedDatasets];
   setSelectedDatasets(
     selectedDatasets.filter((data) => {
-      return data.type !== "Influx";
+      return data.type !== "Influx" || data.type !== "CSV";
     })
   );
   oldSelectedDatasets.map((data) => {

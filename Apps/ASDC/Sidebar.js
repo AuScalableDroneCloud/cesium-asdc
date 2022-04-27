@@ -642,7 +642,6 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
     if (!selectedDatasets.includes(data)) {
       selectedDatasets.push(data);
     }
-    var dataIDs = "";
     var newDataIDs = [];
     selectedDatasets.map((d) => {
       newDataIDs.push(d.id);
@@ -650,11 +649,7 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
 
     newDataIDs.sort((a, b) => a - b);
 
-    newDataIDs.map((id) => {
-      dataIDs += id + "&";
-    });
-
-    dataIDs = dataIDs.slice(0, dataIDs.length - 1);
+    var dataIDs = newDataIDs.join('&');
 
     window.history.pushState(
       "",
@@ -665,8 +660,6 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
     );
 
     loadData(asset, data, true, false, true);
-    // loadData(asset, data, true, data["type"] === "CSV" || data["type"] === "Influx", true);
-    // loadData(asset, data, true, true , true);
 
     if (new Date(data.date) != "Invalid Date") {
       viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
@@ -711,7 +704,7 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
 
     if (data["type"] == "ImageSeries") {
       document.getElementById(
-        "image-series-toolbar"
+        "image-series-toolbar-row"
       ).style.display = "none";
     }
     setSelectedDatasets(
@@ -744,7 +737,7 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
     //   document.getElementById("image-series-toolbar").style.display="none";
     // }
 
-    var dataIDs = "";
+    // var dataIDs = "";
     var newDataIDs = [];
     selectedDatasets.map((d) => {
       newDataIDs.push(d.id);
@@ -752,11 +745,7 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
 
     newDataIDs.sort((a, b) => a - b);
 
-    newDataIDs.map((id) => {
-      dataIDs += id + "&";
-    });
-
-    dataIDs = dataIDs.slice(0, dataIDs.length - 1);
+    var dataIDs = newDataIDs.join('&')
 
     window.history.pushState(
       "",
@@ -767,23 +756,24 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
     );
 
     if (!selectedDatasets.find((d) => d.asset === asset)) {
-      viewer.timeline._trackList.splice(
-        viewer.timeline._trackList.indexOf(
-          timelineTracks[asset["id"]]
-        ),
-        1
-      );
+      if (timelineTracks[asset["id"]]){
+        viewer.timeline._trackList.splice(
+          viewer.timeline._trackList.indexOf(
+            timelineTracks[asset["id"]]
+          ),
+          1
+        );
 
-      timelineTracks[asset["id"]] = null;
-      delete timelineTracks[asset["id"]];
+        timelineTracks[asset["id"]] = null;
+        delete timelineTracks[asset["id"]];
 
-      viewer.timeline._makeTics();
-      viewer.timeline.container.style.bottom =
-        Object.keys(timelineTracks).length * 8 + "px";
-      viewer.timeline._trackContainer.style.height =
-        Object.keys(timelineTracks).length * 8 + 1 + "px";
+        viewer.timeline._makeTics();
+        viewer.timeline.container.style.bottom =
+          Object.keys(timelineTracks).length * 8 + "px";
+        viewer.timeline._trackContainer.style.height =
+          Object.keys(timelineTracks).length * 8 + 1 + "px";
+      }
     }
-
     if (
       timelineTracks[asset["id"]] &&
       timelineTracks[asset["id"]].intervals
@@ -791,7 +781,10 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
       timelineTracks[asset["id"]].intervals.map((t) => {
         if (
           Cesium.JulianDate.toDate(t.start).getTime() ===
-          new Date(data.date).getTime()
+          new Date(data.date).getTime() &&
+          !selectedDatasets.find((d) => d.asset.id === asset.id &&
+          new Date(d.date).getTime()==new Date(data.date).getTime()
+          )
         ) {
           timelineTracks[asset["id"]].intervals.splice(
             timelineTracks[asset["id"]].intervals.indexOf(t),
@@ -800,6 +793,19 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
         }
       });
       viewer.timeline._makeTics();
+    }
+
+    if (
+      !!selectedDatasets.find(
+        (d) =>
+          d.type == "PointCloud" ||
+          d.type == "EPTPointCloud" ||
+          d.type == "ModelTileset"
+      )
+    ) {
+      document.getElementById("msse-slider-row").style.display = "table-row";
+    } else {
+      document.getElementById("msse-slider-row").style.display = "none";
     }
   }
   syncTimeline(false);
@@ -867,6 +873,16 @@ const handleAssetCheckboxChange = (checkboxes, assetCheckbox, asset, uploads) =>
         ) {
           imageryLayers[d.asset.id][d.id].show = false;
         }
+        if (d["type"] == "Influx" || d["type"] == "CSV") {
+          var container = document.getElementById("graphs-container");
+          
+          const children = [...container.children];
+          for (var i=0;i<children.length;i++){
+            if (children[i].id.startsWith(`graph_${d.id}`)){
+              container.removeChild(children[i]);
+            }
+          }
+        }
       }
     });
     setSelectedDatasets(
@@ -883,7 +899,7 @@ const handleAssetCheckboxChange = (checkboxes, assetCheckbox, asset, uploads) =>
     );
 
     if (!selectedDatasets.find((d) => d.type === "ImageSeries")) {
-      document.getElementById("image-series-toolbar").style.display =
+      document.getElementById("image-series-toolbar-row").style.display =
         "none";
     }
 
@@ -936,11 +952,9 @@ const createZoomButton = (asset, data) => {
       Cesium.sampleTerrainMostDetailed(
         viewer.terrainProvider,
         Cesium.Ellipsoid.WGS84.cartesianArrayToCartographicArray(
-          Cesium.Rectangle.subsample(
             entities[asset.id][
               data.id
-            ].rectangle.coordinates.getValue()
-          )
+            ].polygon.hierarchy.getValue().positions
         )
       ).then((updatedPositions) => {
         viewer.camera.flyToBoundingSphere(
@@ -948,7 +962,13 @@ const createZoomButton = (asset, data) => {
             Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
               updatedPositions
             )
-          )
+          ),
+          {
+            offset: new Cesium.HeadingPitchRange(
+              entities[asset.id][data.id].polygon.stRotation,
+              Cesium.Math.toRadians(-45),
+              0)
+          }
         );
       });
     }
@@ -1104,17 +1124,17 @@ const createOpacitySliderBtn = (asset, data, dateDiv) => {
       if (
         entities[asset.id] &&
         entities[asset.id][data.id] &&
-        entities[asset.id][data.id].rectangle &&
-        entities[asset.id][data.id].rectangle.material
+        entities[asset.id][data.id].polygon &&
+        entities[asset.id][data.id].polygon.material
       ) {
         document.getElementById("alpha-slider").value =
           entities[asset.id][
             data.id
-          ].rectangle.material.color.getValue().alpha * 100;
+          ].polygon.material.color.getValue().alpha * 100;
         document.getElementById("alpha-value").innerHTML =
           entities[asset.id][
             data.id
-          ].rectangle.material.color.getValue().alpha *
+          ].polygon.material.color.getValue().alpha *
           100 +
           " %";
       } else {
@@ -1303,6 +1323,28 @@ const createMarkersDataSource = () => {
       cluster.billboard.disableDepthTestDistance = Number.POSITIVE_INFINITY;
       cluster.billboard.heightReference =
         Cesium.HeightReference.CLAMP_TO_GROUND;
+      
+      var id = clusteredEntities[0].id.slice("marker_".length);
+      var data = datasets.find(d=>d.id==id)
+
+      if (data.bounds){
+        var rect = new Cesium.Rectangle.fromDegrees(
+          data.bounds[0],
+          data.bounds[1],
+          data.bounds[2],
+          data.bounds[3]
+        );
+
+        var rectBoundingSphere = Cesium.BoundingSphere.fromPoints(Cesium.Rectangle.subsample(rect));
+      }
+
+      cluster.billboard.distanceDisplayCondition = new Cesium.DistanceDisplayCondition(
+        data.boundingSphereRadius
+          ? data.boundingSphereRadius * 4
+          : data.bounds ? rectBoundingSphere.radius * 4:
+          2500,
+        Number.MAX_VALUE
+      );
     });
   }
 }
@@ -1422,7 +1464,6 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         if (data.type === "Influx" || data.type==="CSV"){
           var container = document.getElementById("graphs-container");
           
-          console.log("here");
           const children = [...container.children];
           for (var i=0;i<children.length;i++){
             if (children[i].id.startsWith(`graph_${data.id}`)){
