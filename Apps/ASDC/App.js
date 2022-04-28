@@ -19,6 +19,8 @@ import {
   setBillboard,
   publicTask,
   initVars,
+  selectedDataIDs,
+  setSelectedDataIDs,
 } from "./State.js";
 import { loadAsset, loadData, setScreenSpaceError, fetchIndexAssets,fetchWebODMProjects, fetchPublicTask } from "./Datasets.js";
 import {
@@ -27,6 +29,7 @@ import {
   addFileInput,
   openModal,
   closeModal,
+  loadSelectedDataIDs
 } from "./Sidebar.js";
 import { closeGraphModal, loadCSVGraphs, loadInfluxGraphs } from "./Graphs.js";
 import { readUrlParams } from "./URL.js";
@@ -86,12 +89,18 @@ if (publicTask) {
 } else {
   if (new URLSearchParams(window.location.search).get('index')){
     fetchIndexAssets().then(()=>{
-      if (initVars && initVars.camera){
-        viewer.camera.position = new Cesium.Cartesian3(initVars.camera.position.x,initVars.camera.position.y,initVars.camera.position.z);
-        viewer.camera.direction = new Cesium.Cartesian3(initVars.camera.direction.x,initVars.camera.direction.y,initVars.camera.direction.z);
-        viewer.camera.up = new Cesium.Cartesian3(initVars.camera.up.x,initVars.camera.up.y,initVars.camera.up.z);
+      if (initVars){
+        if (initVars.camera){
+          viewer.camera.position = new Cesium.Cartesian3(initVars.camera.position.x,initVars.camera.position.y,initVars.camera.position.z);
+          viewer.camera.direction = new Cesium.Cartesian3(initVars.camera.direction.x,initVars.camera.direction.y,initVars.camera.direction.z);
+          viewer.camera.up = new Cesium.Cartesian3(initVars.camera.up.x,initVars.camera.up.y,initVars.camera.up.z);
+        }
       }
       setupSidebar(uploadPage,true);
+      if (initVars && initVars.selectedData && !selectedDataIDs){
+        setSelectedDataIDs(initVars.selectedData)
+        loadSelectedDataIDs(false);
+      }
     })
   } else {
     fetchIndexAssets().then(()=>{
@@ -100,14 +109,25 @@ if (publicTask) {
         viewer.camera.direction = new Cesium.Cartesian3(initVars.camera.direction.x,initVars.camera.direction.y,initVars.camera.direction.z);
         viewer.camera.up = new Cesium.Cartesian3(initVars.camera.up.x,initVars.camera.up.y,initVars.camera.up.z);
       }
+
       setupSidebar(uploadPage);
+      
       if (!uploadPage){
         fetchWebODMProjects()
         .then(()=>{
           setupSidebar(uploadPage);
+          //
+          if (initVars && initVars.selectedData && !selectedDataIDs){
+            setSelectedDataIDs(initVars.selectedData)
+            loadSelectedDataIDs(false);
+          }
         })
         .catch(()=>{
           setupSidebar(uploadPage);
+          if (initVars && initVars.selectedData && !selectedDataIDs){
+            setSelectedDataIDs(initVars.selectedData)
+            loadSelectedDataIDs(false);
+          }
         })
       }
     })
@@ -178,8 +198,8 @@ viewer.camera.moveEnd.addEventListener(() => {
           }
           if (
             distance <=
-            (data.boundingSphereRadius ? data.boundingSphereRadius * 2.5 : 
-              data.bounds ? rectBoundingSphere.radius * 2.5:
+            (data.boundingSphereRadius ? data.boundingSphereRadius * 2.5 > 2000 ? data.boundingSphereRadius * 2.5:2000:
+              data.bounds ? rectBoundingSphere.radius * 2.5>2000 ? rectBoundingSphere.radius * 2.5 : 2000:
               2000)
           ) {
             viewMenu.push({

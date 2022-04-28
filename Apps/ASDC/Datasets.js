@@ -240,7 +240,7 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
         viewer.flyTo(entities[asset["id"]][assetDataset[0]["id"]]);
       } else if (
         assetDataset[0]["type"] === "Influx" ||
-        assetDataset[0]["type"] === "ImageSeries" ||
+        // assetDataset[0]["type"] === "ImageSeries" ||
         assetDataset[0]["type"] === "CSV"
       ) {
         var position = Cesium.Cartesian3.fromDegrees(
@@ -250,6 +250,33 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
         );
 
         viewer.camera.flyTo({ destination: position });
+      } else if (assetDataset[0]["type"] === "ImageSeries") {
+        if (entities[asset.id][
+          assetDataset[0].id
+        ]){
+          Cesium.sampleTerrainMostDetailed(
+            viewer.terrainProvider,
+            Cesium.Ellipsoid.WGS84.cartesianArrayToCartographicArray(
+                entities[asset.id][
+                  assetDataset[0].id
+                ].polygon.hierarchy.getValue().positions
+            )
+          ).then((updatedPositions) => {
+            viewer.camera.flyToBoundingSphere(
+              Cesium.BoundingSphere.fromPoints(
+                Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                  updatedPositions
+                )
+              ),
+              {
+                offset: new Cesium.HeadingPitchRange(
+                  entities[asset.id][assetDataset[0].id].polygon.stRotation,
+                  Cesium.Math.toRadians(-90),
+                  0)
+              }
+            );
+          });
+        }
       } else if (assetDataset[0]["type"] === "Imagery") {
         var data = assetDataset[0];
         var rectangle = new Cesium.Rectangle.fromDegrees(
@@ -309,6 +336,67 @@ export const loadData = (
       }
     }
   });
+
+  
+  if (data["type"] === "Influx" || data["type"]==="ImageSeries") {
+    //Influx charts and Image Series from 2 weeks before
+    if (data.endDateTime){
+      var initialDate = new Date(data.endDateTime);
+      viewer.clock.currentTime = new Cesium.JulianDate.fromDate(initialDate);
+      viewer.timeline.updateFromClock();
+      viewer.timeline.zoomTo(
+        Cesium.JulianDate.fromDate(
+          new Date(initialDate.getTime() - 2 * 7 * 86400000)
+        ),
+        Cesium.JulianDate.fromDate(initialDate)
+      );
+    } else {
+      var currentDate = new Date();
+      viewer.clock.currentTime = new Cesium.JulianDate.fromDate(currentDate);
+      viewer.timeline.updateFromClock();
+      viewer.timeline.zoomTo(
+        Cesium.JulianDate.fromDate(
+          new Date(currentDate.getTime() - 2 * 7 * 86400000)
+          // new Date(currentDate.getTime() + 86400000)
+        ),
+        Cesium.JulianDate.fromDate(new Date())
+      );
+    }
+  } else if (data["type"] === "CSV") {
+    if (data.endDateTime){
+      if (data.startDateTime){
+        viewer.clock.currentTime = new Cesium.JulianDate.fromDate(new Date(data.endDateTime));
+        viewer.timeline.updateFromClock();
+        viewer.timeline.zoomTo(
+          Cesium.JulianDate.fromDate(
+            new Date(data.startDateTime)
+          ),
+          Cesium.JulianDate.fromDate(new Date(data.endDateTime))
+        );
+      } else {
+        var initialDate = new Date(data.endDateTime);
+        viewer.clock.currentTime = new Cesium.JulianDate.fromDate(initialDate);
+        viewer.timeline.updateFromClock();
+        viewer.timeline.zoomTo(
+          Cesium.JulianDate.fromDate(
+            new Date(initialDate.getTime() - 2 * 7 * 86400000)
+          ),
+          Cesium.JulianDate.fromDate(initialDate)
+        );
+      }
+    } else {
+      var currentDate = new Date();
+      viewer.clock.currentTime = new Cesium.JulianDate.fromDate(currentDate);
+      viewer.timeline.updateFromClock();
+      viewer.timeline.zoomTo(
+        Cesium.JulianDate.fromDate(
+          new Date(currentDate.getTime() - 2 * 7 * 86400000)
+          // new Date(currentDate.getTime() + 86400000)
+        ),
+        Cesium.JulianDate.fromDate(new Date())
+      );
+    }
+  }
 
   if (data["type"] === "PointCloud" || data["type"] === "ModelTileset") {
     if (!tilesets[asset["id"]]) tilesets[asset["id"]] = {};
@@ -570,8 +658,8 @@ export const loadData = (
       }
       currentDate.setHours(12, 0, 0);
 
-      var halfWidth = ((data.heightDeg ? data.heightDeg : 0.0025) * data.width) / data.height;
-      var halfHeight = (data.heightDeg ? data.heightDeg : 0.0025);
+      var halfWidth = ((data.halfHeightDeg ? data.halfHeightDeg : 0.0025) * data.width) / data.height;
+      var halfHeight = (data.halfHeightDeg ? data.halfHeightDeg : 0.0025);
 
       if (data.rotation){
         var poly = turf.polygon([[
@@ -600,7 +688,29 @@ export const loadData = (
       }
 
       var points = Cesium.Cartesian3.fromDegreesArray(pointsArray);
-
+      entities[asset.id][data.id] = viewer.entities.add({
+              polygon:{
+                hierarchy:points,
+                stRotation:data.rotation ? Cesium.Math.toRadians(data.rotation): 0,
+                show: !billboard,
+              },
+              position: Cesium.Cartesian3.fromDegrees(
+                data.position["lng"],
+                data.position["lat"]
+              ),
+              billboard: {
+                height: 300,
+                width: (300 * data.width) / data.height,
+                pixelOffset: new Cesium.Cartesian2(0, -150),
+                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
+                  0,
+                  5000
+                ),
+                color: new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
+                show: billboard,
+              },
+            });
       if (data.source && data.source.type === "csv") {
         fetch(
           data.source.url,
@@ -635,39 +745,16 @@ export const loadData = (
           } else {
             var imageUrl = data.url.replace("{Image}",firstImage);
           }
-          
-          entities[asset.id][data.id] = viewer.entities.add({
-            position: Cesium.Cartesian3.fromDegrees(
-              data.position["lng"],
-              data.position["lat"]
-            ),
-            polygon:{
-              hierarchy:points,
-              material: new Cesium.ImageMaterialProperty({
-                image: imageUrl,
-                color: new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
-              }),
-              stRotation:Cesium.Math.toRadians(data.rotation),
-              show: !billboard,
-            },
-            billboard: {
-              image: imageUrl,
-              height: 300,
-              width: (300 * data.width) / data.height,
-              pixelOffset: new Cesium.Cartesian2(0, -150),
-              heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-              distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
-                0,
-                5000
-              ),
-              color: new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
-              show: billboard,
-            },
-          });
+          entities[data.asset.id][data.id].polygon.material =
+                    new Cesium.ImageMaterialProperty({
+                      image: imageUrl,
+                      color:
+                      new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
+                    });
+
+          entities[data.asset.id][data.id].billboard.image = imageUrl;
         })
-      } else {// 
-        var halfWidth = (0.0025 * 960) / 720;
-        var halfHeight = 0.0025;
+      } else {
         fetch(
           `/cesium/influx/images?camera=${data.camera}&time=${
             data.timeOffset
@@ -698,34 +785,14 @@ export const loadData = (
                 data.startDateTime
               ).getTime()}`;
             }
-            entities[asset.id][data.id] = viewer.entities.add({
-              polygon:{
-                hierarchy:points,
-                material: new Cesium.ImageMaterialProperty({
-                  image: imageUrl,
-                  color: new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
-                }),
-                stRotation:data.rotation ? Cesium.Math.toRadians(data.rotation): 0,
-                show: !billboard,
-              },
-              position: Cesium.Cartesian3.fromDegrees(
-                data.position["lng"],
-                data.position["lat"]
-              ),
-              billboard: {
-                image: imageUrl,
-                height: 300,
-                width: (300 * 960) / 720,
-                pixelOffset: new Cesium.Cartesian2(0, -150),
-                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-                distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
-                  0,
-                  5000
-                ),
-                color: new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
-                show: billboard,
-              },
-            });
+            entities[data.asset.id][data.id].polygon.material =
+                    new Cesium.ImageMaterialProperty({
+                      image: imageUrl,
+                      color:
+                      new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
+                    });
+
+            entities[data.asset.id][data.id].billboard.image = imageUrl;
           })
           .catch((error) => {
             console.log(error);
@@ -841,7 +908,7 @@ export const loadData = (
           viewer.flyTo(entities[asset["id"]][data["id"]]);
         } else if (
           assetDataset[0]["type"] === "Influx" ||
-          assetDataset[0]["type"] === "ImageSeries" ||
+          // assetDataset[0]["type"] === "ImageSeries" ||
           assetDataset[0]["type"] === "CSV"
         ) {
           // if (assetDataset[0] && assetDataset[0]["position"]){
@@ -858,6 +925,33 @@ export const loadData = (
               }
             });
           // }
+        } else if (assetDataset[0]["type"] === "ImageSeries") {
+          if (entities[asset.id][
+            data.id
+          ]){
+            Cesium.sampleTerrainMostDetailed(
+              viewer.terrainProvider,
+              Cesium.Ellipsoid.WGS84.cartesianArrayToCartographicArray(
+                  entities[asset.id][
+                    data.id
+                  ].polygon.hierarchy.getValue().positions
+              )
+            ).then((updatedPositions) => {
+              viewer.camera.flyToBoundingSphere(
+                Cesium.BoundingSphere.fromPoints(
+                  Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                    updatedPositions
+                  )
+                ),
+                {
+                  offset: new Cesium.HeadingPitchRange(
+                    entities[asset.id][data.id].polygon.stRotation,
+                    Cesium.Math.toRadians(-90),
+                    0)
+                }
+              );
+            });
+          }
         } else if (assetDataset[0]["type"] === "Imagery") {
           if (assetDataset[0].bounds){
             var rectangle = new Cesium.Rectangle.fromDegrees(
@@ -896,66 +990,6 @@ export const loadData = (
           }
         }
       }
-    }
-  }
-
-  if (data["type"] === "Influx" || data["type"]==="ImageSeries") {
-    //Influx charts and Image Series from 2 weeks before
-    if (data.endDateTime){
-      var initialDate = new Date(data.endDateTime);
-      viewer.clock.currentTime = new Cesium.JulianDate.fromDate(initialDate);
-      viewer.timeline.updateFromClock();
-      viewer.timeline.zoomTo(
-        Cesium.JulianDate.fromDate(
-          new Date(initialDate.getTime() - 2 * 7 * 86400000)
-        ),
-        Cesium.JulianDate.fromDate(initialDate)
-      );
-    } else {
-      var currentDate = new Date();
-      viewer.clock.currentTime = new Cesium.JulianDate.fromDate(currentDate);
-      viewer.timeline.updateFromClock();
-      viewer.timeline.zoomTo(
-        Cesium.JulianDate.fromDate(
-          new Date(currentDate.getTime() - 2 * 7 * 86400000)
-          // new Date(currentDate.getTime() + 86400000)
-        ),
-        Cesium.JulianDate.fromDate(new Date())
-      );
-    }
-  } else if (data["type"] === "CSV") {
-    if (data.endDateTime){
-      if (data.startDateTime){
-        viewer.clock.currentTime = new Cesium.JulianDate.fromDate(new Date(data.endDateTime));
-        viewer.timeline.updateFromClock();
-        viewer.timeline.zoomTo(
-          Cesium.JulianDate.fromDate(
-            new Date(data.startDateTime)
-          ),
-          Cesium.JulianDate.fromDate(new Date(data.endDateTime))
-        );
-      } else {
-        var initialDate = new Date(data.endDateTime);
-        viewer.clock.currentTime = new Cesium.JulianDate.fromDate(initialDate);
-        viewer.timeline.updateFromClock();
-        viewer.timeline.zoomTo(
-          Cesium.JulianDate.fromDate(
-            new Date(initialDate.getTime() - 2 * 7 * 86400000)
-          ),
-          Cesium.JulianDate.fromDate(initialDate)
-        );
-      }
-    } else {
-      var currentDate = new Date();
-      viewer.clock.currentTime = new Cesium.JulianDate.fromDate(currentDate);
-      viewer.timeline.updateFromClock();
-      viewer.timeline.zoomTo(
-        Cesium.JulianDate.fromDate(
-          new Date(currentDate.getTime() - 2 * 7 * 86400000)
-          // new Date(currentDate.getTime() + 86400000)
-        ),
-        Cesium.JulianDate.fromDate(new Date())
-      );
     }
   }
 

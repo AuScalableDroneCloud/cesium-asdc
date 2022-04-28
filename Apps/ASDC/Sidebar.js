@@ -24,7 +24,8 @@ import {
   projectDivs,
   categoryDivs,
   publicTask,
-  taskInfos
+  taskInfos,
+  initVars
 } from "./State.js";
 import { loadAsset, loadData, syncTimeline } from "./Datasets.js";
 import { pcFormats, processingAPI } from "./Constants.js";
@@ -281,12 +282,21 @@ export const setupSidebar = (uploads, indexParam=false) => {
       markersDataSource.clustering.pixelRange = 0;
     }, 0);
   }
+
+  loadSelectedDataIDs(true);
+};
+
+export const loadSelectedDataIDs = (fly)=>{
   if (selectedDataIDs) {
     var assetIDs = [];
     var selectedCats = [];
     var selectedProjects = [];
     var newSelectedDatasets = [];
     selectedDataIDs.map((dataID, index) => {
+      var dataCheckbox = document.getElementById(`dataCheckbox-${dataID}`);
+      if (dataCheckbox){
+        dataCheckbox.checked=true;
+      }
       var asset;
       for (var i = 0; i < assets.length; i++) {
         if (assets[i].data && (!!assets[i].data.find(d => d.toString() == dataID))) {
@@ -306,13 +316,27 @@ export const setupSidebar = (uploads, indexParam=false) => {
           break;
         }
       }
-
-      for (var i = 0; i < datasets.length; i++) {
-        if (datasets[i].id == dataID) {
-          newSelectedDatasets.push(datasets[i]);
-          loadData(asset, datasets[i], index == 0, false, true);
-          // loadData(asset, datasets[i], index == 0, datasets[i]["type"] === "CSV" || datasets[i]["type"] === "Influx", true);
-          break;
+      if(asset){
+        var assetCheckbox = document.getElementById(
+          `assetCheckbox-${asset.id}`
+        );
+        if (asset.data.every(ad => selectedDataIDs.includes(ad.toString()) || selectedDataIDs.includes(ad))){
+            assetCheckbox.checked = true;
+            assetCheckbox.indeterminate = false;
+        } else {
+          assetCheckbox.checked = false;
+          if (asset.data.some(ad => selectedDataIDs.includes(ad.toString()) || selectedDataIDs.includes(ad))){
+            assetCheckbox.indeterminate = true;
+          } else {
+            assetCheckbox.indeterminate = false;
+          }
+        }
+        for (var i = 0; i < datasets.length; i++) {
+          if (datasets[i].id == dataID) {
+            newSelectedDatasets.push(datasets[i]);
+            loadData(asset, datasets[i], fly && index == 0, false, true);
+            break;
+          }
         }
       }
     });
@@ -342,7 +366,7 @@ export const setupSidebar = (uploads, indexParam=false) => {
 
     setSelectedAssetIDs(assetIDs);
   }
-};
+}
 
 export const downloadFile = (asset, data, index, format) => {
   var waitModal = document.getElementById("processing-wait-modal");
@@ -846,6 +870,11 @@ const handleAssetCheckboxChange = (checkboxes, assetCheckbox, asset, uploads) =>
         : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search
     );
     loadAsset(asset, false, true);
+    
+    var firstAssetData = selectedDatasets.find(d=>d.asset.id==asset.id);
+    if (firstAssetData.type!="Influx" && firstAssetData.type!="ImageSeries"){
+      syncTimeline(true);
+    }
   } else {
     selectedDatasets.map((d) => {
       if (d.asset.id === asset.id) {
@@ -940,8 +969,9 @@ const handleAssetCheckboxChange = (checkboxes, assetCheckbox, asset, uploads) =>
       Object.keys(timelineTracks).length * 8 - 1 + "px";
     viewer.timeline._trackContainer.style.height =
       Object.keys(timelineTracks).length * 8 + 1 + "px";
+
+    syncTimeline(true);
   }
-  syncTimeline(true);
 }
 
 const createZoomButton = (asset, data) => {
