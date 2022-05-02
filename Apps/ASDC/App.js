@@ -113,6 +113,7 @@ if (publicTask) {
       setupSidebar(uploadPage);
       
       if (!uploadPage){
+        document.getElementById("user-dropdown-button").style.display="flex";
         fetchWebODMProjects()
         .then(()=>{
           setupSidebar(uploadPage);
@@ -694,3 +695,30 @@ document.getElementById("add-file-button").onclick = addFileInput;
 document.getElementById("modal-upload-button").onclick = upload;
 document.getElementById("close-graph").onclick = closeGraphModal;
 document.getElementById("msse-slider").oninput = setScreenSpaceError;
+
+
+var sidebarOpen=true;
+document.getElementById("sidebar-collapse-button").onclick = ()=>{
+  if (sidebarOpen){
+    document.getElementById("sidebar").style.width = "0";
+    document.getElementById("cesiumContainer").style.left = "0";
+    document.getElementById("cesiumContainer").style.width = "100%";
+  } else {
+    document.getElementById("sidebar").style.width = "300px";
+    document.getElementById("cesiumContainer").style.left = "300px";
+    document.getElementById("cesiumContainer").style.width = "calc(100% - 300px)";
+
+  }
+  sidebarOpen=!sidebarOpen;
+};
+
+document.getElementById("user-dropdown-button").onclick = ()=>{
+  var userDropDown = document.getElementById("user-dropdown-list");
+  if (userDropDown.style.display=="block"){
+    userDropDown.style.display="none";
+    document.getElementById("user-dropdown-button").style.background = "transparent";
+  } else {
+    userDropDown.style.display="block";
+    document.getElementById("user-dropdown-button").style.background = "#5b8b51";
+  }
+}

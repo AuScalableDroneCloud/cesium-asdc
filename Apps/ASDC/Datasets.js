@@ -22,7 +22,10 @@ import {
   publicTask,
   selectedData,
   setTaskInfos,
-  indexFile
+  indexFile,
+  sourceDivs,
+  setSelectedDatasets,
+  markersDataSource
 } from "./State.js";
 import { loadInfluxGraphs, loadCSVGraphs,closeGraphModal } from "./Graphs.js";
 import { setupStyleToolbar, applyStyle } from "./Style.js";
@@ -1416,11 +1419,76 @@ export const fetchWebODMProjects = () => {
         credentials: 'include'
       })
         .then(response => {
+          var signInButton = document.createElement("div");
+          signInButton.className = "sidebar-item";
+          signInButton.style["text-align"] = "center";
+          signInButton.innerHTML = "Login here to view your ASDC data";
+          signInButton.onclick=()=>{
+            window.location.href = `https://asdc.cloud.edu.au/login/auth0?next=${window.location.href}`; 
+          }
+
           if (response.status===200){
+            document.getElementById("login-logout-button-text").innerHTML = "Logout";
+            document.getElementById("login-logout-button").onclick = ()=>{
+              fetch("https://asdc.cloud.edu.au/logout/", {
+                cache: "no-store",
+                credentials: 'include',
+                mode: 'no-cors'
+              }).then(()=>{
+                document.getElementById("login-logout-button-text").innerHTML = "Login";
+                const children = [...sourceDivs["WebODM Projects"].nextElementSibling.children];
+                for (var i=0;i<children.length;i++){
+                    sourceDivs["WebODM Projects"].nextElementSibling.removeChild(children[i]);
+                }
+                sourceDivs["WebODM Projects"].nextElementSibling.appendChild(signInButton);
+
+                document.getElementById("login-logout-button").onclick = signInButton.onclick;
+
+                selectedDatasets.filter(d=>d.asset.project).map(d=>{
+                  if(d.type=="Imagery"){
+                    viewer.imageryLayers.remove(imageryLayers[d.asset.id][d.id], true);
+                    imageryLayers[d.asset.id][d.id] = imageryLayers[d.asset.id][d.id] && imageryLayers[d.asset.id][d.id].destroy();                  
+                  } else if (d.type==="EPTPointCloud") {
+                    viewer.scene.primitives.remove(tilesets[d.asset.id][d.id])
+                    tilesets[d.asset.id][d.id] = tilesets[d.asset.id][d.id] && tilesets[d.asset.id][d.id].destroy();
+                  }
+                })
+                setSelectedDatasets(selectedDatasets.filter(d=>!d.asset.project));
+                setDatasets(datasets.filter(d=>d.asset && !d.asset.project));
+
+                assets.filter(a=>a.project).map(a=>{
+                  markersDataSource.entities.removeById("marker_" + a.id);
+                })
+
+                setAssets(assets.filter(a=>!a.project));
+                setODMProjects();
+  
+                viewer.camera.moveEnd.raiseEvent();
+                if (
+                  !selectedDatasets.find(
+                    (d) =>
+                      d.type == "PointCloud" ||
+                      d.type == "EPTPointCloud" ||
+                      d.type == "ModelTileset"
+                  )
+                ) 
+                {
+                  document.getElementById("msse-slider-row").style.display = "none";
+                  document.getElementById("dims-toolbar-row").style.display = "none";
+                }
+              })
+            }
+
             return response.json()
           } else {
             if (response.status===403){
-              window.location.href = `https://asdc.cloud.edu.au/login/auth0?next=${window.location.href}`; 
+              document.getElementById("login-logout-button-text").innerHTML = "Login";
+              document.getElementById("login-logout-button").onclick = signInButton.onclick;
+
+              if (sourceDivs["WebODM Projects"].nextElementSibling.firstChild.className === "loader-parent"){
+                sourceDivs["WebODM Projects"].nextElementSibling.removeChild(sourceDivs["WebODM Projects"].nextElementSibling.firstChild);
+              }
+              sourceDivs["WebODM Projects"].nextElementSibling.appendChild(signInButton)
             }
             resolve();
           }

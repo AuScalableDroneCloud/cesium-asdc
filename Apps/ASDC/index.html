@@ -30,6 +30,33 @@
     </style>
   </head>
   <body>
+    <nav id="nav-header">
+      <button id="sidebar-collapse-button">☰</button>
+      <a href="/cesium/Apps/ASDC/" style="align-self: center;margin-left: 15px;float: left;">
+        <img src="https://asdc.cloud.edu.au/media/CACHE/images/settings/Australia_Outline_blur_threshold_bw/0d9b8785a254e94442840616154623f5.png" alt="WebODM">
+      </a>
+      <a 
+        href="/cesium/Apps/ASDC/" 
+        style='align-self: center;
+          margin-left: 5px;
+          text-decoration: none;
+          color: white;
+          font-size: 15px;
+          float: left;'
+      >
+        ASDC Cesium Platform
+      </a>
+      <div id="user-dropdown-button">
+        <div class="fa fa-user fa-fw"></div>
+        <div class="fa fa-caret-down"></div>
+        <div id="user-dropdown-list">
+          <div id="login-logout-button">
+            <div class="fa fa-sign-out"></div>
+            <div id="login-logout-button-text">Logout</div>
+          </div>
+        </div>
+      </div>
+    </nav>
     <div id="cesiumContainer">
       <table id="toolbars-container" style="z-index: 2; position: absolute">
         <tr id="cam-toolbar-row" style="display: none;">

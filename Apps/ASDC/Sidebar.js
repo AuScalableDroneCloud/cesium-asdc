@@ -828,8 +828,10 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
       )
     ) {
       document.getElementById("msse-slider-row").style.display = "table-row";
+      document.getElementById("dims-toolbar-row").style.display = "table-row";
     } else {
       document.getElementById("msse-slider-row").style.display = "none";
+      document.getElementById("dims-toolbar-row").style.display = "none";
     }
   }
   syncTimeline(false);
@@ -1185,6 +1187,7 @@ const createOpacitySliderBtn = (asset, data, dateDiv) => {
       document.getElementById("sidebar-data-buttons").scrollLeft +
       "px";
     opacityDropdown.style.top =
+      document.getElementById("nav-header").offsetHeight +
       evt.target.offsetTop +
       evt.target.offsetHeight / 2 -
       document.getElementById("sidebar-data-buttons").scrollTop +
@@ -1232,6 +1235,7 @@ const createDownloadBtn = (asset, data, dateDiv, index) => {
       document.getElementById("sidebar-data-buttons").scrollLeft +
       "px";
     dlDropdown.style.top =
+      document.getElementById("nav-header").offsetHeight +
       evt.target.offsetTop +
       evt.target.offsetHeight / 2 -
       document.getElementById("sidebar-data-buttons").scrollTop +

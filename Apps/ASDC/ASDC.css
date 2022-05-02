@@ -1,23 +1,100 @@
 #cesiumContainer {
-  width: 80%;
+  width: calc(100% - 300px);
   position: absolute;
   left: 300px;
-  height: 100%;
+  height: calc(100% - 50px);
   margin: 0;
   padding: 0;
   overflow: hidden;
+  transition:0.5s;
 }
 
 #sidebar {
   width: 300px;
   position: absolute;
   left: 0%;
-  height: 100%;
+  height: calc(100% - 50px);
   margin: 0;
   padding: 0;
   overflow: hidden;
   background: #fffbf5;
   color: black;
+  transition: 0.5s;
+  max-width: 100%;
+}
+
+#nav-header{
+  height:50px;
+  background-color: #C55034;
+  display:flex;
+}
+
+#sidebar-collapse-button{
+  background-color: transparent;
+  background-image: none;
+  border: 1px solid #1a242f;
+  border-radius: 4px;
+  line-height: 0px;
+  font-size: 22px;
+  width: 40px;
+  padding: 5px;
+  color: white;
+  height: 36px;
+  float: left;
+  align-self: center;
+  margin-left: 15px;
+}
+
+#sidebar-collapse-button:hover{
+  background-color: #1a242f;
+  cursor: pointer;
+}
+
+#user-dropdown-button{
+  margin-left: auto;
+  margin-right: 15px;
+  padding: 0px 5px;
+  font-size: 18px;
+  height: 100%;
+  display: none;
+  align-items: center;
+}
+
+#login-logout-button {
+  padding: 5px;
+  margin:0 8px;
+  display: flex;
+  align-items: center;
+}
+
+#login-logout-button-text{
+  padding:5px;
+}
+
+#login-logout-button:hover,
+#user-dropdown-button:hover{
+  background-color: #5b8b51;
+  cursor: pointer;
+}
+
+#user-dropdown-list{
+  position: absolute;
+  background-color: #efe5d5;
+  top: 50px;
+  z-index: 3;
+  right: 15px;
+  margin-top: 2px;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 4px;
+  color: black;
+  border-color: #EFE5D5;
+  background-color: #FFFBF5;
+  box-shadow: 0 6px 12px rgb(0 0 0 / 18%);
+  background-clip: padding-box;
+  min-width: 160px;
+  font-size: 15px;
+  padding: 5px 0px;
+  display: none;
 }
 
 #sidebar-data-buttons {
