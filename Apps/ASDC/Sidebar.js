@@ -158,6 +158,13 @@ export const setupSidebar = (uploads, indexParam=false) => {
           layerContentDiv.style.padding = "0 54px";
           layerContentDiv.innerHTML = "All " + (suffix == "pc" ? "Point Clouds":
             suffix == "op" ? "Orthophotos" : suffix == "dtm" ? "DTMs" : suffix == "dsm" ? "DSMs": null); 
+
+          // var layerCheckBox = document.createElement("input");
+          // layerCheckBox.type = "checkbox";
+          // layerCheckBox.style.float = "left";
+          // layerCheckBox.style.margin = "0 5px 0 0";
+          // layerContentDiv.appendChild(layerCheckBox);
+
           layerDiv.appendChild(layerContentDiv);
   
           layerDiv.onclick = ()=>{
@@ -365,7 +372,32 @@ export const loadSelectedDataIDs = (fly)=>{
           categoryDivs[c].onclick();
         }
       } else {
-        sourceDivs["WebODM Projects"].onclick();
+        sourceDivs["WebODM Projects"].firstChild.classList.add("sidebar-accordion-active");
+        var panel = sourceDivs["WebODM Projects"].nextElementSibling;
+          panel.style.maxHeight = "fit-content";
+          var height=0;
+          var children = [...panel.children];
+          for (var i=0;i<children.length;i++) {
+            height+=children[i].scrollHeight + children[i].getBoundingClientRect().height;
+          }
+          
+          panel.style.maxHeight = height + "px";
+
+        var elem = panel.parentElement;
+        while (elem) {      
+          var height = 0;
+          var children = [...elem.children];
+          for(var i=0;i<children.length;i++){
+            if (children[i].style.maxHeight){
+              height+=parseFloat(children[i].style.maxHeight.slice(0,-2));
+            } else {
+              height+=children[i].scrollHeight + children[i].getBoundingClientRect().height;
+            }
+          }
+          elem.style.maxHeight = height + "px";
+
+          elem = elem.parentElement;
+        }
       }
     });
 
@@ -664,7 +696,7 @@ const createAccordion = (name, padding = 0) => {
     if (panel.style.maxHeight) {
       panel.style.maxHeight = null;
     } else {
-      panel.style.maxHeight = "fit-content";
+      // panel.style.maxHeight = "fit-content";
       var height=0;
       var children = [...panel.children];
       for (var i=0;i<children.length;i++) {
@@ -675,7 +707,7 @@ const createAccordion = (name, padding = 0) => {
     }
 
     var elem = panel.parentElement;
-    while (elem) {
+    while (elem && elem.id != "sidebar" && elem.id != "sidebar-data-buttons") {
       // elem.style.maxHeight = 'fit-content';
       
       var height = 0;
