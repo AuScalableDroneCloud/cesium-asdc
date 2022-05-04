@@ -39,6 +39,7 @@ export const setupSidebar = (uploads, indexParam=false) => {
 
   createMarkersDataSource();
 
+  var togglePublicData = false;
   if (!uploads && !publicTask && !indexParam){
     if (Object.keys(sourceDivs).length==0){
       var sources= ["Public Data", "WebODM Projects"];
@@ -57,7 +58,7 @@ export const setupSidebar = (uploads, indexParam=false) => {
         sidebarDataButtons.appendChild(sourceDivs[s]);
         sidebarDataButtons.appendChild(sourceAccordionPanelDiv);
       })
-      sourceDivs["Public Data"].onclick();
+      togglePublicData=true;
       categories.map((cat) => {
         categoryDivs[cat.id] = createAccordion(cat.name,18);
         categoryDivs[cat.id].id = `category-${cat.id}`;
@@ -173,6 +174,19 @@ export const setupSidebar = (uploads, indexParam=false) => {
         }
       })
     })
+
+    if (sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight){
+      var height = 0;
+      var children = [...sourceDivs["WebODM Projects"].nextElementSibling.children];
+      for(var i=0;i<children.length;i++){
+        if (children[i].style.maxHeight){
+          height+=parseFloat(children[i].style.maxHeight.slice(0,-2));
+        } else {
+          height+=children[i].scrollHeight + children[i].getBoundingClientRect().height;
+        }
+      }
+      sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight = height + "px";
+    }
   } 
 
   assets.map((asset) => {
@@ -281,6 +295,10 @@ export const setupSidebar = (uploads, indexParam=false) => {
     setTimeout(() => {
       markersDataSource.clustering.pixelRange = 0;
     }, 0);
+  }
+  
+  if (togglePublicData) {
+    sourceDivs["Public Data"].onclick();
   }
 
   loadSelectedDataIDs(true);
@@ -647,11 +665,30 @@ const createAccordion = (name, padding = 0) => {
       panel.style.maxHeight = null;
     } else {
       panel.style.maxHeight = "fit-content";
+      var height=0;
+      var children = [...panel.children];
+      for (var i=0;i<children.length;i++) {
+        height+=children[i].scrollHeight + children[i].getBoundingClientRect().height;
+      }
+      
+      panel.style.maxHeight = height + "px";
     }
 
     var elem = panel.parentElement;
     while (elem) {
-      elem.style.maxHeight = 'fit-content';
+      // elem.style.maxHeight = 'fit-content';
+      
+      var height = 0;
+      var children = [...elem.children];
+      for(var i=0;i<children.length;i++){
+        if (children[i].style.maxHeight){
+          height+=parseFloat(children[i].style.maxHeight.slice(0,-2));
+        } else {
+          height+=children[i].scrollHeight + children[i].getBoundingClientRect().height;
+        }
+      }
+      elem.style.maxHeight = height + "px";
+
       elem = elem.parentElement;
     }
   };

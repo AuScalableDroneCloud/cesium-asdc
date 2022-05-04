@@ -21,6 +21,11 @@ import {
   initVars,
   selectedDataIDs,
   setSelectedDataIDs,
+  sourceDivs,
+  setSelectedDatasets,
+  setDatasets,
+  setAssets,
+  setODMProjects
 } from "./State.js";
 import { loadAsset, loadData, setScreenSpaceError, fetchIndexAssets,fetchWebODMProjects, fetchPublicTask } from "./Datasets.js";
 import {
@@ -81,7 +86,7 @@ if (window.location.href.toLowerCase().includes("cesium/apps/asdc/uploads")) {
 }
 
 Cesium.TrustedServers.add("asdc.cloud.edu.au",443)
-
+var odmToken={};
 if (publicTask) {
   fetchPublicTask().then(()=>{
     setupSidebar(false);
@@ -114,17 +119,15 @@ if (publicTask) {
       
       if (!uploadPage){
         document.getElementById("user-dropdown-button").style.display="flex";
-        fetchWebODMProjects()
+        fetchWebODMProjects(odmToken)
         .then(()=>{
           setupSidebar(uploadPage);
-          //
           if (initVars && initVars.selectedData && !selectedDataIDs){
             setSelectedDataIDs(initVars.selectedData)
             loadSelectedDataIDs(false);
           }
         })
         .catch(()=>{
-          setupSidebar(uploadPage);
           if (initVars && initVars.selectedData && !selectedDataIDs){
             setSelectedDataIDs(initVars.selectedData)
             loadSelectedDataIDs(false);
@@ -721,4 +724,70 @@ document.getElementById("user-dropdown-button").onclick = ()=>{
     userDropDown.style.display="block";
     document.getElementById("user-dropdown-button").style.background = "#5b8b51";
   }
+}
+
+document.getElementById("login-logout-button").onclick = ()=>{
+  odmToken.cancel();
+
+  fetch("https://asdc.cloud.edu.au/logout/", {
+    cache: "no-store",
+    credentials: 'include',
+    mode: 'no-cors'
+  }).then(()=>{
+    document.getElementById("login-logout-button-text").innerHTML = "Login";
+
+    var signInButton = document.createElement("div");
+    signInButton.className = "sidebar-item";
+    signInButton.style["text-align"] = "center";
+    signInButton.innerHTML = "Login here to view your ASDC data";
+    signInButton.onclick=()=>{
+      window.location.href = `https://asdc.cloud.edu.au/login/auth0?next=${window.location.href}`; 
+    }
+
+    const children = [...sourceDivs["WebODM Projects"].nextElementSibling.children];
+    for (var i=0;i<children.length;i++){
+        sourceDivs["WebODM Projects"].nextElementSibling.removeChild(children[i]);
+    }
+
+    sourceDivs["WebODM Projects"].nextElementSibling.appendChild(signInButton);
+
+    if (sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight){
+      sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight = signInButton.scrollHeight + "px";
+    }
+
+    document.getElementById("login-logout-button").onclick = signInButton.onclick;
+
+    selectedDatasets.filter(d=>d.asset.project).map(d=>{
+      if(d.type=="Imagery"){
+        viewer.imageryLayers.remove(imageryLayers[d.asset.id][d.id], true);
+        imageryLayers[d.asset.id][d.id] = imageryLayers[d.asset.id][d.id] && imageryLayers[d.asset.id][d.id].destroy();                  
+      } else if (d.type==="EPTPointCloud") {
+        viewer.scene.primitives.remove(tilesets[d.asset.id][d.id])
+        tilesets[d.asset.id][d.id] = tilesets[d.asset.id][d.id] && tilesets[d.asset.id][d.id].destroy();
+      }
+    })
+    setSelectedDatasets(selectedDatasets.filter(d=>!d.asset.project));
+    setDatasets(datasets.filter(d=>d.asset && !d.asset.project));
+
+    assets.filter(a=>a.project).map(a=>{
+      markersDataSource.entities.removeById("marker_" + a.id);
+    })
+
+    setAssets(assets.filter(a=>!a.project));
+    setODMProjects();
+
+    viewer.camera.moveEnd.raiseEvent();
+    if (
+      !selectedDatasets.find(
+        (d) =>
+          d.type == "PointCloud" ||
+          d.type == "EPTPointCloud" ||
+          d.type == "ModelTileset"
+      )
+    ) 
+    {
+      document.getElementById("msse-slider-row").style.display = "none";
+      document.getElementById("dims-toolbar-row").style.display = "none";
+    }
+  })
 }

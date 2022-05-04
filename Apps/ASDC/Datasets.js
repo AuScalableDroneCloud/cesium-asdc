@@ -1411,12 +1411,19 @@ export const fetchIndexAssets = ()=>{
   })
 }
 
-export const fetchWebODMProjects = () => {
+export const fetchWebODMProjects = (token={}) => {
   return (
     new Promise(function (resolve, reject) {
+      var controller = new AbortController();
+      token.cancel = ()=>{
+        reject();
+        controller.abort();
+      }
+
       fetch("https://asdc.cloud.edu.au/api/projects/?ordering=-created_at", {
         cache: "no-store",
-        credentials: 'include'
+        credentials: 'include',
+        signal:controller.signal
       })
         .then(response => {
           var signInButton = document.createElement("div");
@@ -1429,7 +1436,10 @@ export const fetchWebODMProjects = () => {
 
           if (response.status===200){
             document.getElementById("login-logout-button-text").innerHTML = "Logout";
+
             document.getElementById("login-logout-button").onclick = ()=>{
+              token.cancel();
+
               fetch("https://asdc.cloud.edu.au/logout/", {
                 cache: "no-store",
                 credentials: 'include',
@@ -1441,6 +1451,10 @@ export const fetchWebODMProjects = () => {
                     sourceDivs["WebODM Projects"].nextElementSibling.removeChild(children[i]);
                 }
                 sourceDivs["WebODM Projects"].nextElementSibling.appendChild(signInButton);
+
+                if (sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight){
+                  sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight = signInButton.scrollHeight + "px";
+                }
 
                 document.getElementById("login-logout-button").onclick = signInButton.onclick;
 
@@ -1504,7 +1518,8 @@ export const fetchWebODMProjects = () => {
             odmProjects.map((project) => {
               taskInfoPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/?ordering=-created_at`, {
                 cache: "no-store",
-                credentials: 'include'
+                credentials: 'include',
+                signal:controller.signal
               }).then(response => response.json()));
             })
           }
@@ -1513,55 +1528,66 @@ export const fetchWebODMProjects = () => {
             if (Array.isArray(odmProjects)) {
               var taskDict = {};
               odmProjects.map((project, projectIndex) => {
-                // setTaskInfos(taskInfos);
                 taskInfos[projectIndex].map(task => {
                   taskDict[task.id] = task;
                   if (task.available_assets.includes("georeferenced_model.laz")) {
                     metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`, {
                       cache: "no-store",
-                      credentials: 'include'
+                      credentials: 'include',
+                      signal:controller.signal
                     }).then(response => {
                       if(response.status===200){
                         return response.json();
                       }
                     }).catch((e) => {
-                      console.log(e);
+                      if (e.name !== "AbortError") {
+                        console.log(e);
+                      }
                     }))
                   }
                   if (task.available_assets.includes("orthophoto.tif")) {
                     metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/orthophoto/metadata`, {
                       cache: "no-store",
-                      credentials: 'include'
+                      credentials: 'include',
+                      signal:controller.signal
                     }).then(response => {
                       if(response.status===200){
                         return response.json();
                       }
                     }).catch((e) => {
-                      console.log(e);
+                      if (e.name !== "AbortError") {
+                        console.log(e);
+                      }
                     }))
                   }
                   if (task.available_assets.includes("dsm.tif")) {
                     metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dsm/metadata`, {
                       cache: "no-store",
-                      credentials: 'include'
+                      credentials: 'include',
+                      signal:controller.signal
                     }).then(response => {
                       if(response.status===200){
                         return response.json();
                       }
                     }).catch((e) => {
-                      console.log(e);
+                      if (e.name !== "AbortError") {
+                        console.log(e);
+                      }
                     }))
                   }
                   if (task.available_assets.includes("dtm.tif")) {
                     metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dtm/metadata`, {
                       cache: "no-store",
-                      credentials: 'include'
+                      credentials: 'include',
+                      signal:controller.signal
                     }).then(response => {
                       if(response.status===200){
                         return response.json();
                       }
                     }).catch((e) => {
-                      console.log(e);
+                      if (e.name !== "AbortError") {
+                        console.log(e);
+                      }
                     }))
                   }
                 })
@@ -1571,7 +1597,6 @@ export const fetchWebODMProjects = () => {
 
             Promise.all(metaDataPromises).then((metadata) => {
               var metadataIndex = 0;
-
               if (Array.isArray(odmProjects)) {
                 odmProjects.map((project, projectIndex) => {
                   taskInfos[projectIndex].map((task, taskIndex) => {
@@ -1693,7 +1718,9 @@ export const fetchWebODMProjects = () => {
           })
         })
         .catch(error => {
-          console.error(error);
+          if (error.name !== "AbortError") {
+            console.log(error);
+          }
           reject();
         })
     })
