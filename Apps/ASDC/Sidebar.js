@@ -159,24 +159,52 @@ export const setupSidebar = (uploads, indexParam=false) => {
           layerContentDiv.innerHTML = "All " + (suffix == "pc" ? "Point Clouds":
             suffix == "op" ? "Orthophotos" : suffix == "dtm" ? "DTMs" : suffix == "dsm" ? "DSMs": null); 
 
-          // var layerCheckBox = document.createElement("input");
-          // layerCheckBox.type = "checkbox";
-          // layerCheckBox.style.float = "left";
-          // layerCheckBox.style.margin = "0 5px 0 0";
-          // layerContentDiv.appendChild(layerCheckBox);
-
+          var layerCheckBox = document.createElement("input");
+          layerCheckBox.type = "checkbox";
+          layerCheckBox.style.float = "left";
+          layerCheckBox.style.margin = "0 5px 0 0";
+          var projectLayerDataIDs = [];
+          projectTasks.map(asset=>{
+            asset.data.map(dataID=>{
+              if (dataID.endsWith("-" + suffix)) {
+                projectLayerDataIDs.push(dataID);
+              }
+            })
+          });
+          layerCheckBox.checked = projectLayerDataIDs.every(id=>selectedDataIDs.includes(id))
+          layerContentDiv.appendChild(layerCheckBox);
           layerDiv.appendChild(layerContentDiv);
   
-          layerDiv.onclick = ()=>{
+          layerDiv.onclick = (e)=>{
+            if (e && e.target==layerCheckBox) return;
             projectTasks.map(asset=>{
               asset.data.map(dataID=>{
                 if (dataID.endsWith("-" + suffix)) {
                   var data = datasets.find(d=>d.id === dataID);
+                  layerCheckBox.checked=true;
                   document.getElementById(`dataButton-${data.id}`).onclick();
                 }
               })
             });
           }
+
+          layerCheckBox.onchange = (e) =>{
+            if (e && e.target!=layerCheckBox) return;
+            if(layerCheckBox.checked){
+              layerDiv.onclick();
+            } else {
+              projectTasks.map(asset=>{
+                asset.data.map(dataID=>{
+                  if (dataID.endsWith("-" + suffix)) {
+                    var data = datasets.find(d=>d.id === dataID);
+                    document.getElementById(`dataCheckbox-${data.id}`).checked=false;
+                    document.getElementById(`dataCheckbox-${data.id}`).onchange();
+                  }
+                })
+              });
+            }
+          }
+
           projectsPanelDiv.appendChild(layerDiv);
         }
       })

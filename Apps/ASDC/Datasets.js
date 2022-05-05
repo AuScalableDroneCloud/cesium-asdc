@@ -424,6 +424,9 @@ export const loadData = (
       tilesets[asset["id"]][data.id].readyPromise.then(function (
         tileset
       ) {
+        // keep tileset visible at all times
+        tileset._geometricError= Number.MAX_SAFE_INTEGER;
+        
         // console.log(tilesets[asset["id"]][data.id].boundingSphere);
         // var carto = Cesium.Cartographic.fromCartesian(tilesets[asset["id"]][data.id].boundingSphere.center);
         // console.log(carto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
@@ -563,6 +566,8 @@ export const loadData = (
 
             tilesets[asset["id"]][data.id].readyPromise.then(
               function (tileset) {
+                tileset._geometricError= Number.MAX_SAFE_INTEGER;
+
                 // console.log(tilesets[asset["id"]][
                 //   data.id
                 //   ].boundingSphere);
