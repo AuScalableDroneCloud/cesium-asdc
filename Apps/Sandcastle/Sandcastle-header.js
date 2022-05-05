@@ -75,6 +75,8 @@
     addToolbarMenu: function (options, toolbarID) {
       var menu = document.createElement("select");
       menu.className = "cesium-button";
+      menu.style.width = "100%";
+      menu.style.margin = "0";
       menu.onchange = function () {
         window.Sandcastle.reset();
         var item = options[menu.selectedIndex];

@@ -90,6 +90,8 @@ export const setupStyleToolbar = (tileset) => {
     toolbar.removeChild(toolbar.firstChild);
   }
 
+  document.getElementById("dims-toolbar-row").style.display="none";
+
   if (!tileset.asset || !tileset.asset.ept || !tileset.asset.ept.schema) return;
   if (tileset.asset && tileset.asset.options.dimensions.length === 0) return;
 

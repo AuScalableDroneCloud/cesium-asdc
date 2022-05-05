@@ -31,11 +31,6 @@
   </head>
   <body>
     <nav id="nav-header">
-      <button id="sidebar-collapse-button">
-        <span class="sidebar-collapse-button-icon"></span>
-        <span class="sidebar-collapse-button-icon" style="margin-top: 5px;"></span>
-        <span class="sidebar-collapse-button-icon" style="margin-top: 5px;"></span>
-      </button>
       <a href="/cesium/Apps/ASDC/" style="align-self: center;margin-left: 15px;float: left;">
         <img src="https://asdc.cloud.edu.au/media/CACHE/images/settings/Australia_Outline_blur_threshold_bw/0d9b8785a254e94442840616154623f5.png" alt="WebODM">
       </a>
@@ -62,35 +57,33 @@
       </div>
     </nav>
     <div id="cesiumContainer">
-      <table id="toolbars-container" style="z-index: 2; position: absolute">
+      <table id="toolbars-container" style="z-index: 2; position: absolute;pointer-events: none; max-width: calc(100% - 200px); margin-left: 5px;">
         <tr id="cam-toolbar-row" style="display: none;">
-          <td>
+          <td >
             Datasets in Map Area:
           </td>
-          <td id="cam-toolbar">
+          <td id="cam-toolbar" style="pointer-events: auto;">
           </td>
         </tr>
         <tr id="dims-toolbar-row" style="display: none;">
           <td>
             Point Cloud Layers:
           </td>
-          <td id="dims-toolbar">
+          <td id="dims-toolbar" style="pointer-events: auto;">
           </td>
         </tr>
         <tr id="image-series-toolbar-row" style="display: none;">
           <td>
             Image Geometry:
           </td>
-          <td
-            id="image-series-toolbar"
-          >
+          <td id="image-series-toolbar" style="pointer-events: auto;">
           </td>
         </tr>
         <tr id="msse-slider-row" style="display: none;">
           <td>
             Point Budget:
           </td>
-          <td>
+          <td style="pointer-events: auto;">
             <input
               type="range"
               min="0"
@@ -104,9 +97,20 @@
         </tr>
       </table>
     </div>
-    <div id="sidebar">
-      <div id="sidebar-data-buttons"></div>
-      <div id="sidebar-upload-button" class="sidebar-upload-button">Upload</div>
+    <div id="sidebar-wrapper">
+      <div id="sidebar-close-button">
+        <svg width="18" height="18" viewBox="0 0 24 24">
+          <path 
+            fill="black" d="M 2 2 L 20 20" stroke="black" stroke-width="3" stroke-linecap="round"
+          />
+          <path fill="black" d="M 20 2 L 2 20" stroke="black" stroke-width="3" stroke-linecap="round"
+          />
+        </svg>
+      </div>
+      <div id="sidebar">
+        <div id="sidebar-data-buttons"></div>
+        <div id="sidebar-upload-button" class="sidebar-upload-button">Upload</div>
+      </div>
     </div>
     <div class="modal" id="upload-modal">
       <div class="modal-header">

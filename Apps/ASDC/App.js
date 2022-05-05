@@ -701,19 +701,37 @@ document.getElementById("msse-slider").oninput = setScreenSpaceError;
 
 
 var sidebarOpen=true;
-document.getElementById("sidebar-collapse-button").onclick = ()=>{
+document.getElementById("sidebar-close-button").onclick = ()=>{
   if (sidebarOpen){
+    document.getElementById("sidebar-close-button").style.left = "0";
+    document.getElementById("sidebar-close-button").innerHTML=
+      `<svg width="18" height="18" viewBox="0 0 24 24">
+        <path 
+          fill="black" d="M 10 2 L 20 10" stroke="black" stroke-width="3" stroke-linecap="round"
+        />
+        <path fill="black" d="M 20 10 L 10 20" stroke="black" stroke-width="3" stroke-linecap="round"
+        />
+      </svg>`;
     document.getElementById("sidebar").style.width = "0";
     document.getElementById("cesiumContainer").style.left = "0";
     document.getElementById("cesiumContainer").style.width = "100%";
   } else {
+    document.getElementById("sidebar-close-button").style.left = "300px";
+    document.getElementById("sidebar-close-button").innerHTML=
+      `<svg width="18" height="18" viewBox="0 0 24 24">
+        <path 
+          fill="black" d="M 2 2 L 20 20" stroke="black" stroke-width="3" stroke-linecap="round"
+        />
+        <path fill="black" d="M 20 2 L 2 20" stroke="black" stroke-width="3" stroke-linecap="round"
+        />
+      </svg>`
     document.getElementById("sidebar").style.width = "300px";
     document.getElementById("cesiumContainer").style.left = "300px";
     document.getElementById("cesiumContainer").style.width = "calc(100% - 300px)";
 
   }
   sidebarOpen=!sidebarOpen;
-};
+}
 
 document.getElementById("user-dropdown-button").onclick = ()=>{
   var userDropDown = document.getElementById("user-dropdown-list");
