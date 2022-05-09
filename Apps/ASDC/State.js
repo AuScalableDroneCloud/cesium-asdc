@@ -7,7 +7,7 @@ export var categories = [];
 export var odmProjects;
 export var publicTask;
 
-export var selectedDataIDs; //url data ids
+export var selectedDataIDs = []; //url data ids
 
 export var selectedData; //cam
 export var selectedDatasets = [];
