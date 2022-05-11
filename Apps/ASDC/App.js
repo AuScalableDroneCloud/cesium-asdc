@@ -102,7 +102,7 @@ if (publicTask) {
         }
       }
       setupSidebar(uploadPage,true);
-      if (initVars && initVars.selectedData && !selectedDataIDs){
+      if (initVars && initVars.selectedData && selectedDataIDs.length===0){
         setSelectedDataIDs(initVars.selectedData)
         loadSelectedDataIDs(false);
       }
