@@ -25,7 +25,8 @@ import {
   indexFile,
   sourceDivs,
   setSelectedDatasets,
-  markersDataSource
+  markersDataSource,
+  zoomOnDataSelect
 } from "./State.js";
 import { loadInfluxGraphs, loadCSVGraphs,closeGraphModal } from "./Graphs.js";
 import { setupStyleToolbar, applyStyle } from "./Style.js";
@@ -188,7 +189,7 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
     }
   }
 
-  if (assetDataset.length > 0) {
+  if (assetDataset.length > 0 && zoomOnDataSelect) {
     if (assetDataset[0].zoom){
       var zoom = assetDataset[0].zoom;
       viewer.camera.flyTo({
@@ -494,7 +495,7 @@ export const loadData = (
       entities[asset["id"]][data["id"]].show = true;
     }
   } else if (data["type"] === "GeoJSON") {
-    loadGeoJson(asset, data, fly);
+    loadGeoJson(asset, data, fly && zoomOnDataSelect);
   } else if (data["type"] === "EPTPointCloud") {
     if (!tilesets[asset["id"]]) tilesets[asset["id"]] = {};
     if (!tilesets[asset["id"]][data.id]) {
@@ -543,6 +544,8 @@ export const loadData = (
                 tilesets[asset["id"]][
                   data.id
                 ][0].readyPromise.then(function (tileset) {
+                  tileset._geometricError= Number.MAX_SAFE_INTEGER;
+
                   setupStyleToolbar(tileset);
                   applyStyle(selectedDimension);
                 });
@@ -828,7 +831,7 @@ export const loadData = (
     document.getElementById("msse-slider-row").style.display = "none";
   }
 
-  if (fly) {
+  if (fly && zoomOnDataSelect) {
     if (data.zoom){
       if (data.zoom === "boundingSphere") {
         if (data.position && data.boundingSphereRadius){
@@ -1210,7 +1213,7 @@ export const loadGeoJson = (asset, data, fly) => {
       Promise.all(samplePromises).then(() => {
         dataSource = null;
         geoJsonPromise = null;
-        if (fly) {
+        if (fly && zoomOnDataSelect) {
           viewer.flyTo(dataSources[asset.id][dataID]);
           // document.getElementById("msse-slider-row").style.display =
           //   "none";
@@ -1219,7 +1222,7 @@ export const loadGeoJson = (asset, data, fly) => {
     });
   } else {
     dataSources[asset.id][dataID].show = true;
-    if (fly) {
+    if (fly && zoomOnDataSelect) {
       viewer.flyTo(dataSources[asset.id][dataID]);
       // document.getElementById("msse-slider-row").style.display = "none";
     }

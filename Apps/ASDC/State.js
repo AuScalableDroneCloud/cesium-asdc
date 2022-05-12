@@ -41,6 +41,8 @@ export const pinBuilder = new Cesium.PinBuilder();
 
 export const timelineTracks = {};
 
+export var zoomOnDataSelect = true;
+
 export var indexFile =
   "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/index.json";
   // "/cesium/Apps/ASDC/index.json";
@@ -119,4 +121,8 @@ export function setIndexFile(newIndexFile){
 
 export function setInitVars(newInitVars){
   initVars = newInitVars;
+}
+
+export function setZoomOnDataSelect(newZoomOnDataSelect) {
+  zoomOnDataSelect=newZoomOnDataSelect;
 }

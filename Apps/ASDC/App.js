@@ -25,7 +25,8 @@ import {
   setSelectedDatasets,
   setDatasets,
   setAssets,
-  setODMProjects
+  setODMProjects,
+  setZoomOnDataSelect
 } from "./State.js";
 import { loadAsset, loadData, setScreenSpaceError, fetchIndexAssets,fetchWebODMProjects, fetchPublicTask } from "./Datasets.js";
 import {
@@ -808,4 +809,8 @@ document.getElementById("login-logout-button").onclick = ()=>{
       document.getElementById("dims-toolbar-row").style.display = "none";
     }
   })
+}
+
+document.getElementById("zoom-checkbox").onchange = (e)=>{
+  setZoomOnDataSelect(e.target.checked);
 }
