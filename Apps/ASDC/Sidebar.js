@@ -135,6 +135,11 @@ export const setupSidebar = (uploads, indexParam=false) => {
           }
         })
       }
+      // console.log(projectAssets);
+      var projectAssets = assets.filter(a=>a.project==odmProject.id);
+      // createProjectOpacitySliderBtn(projectAssets,projectDivs[odmProject.id]);
+      var projectOpacityBtn = createProjectOpacitySliderBtn(projectAssets,projectDivs[odmProject.id]);
+      projectDivs[odmProject.id].firstChild.appendChild(projectOpacityBtn);
 
       if (sourceDivs["WebODM Projects"].nextElementSibling.firstChild.className === "loader-parent"){
         sourceDivs["WebODM Projects"].nextElementSibling.removeChild(sourceDivs["WebODM Projects"].nextElementSibling.firstChild);
@@ -1160,7 +1165,8 @@ const createOpacitySliderBtn = (asset, data, dateDiv) => {
   var opacitySliderBtn = document.createElement("div");
   opacitySliderBtn.className = "fa fa-sliders";
   opacitySliderBtn.style.float = "right";
-  // dateContentDiv.appendChild(opacitySliderBtn);
+  opacitySliderBtn.style.height = "fit-content";
+
   var opacityDropdown = document.getElementById(
     "alpha-slider-container"
   );
@@ -1278,17 +1284,9 @@ const createOpacitySliderBtn = (asset, data, dateDiv) => {
     document.getElementById("alpha-value").innerHTML =
       document.getElementById("alpha-slider").value + " %";
 
-    opacityDropdown.style.left =
-      evt.target.offsetLeft +
-      evt.target.offsetWidth / 2 -
-      document.getElementById("sidebar-data-buttons").scrollLeft +
-      "px";
-    opacityDropdown.style.top =
-      document.getElementById("nav-header").offsetHeight +
-      evt.target.offsetTop +
-      evt.target.offsetHeight / 2 -
-      document.getElementById("sidebar-data-buttons").scrollTop +
-      "px";
+    var rect = evt.target.getBoundingClientRect();
+    opacityDropdown.style.left = rect.x + (rect.width/2) +"px";
+    opacityDropdown.style.top = rect.y + (rect.height/2) +"px";
     opacityDropdown.style.display = "block";
     opacitySliderBtn.style.color = "white";
 
@@ -1306,6 +1304,299 @@ const createOpacitySliderBtn = (asset, data, dateDiv) => {
 
     document.getElementById("alpha-slider").oninput = (evt) =>
       applyAlpha(evt, asset, data);
+  };
+  opacitySliderBtn.onmouseleave = (evt) => {
+    opacityDropdown.style.display = "none";
+    opacitySliderBtn.style.color = "black";
+  };
+  return opacitySliderBtn;
+}
+
+const createAssetOpacitySliderBtn = (asset, dateDiv,assetDatasets) => {
+  var opacitySliderBtn = document.createElement("div");
+  opacitySliderBtn.className = "fa fa-sliders";
+  opacitySliderBtn.style.float = "right";
+  opacitySliderBtn.style.height = "fit-content";
+
+  var opacityDropdown = document.getElementById(
+    "alpha-slider-container"
+  );
+  
+  opacitySliderBtn.onmouseover = (evt) => {
+    var alphas = [];
+    assetDatasets.map(data=>{
+      if (
+        data.type === "PointCloud" ||
+        data.type === "EPTPointCloud" ||
+        data.type === "ModelTileset"
+      ) {
+        if (
+          tilesets[asset.id] &&
+          tilesets[asset.id][data.id] &&
+          tilesets[asset.id][data.id].style &&
+          tilesets[asset.id][data.id].style.color
+        ) {
+          var alpha = tilesets[asset.id][
+            data.id
+          ].style.color.expression
+            .match(/\((.*)\)/)
+            .pop()
+            .split(",")
+            .pop();
+            alphas.push(alpha);
+        } else {
+          // alphas.push(1);
+        }
+      } else if (data.type === "Imagery") {
+        if (
+          imageryLayers[asset.id] &&
+          imageryLayers[asset.id][data.id]
+        ) {
+          alphas.push(imageryLayers[asset.id][data.id].alpha);
+        } else {
+          // alphas.push(1);
+        }
+      } else if (data.type === "Model") {
+        if (
+          entities[asset.id] &&
+          entities[asset.id][data.id] &&
+          entities[asset.id][data.id].model.color
+        ) {
+          alphas.push(entities[asset.id][data.id].model.color.getValue().alpha);
+        } else {
+          // alphas.push(1);
+        }
+      } else if (data.type === "GeoJSON") {
+        if (dataSources[asset.id] && dataSources[asset.id][data.id]) {
+          var entity =
+            dataSources[asset.id][data.id].entities.values[0];
+          if (entity) {
+            if (entity.polygon) {
+              alphas.push(entity.polygon.material.color.getValue().alpha);
+            } else if (entity.polyline) {
+              alphas.push(entity.polyline.material.color.getValue().alpha);
+            } else {
+              alphas.push(1);
+            }
+          }
+        } else {
+          // alphas.push(1);
+        }
+      } else if (data.type === "ImageSeries") {
+        if (
+          entities[asset.id] &&
+          entities[asset.id][data.id] &&
+          entities[asset.id][data.id].polygon &&
+          entities[asset.id][data.id].polygon.material
+        ) {
+          alphas.push(entities[asset.id][
+            data.id
+          ].polygon.material.color.getValue().alpha);
+        } else {
+          // alphas.push(1);
+        }
+      }
+
+      var rect = evt.target.getBoundingClientRect();
+      opacityDropdown.style.left = rect.x + (rect.width/2) +"px";
+      opacityDropdown.style.top = rect.y + (rect.height/2) +"px";
+
+      opacityDropdown.style.display = "block";
+      opacitySliderBtn.style.color = "white";
+
+      opacityDropdown.onmouseover = (event) => {
+        opacityDropdown.style.display = "block";
+        opacitySliderBtn.style.color = "white";
+        dateDiv.style.background = "#5B8B51";
+      };
+
+      opacityDropdown.onmouseleave = (event) => {
+        opacityDropdown.style.display = "none";
+        opacitySliderBtn.style.color = "black";
+        dateDiv.style.background = null;
+      };
+
+      document.getElementById("alpha-slider").oninput = (evt) =>{
+        assetDatasets.map(data=>{
+            applyAlpha(evt, asset, data);
+          }
+        )
+      }
+    })
+
+    if (alphas.length!=0 && alphas.every(a=>a==alphas[0])){
+      document.getElementById("alpha-slider").value = alphas[0] * 100;
+      document.getElementById("alpha-value").value = alphas[0] * 100 + " %";;
+    } else {
+      document.getElementById("alpha-slider").value = 100;
+      document.getElementById("alpha-value").innerHTML = "100 %";
+    }
+
+    document.getElementById("alpha-slider").value = Math.round(
+      document.getElementById("alpha-slider").value
+    );
+    document.getElementById("alpha-value").innerHTML =
+      document.getElementById("alpha-slider").value + " %";
+  };
+  opacitySliderBtn.onmouseleave = (evt) => {
+    opacityDropdown.style.display = "none";
+    opacitySliderBtn.style.color = "black";
+  };
+  return opacitySliderBtn;
+}
+
+const createProjectOpacitySliderBtn = (projectAssets, projectDiv) => {
+  var opacitySliderBtn = document.createElement("div");
+  opacitySliderBtn.className = "fa fa-sliders";
+  opacitySliderBtn.style.float = "right";
+  opacitySliderBtn.style.height = "fit-content";
+
+  var opacityDropdown = document.getElementById(
+    "alpha-slider-container"
+  );
+  
+  opacitySliderBtn.onmouseover = (evt) => {
+    var alphas = [];
+    projectAssets.map(asset=>{
+      var assetDatasets = [];
+      asset?.data?.map((dataID, index) => {
+        for (var i = 0; i < datasets.length; i++) {
+          if (datasets[i].id == dataID) {
+            assetDatasets.push(datasets[i]);
+          }
+        }
+      })
+
+      assetDatasets.map(data=>{
+        if (
+          data.type === "PointCloud" ||
+          data.type === "EPTPointCloud" ||
+          data.type === "ModelTileset"
+        ) {
+          if (
+            tilesets[asset.id] &&
+            tilesets[asset.id][data.id] &&
+            tilesets[asset.id][data.id].style &&
+            tilesets[asset.id][data.id].style.color
+          ) {
+            var alpha = tilesets[asset.id][
+              data.id
+            ].style.color.expression
+              .match(/\((.*)\)/)
+              .pop()
+              .split(",")
+              .pop();
+              alphas.push(alpha);
+          } 
+          else {
+            // alphas.push(1);
+          }
+        } else if (data.type === "Imagery") {
+          if (
+            imageryLayers[asset.id] &&
+            imageryLayers[asset.id][data.id]
+          ) {
+            alphas.push(imageryLayers[asset.id][data.id].alpha);
+          } 
+          else {
+            // alphas.push(1);
+          }
+        } else if (data.type === "Model") {
+          if (
+            entities[asset.id] &&
+            entities[asset.id][data.id] &&
+            entities[asset.id][data.id].model.color
+          ) {
+            alphas.push(entities[asset.id][data.id].model.color.getValue().alpha);
+          }
+           else {
+            // alphas.push(1);
+          }
+        } else if (data.type === "GeoJSON") {
+          if (dataSources[asset.id] && dataSources[asset.id][data.id]) {
+            var entity =
+              dataSources[asset.id][data.id].entities.values[0];
+            if (entity) {
+              if (entity.polygon) {
+                alphas.push(entity.polygon.material.color.getValue().alpha);
+              } else if (entity.polyline) {
+                alphas.push(entity.polyline.material.color.getValue().alpha);
+              }
+               else {
+                // alphas.push(1);
+              }
+            }
+          }
+           else {
+            // alphas.push(1);
+          }
+        } else if (data.type === "ImageSeries") {
+          if (
+            entities[asset.id] &&
+            entities[asset.id][data.id] &&
+            entities[asset.id][data.id].polygon &&
+            entities[asset.id][data.id].polygon.material
+          ) {
+            alphas.push(entities[asset.id][
+              data.id
+            ].polygon.material.color.getValue().alpha);
+          } 
+          else {
+            // alphas.push(1);
+          }
+        }
+
+        var rect = evt.target.getBoundingClientRect();
+        opacityDropdown.style.left = rect.x + (rect.width/2) +"px";
+        opacityDropdown.style.top = rect.y + (rect.height/2) +"px";
+
+        opacityDropdown.style.display = "block";
+        opacitySliderBtn.style.color = "white";
+
+        opacityDropdown.onmouseover = (event) => {
+          opacityDropdown.style.display = "block";
+          opacitySliderBtn.style.color = "white";
+          projectDiv.style.background = "#5B8B51";
+        };
+
+        opacityDropdown.onmouseleave = (event) => {
+          opacityDropdown.style.display = "none";
+          opacitySliderBtn.style.color = "black";
+          projectDiv.style.background = null;
+        };
+
+        document.getElementById("alpha-slider").oninput = (evt) =>{
+          projectAssets.map(asset=>{
+            var assetDatasets = [];
+            asset?.data?.map((dataID, index) => {
+              for (var i = 0; i < datasets.length; i++) {
+                if (datasets[i].id == dataID) {
+                  assetDatasets.push(datasets[i]);
+                }
+              }
+            })
+            assetDatasets.map(data=>{
+                applyAlpha(evt, asset, data);
+              }
+            )
+          })
+        }
+      })
+    })
+
+    if (alphas.length!=0 && alphas.every(a=>a==alphas[0])){
+      document.getElementById("alpha-slider").value = alphas[0] * 100;
+      document.getElementById("alpha-value").value = alphas[0] * 100 + " %";;
+    } else {
+      document.getElementById("alpha-slider").value = 100;
+      document.getElementById("alpha-value").innerHTML = "100 %";
+    }
+
+    document.getElementById("alpha-slider").value = Math.round(
+      document.getElementById("alpha-slider").value
+    );
+    document.getElementById("alpha-value").innerHTML =
+      document.getElementById("alpha-slider").value + " %";
   };
   opacitySliderBtn.onmouseleave = (evt) => {
     opacityDropdown.style.display = "none";
@@ -1628,7 +1919,10 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
     dateDivs.map(div => {
       datesPanelDiv.appendChild(div);
     })
-  }   
+
+    var opacityBtn = createAssetOpacitySliderBtn(asset,assetDiv,assetDatasets);
+    assetDiv.firstChild.appendChild(opacityBtn);
+  }
 
   assetCheckbox.onchange = (e) => {
     handleAssetCheckboxChange(checkboxes, assetCheckbox, asset, uploads);
