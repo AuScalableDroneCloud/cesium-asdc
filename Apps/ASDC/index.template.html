@@ -55,58 +55,66 @@
       </div>
     </nav>
     <div id="cesiumContainer">
-      <table id="toolbars-container" style="z-index: 2; position: absolute;pointer-events: none; max-width: calc(100% - 200px); margin-left: 5px;">
-        <tr id="cam-toolbar-row" style="display: none;">
-          <td >
-            Datasets in Map Area:
-          </td>
-          <td id="cam-toolbar" style="pointer-events: auto;">
-          </td>
-        </tr>
-        <tr id="dims-toolbar-row" style="display: none;">
-          <td>
-            Point Cloud Layers:
-          </td>
-          <td id="dims-toolbar" style="pointer-events: auto;">
-          </td>
-        </tr>
-        <tr id="image-series-toolbar-row" style="display: none;">
-          <td>
-            Image Geometry:
-          </td>
-          <td id="image-series-toolbar" style="pointer-events: auto;">
-          </td>
-        </tr>
-        <tr id="msse-slider-row" style="display: none;">
-          <td>
-            Point Budget:
-          </td>
-          <td style="pointer-events: auto;">
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value="83"
-              id="msse-slider"
-              style="vertical-align: middle"
-            />
-            <span id="msse-value">83 %</span>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            Zoom to dataset:
-          </td>
-          <td style="pointer-events: auto;">
-            <input
-              type="checkbox"
+      <div
+        style="z-index: 2; position: absolute;pointer-events: none; max-width: calc(100% - 230px); left:30px;width:50%;"
+      >
+        <table id="toolbars-container" style="table-layout: fixed;width: 100%;">
+          <tr id="cam-toolbar-row" style="display: none;">
+            <td style="width: 20%;">
+              Datasets in Map Area:
+            </td>
+            <td id="cam-toolbar" style="pointer-events: auto;">
+            </td>
+          </tr>
+          <tr id="dims-toolbar-row" style="display: none;">
+            <td style="width: 20%;">
+              Point Cloud Layers:
+            </td>
+            <td id="dims-toolbar" style="pointer-events: auto;">
+            </td>
+          </tr>
+          <tr id="image-series-toolbar-row" style="display: none;">
+            <td style="width: 20%;">
+              Image Geometry:
+            </td>
+            <td id="image-series-toolbar" style="pointer-events: auto;">
+            </td>
+          </tr>
+          <tr id="msse-slider-row" style="display: none;">
+            <td style="width: 20%;">
+              Point Budget:
+            </td>
+            <td style="pointer-events: auto;">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value="83"
+                id="msse-slider"
+                style="vertical-align: middle; max-width: 70%;"
+              />
+              <span id="msse-value">83 %</span>
+            </td>
+          </tr>
+          <tr>
+            <td
+              id="zoom-td"
+              style="pointer-events: auto; width: 20%;"
               title="If checked, clicking on layer name will zoom to that dataset"
-              checked="true"
-              id="zoom-checkbox"
-            />
-          </td>
-        </tr>
-      </table>
+            >
+              Zoom to dataset:
+            </td>
+            <td style="pointer-events: auto;">
+              <input
+                type="checkbox"
+                title="If checked, clicking on layer name will zoom to that dataset"
+                checked="true"
+                id="zoom-checkbox"
+              />
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
     <div id="sidebar-wrapper">
       <div id="sidebar-close-button">
