@@ -26,7 +26,14 @@ import {
   setDatasets,
   setAssets,
   setODMProjects,
-  setZoomOnDataSelect
+  zoomOnDataSelect,
+  setZoomOnDataSelect,
+  selectedDimension,
+  billboard,
+  setSelectedDimension,
+  setMSSE,
+  init,
+  odmProjects
 } from "./State.js";
 import { loadAsset, loadData, setScreenSpaceError, fetchIndexAssets,fetchWebODMProjects, fetchPublicTask } from "./Datasets.js";
 import {
@@ -39,10 +46,29 @@ import {
 } from "./Sidebar.js";
 import { closeGraphModal, loadCSVGraphs, loadInfluxGraphs } from "./Graphs.js";
 import { readUrlParams } from "./URL.js";
+import { applyAlpha, getAlpha } from "./Style.js";
 
 Cesium.Ion.defaultAccessToken = cesiumIonAccessToken;
 
 window.CESIUM_BASE_URL = "/cesium/Build/Cesium";
+
+const handleBillboard = (billboard) => {
+  setBillboard(billboard);
+  selectedDatasets.map((data) => {
+    if (entities[data.asset.id] && entities[data.asset.id][data.id]) {
+      entities[data.asset.id][data.id].polygon.show = !billboard;
+      entities[data.asset.id][data.id].billboard.show = billboard;
+    }
+  });
+};
+
+Sandcastle.addToolbarMenu(
+  [
+    { text: "Ground Image", onselect: () => handleBillboard(false) },
+    { text: "Billboard Image", onselect: () => handleBillboard(true) },
+  ],
+  "image-series-toolbar"
+);
 
 readUrlParams();
 
@@ -55,6 +81,7 @@ Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(
 
 setViewer(
   new Cesium.Viewer("cesiumContainer", {
+    // imageryProvider: new Cesium.IonImageryProvider({ assetId: 3954 }),//sentinel-2
     terrainProvider: Cesium.createWorldTerrain({ requestWaterMask: true }),
     vrButton: true,
     fullscreenElement: "cesiumContainer"
@@ -82,54 +109,175 @@ Cesium.Timeline.prototype.makeLabel = function (time) {
 var uploadPage;
 if (window.location.href.toLowerCase().includes("cesium/apps/asdc/uploads")) {
   uploadPage = true;
+  document.getElementById("user-dropdown-button").style.display="none";
 } else {
   uploadPage = false;
 }
 
-Cesium.TrustedServers.add("asdc.cloud.edu.au",443)
+Cesium.TrustedServers.add("asdc.cloud.edu.au",443);
+
+if(init){
+  if (init.billboard!=undefined){
+    setBillboard(init.billboard);
+    document.getElementById("image-series-toolbar").childNodes[0].selectedIndex = init.billboard ? 1 : 0;
+  }
+  if (init.selectedDimension!=undefined){
+    setSelectedDimension(init.selectedDimension);
+  }
+  if (init.zoomOnDataSelect!=undefined){
+    setZoomOnDataSelect(init.zoomOnDataSelect);
+    document.getElementById("zoom-checkbox").checked = init.zoomOnDataSelect;
+  }
+
+  if(init.MSSE!=undefined){
+    setMSSE(parseInt(init.MSSE));
+    document.getElementById("msse-slider").value = parseInt(init.MSSE);
+    document.getElementById("msse-value").innerHTML = MSSE + " %";
+  }
+
+  if (init.index) {//shared webodm datasets
+    init.index.assets.map(a=>{
+      if (assets.length>0){
+        a.id=assets[assets.length-1].id+1;
+      } else {
+        a.id=1;
+      }
+    });
+    setAssets([...assets, ...init.index.assets]);
+    init.index.assets.map(a=>{
+      a.data.map(id=>{
+        var data = init.index.datasets.find(data=>data.id==id);
+        if (data){
+          data.asset=a;
+        }
+      })      
+    })
+    setDatasets([...datasets, ...init.index.datasets])
+  }
+}
+
+export const applyInit = ()=>{
+  if (init){
+    if (init.currentTime){
+      viewer.clock.currentTime = Cesium.JulianDate.fromDate(new Date(init.currentTime));
+    }
+    if (init.timeline){
+      viewer.timeline.zoomTo(
+        Cesium.JulianDate.fromDate(
+          new Date(init.timeline.start)
+        ),
+        Cesium.JulianDate.fromDate(
+          new Date(init.timeline.end)
+        )
+      );
+    }
+    if (init.cameraSelectedDataID){
+      setSelectedData(datasets.find(d=>d.id==init.cameraSelectedDataID));
+    }
+    if (init.imageryLayersOrder){
+      var layers=[];
+      viewer.imageryLayers._layers.slice(1).map(l=>{
+        layers[init.imageryLayersOrder.indexOf(l.data.id)] = l;
+      })
+      layers.map(l=>viewer.imageryLayers.raiseToTop(l))
+    }
+    if(init.opacity){
+        selectedDatasets
+        .filter(d=>Object.keys(init.opacity).includes(d.id.toString()))
+        .map(data=>{
+          applyAlpha(parseFloat(init.opacity[data.id.toString()]),data.asset,data);
+        })
+    }
+  }
+}
+
 var odmToken={};
+//with task parameter specified
 if (publicTask) {
+  document.getElementById("user-dropdown-button").style.display="none";
+  if (init && init.camera){
+    viewer.camera.position = new Cesium.Cartesian3(init.camera.position.x,init.camera.position.y,init.camera.position.z);
+    viewer.camera.direction = new Cesium.Cartesian3(init.camera.direction.x,init.camera.direction.y,init.camera.direction.z);
+    viewer.camera.up = new Cesium.Cartesian3(init.camera.up.x,init.camera.up.y,init.camera.up.z);
+  }
   fetchPublicTask().then(()=>{
     setupSidebar(false);
+    loadSelectedDataIDs(!(init && init.camera));
+
+    if (init){
+      applyInit(init);
+      cameraMoveEndListener();
+    }
   })
 } else {
+  //with index param specified
   if (new URLSearchParams(window.location.search).get('index')){
+    document.getElementById("user-dropdown-button").style.display="none";
+    if (init && init.camera){
+      viewer.camera.position = new Cesium.Cartesian3(init.camera.position.x,init.camera.position.y,init.camera.position.z);
+      viewer.camera.direction = new Cesium.Cartesian3(init.camera.direction.x,init.camera.direction.y,init.camera.direction.z);
+      viewer.camera.up = new Cesium.Cartesian3(init.camera.up.x,init.camera.up.y,init.camera.up.z);
+    }
     fetchIndexAssets().then(()=>{
-      if (initVars){
-        if (initVars.camera){
-          viewer.camera.position = new Cesium.Cartesian3(initVars.camera.position.x,initVars.camera.position.y,initVars.camera.position.z);
-          viewer.camera.direction = new Cesium.Cartesian3(initVars.camera.direction.x,initVars.camera.direction.y,initVars.camera.direction.z);
-          viewer.camera.up = new Cesium.Cartesian3(initVars.camera.up.x,initVars.camera.up.y,initVars.camera.up.z);
-        }
+      if (!(init && init.camera) && initVars && initVars.camera){
+        viewer.camera.position = new Cesium.Cartesian3(initVars.camera.position.x,initVars.camera.position.y,initVars.camera.position.z);
+        viewer.camera.direction = new Cesium.Cartesian3(initVars.camera.direction.x,initVars.camera.direction.y,initVars.camera.direction.z);
+        viewer.camera.up = new Cesium.Cartesian3(initVars.camera.up.x,initVars.camera.up.y,initVars.camera.up.z);
       }
+      
       setupSidebar(uploadPage,true);
+      loadSelectedDataIDs(!(init && init.camera));
+
       if (initVars && initVars.selectedData && selectedDataIDs.length===0){
         setSelectedDataIDs(initVars.selectedData)
         loadSelectedDataIDs(false);
       }
+
+      if (init){
+        applyInit(init);
+        cameraMoveEndListener();
+      }
     })
   } else {
+    if (init && init.camera){
+      viewer.camera.position = new Cesium.Cartesian3(init.camera.position.x,init.camera.position.y,init.camera.position.z);
+      viewer.camera.direction = new Cesium.Cartesian3(init.camera.direction.x,init.camera.direction.y,init.camera.direction.z);
+      viewer.camera.up = new Cesium.Cartesian3(init.camera.up.x,init.camera.up.y,init.camera.up.z);
+    }
+    //main page and upload
     fetchIndexAssets().then(()=>{
-      if (initVars && initVars.camera){
+      if (!(init && init.camera) && initVars && initVars.camera){
         viewer.camera.position = new Cesium.Cartesian3(initVars.camera.position.x,initVars.camera.position.y,initVars.camera.position.z);
         viewer.camera.direction = new Cesium.Cartesian3(initVars.camera.direction.x,initVars.camera.direction.y,initVars.camera.direction.z);
         viewer.camera.up = new Cesium.Cartesian3(initVars.camera.up.x,initVars.camera.up.y,initVars.camera.up.z);
       }
 
       setupSidebar(uploadPage);
+      loadSelectedDataIDs(!(init && init.camera));
+      
+      if (init){
+        applyInit(init);
+        cameraMoveEndListener();
+      }
       
       if (!uploadPage){
-        document.getElementById("user-dropdown-button").style.display="flex";
         fetchWebODMProjects(odmToken)
         .then(()=>{
           setupSidebar(uploadPage);
-          if (initVars && initVars.selectedData && !selectedDataIDs){
+          loadSelectedDataIDs(!(init && init.camera));
+          
+          if (initVars && initVars.selectedData && selectedDataIDs.length===0){ //todo: use applyInit as well
             setSelectedDataIDs(initVars.selectedData)
             loadSelectedDataIDs(false);
           }
+
+          if (init){
+            applyInit(init);
+            cameraMoveEndListener();
+          }
         })
         .catch(()=>{
-          if (initVars && initVars.selectedData && !selectedDataIDs){
+          if (initVars && initVars.selectedData && selectedDataIDs.length===0){
             setSelectedDataIDs(initVars.selectedData)
             loadSelectedDataIDs(false);
           }
@@ -139,33 +287,15 @@ if (publicTask) {
   }
 }
 
-const handleBillboard = (billboard) => {
-  setBillboard(billboard);
-  selectedDatasets.map((data) => {
-    if (entities[data.asset.id] && entities[data.asset.id][data.id]) {
-      entities[data.asset.id][data.id].polygon.show = !billboard;
-      entities[data.asset.id][data.id].billboard.show = billboard;
-    }
-  });
-};
-
-Sandcastle.addToolbarMenu(
-  [
-    { text: "Ground Image", onselect: () => handleBillboard(false) },
-    { text: "Billboard Image", onselect: () => handleBillboard(true) },
-  ],
-  "image-series-toolbar"
-);
-
-viewer.camera.moveEnd.addEventListener(() => {
+var cameraMoveEndListener = () => {
   if (!assets) return;
 
   var viewMenu = [];
-
-  var selectedIndex;
-  var timeseriesInView = false;
+  var selectedIndex = 0;
 
   assets.map((asset) => {
+    if (!uploadPage && asset.categoryID == 6) return;
+    if (uploadPage && asset.categoryID != 6) return;
     if (asset.data) {
       var assetDataset = [];
       asset.data?.map((dataID) => {
@@ -212,69 +342,10 @@ viewer.camera.moveEnd.addEventListener(() => {
                 (data.date
                   ? `${asset.name} - ${data.date}`
                   : `${asset.name} - No Date`) +
-                (data.name ? " - " + data.name : ""),
+                (data.name ? " - " + data.name : "") + 
+                (data.asset.categoryID==-3 ? " - Shared" : ""),
               onselect: () => {
                 if (data != selectedData) {
-                  if (selectedData) {
-                    var checkbox = document.getElementById(
-                      `dataCheckbox-${selectedData.id}`
-                    );
-                    if (
-                      // selectedDatasets.includes(selectedData) &&
-                      !checkbox.checked
-                    ) {
-                      if (
-                        tilesets[selectedData.asset.id] &&
-                        tilesets[selectedData.asset.id][
-                          selectedData.id
-                        ]
-                      ) {
-                        if (
-                          Array.isArray(
-                            tilesets[selectedData.asset.id][
-                              selectedData.id
-                            ]
-                          )
-                        ) {
-                          tilesets[selectedData.asset.id][
-                            selectedData.id
-                          ].map((tileset) => {
-                            tileset.show = false;
-                          });
-                        } else {
-                          tilesets[selectedData.asset.id][
-                            selectedData.id
-                          ].show = false;
-                        }
-                      }
-                      if (
-                        entities[selectedData.asset.id] &&
-                        entities[selectedData.asset.id][selectedData.id]
-                      ) {
-                        entities[selectedData.asset.id][
-                          selectedData.id
-                        ].show = false;
-                      }
-                      if (
-                        dataSources[selectedData.asset.id] &&
-                        dataSources[selectedData.asset.id][selectedData.id]
-                      ) {
-                        dataSources[selectedData.asset.id][
-                          selectedData.id
-                        ].show = false;
-                      }
-                      if (
-                        imageryLayers[selectedData.asset.id] &&
-                        imageryLayers[selectedData.asset.id][selectedData.id]
-                      ) {
-                        imageryLayers[selectedData.asset.id][
-                          selectedData.id
-                        ].show = false;
-                      }
-                    }
-                  }
-
-                  // loadData(asset, data, false, true, false, false);
                   loadData(asset, data, false, true, true, true);
 
                   var newDataIDs = [];
@@ -290,8 +361,8 @@ viewer.camera.moveEnd.addEventListener(() => {
                     "",
                     "",
                     uploadPage
-                      ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search
-                      : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search
+                      ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search + window.location.hash
+                      : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search + window.location.hash
                   );
 
                   var checkbox = document.getElementById(`dataCheckbox-${data.id}`);
@@ -311,31 +382,25 @@ viewer.camera.moveEnd.addEventListener(() => {
                     assetCheckbox.checked = false;
                     assetCheckbox.indeterminate = true;
                   }
-
-                  if (
-                    data["type"] === "PointCloud" ||
-                    data["type"] === "EPTPointCloud" ||
-                    data["type"] === "ModelTileset"
-                  ) {
-                    document.getElementById(
-                      "msse-slider-row"
-                    ).style.display = "table-row";
-                  } else {
-                    document.getElementById(
-                      "msse-slider-row"
-                    ).style.display = "none";
-                  }
                 }
 
                 setSelectedData(data);
               },
               data: data,
             });
-            if ((selectedData && selectedData === data) || selectedDatasets.find(d=>d.id==data.id)) {
+
+            if ((selectedData && selectedData == data)) {
               selectedIndex = viewMenu.length - 1;
-            }
-            if (selectedAssetIDs.includes(asset.id)) {
-              timeseriesInView = true;
+            } else if (!selectedIndex && (selectedDatasets.find(d=>d.id==data.id)
+            && (
+              data.type !="csv" || ( //todo: other types?
+              (tilesets[data.asset.id] && tilesets[data.asset.id][data.id]&& tilesets[data.asset.id][data.id].show) || 
+              (imageryLayers[data.asset.id] && imageryLayers[data.asset.id][data.id] && imageryLayers[data.asset.id][data.id].show) || 
+              (dataSources[data.asset.id] && dataSources[data.asset.id][data.id] && dataSources[data.asset.id][data.id].show)
+              )
+              )
+            )){
+              selectedIndex = viewMenu.length - 1;
             }
           }
         }
@@ -353,23 +418,17 @@ viewer.camera.moveEnd.addEventListener(() => {
   if (viewMenu.length > 0) {
     Sandcastle.addToolbarMenu(viewMenu, "cam-toolbar");
     toolbarRow.style.display = "table-row";
+    document.getElementById("cam-toolbar").childNodes[0].selectedIndex =
+      selectedIndex;
 
-    if (selectedIndex) {
-      document.getElementById("cam-toolbar").childNodes[0].selectedIndex =
-        selectedIndex;
-
-      if (selectedData && selectedData != viewMenu[selectedIndex].data) {
-        viewMenu[selectedIndex].onselect();
-      }
-    } else {
-      if (!timeseriesInView) {
-        viewMenu[0].onselect();
-      }
+    if (selectedData && selectedData != viewMenu[selectedIndex].data) {//to avoid loading right after removing
+      viewMenu[selectedIndex].onselect();
     }
   } else {
     toolbarRow.style.display = "none";
   }
-});
+};
+viewer.camera.moveEnd.addEventListener(cameraMoveEndListener);
 
 viewer.clock.onTick.addEventListener((clock) => {
   var currentDate = Cesium.JulianDate.toDate(clock.currentTime);
@@ -450,7 +509,7 @@ viewer.clock.onTick.addEventListener((clock) => {
       }
     }
   })
-    
+
   if (lastCurrentTime) {
     var noon = new Date(
       lastCurrentTime.getFullYear(),
@@ -660,8 +719,8 @@ viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
             "",
             "",
             uploadPage
-              ? `/cesium/Apps/ASDC/Uploads/${dataIDs}`
-              : `/cesium/Apps/ASDC/${dataIDs}`
+              ? `/cesium/Apps/ASDC/Uploads/${dataIDs}`+ window.location.search + window.location.hash
+              : `/cesium/Apps/ASDC/${dataIDs}`+ window.location.search + window.location.hash
           );
           return;
         }
@@ -700,7 +759,6 @@ document.getElementById("modal-upload-button").onclick = upload;
 document.getElementById("close-graph").onclick = closeGraphModal;
 document.getElementById("msse-slider").oninput = setScreenSpaceError;
 
-
 var sidebarOpen=true;
 document.getElementById("sidebar-close-button").onclick = ()=>{
   if (sidebarOpen){
@@ -738,7 +796,7 @@ document.getElementById("user-dropdown-button").onclick = ()=>{
   var userDropDown = document.getElementById("user-dropdown-list");
   if (userDropDown.style.display=="block"){
     userDropDown.style.display="none";
-    document.getElementById("user-dropdown-button").style.background = "transparent";
+    document.getElementById("user-dropdown-button").style.background = null;
   } else {
     userDropDown.style.display="block";
     document.getElementById("user-dropdown-button").style.background = "#5b8b51";
@@ -813,4 +871,173 @@ document.getElementById("login-logout-button").onclick = ()=>{
 
 document.getElementById("zoom-checkbox").onchange = (e)=>{
   setZoomOnDataSelect(e.target.checked);
+}
+
+document.getElementById("share-button").onclick = ()=>{
+  const urlParams = new URLSearchParams(window.location.search);
+
+  var alphas = {};
+  selectedDatasets.map(data=>{
+    if (data.asset.project && !data.id.endsWith("-s") && !urlParams.get('task')){
+      alphas[data.id + "-s"] = getAlpha(data.asset,data);
+    } else {
+      alphas[data.id] = getAlpha(data.asset,data);
+    }
+  })
+  
+  if (init && init.index){
+    //deep copy
+    var index = JSON.parse(JSON.stringify(init.index));
+
+    index.assets = index.assets.filter(a=>
+      !a.data.every(d=>!selectedDatasets.find(sd=>sd.id==d))
+    )
+
+    index.categories = index.categories.filter(c=>
+      index.assets.find(a=>a && a.project==c.id)
+    )
+
+    index.datasets = index.datasets.filter(d=>
+      selectedDatasets.find(sd=>sd.id==d.id)
+    )
+  } else {
+    if (selectedDatasets.find(d=>d.asset.categoryID==-1)){
+      var index={
+        assets:[],
+        datasets:[],
+        categories:[],
+      };
+    }
+  }
+
+  var selectedWebODMDatasets = selectedDatasets.filter(d=>d.asset.categoryID==-1 || d.asset.categoryID==-3);
+  selectedWebODMDatasets.map(d=>{
+    var data = {...d};
+
+    if (!index.datasets.find(indexData=>indexData.id==d.id)){
+      delete(data.asset);
+      data.id += !data.id.endsWith('-s') ? '-s' : "";
+
+      index.datasets.push(data);
+    }
+
+    var asset = {...d.asset};
+    if (!index.assets.find(a=>a.id == d.asset.id)){
+      index.assets.push(asset);
+    }
+    asset.data.map(data=>{
+      var newData = {...datasets.find(dd=>dd.id==data)};
+      delete(newData.asset);
+
+      if (!index.datasets.find(dd=>dd.id == newData.id)){
+        newData.id += !newData.id.endsWith('-s') ? '-s' : "";
+        index.datasets.push(newData);
+      }
+    })
+
+    var project = odmProjects && odmProjects.find(p=>p.tasks.includes(d.asset.taskID));
+    if (project && !index.categories.find(c=>c.id == project.id)){//
+      index.categories.push(project);
+    }
+  })
+
+  index?.assets.map(asset=>{
+    delete(asset.id);
+    asset.categoryID=-3;
+
+    asset.data = asset.data.map(ad=>!ad.endsWith('-s') ? ad + '-s' : ad)
+  })
+
+  index?.categories.map(proj=>{
+    delete(proj.permissions);
+  })
+
+  var initParams={
+    camera:{
+      position:viewer.camera.positionWC,
+      direction:viewer.camera.directionWC,
+      up:viewer.camera.upWC
+    },
+    currentTime: Cesium.JulianDate.toDate(viewer.clock.currentTime).toISOString(),
+    selectedDimension:selectedDimension,
+    billboard:billboard,
+    imageryLayersOrder:viewer.imageryLayers._layers.filter(l=>l.data).map(l=>l.data.id),
+    zoomOnDataSelect:zoomOnDataSelect,
+    MSSE:MSSE,
+    timeline:{
+      start: Cesium.JulianDate.toDate(viewer.timeline._startJulian).toISOString(),
+      end: Cesium.JulianDate.toDate(viewer.timeline._endJulian).toISOString()
+    },
+    opacity:alphas,
+  }
+
+  if (selectedData){
+    if ((index && index.datasets.find(d=>d.id==selectedData.id)) || 
+        selectedData.asset.categoryID == -1){
+      initParams.cameraSelectedDataID = selectedData.id + '-s';
+    } else {
+      initParams.cameraSelectedDataID = selectedData.id;
+    }
+  }
+
+  if (!urlParams.get('task')){
+    initParams.index = index;
+  }
+
+  var shareURL = window.location.origin + "/cesium/Apps/ASDC/"
+                + (uploadPage ? "Uploads/" : "")
+                + selectedDatasets.map(d=>{
+                  if (d.asset.project && !d.id.endsWith("-s") && !urlParams.get('task')){
+                    return d.id + "-s"
+                  } else {
+                    return d.id
+                  }
+                }).join("&")
+                + "?"
+                + (urlParams.get('index') ? 'index=' + urlParams.get('index') : "")
+                + (urlParams.get('task') ? '&task=' + urlParams.get('task') : "")
+                + "#init=" 
+                + encodeURIComponent(JSON.stringify(initParams));
+
+  var shareInput = document.getElementById("share-input");
+  shareInput.value=shareURL;
+
+  var copyBtn = document.getElementById("copy-share-link-button");
+  copyBtn.onclick=()=>{
+    shareInput.select();
+    shareInput.setSelectionRange(0, 99999); //mobile?
+    navigator.clipboard.writeText(shareURL);
+  }
+
+  var shareDropDown = document.getElementById("share-dropdown-list");
+  if (shareDropDown.style.display=="block"){
+    shareDropDown.style.display="none";
+    document.getElementById("share-button").style.background = null;
+  } else {
+    if (uploadPage || urlParams.get('task') || urlParams.get('index')){
+      shareDropDown.style.right="15px";
+    } else {
+      shareDropDown.style.right="60px";
+    }
+    shareDropDown.style.display="block";
+    document.getElementById("share-button").style.background = "#5b8b51";
+  }
+}
+
+document.onclick=(e)=>{
+  if(
+    e.target!=document.getElementById("share-button") &&
+    e.target!=document.getElementById("share-dropdown-list") &&
+    e.target!=document.getElementById("share-input") &&
+    e.target!=document.getElementById("copy-share-link-button")
+  ){
+    document.getElementById("share-dropdown-list").style.display="none";
+    document.getElementById("share-button").style.background = null;
+  }
+  
+  var userDropdownChildren = [...document.getElementById("user-dropdown-button").children];
+  if (!userDropdownChildren.find(c=>c==e.target) && e.target!=document.getElementById("user-dropdown-button")){
+    document.getElementById("user-dropdown-list").style.display="none";
+    document.getElementById("user-dropdown-button").style.background = null;
+  }
 }

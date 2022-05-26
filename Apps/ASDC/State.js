@@ -26,7 +26,10 @@ export var sourceDivs = {};
 export var assetDivs = {};
 export var projectDivs = {};
 export var categoryDivs = {};
-export var initVars = {};
+export var sharedDivs = {};
+
+export var initVars = {}; //index file init variables
+export var init;  //url index query parameter used for sharing
 
 export var taskInfos;
 
@@ -125,4 +128,8 @@ export function setInitVars(newInitVars){
 
 export function setZoomOnDataSelect(newZoomOnDataSelect) {
   zoomOnDataSelect=newZoomOnDataSelect;
+}
+
+export function setInit(newInit) {
+  init=newInit;
 }

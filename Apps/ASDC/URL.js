@@ -1,4 +1,4 @@
-import { setSelectedDataIDs, setPublicTask, setIndexFile } from "./State.js";
+import { setSelectedDataIDs, setPublicTask, setIndexFile,setInit,init, setBillboard,setSelectedDimension,setZoomOnDataSelect,setMSSE, MSSE } from "./State.js";
 
 export const readUrlParams = () => {
   var currentUrl = window.location.href.split('?')[0];
@@ -10,7 +10,7 @@ export const readUrlParams = () => {
     match[1].toUpperCase() !== "ASDC" &&
     match[1].toLowerCase() != "asdc.html"
   ) {
-    setSelectedDataIDs(match[1].split("&").map((id) => id));
+    setSelectedDataIDs(match[1].split("#")[0].split("&").map((id) => id));
   }
 
   const queryString = window.location.search;
@@ -20,5 +20,27 @@ export const readUrlParams = () => {
   const indexFile = urlParams.get('index');
   if (indexFile){
     setIndexFile(indexFile);
+  }
+
+  const initParam = window.location.hash;
+  if(initParam){
+    setInit(JSON.parse(decodeURIComponent(initParam.slice(6))));
+    
+    if (init.billboard!=undefined){
+      setBillboard(init.billboard);
+      document.getElementById("image-series-toolbar").childNodes[0].selectedIndex = 1;
+    }
+    if (init.selectedDimension!=undefined){
+      setSelectedDimension(init.selectedDimension);
+    }
+    if (init.zoomOnDataSelect!=undefined){
+      setZoomOnDataSelect(init.zoomOnDataSelect);
+      document.getElementById("zoom-checkbox").checked = init.zoomOnDataSelect;
+    }
+    if(init.MSSE!=undefined){
+      setMSSE(parseInt(init.MSSE));
+      document.getElementById("msse-slider").value = parseInt(init.MSSE);
+      document.getElementById("msse-value").innerHTML = MSSE + " %";
+    }
   }
 };

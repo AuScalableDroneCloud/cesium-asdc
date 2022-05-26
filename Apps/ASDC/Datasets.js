@@ -26,11 +26,13 @@ import {
   sourceDivs,
   setSelectedDatasets,
   markersDataSource,
-  zoomOnDataSelect
+  zoomOnDataSelect,
+  categories
 } from "./State.js";
 import { loadInfluxGraphs, loadCSVGraphs,closeGraphModal } from "./Graphs.js";
 import { setupStyleToolbar, applyStyle } from "./Style.js";
 import { highlightHeightPX, highlightColor, eptServer } from "./Constants.js";
+import { applyInit } from "./App.js";
 
 export const loadAsset = (asset, timeline, timelineTrack) => {
   if (!asset) return;
@@ -48,7 +50,9 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
 
   syncTimeline(false);
 
-  var assetDates = assetDataset.map(data=>{
+  var assetDates = assetDataset.filter(
+    (d) => new Date(d.date) != "Invalid Date"
+  ).map(data=>{
     return new Date(data.date)
   });
 
@@ -56,9 +60,11 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
     return new Date(a).getTime() - new Date(b).getTime();
   });
 
-  viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
-    new Date(assetDates[0])
-  );
+  if (assetDates[0]){
+    viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+      new Date(assetDates[0])
+    );
+  }
 
   if (assetDataset[0]["type"] === "Influx" || assetDataset[0]["type"]==="ImageSeries") {//todo: clean with function params
     //Influx charts and Image Series from 2 weeks before
@@ -421,6 +427,8 @@ export const loadData = (
             // show: new Date(data["date"]) != "Invalid Date" ? false : true,
           })
         );
+        
+      applyInit();
 
       tilesets[asset["id"]][data.id].readyPromise.then(function (
         tileset
@@ -428,7 +436,7 @@ export const loadData = (
         // keep tileset visible at all times
         tileset._geometricError= Number.MAX_SAFE_INTEGER;
         
-        // console.log(tilesets[asset["id"]][data.id].boundingSphere);
+        // console.log(tileset.boundingSphere);
         // var carto = Cesium.Cartographic.fromCartesian(tilesets[asset["id"]][data.id].boundingSphere.center);
         // console.log(carto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
         // console.log(carto.longitude * Cesium.Math.DEGREES_PER_RADIAN);
@@ -541,6 +549,8 @@ export const loadData = (
                 )
               );
               if (index == 0) {
+                applyInit();
+
                 tilesets[asset["id"]][
                   data.id
                 ][0].readyPromise.then(function (tileset) {
@@ -566,6 +576,8 @@ export const loadData = (
                   // debugShowBoundingVolume:true
                 })
               );
+            
+            applyInit();
 
             tilesets[asset["id"]][data.id].readyPromise.then(
               function (tileset) {
@@ -607,6 +619,12 @@ export const loadData = (
                   tileset.modelMatrix =
                   // tileset.root.transofrm =
                     Cesium.Matrix4.fromTranslation(translation);
+                    // Cesium.Matrix4.fromTranslationRotationScale(new Cesium.TranslationRotationScale(translation, Cesium.Quaternion.IDENTITY, new Cesium.Cartesian3(0.1, 0.1, 0.1)),new Cesium.Matrix4())
+                    // Cesium.Matrix4.fromTranslationRotationScale(Cesium.TranslationRotationScale(translation, Cesium.Quaternion.IDENTITY, new Cartesian3(0.001, 0.001, 0.001)));
+                    // console.log(Cesium.Matrix4.fromTranslationRotationScale(new Cesium.TranslationRotationScale(translation, new Cesium.Quaternion.IDENTITY, new Cesium.Cartesian3(0.1, 0.1, 0.1))));
+                    // console.log(Cesium.TranslationRotationScale(translation, Cesium.Quaternion.IDENTITY, new Cartesian3(0.1, 0.1, 0.1)));
+                    // console.log(new Cesium.TranslationRotationScale(translation, Cesium.Quaternion.IDENTITY, new Cesium.Cartesian3(0.1, 0.1, 0.1)));
+                    // console.log(Cesium.Matrix4.fromTranslationRotationScale(new Cesium.TranslationRotationScale(translation, Cesium.Quaternion.IDENTITY, new Cesium.Cartesian3(0.1, 0.1, 0.1)),new Cesium.Matrix4()));
                 }
 
                 setupStyleToolbar(tileset);
@@ -654,6 +672,7 @@ export const loadData = (
             maximumLevel: data.maxzoom ? data.maxzoom : undefined,
           })
         );
+        imageryLayers[asset.id][data.id].data=data;
     } else {
       viewer.imageryLayers.raiseToTop(imageryLayers[asset.id][data.id]);
       imageryLayers[asset.id][data.id].show = true;
@@ -832,6 +851,9 @@ export const loadData = (
   }
 
   if (fly && zoomOnDataSelect) {
+    // if (true){
+    // viewer.flyTo(tilesets[asset.id][data.id]);
+    // } else
     if (data.zoom){
       if (data.zoom === "boundingSphere") {
         if (data.position && data.boundingSphereRadius){
@@ -1409,9 +1431,10 @@ export const fetchIndexAssets = ()=>{
   fetch(indexFile, { cache: "no-store" })
     .then((response) => response.json())
     .then((jsonResponse) => {
-      setAssets(jsonResponse["assets"]);
-      setDatasets(jsonResponse["datasets"]);
-      setCategories(jsonResponse["categories"]);
+      setAssets([...assets, ...jsonResponse["assets"]]);
+      assets.map((a,i)=>a.id=i+1);
+      setDatasets([...datasets, ...jsonResponse["datasets"]]);
+      setCategories([...categories,...jsonResponse["categories"]]);
       setInitVars(jsonResponse["initVars"])
     })
   ).catch(error => {
@@ -1485,7 +1508,7 @@ export const fetchWebODMProjects = (token={}) => {
                 setAssets(assets.filter(a=>!a.project));
                 setODMProjects();
   
-                viewer.camera.moveEnd.raiseEvent();
+                // viewer.camera.moveEnd.raiseEvent();
                 if (
                   !selectedDatasets.find(
                     (d) =>
@@ -1511,6 +1534,7 @@ export const fetchWebODMProjects = (token={}) => {
                 sourceDivs["WebODM Projects"].nextElementSibling.removeChild(sourceDivs["WebODM Projects"].nextElementSibling.firstChild);
               }
               sourceDivs["WebODM Projects"].nextElementSibling.appendChild(signInButton)
+              reject();
             }
             resolve();
           }

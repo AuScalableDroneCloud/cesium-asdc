@@ -25,26 +25,36 @@ import {
   categoryDivs,
   publicTask,
   taskInfos,
-  initVars
+  initVars,
+  init,
+  sharedDivs
 } from "./State.js";
 import { loadAsset, loadData, syncTimeline } from "./Datasets.js";
 import { pcFormats, processingAPI } from "./Constants.js";
 import { closeGraphModal } from "./Graphs.js";
-import { applyAlpha } from "./Style.js";
+import { applyAlpha, getAlpha } from "./Style.js";
 
 export const setupSidebar = (uploads, indexParam=false) => {
   if (!assets) return;
-
   var sidebarDataButtons = document.getElementById("sidebar-data-buttons");
 
   createMarkersDataSource();
-
   var togglePublicData = false;
   if (!uploads && !publicTask && !indexParam){
     if (Object.keys(sourceDivs).length==0){
-      var sources= ["Public Data", "WebODM Projects"];
+      var sources = ["Public Data", "WebODM Projects"];
+
+      var sharedODMAssetsExist = false
+      if(init && init.index && init.index.categories && init.index.categories.length){//
+      // if(init && init.index && init.index.categories && !sourceDivs["Shared WebODM Datasets"]){//
+      // if(init && init.index){
+        //// sources.push(init.index.source);
+        sources.push("Shared WebODM Datasets");
+        sharedODMAssetsExist=true;
+      }
       sources.map(s=>{
         sourceDivs[s] = createAccordion(s);
+        sourceDivs[s].id = `source-${s}`
         var sourceAccordionPanelDiv = document.createElement("div");
         sourceAccordionPanelDiv.className = "sidebar-accordion-panel";
 
@@ -63,7 +73,7 @@ export const setupSidebar = (uploads, indexParam=false) => {
         categoryDivs[cat.id] = createAccordion(cat.name,18);
         categoryDivs[cat.id].id = `category-${cat.id}`;
         //Uploads page
-        if ((!uploads && cat.id !== 6)|| (uploads && cat.id == 6)) {
+        if (((!uploads && cat.id !== 6)|| (uploads && cat.id == 6))) {
           sourceDivs["Public Data"].nextElementSibling.appendChild(categoryDivs[cat.id]);
           var accordionPanelDiv = document.createElement("div");
           accordionPanelDiv.className = "sidebar-accordion-panel";
@@ -84,6 +94,16 @@ export const setupSidebar = (uploads, indexParam=false) => {
       })
   }
 
+  if(sharedODMAssetsExist){
+    init.index.categories.map(c=>{
+      sharedDivs[c.id] = createAccordion(c.name, 18);
+      sharedDivs[c.id].id = `shared-${c.id}`;
+      sourceDivs["Shared WebODM Datasets"].nextElementSibling.appendChild(sharedDivs[c.id]);
+      var accordionPanelDiv = document.createElement("div");
+      accordionPanelDiv.className = "sidebar-accordion-panel";
+      sourceDivs["Shared WebODM Datasets"].nextElementSibling.appendChild(accordionPanelDiv);
+    })
+  }
   if (!uploads && Array.isArray(odmProjects)) {
     odmProjects.map(odmProject => {
       if (projectDivs[odmProject.id]) return
@@ -93,7 +113,7 @@ export const setupSidebar = (uploads, indexParam=false) => {
       const oldProjectClick = projectDivs[odmProject.id].onclick;
       projectDivs[odmProject.id].onclick=()=>{
         oldProjectClick();
-        var projectAssets = assets.filter(a=>a.project==odmProject.id);
+        var projectAssets = assets.filter(a=>a.project==odmProject.id && a.categoryID==-1);
         projectAssets.map(asset=>{
           var assetDatasets = [];
           asset?.data?.map((dataID, index) => {
@@ -134,10 +154,11 @@ export const setupSidebar = (uploads, indexParam=false) => {
             markersDataSource.entities.removeById("marker_" + asset.id);
           }
         })
+        // setTimeout(() => {
+        //   markersDataSource.clustering.pixelRange = 0;
+        // }, 0);
       }
-      // console.log(projectAssets);
       var projectAssets = assets.filter(a=>a.project==odmProject.id);
-      // createProjectOpacitySliderBtn(projectAssets,projectDivs[odmProject.id]);
       var projectOpacityBtn = createProjectOpacitySliderBtn(projectAssets,projectDivs[odmProject.id]);
       projectDivs[odmProject.id].firstChild.appendChild(projectOpacityBtn);
 
@@ -185,7 +206,7 @@ export const setupSidebar = (uploads, indexParam=false) => {
             projectTasks.map(asset=>{
               asset.data.map(dataID=>{
                 if (dataID.endsWith("-" + suffix)) {
-                  var data = datasets.find(d=>d.id === dataID);
+                  var data = datasets.find(d=>d.id === dataID && d.asset.categoryID!=-3);
                   layerCheckBox.checked=true;
                   document.getElementById(`dataButton-${data.id}`).onclick();
                 }
@@ -201,9 +222,10 @@ export const setupSidebar = (uploads, indexParam=false) => {
               projectTasks.map(asset=>{
                 asset.data.map(dataID=>{
                   if (dataID.endsWith("-" + suffix)) {
-                    var data = datasets.find(d=>d.id === dataID);
-                    document.getElementById(`dataCheckbox-${data.id}`).checked=false;
-                    document.getElementById(`dataCheckbox-${data.id}`).onchange();
+                    var data = datasets.find(d=>d.id === dataID && d.asset.categoryID!=-3);
+                    var checkbox  = sourceDivs["WebODM Projects"].nextElementSibling.querySelector(`#dataCheckbox-${data.id}`);
+                    checkbox.checked=false;
+                    checkbox.onchange();
                   }
                 })
               });
@@ -237,12 +259,19 @@ export const setupSidebar = (uploads, indexParam=false) => {
     if (asset.categoryID == -1) {
       var accordionDiv = projectDivs[asset.project];
       var accordionPanelDiv = projectDivs[asset.project].nextElementSibling;
+    } else  if (asset.categoryID == -3) {
+      var accordionDiv = sharedDivs[asset.project];
+      var accordionPanelDiv = sharedDivs[asset.project].nextElementSibling;
     } else {
       var accordionDiv = categoryDivs[asset.categoryID];
       var accordionPanelDiv = accordionDiv.nextElementSibling;
 
       if (!uploads && !publicTask && !indexParam && sourceDivs["Public Data"].nextElementSibling.firstChild.className === "loader-parent"){
         sourceDivs["Public Data"].nextElementSibling.removeChild(sourceDivs["Public Data"].nextElementSibling.firstChild);
+        
+        if (sourceDivs["Shared WebODM Datasets"]){
+          sourceDivs["Shared WebODM Datasets"].nextElementSibling.removeChild(sourceDivs["Shared WebODM Datasets"].nextElementSibling.firstChild);
+        }
       }
     }
 
@@ -340,81 +369,108 @@ export const setupSidebar = (uploads, indexParam=false) => {
   if (togglePublicData) {
     sourceDivs["Public Data"].onclick();
   }
-
-  loadSelectedDataIDs(true);
 };
 
 export const loadSelectedDataIDs = (fly)=>{
-  if (selectedDataIDs) {
+  if (selectedDataIDs && selectedDataIDs.length!=0) {
     var assetIDs = [];
     var selectedCats = [];
     var selectedProjects = [];
-    var newSelectedDatasets = [];
+    var newSelectedDatasets = [...selectedDatasets];
+    var sharedProjects = [];
+    
     selectedDataIDs.map((dataID, index) => {
-      var dataCheckbox = document.getElementById(`dataCheckbox-${dataID}`);
-      if (dataCheckbox){
-        dataCheckbox.checked=true;
-      }
+      if (selectedDatasets.find(d=>d.id==dataID)) return;
+
       var asset;
       for (var i = 0; i < assets.length; i++) {
         if (assets[i].data && (!!assets[i].data.find(d => d.toString() == dataID))) {
           asset = assets[i];
-          if (!assetIDs.includes(assets[i]["id"])) {
-            assetIDs.push(assets[i]["id"]);
+          break;
+        }
+      }
+      if(asset){
+        var data;
+        for (var i = 0; i < datasets.length; i++) {
+          if (datasets[i].id == dataID) {
+            data = datasets[i];
+            break;
+          }
+        }
+
+        if (data){
+          if ((tilesets[data.asset.id] && tilesets[data.asset.id][data.id]) || 
+          (imageryLayers[data.asset.id] && imageryLayers[data.asset.id][data.id]) || 
+          (dataSources[data.asset.id] && dataSources[data.asset.id][data.id])
+          ) return;
+
+          var dataCheckbox = document.getElementById(`dataCheckbox-${dataID}`);
+          if (dataCheckbox){
+            dataCheckbox.checked=true;
+          }
+
+          newSelectedDatasets.push(datasets[i]);
+          loadData(asset, datasets[i], fly && index == 0, false, true);
+
+          if (!assetIDs.includes(asset["id"])) {
+            assetIDs.push(asset["id"]);
           }
           if (!selectedCats.includes(asset.categoryID)) {
             selectedCats.push(asset.categoryID);
           }
-
+  
           if (asset.categoryID == -1) {
             if (!selectedProjects.includes(asset.project)) {
               selectedProjects.push(asset.project);
             }
           }
-          break;
-        }
-      }
-      if(asset){
-        var assetCheckbox = document.getElementById(
-          `assetCheckbox-${asset.id}`
-        );
-        if (asset.data.every(ad => selectedDataIDs.includes(ad.toString()) || selectedDataIDs.includes(ad))){
-            assetCheckbox.checked = true;
-            assetCheckbox.indeterminate = false;
-        } else {
-          assetCheckbox.checked = false;
-          if (asset.data.some(ad => selectedDataIDs.includes(ad.toString()) || selectedDataIDs.includes(ad))){
-            assetCheckbox.indeterminate = true;
-          } else {
-            assetCheckbox.indeterminate = false;
+  
+          if (asset.categoryID == -3) {
+            if (!sharedProjects.includes(asset.project)){
+              sharedProjects.push(asset.project)
+            }
           }
-        }
-        for (var i = 0; i < datasets.length; i++) {
-          if (datasets[i].id == dataID) {
-            newSelectedDatasets.push(datasets[i]);
-            loadData(asset, datasets[i], fly && index == 0, false, true);
-            break;
+  
+          var assetCheckbox = document.getElementById(
+            `assetCheckbox-${asset.id}`
+          );
+          if (asset.data.every(ad => selectedDataIDs.includes(ad.toString()) || selectedDataIDs.includes(ad))){
+              assetCheckbox.checked = true;
+              assetCheckbox.indeterminate = false;
+          } else {
+            assetCheckbox.checked = false;
+            if (asset.data.some(ad => selectedDataIDs.includes(ad.toString()) || selectedDataIDs.includes(ad))){
+              assetCheckbox.indeterminate = true;
+            } else {
+              assetCheckbox.indeterminate = false;
+            }
           }
         }
       }
     });
 
     selectedCats.map((c) => {
-      if (c!=-1) {
+      if (c!=-1 && c!=-3) {
         if (!categoryDivs[c].firstChild.classList.contains("sidebar-accordion-active")){
           categoryDivs[c].onclick();
         }
       } else {
-        sourceDivs["WebODM Projects"].firstChild.classList.add("sidebar-accordion-active");
-        var panel = sourceDivs["WebODM Projects"].nextElementSibling;
-          panel.style.maxHeight = "fit-content";
-          var height=0;
-          var children = [...panel.children];
-          for (var i=0;i<children.length;i++) {
-            height+=children[i].scrollHeight + children[i].getBoundingClientRect().height;
-          }
-          
-          panel.style.maxHeight = height + "px";
+        var sourceDiv;
+        if (c==-1){
+          sourceDiv = sourceDivs["WebODM Projects"];
+        } else if (c==-3) {
+          sourceDiv = sourceDivs["Shared WebODM Datasets"];
+        }
+        sourceDiv.firstChild.classList.add("sidebar-accordion-active");
+        var panel = sourceDiv.nextElementSibling;
+        panel.style.maxHeight = "fit-content";
+        var height=0;
+        var children = [...panel.children];
+        for (var i=0;i<children.length;i++) {
+          height+=children[i].scrollHeight + children[i].getBoundingClientRect().height;
+        }
+        
+        panel.style.maxHeight = height + "px";
 
         var elem = panel.parentElement;
         while (elem) {      
@@ -436,6 +492,12 @@ export const loadSelectedDataIDs = (fly)=>{
 
     selectedProjects.map(p => {
       projectDivs[p].onclick();
+    })
+
+    sharedProjects.map(p => {
+      if (!sharedDivs[p].firstChild.classList.contains("sidebar-accordion-active")){
+        sharedDivs[p].onclick();
+      }
     })
 
     assetIDs.map((a) => {
@@ -781,8 +843,8 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
       "",
       "",
       uploads
-        ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search
-        : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search
+        ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search + window.location.hash
+        : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search + window.location.hash
     );
 
     loadData(asset, data, true, false, true);
@@ -877,8 +939,8 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
       "",
       "",
       uploads
-        ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search
-        : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search
+        ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search + window.location.hash
+        : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search + window.location.hash
     );
 
     if (!selectedDatasets.find((d) => d.asset === asset)) {
@@ -944,6 +1006,7 @@ const handleAssetCheckboxChange = (checkboxes, assetCheckbox, asset, uploads) =>
     cb.checked = assetCheckbox.checked;
   });
   if (assetCheckbox.checked) {
+    console.log("here");
     var dataIDs = "";
     var newDataIDs = [];
     if (selectedDatasets) {
@@ -970,13 +1033,13 @@ const handleAssetCheckboxChange = (checkboxes, assetCheckbox, asset, uploads) =>
       "",
       "",
       uploads
-        ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search
-        : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search
+        ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search + window.location.hash
+        : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search + window.location.hash
     );
     loadAsset(asset, false, true);
     
     var firstAssetData = selectedDatasets.find(d=>d.asset.id==asset.id);
-    if (firstAssetData.type!="Influx" && firstAssetData.type!="ImageSeries"){
+    if (firstAssetData && firstAssetData.type!="Influx" && firstAssetData.type!="ImageSeries"){
       syncTimeline(true);
     }
   } else {
@@ -1051,8 +1114,8 @@ const handleAssetCheckboxChange = (checkboxes, assetCheckbox, asset, uploads) =>
       "",
       "",
       uploads
-        ? `/cesium/Apps/ASDC/Uploads/${dataIDs.join("&")}` + window.location.search
-        : `/cesium/Apps/ASDC/${dataIDs.join("&")}` + window.location.search
+        ? `/cesium/Apps/ASDC/Uploads/${dataIDs.join("&")}` + window.location.search + window.location.hash
+        : `/cesium/Apps/ASDC/${dataIDs.join("&")}` + window.location.search + window.location.hash
     );
 
     if (
@@ -1150,8 +1213,8 @@ const createTimeseriesDiv = (asset, assetCheckbox, checkboxes, uploads) => {
       "",
       "",
       uploads
-        ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search
-        : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search
+        ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search + window.location.hash
+        : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search + window.location.hash
     );
     loadAsset(asset, true, true);
   };
@@ -1172,114 +1235,10 @@ const createOpacitySliderBtn = (asset, data, dateDiv) => {
   );
 
   opacitySliderBtn.onmouseover = (evt) => {
-    if (
-      data.type === "PointCloud" ||
-      data.type === "EPTPointCloud" ||
-      data.type === "ModelTileset"
-    ) {
-      if (
-        tilesets[asset.id] &&
-        tilesets[asset.id][data.id] &&
-        tilesets[asset.id][data.id].style &&
-        tilesets[asset.id][data.id].style.color
-      ) {
-        var alpha = tilesets[asset.id][
-          data.id
-        ].style.color.expression
-          .match(/\((.*)\)/)
-          .pop()
-          .split(",")
-          .pop();
-        document.getElementById("alpha-slider").value = alpha * 100;
-        document.getElementById("alpha-value").innerHTML =
-          alpha * 100 + " %";
-      } else {
-        document.getElementById("alpha-slider").value = 100;
-        document.getElementById("alpha-value").innerHTML = "100 %";
-      }
-    } else if (data.type === "Imagery") {
-      if (
-        imageryLayers[asset.id] &&
-        imageryLayers[asset.id][data.id]
-      ) {
-        document.getElementById("alpha-slider").value =
-          imageryLayers[asset.id][data.id].alpha * 100;
-        document.getElementById("alpha-value").innerHTML =
-          imageryLayers[asset.id][data.id].alpha * 100 + " %";
-      } else {
-        document.getElementById("alpha-slider").value = 100;
-        document.getElementById("alpha-value").innerHTML = "100 %";
-      }
-    } else if (data.type === "Model") {
-      if (
-        entities[asset.id] &&
-        entities[asset.id][data.id] &&
-        entities[asset.id][data.id].model.color
-      ) {
-        document.getElementById("alpha-slider").value =
-          entities[asset.id][data.id].model.color.getValue().alpha *
-          100;
-        document.getElementById("alpha-value").innerHTML =
-          entities[asset.id][data.id].model.color.getValue().alpha *
-          100 +
-          " %";
-      } else {
-        document.getElementById("alpha-slider").value = 100;
-        document.getElementById("alpha-value").innerHTML = "100 %";
-      }
-    } else if (data.type === "GeoJSON") {
-      if (dataSources[asset.id] && dataSources[asset.id][data.id]) {
-        var entity =
-          dataSources[asset.id][data.id].entities.values[0];
-        if (entity) {
-          if (entity.polygon) {
-            document.getElementById("alpha-slider").value =
-              entity.polygon.material.color.getValue().alpha * 100;
-            document.getElementById("alpha-value").innerHTML =
-              entity.polygon.material.color.getValue().alpha * 100 +
-              " %";
-          } else if (entity.polyline) {
-            document.getElementById("alpha-slider").value =
-              entity.polyline.material.color.getValue().alpha * 100;
-            document.getElementById("alpha-value").innerHTML =
-              entity.polyline.material.color.getValue().alpha *
-              100 +
-              " %";
-          } else {
-            document.getElementById("alpha-slider").value = 100;
-            document.getElementById("alpha-value").innerHTML =
-              "100 %";
-          }
-        }
-      } else {
-        document.getElementById("alpha-slider").value = 100;
-        document.getElementById("alpha-value").innerHTML = "100 %";
-      }
-    } else if (data.type === "ImageSeries") {
-      if (
-        entities[asset.id] &&
-        entities[asset.id][data.id] &&
-        entities[asset.id][data.id].polygon &&
-        entities[asset.id][data.id].polygon.material
-      ) {
-        document.getElementById("alpha-slider").value =
-          entities[asset.id][
-            data.id
-          ].polygon.material.color.getValue().alpha * 100;
-        document.getElementById("alpha-value").innerHTML =
-          entities[asset.id][
-            data.id
-          ].polygon.material.color.getValue().alpha *
-          100 +
-          " %";
-      } else {
-        document.getElementById("alpha-slider").value = 100;
-        document.getElementById("alpha-value").innerHTML = "100 %";
-      }
-    }
+    var alpha = getAlpha(asset,data);
 
     document.getElementById("alpha-slider").value = Math.round(
-      document.getElementById("alpha-slider").value
+      alpha * 100
     );
     document.getElementById("alpha-value").innerHTML =
       document.getElementById("alpha-slider").value + " %";
@@ -1302,8 +1261,10 @@ const createOpacitySliderBtn = (asset, data, dateDiv) => {
       dateDiv.style.background = null;
     };
 
-    document.getElementById("alpha-slider").oninput = (evt) =>
-      applyAlpha(evt, asset, data);
+    document.getElementById("alpha-slider").oninput = (event) =>{
+      document.getElementById("alpha-value").innerHTML = event.target.value + " %";
+      applyAlpha(event.target.value / 100, asset, data);
+    }
   };
   opacitySliderBtn.onmouseleave = (evt) => {
     opacityDropdown.style.display = "none";
@@ -1325,77 +1286,25 @@ const createAssetOpacitySliderBtn = (asset, dateDiv,assetDatasets) => {
   opacitySliderBtn.onmouseover = (evt) => {
     var alphas = [];
     assetDatasets.map(data=>{
-      if (
-        data.type === "PointCloud" ||
-        data.type === "EPTPointCloud" ||
-        data.type === "ModelTileset"
-      ) {
-        if (
-          tilesets[asset.id] &&
-          tilesets[asset.id][data.id] &&
-          tilesets[asset.id][data.id].style &&
-          tilesets[asset.id][data.id].style.color
-        ) {
-          var alpha = tilesets[asset.id][
-            data.id
-          ].style.color.expression
-            .match(/\((.*)\)/)
-            .pop()
-            .split(",")
-            .pop();
-            alphas.push(alpha);
-        } else {
-          // alphas.push(1);
-        }
-      } else if (data.type === "Imagery") {
-        if (
-          imageryLayers[asset.id] &&
-          imageryLayers[asset.id][data.id]
-        ) {
-          alphas.push(imageryLayers[asset.id][data.id].alpha);
-        } else {
-          // alphas.push(1);
-        }
-      } else if (data.type === "Model") {
-        if (
-          entities[asset.id] &&
-          entities[asset.id][data.id] &&
-          entities[asset.id][data.id].model.color
-        ) {
-          alphas.push(entities[asset.id][data.id].model.color.getValue().alpha);
-        } else {
-          // alphas.push(1);
-        }
-      } else if (data.type === "GeoJSON") {
-        if (dataSources[asset.id] && dataSources[asset.id][data.id]) {
-          var entity =
-            dataSources[asset.id][data.id].entities.values[0];
-          if (entity) {
-            if (entity.polygon) {
-              alphas.push(entity.polygon.material.color.getValue().alpha);
-            } else if (entity.polyline) {
-              alphas.push(entity.polyline.material.color.getValue().alpha);
-            } else {
-              alphas.push(1);
-            }
-          }
-        } else {
-          // alphas.push(1);
-        }
-      } else if (data.type === "ImageSeries") {
-        if (
-          entities[asset.id] &&
-          entities[asset.id][data.id] &&
-          entities[asset.id][data.id].polygon &&
-          entities[asset.id][data.id].polygon.material
-        ) {
-          alphas.push(entities[asset.id][
-            data.id
-          ].polygon.material.color.getValue().alpha);
-        } else {
-          // alphas.push(1);
-        }
+      var alpha = getAlpha(asset,data);
+      if (alpha!=undefined){
+        alphas.push(alpha);
       }
+    })
+
+    if (alphas.length!=0 && alphas.every(a=>a==alphas[0])){
+      document.getElementById("alpha-slider").value = alphas[0] * 100;
+      document.getElementById("alpha-value").value = alphas[0] * 100 + " %";;
+    } else {
+      document.getElementById("alpha-slider").value = 100;
+      document.getElementById("alpha-value").innerHTML = "100 %";
+    }
+
+    document.getElementById("alpha-slider").value = Math.round(
+      document.getElementById("alpha-slider").value
+    );
+    document.getElementById("alpha-value").innerHTML =
+      document.getElementById("alpha-slider").value + " %";
 
       var rect = evt.target.getBoundingClientRect();
       opacityDropdown.style.left = rect.x + (rect.width/2) +"px";
@@ -1416,27 +1325,14 @@ const createAssetOpacitySliderBtn = (asset, dateDiv,assetDatasets) => {
         dateDiv.style.background = null;
       };
 
-      document.getElementById("alpha-slider").oninput = (evt) =>{
+      document.getElementById("alpha-slider").oninput = (event) =>{
         assetDatasets.map(data=>{
-            applyAlpha(evt, asset, data);
+            document.getElementById("alpha-value").innerHTML = event.target.value + " %";
+            var alpha = event.target.value / 100;
+            applyAlpha(alpha, asset, data);
           }
         )
       }
-    })
-
-    if (alphas.length!=0 && alphas.every(a=>a==alphas[0])){
-      document.getElementById("alpha-slider").value = alphas[0] * 100;
-      document.getElementById("alpha-value").value = alphas[0] * 100 + " %";;
-    } else {
-      document.getElementById("alpha-slider").value = 100;
-      document.getElementById("alpha-value").innerHTML = "100 %";
-    }
-
-    document.getElementById("alpha-slider").value = Math.round(
-      document.getElementById("alpha-slider").value
-    );
-    document.getElementById("alpha-value").innerHTML =
-      document.getElementById("alpha-slider").value + " %";
   };
   opacitySliderBtn.onmouseleave = (evt) => {
     opacityDropdown.style.display = "none";
@@ -1468,118 +1364,9 @@ const createProjectOpacitySliderBtn = (projectAssets, projectDiv) => {
       })
 
       assetDatasets.map(data=>{
-        if (
-          data.type === "PointCloud" ||
-          data.type === "EPTPointCloud" ||
-          data.type === "ModelTileset"
-        ) {
-          if (
-            tilesets[asset.id] &&
-            tilesets[asset.id][data.id] &&
-            tilesets[asset.id][data.id].style &&
-            tilesets[asset.id][data.id].style.color
-          ) {
-            var alpha = tilesets[asset.id][
-              data.id
-            ].style.color.expression
-              .match(/\((.*)\)/)
-              .pop()
-              .split(",")
-              .pop();
-              alphas.push(alpha);
-          } 
-          else {
-            // alphas.push(1);
-          }
-        } else if (data.type === "Imagery") {
-          if (
-            imageryLayers[asset.id] &&
-            imageryLayers[asset.id][data.id]
-          ) {
-            alphas.push(imageryLayers[asset.id][data.id].alpha);
-          } 
-          else {
-            // alphas.push(1);
-          }
-        } else if (data.type === "Model") {
-          if (
-            entities[asset.id] &&
-            entities[asset.id][data.id] &&
-            entities[asset.id][data.id].model.color
-          ) {
-            alphas.push(entities[asset.id][data.id].model.color.getValue().alpha);
-          }
-           else {
-            // alphas.push(1);
-          }
-        } else if (data.type === "GeoJSON") {
-          if (dataSources[asset.id] && dataSources[asset.id][data.id]) {
-            var entity =
-              dataSources[asset.id][data.id].entities.values[0];
-            if (entity) {
-              if (entity.polygon) {
-                alphas.push(entity.polygon.material.color.getValue().alpha);
-              } else if (entity.polyline) {
-                alphas.push(entity.polyline.material.color.getValue().alpha);
-              }
-               else {
-                // alphas.push(1);
-              }
-            }
-          }
-           else {
-            // alphas.push(1);
-          }
-        } else if (data.type === "ImageSeries") {
-          if (
-            entities[asset.id] &&
-            entities[asset.id][data.id] &&
-            entities[asset.id][data.id].polygon &&
-            entities[asset.id][data.id].polygon.material
-          ) {
-            alphas.push(entities[asset.id][
-              data.id
-            ].polygon.material.color.getValue().alpha);
-          } 
-          else {
-            // alphas.push(1);
-          }
-        }
-
-        var rect = evt.target.getBoundingClientRect();
-        opacityDropdown.style.left = rect.x + (rect.width/2) +"px";
-        opacityDropdown.style.top = rect.y + (rect.height/2) +"px";
-
-        opacityDropdown.style.display = "block";
-        opacitySliderBtn.style.color = "white";
-
-        opacityDropdown.onmouseover = (event) => {
-          opacityDropdown.style.display = "block";
-          opacitySliderBtn.style.color = "white";
-          projectDiv.style.background = "#5B8B51";
-        };
-
-        opacityDropdown.onmouseleave = (event) => {
-          opacityDropdown.style.display = "none";
-          opacitySliderBtn.style.color = "black";
-          projectDiv.style.background = null;
-        };
-
-        document.getElementById("alpha-slider").oninput = (evt) =>{
-          projectAssets.map(asset=>{
-            var assetDatasets = [];
-            asset?.data?.map((dataID, index) => {
-              for (var i = 0; i < datasets.length; i++) {
-                if (datasets[i].id == dataID) {
-                  assetDatasets.push(datasets[i]);
-                }
-              }
-            })
-            assetDatasets.map(data=>{
-                applyAlpha(evt, asset, data);
-              }
-            )
-          })
+        var alpha = getAlpha(asset,data);
+        if (alpha!=undefined){
+          alphas.push(alpha);
         }
       })
     })
@@ -1597,6 +1384,44 @@ const createProjectOpacitySliderBtn = (projectAssets, projectDiv) => {
     );
     document.getElementById("alpha-value").innerHTML =
       document.getElementById("alpha-slider").value + " %";
+
+    var rect = evt.target.getBoundingClientRect();
+    opacityDropdown.style.left = rect.x + (rect.width/2) +"px";
+    opacityDropdown.style.top = rect.y + (rect.height/2) +"px";
+
+    opacityDropdown.style.display = "block";
+    opacitySliderBtn.style.color = "white";
+
+    opacityDropdown.onmouseover = (event) => {
+      opacityDropdown.style.display = "block";
+      opacitySliderBtn.style.color = "white";
+      projectDiv.style.background = "#5B8B51";
+    };
+
+    opacityDropdown.onmouseleave = (event) => {
+      opacityDropdown.style.display = "none";
+      opacitySliderBtn.style.color = "black";
+      projectDiv.style.background = null;
+    };
+
+    document.getElementById("alpha-slider").oninput = (event) =>{
+      projectAssets.map(asset=>{
+        var assetDatasets = [];
+        asset?.data?.map((dataID, index) => {
+          for (var i = 0; i < datasets.length; i++) {
+            if (datasets[i].id == dataID) {
+              assetDatasets.push(datasets[i]);
+            }
+          }
+        })
+        assetDatasets.map(data=>{
+            document.getElementById("alpha-value").innerHTML = event.target.value + " %";
+            var alpha = event.target.value / 100;
+            applyAlpha(alpha, asset, data);
+          }
+        )
+      })
+    }
   };
   opacitySliderBtn.onmouseleave = (evt) => {
     opacityDropdown.style.display = "none";
@@ -1786,7 +1611,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
     var assetDatasets = [];
     var dateDivs = [];
     asset.data.map((dataID, index) => {
-      var data = dataID;
+      var data;
       for (var i = 0; i < datasets.length; i++) {
         if (datasets[i].id == dataID) {
           data = datasets[i];
@@ -1795,7 +1620,8 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
           break;
         }
       }
-
+      
+      if(!data)return
       var dateDiv = document.createElement("div");
       dateDiv.className = "sidebar-item";
       dateDiv.id = `dataButton-${data.id}`;
@@ -1805,8 +1631,15 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
       checkbox.type = "checkbox";
       checkbox.style.float = "left";
       checkbox.style.margin = "0 5px 0 0";
-      checkbox.checked =
-        selectedDataIDs && (selectedDataIDs.includes(data.id.toString()));
+      
+      if (init && init.index && data && data.asset && data.asset.project){
+        checkbox.checked =
+          selectedDataIDs && (selectedDataIDs.includes(data.id.toString()) && data.asset.categoryID==-3);
+      } else {
+        checkbox.checked =
+          selectedDataIDs && (selectedDataIDs.includes(data.id.toString()));
+      }
+      
       checkboxes.push(checkbox);
 
       assetCheckbox.checked = checkboxes.every((cb) => cb.checked);
@@ -1877,8 +1710,8 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
           "",
           "",
           uploads
-            ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search
-            : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search
+            ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search + window.location.hash
+            : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search + window.location.hash
         );
 
         loadData(asset, data, true, true, true);

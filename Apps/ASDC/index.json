@@ -5,146 +5,233 @@
       "name": "NUE",
       "status": "active",
       "categoryID": 1,
-      "data": [1, 2, 3]
+      "data": [
+        1,
+        2,
+        3
+      ]
     },
     {
       "id": 2,
       "name": "VBIR",
       "status": "active",
       "categoryID": 1,
-      "data": [4, 5, 6, 7, 8, 9, 10]
+      "data": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
     },
     {
       "id": 3,
       "name": "Gegedzerick Rd",
       "status": "active",
       "categoryID": 2,
-      "data": [11]
+      "data": [
+        11
+      ]
     },
     {
       "id": 4,
       "name": "Gillan Ecosphere",
       "status": "active",
       "categoryID": 3,
-      "data": [12, 13, 14]
+      "data": [
+        12,
+        13,
+        14
+      ]
     },
     {
       "id": 5,
       "name": "Dryandra Model",
       "status": "active",
       "categoryID": 5,
-      "data": [15]
+      "data": [
+        15
+      ]
     },
     {
       "id": 6,
       "name": "Dryandra Point Cloud",
       "status": "active",
       "categoryID": 5,
-      "data": [16]
+      "data": [
+        16
+      ]
     },
     {
       "id": 7,
       "name": "Graffiti Model",
       "status": "active",
       "categoryID": 5,
-      "data": [17]
+      "data": [
+        17
+      ]
     },
     {
       "id": 8,
       "name": "Graffiti Point Cloud",
       "status": "active",
       "categoryID": 5,
-      "data": [18]
+      "data": [
+        18
+      ]
     },
     {
       "id": 9,
       "name": "Perisher",
       "status": "active",
       "categoryID": 4,
-      "data": [19, 41]
+      "data": [
+        19,
+        41
+      ]
     },
     {
       "id": 10,
       "name": "Falls Creek",
       "status": "active",
       "categoryID": 4,
-      "data": [20, 42]
+      "data": [
+        20,
+        42
+      ]
     },
     {
       "id": 11,
       "name": "Adelaide Hills",
       "status": "active",
       "categoryID": 7,
-      "data": [21, 22, 23, 24]
+      "data": [
+        21,
+        22,
+        23,
+        24
+      ]
     },
     {
       "id": 12,
       "name": "Kangaroo Island",
       "status": "active",
       "categoryID": 7,
-      "data": [25, 26, 27, 28]
-    },
-    {
-      "id": 15,
-      "name": "ANU hyperspec Scaniverse las",
-      "status": "active",
-      "categoryID": 6,
-      "data": [29]
+      "data": [
+        25,
+        26,
+        27,
+        28
+      ]
     },
     {
       "id": 16,
       "name": "Apple maps car",
       "status": "active",
       "categoryID": 6,
-      "data": [30]
-    },
-    {
-      "id": 17,
-      "name": "APPF ANU Controlled Environment Facility-point-cloud-polycam",
-      "status": "failed",
-      "categoryID": 6
+      "data": [
+        30
+      ]
     },
     {
       "id": 18,
       "name": "Coolama",
       "status": "active",
       "categoryID": 2,
-      "data": [31, 67, 32, 33, 34, 35]
+      "data": [
+        31,
+        67,
+        32,
+        33,
+        34,
+        35
+      ]
     },
     {
       "id": 19,
       "name": "Doran",
       "status": "active",
       "categoryID": 2,
-      "data": [36, 68, 37, 38, 39, 40]
+      "data": [
+        36,
+        68,
+        37,
+        38,
+        39,
+        40
+      ]
     },
     {
       "id": 20,
       "name": "Graham Road Construction Site",
       "status": "active",
       "categoryID": 8,
-      "data": [43, 44, 45, 57]
+      "data": [
+        43,
+        44,
+        45,
+        57
+      ]
     },
     {
       "id": 21,
-      "name": "Growth Capsules - Phenospex Scanner",
+      "name": "APPF ANU Phenotyping Facility",
       "status": "active",
-      "categoryID": 6,
-      "data": [46,47,48,49,50,51,52,53,54,55, 56, 69, 73, 70, 66, 71]
+      "categoryID": 9,
+      "data": [
+        73,
+        70,
+        66,
+        71,
+        72,
+        29
+      ]
     },
     {
       "id": 22,
       "name": "STAR",
       "status": "active",
       "categoryID": 1,
-      "data": [58, 59, 60, 61, 62, 63, 64, 65]
+      "data": [
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65
+      ]
     },
     {
       "id": 23,
-      "name": "Plant Growth Facility",
+      "name": "Phenospex data (Capsule 3)",
       "status": "active",
-      "categoryID": 6,
-      "data": [72]
+      "categoryID": 9,
+      "data": [
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93
+      ]
     }
   ],
   "datasets": [
@@ -648,16 +735,18 @@
       "id": 29,
       "date": "2022-02-14",
       "type": "PointCloud",
+      "name":"ANU hyperspec Scaniverse las",
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Uploads/15/0/ept/ept-tileset/tileset.json",
       "position": {
         "lng": 149.11679563939344,
         "lat": -35.27683340340024,
-        "height": 559.9999992937356
+        "height": 586.5
       },
       "boundingSphereRadius": 5.196262908854472,
       "source": {
         "url": "s3://appf-anu/Cesium/Uploads/15/0/APPF-ANU-hyperspectral-scanner-Scaniverse.las"
-      }
+      },
+      "zoom":"boundingSphere"
     },
     {
       "id": 30,
@@ -701,7 +790,9 @@
         "height": 16
       },
       "bounds": [
-        148.8749411622239, -36.345729531573845, 148.87762159040525,
+        148.8749411622239,
+        -36.345729531573845,
+        148.87762159040525,
         -36.3432744889566
       ],
       "minzoom": 13,
@@ -722,7 +813,9 @@
         "height": 16
       },
       "bounds": [
-        148.8749411622239, -36.345729531573845, 148.87762159040525,
+        148.8749411622239,
+        -36.345729531573845,
+        148.87762159040525,
         -36.3432744889566
       ],
       "minzoom": 13,
@@ -743,7 +836,9 @@
         "height": 16
       },
       "bounds": [
-        148.87494115891505, -36.345729676734614, 148.877621544352,
+        148.87494115891505,
+        -36.345729676734614,
+        148.877621544352,
         -36.34327455489103
       ],
       "minzoom": 13,
@@ -793,7 +888,9 @@
         "height": 16
       },
       "bounds": [
-        148.81171394103723, -36.37338985662639, 148.81392586642946,
+        148.81171394103723,
+        -36.37338985662639,
+        148.81392586642946,
         -36.37234246842119
       ],
       "minzoom": 14,
@@ -814,7 +911,9 @@
         "height": 16
       },
       "bounds": [
-        148.81171394103723, -36.37338985662639, 148.81392586642946,
+        148.81171394103723,
+        -36.37338985662639,
+        148.81392586642946,
         -36.37234246842119
       ],
       "minzoom": 14,
@@ -835,7 +934,9 @@
         "height": 16
       },
       "bounds": [
-        148.81171395918432, -36.37338986125863, 148.81392532747853,
+        148.81171395918432,
+        -36.37338986125863,
+        148.81392532747853,
         -36.37234248023783
       ],
       "minzoom": 14,
@@ -867,8 +968,8 @@
         "lat": -36.3731306,
         "height": 1594
       },
-      "width":960,
-      "height":720,
+      "width": 960,
+      "height": 720,
       "camera": "AMRF_PER_C01",
       "timeOffset": 3600000,
       "startDateTime": "2021-03-03T03:00:00.000Z"
@@ -882,8 +983,8 @@
         "lat": -36.877349,
         "height": 1730
       },
-      "width":960,
-      "height":720,
+      "width": 960,
+      "height": 720,
       "camera": "AMRF_FRY_C01",
       "startDateTime": "2022-01-10T20:00:00.000Z"
     },
@@ -938,8 +1039,8 @@
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210415/ept.json",
-      "zoom":{
-        "position":{
+      "zoom": {
+        "position": {
           "x": -4473969.966870818,
           "y": 2675859.1648259866,
           "z": -3663474.1383372117
@@ -970,8 +1071,8 @@
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210416/ept.json",
-      "zoom":{
-        "position":{
+      "zoom": {
+        "position": {
           "x": -4473969.966870818,
           "y": 2675859.1648259866,
           "z": -3663474.1383372117
@@ -1002,8 +1103,8 @@
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210417/ept.json",
-      "zoom":{
-        "position":{
+      "zoom": {
+        "position": {
           "x": -4473969.966870818,
           "y": 2675859.1648259866,
           "z": -3663474.1383372117
@@ -1034,8 +1135,8 @@
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210418/ept.json",
-      "zoom":{
-        "position":{
+      "zoom": {
+        "position": {
           "x": -4473969.966870818,
           "y": 2675859.1648259866,
           "z": -3663474.1383372117
@@ -1066,8 +1167,8 @@
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210419/ept.json",
-      "zoom":{
-        "position":{
+      "zoom": {
+        "position": {
           "x": -4473969.966870818,
           "y": 2675859.1648259866,
           "z": -3663474.1383372117
@@ -1098,8 +1199,8 @@
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210420/ept.json",
-      "zoom":{
-        "position":{
+      "zoom": {
+        "position": {
           "x": -4473969.966870818,
           "y": 2675859.1648259866,
           "z": -3663474.1383372117
@@ -1130,8 +1231,8 @@
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210421/ept.json",
-      "zoom":{
-        "position":{
+      "zoom": {
+        "position": {
           "x": -4473969.966870818,
           "y": 2675859.1648259866,
           "z": -3663474.1383372117
@@ -1162,8 +1263,8 @@
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210422/ept.json",
-      "zoom":{
-        "position":{
+      "zoom": {
+        "position": {
           "x": -4473969.966870818,
           "y": 2675859.1648259866,
           "z": -3663474.1383372117
@@ -1194,8 +1295,8 @@
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210423/ept.json",
-      "zoom":{
-        "position":{
+      "zoom": {
+        "position": {
           "x": -4473969.966870818,
           "y": 2675859.1648259866,
           "z": -3663474.1383372117
@@ -1226,8 +1327,8 @@
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210424/ept.json",
-      "zoom":{
-        "position":{
+      "zoom": {
+        "position": {
           "x": -4473969.966870818,
           "y": 2675859.1648259866,
           "z": -3663474.1383372117
@@ -1258,8 +1359,8 @@
       },
       "boundingSphereRadius": 4.579436804133652,
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210425/ept.json",
-      "zoom":{
-        "position":{
+      "zoom": {
+        "position": {
           "x": -4473969.966870818,
           "y": 2675859.1648259866,
           "z": -3663474.1383372117
@@ -1408,7 +1509,7 @@
     {
       "id": 66,
       "type": "Model",
-      "name":"Growth Capsule Model 3",
+      "name": "Growth Capsule Model 3",
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/container/container_light_baked.gltf",
       "position": {
         "lng": 149.116541432,
@@ -1421,7 +1522,7 @@
         "roll": 0
       },
       "boundingSphereRadius": 6.354320339206865,
-      "zoom":"boundingSphere",
+      "zoom": "boundingSphere",
       "source": {
         "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/container/container_light_baked.gltf"
       }
@@ -1437,12 +1538,14 @@
         "height": 16
       },
       "bounds": [
-        148.874895, -36.345713, 148.8776228,
+        148.874895,
+        -36.345713,
+        148.8776228,
         -36.3432611
       ],
       "minzoom": 12,
       "maxzoom": 24,
-      "useProxy":true,
+      "useProxy": true,
       "url": "https://s3-us-west-1.amazonaws.com/6-tiles.mapsmadeeasy.com/{x}/3ed73f18925c481ba0ac0386226a8caa/7b405e881b3c4cad944de2dd5be37926/{z}/{x}/{reverseY}.png"
     },
     {
@@ -1456,18 +1559,20 @@
         "height": 16
       },
       "bounds": [
-        148.8117525, -36.37342, 148.8139072,
+        148.8117525,
+        -36.37342,
+        148.8139072,
         -36.372257
       ],
       "minzoom": 12,
       "maxzoom": 24,
-      "useProxy":true,
+      "useProxy": true,
       "url": "https://s3-us-west-1.amazonaws.com/1-tiles.mapsmadeeasy.com/{x}/3ed73f18925c481ba0ac0386226a8caa/d8f0479d98aa45358c142146f69b6461/{z}/{x}/{reverseY}.png"
     },
     {
       "id": 69,
       "type": "Model",
-      "name":"Research School of Biology - untiled",
+      "name": "Research School of Biology - untiled",
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/RSB/robertson_gh-fullresMesh_simplified_3d_mesh.gltf",
       "position": {
         "lng": 149.1171203434,
@@ -1480,7 +1585,7 @@
         "roll": 0
       },
       "boundingSphereRadius": 169.4525991168452,
-      "zoom":"boundingSphere",
+      "zoom": "boundingSphere",
       "source": [
         {
           "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/RSB/robertson_gh-fullresMesh_simplified_3d_mesh.gltf"
@@ -1496,7 +1601,7 @@
     {
       "id": 70,
       "type": "Model",
-      "name":"Growth Capsule Model 1",
+      "name": "Growth Capsule Model 1",
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/container/container_light_baked.gltf",
       "position": {
         "lng": 149.1165920163,
@@ -1509,7 +1614,7 @@
         "roll": 0
       },
       "boundingSphereRadius": 6.354320339206865,
-      "zoom":"boundingSphere",
+      "zoom": "boundingSphere",
       "source": {
         "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/container/container_light_baked.gltf"
       }
@@ -1517,7 +1622,7 @@
     {
       "id": 71,
       "type": "Model",
-      "name":"Growth Capsule Model 4",
+      "name": "Growth Capsule Model 4",
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/Capsule+4/2022-02-GrowthCapsule04-polycam.glb",
       "position": {
         "lng": 149.1164981353,
@@ -1530,7 +1635,7 @@
         "roll": 0
       },
       "boundingSphereRadius": 8.111670345457522,
-      "zoom":"boundingSphere",
+      "zoom": "boundingSphere",
       "source": {
         "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/Capsule+4/2022-02-GrowthCapsule04-polycam.glb"
       }
@@ -1538,7 +1643,7 @@
     {
       "id": 72,
       "type": "Model",
-      "name":"Plant Growth Facility",
+      "name": "Plant Growth Facility",
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/PGF/2022-03-APPF+PlantGrowthFacility-polycam.glb",
       "position": {
         "lng": 149.1166696509,
@@ -1558,16 +1663,16 @@
     {
       "id": 73,
       "type": "ModelTileset",
-      "name":"Research School of Biology - tiled",
+      "name": "Research School of Biology - tiled",
       "url": "ion",
-      "assetId":942295,
+      "assetId": 942295,
       "position": {
         "lng": 149.1170704094,
-        "lat":-35.27873980283574,
+        "lat": -35.27873980283574,
         "height": 592.1895133636085
       },
       "boundingSphereRadius": 169.45259911684582,
-      "zoom":"boundingSphere",
+      "/zoom": "boundingSphere",
       "source": [
         {
           "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/RSB/robertson_gh-fullresMesh_simplified_3d_mesh.gltf"
@@ -1579,32 +1684,1847 @@
           "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/RSB/robertson_gh-fullresMesh_texture.jpg"
         }
       ]
+    },
+    {
+      "date": "2021-04-07T01:38:49.000Z",
+      "name": "Point Cloud",
+      "type": "PointCloud",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9090930951741
+      },
+      "boundingSphereRadius": 1.0660602569568423,
+      "url": "ion",
+      "assetId": 1058372,
+      "zoom": {
+        "position": {
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
+        },
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
+          },
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
+          }
+        }
+      },
+      "id": 74
+    },
+    {
+      "date": "2021-04-08T01:41:23.000Z",
+      "name": "Point Cloud",
+      "type": "PointCloud",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9090930951741
+      },
+      "boundingSphereRadius": 1.2070396661722347,
+      "url": "ion",
+      "assetId": 1058253,
+      "zoom": {
+        "position": {
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
+        },
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
+          },
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
+          }
+        }
+      },
+      "id": 75
+    },
+    {
+      "date": "2021-04-09T01:43:57.000Z",
+      "name": "Point Cloud",
+      "type": "PointCloud",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9090930951741
+      },
+      "boundingSphereRadius": 1.2073673275302765,
+      "url": "ion",
+      "assetId": 1058259,
+      "zoom": {
+        "position": {
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
+        },
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
+          },
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
+          }
+        }
+      },
+      "id": 76
+    },
+    {
+      "date": "2021-04-10T01:46:31.000Z",
+      "name": "Point Cloud",
+      "type": "PointCloud",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9090930951741
+      },
+      "boundingSphereRadius": 1.2070096759071995,
+      "url": "ion",
+      "assetId": 1058264,
+      "zoom": {
+        "position": {
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
+        },
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
+          },
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
+          }
+        }
+      },
+      "id": 77
+    },
+    {
+      "date": "2021-04-11T01:49:05.000Z",
+      "name": "Point Cloud",
+      "type": "PointCloud",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9090930951741
+      },
+      "boundingSphereRadius": 1.206033134552412,
+      "url": "ion",
+      "assetId": 1058266,
+      "zoom": {
+        "position": {
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
+        },
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
+          },
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
+          }
+        }
+      },
+      "id": 78
+    },
+    {
+      "date": "2021-04-12T01:51:39.000Z",
+      "name": "Point Cloud",
+      "type": "PointCloud",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9090930951741
+      },
+      "boundingSphereRadius": 1.204956489832533,
+      "url": "ion",
+      "assetId": 1058268,
+      "zoom": {
+        "position": {
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
+        },
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
+          },
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
+          }
+        }
+      },
+      "id": 79
+    },
+    {
+      "date": "2021-04-13T01:54:13.000Z",
+      "name": "Point Cloud",
+      "type": "PointCloud",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9090930951741
+      },
+      "boundingSphereRadius": 1.2082058126445636,
+      "url": "ion",
+      "assetId": 1058272,
+      "zoom": {
+        "position": {
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
+        },
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
+          },
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
+          }
+        }
+      },
+      "id": 80
+    },
+    {
+      "date": "2021-04-14T01:56:47.000Z",
+      "name": "Point Cloud",
+      "type": "PointCloud",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9090930951741
+      },
+      "boundingSphereRadius": 1.2141481239483054,
+      "url": "ion",
+      "assetId": 1058273,
+      "zoom": {
+        "position": {
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
+        },
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
+          },
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
+          }
+        }
+      },
+      "id": 81
+    },
+    {
+      "date": "2021-04-15T01:59:22.000Z",
+      "name": "Point Cloud",
+      "type": "PointCloud",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9090930951741
+      },
+      "boundingSphereRadius": 1.2197421357005533,
+      "url": "ion",
+      "assetId": 1058275,
+      "zoom": {
+        "position": {
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
+        },
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
+          },
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
+          }
+        }
+      },
+      "id": 82
+    },
+    {
+      "date": "2021-04-16T02:01:56.000Z",
+      "name": "Point Cloud",
+      "type": "PointCloud",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9090930951741
+      },
+      "boundingSphereRadius": 1.225047082356328,
+      "url": "ion",
+      "assetId": 1058276,
+      "zoom": {
+        "position": {
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
+        },
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
+          },
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
+          }
+        }
+      },
+      "id": 83
+    },
+    {
+      "date": "2021-04-17T02:10:17.000Z",
+      "name": "Point Cloud",
+      "type": "PointCloud",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9090930951741
+      },
+      "boundingSphereRadius": 1.2226543969545416,
+      "url": "ion",
+      "assetId": 1058277,
+      "zoom": {
+        "position": {
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
+        },
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
+          },
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
+          }
+        }
+      },
+      "id": 84
+    },
+    {
+      "date": "2021-04-18T02:12:52.000Z",
+      "name": "Point Cloud",
+      "type": "PointCloud",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9090930951741
+      },
+      "boundingSphereRadius": 1.227192706372796,
+      "url": "ion",
+      "assetId": 1058279,
+      "zoom": {
+        "position": {
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
+        },
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
+          },
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
+          }
+        }
+      },
+      "id": 85
+    },
+    {
+      "date": "2021-04-19T02:15:26.000Z",
+      "name": "Point Cloud",
+      "type": "PointCloud",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9090930951741
+      },
+      "boundingSphereRadius": 1.2326780796767376,
+      "url": "ion",
+      "assetId": 1058282,
+      "zoom": {
+        "position": {
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
+        },
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
+          },
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
+          }
+        }
+      },
+      "id": 86
+    },
+    {
+      "date": "2021-04-20T02:18:01.000Z",
+      "name": "Point Cloud",
+      "type": "PointCloud",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9090930951741
+      },
+      "boundingSphereRadius": 1.235343887700023,
+      "url": "ion",
+      "assetId": 1058283,
+      "zoom": {
+        "position": {
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
+        },
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
+          },
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
+          }
+        }
+      },
+      "id": 87
+    },
+    {
+      "date": "2021-04-21T01:36:02.000Z",
+      "name": "Point Cloud",
+      "type": "PointCloud",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9090930951741
+      },
+      "boundingSphereRadius": 1.235105656879901,
+      "url": "ion",
+      "assetId": 1058286,
+      "zoom": {
+        "position": {
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
+        },
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
+          },
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
+          }
+        }
+      },
+      "id": 88
+    },
+    {
+      "date": "2021-04-22T01:38:37.000Z",
+      "name": "Point Cloud",
+      "type": "PointCloud",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9090930951741
+      },
+      "boundingSphereRadius": 1.2372642732886159,
+      "url": "ion",
+      "assetId": 1058289,
+      "zoom": {
+        "position": {
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
+        },
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
+          },
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
+          }
+        }
+      },
+      "id": 89
+    },
+    {
+      "date": "2021-04-23T01:41:12.000Z",
+      "name": "Point Cloud",
+      "type": "PointCloud",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9090930951741
+      },
+      "boundingSphereRadius": 1.2376670315772444,
+      "url": "ion",
+      "assetId": 1058291,
+      "zoom": {
+        "position": {
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
+        },
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
+          },
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
+          }
+        }
+      },
+      "id": 90
+    },
+    {
+      "date": "2021-04-24T01:43:29.000Z",
+      "name": "Point Cloud",
+      "type": "PointCloud",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9090930951741
+      },
+      "boundingSphereRadius": 1.2406630022304648,
+      "url": "ion",
+      "assetId": 1058292,
+      "zoom": {
+        "position": {
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
+        },
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
+          },
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
+          }
+        }
+      },
+      "id": 91
+    },
+    {
+      "date": "2021-04-25T01:46:03.000Z",
+      "name": "Point Cloud",
+      "type": "PointCloud",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386,
+        "height": 585.9090930951741
+      },
+      "boundingSphereRadius": 1.2400056219318651,
+      "url": "ion",
+      "assetId": 1058293,
+      "zoom": {
+        "position": {
+          "x": -4473969.966870818,
+          "y": 2675859.1648259866,
+          "z": -3663474.1383372117
+        },
+        "orientation": {
+          "direction": {
+            "x": 0.7941747921924697,
+            "y": -0.3512826501722236,
+            "z": -0.4958698409200008
+          },
+          "up": {
+            "x": -0.40632018066784636,
+            "y": 0.29980975284336564,
+            "z": -0.8631442653937109
+          }
+        }
+      },
+      "id": 92
+    },
+    {
+      "id": 93,
+      "type": "CSV",
+      "name": "Graphs",
+      "position": {
+        "lng": 149.1165620163,
+        "lat": -35.2785386386
+      },
+      "graphs": [
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "Digital biomass [mm³] Unit 1",
+              "Digital biomass [mm³] Unit 2",
+              "Digital biomass [mm³] Unit 3",
+              "Digital biomass [mm³] Unit 4",
+              "Digital biomass [mm³] Unit 5",
+              "Digital biomass [mm³] Unit 6",
+              "Digital biomass [mm³] Unit 7",
+              "Digital biomass [mm³] Unit 8",
+              "Digital biomass [mm³] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Digital Biomass",
+          "unit": "mm³"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "Height [mm] Unit 1",
+              "Height [mm] Unit 2",
+              "Height [mm] Unit 3",
+              "Height [mm] Unit 4",
+              "Height [mm] Unit 5",
+              "Height [mm] Unit 6",
+              "Height [mm] Unit 7",
+              "Height [mm] Unit 8",
+              "Height [mm] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Height",
+          "unit": "mm"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "Height Max [mm] Unit 1",
+              "Height Max [mm] Unit 2",
+              "Height Max [mm] Unit 3",
+              "Height Max [mm] Unit 4",
+              "Height Max [mm] Unit 5",
+              "Height Max [mm] Unit 6",
+              "Height Max [mm] Unit 7",
+              "Height Max [mm] Unit 8",
+              "Height Max [mm] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Height Max",
+          "unit": "mm"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "greenness average [] Unit 1",
+              "greenness average [] Unit 2",
+              "greenness average [] Unit 3",
+              "greenness average [] Unit 4",
+              "greenness average [] Unit 5",
+              "greenness average [] Unit 6",
+              "greenness average [] Unit 7",
+              "greenness average [] Unit 8",
+              "greenness average [] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Greenness Average",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "greenness bin0 [%] Unit 1",
+              "greenness bin0 [%] Unit 2",
+              "greenness bin0 [%] Unit 3",
+              "greenness bin0 [%] Unit 4",
+              "greenness bin0 [%] Unit 5",
+              "greenness bin0 [%] Unit 6",
+              "greenness bin0 [%] Unit 7",
+              "greenness bin0 [%] Unit 8",
+              "greenness bin0 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Greenness Bin0",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "greenness bin1 [%] Unit 1",
+              "greenness bin1 [%] Unit 2",
+              "greenness bin1 [%] Unit 3",
+              "greenness bin1 [%] Unit 4",
+              "greenness bin1 [%] Unit 5",
+              "greenness bin1 [%] Unit 6",
+              "greenness bin1 [%] Unit 7",
+              "greenness bin1 [%] Unit 8",
+              "greenness bin1 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Greenness Bin1",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "greenness bin2 [%] Unit 1",
+              "greenness bin2 [%] Unit 2",
+              "greenness bin2 [%] Unit 3",
+              "greenness bin2 [%] Unit 4",
+              "greenness bin2 [%] Unit 5",
+              "greenness bin2 [%] Unit 6",
+              "greenness bin2 [%] Unit 7",
+              "greenness bin2 [%] Unit 8",
+              "greenness bin2 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Greenness Bin2",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "greenness bin3 [%] Unit 1",
+              "greenness bin3 [%] Unit 2",
+              "greenness bin3 [%] Unit 3",
+              "greenness bin3 [%] Unit 4",
+              "greenness bin3 [%] Unit 5",
+              "greenness bin3 [%] Unit 6",
+              "greenness bin3 [%] Unit 7",
+              "greenness bin3 [%] Unit 8",
+              "greenness bin3 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Greenness Bin3",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "greenness bin4 [%] Unit 1",
+              "greenness bin4 [%] Unit 2",
+              "greenness bin4 [%] Unit 3",
+              "greenness bin4 [%] Unit 4",
+              "greenness bin4 [%] Unit 5",
+              "greenness bin4 [%] Unit 6",
+              "greenness bin4 [%] Unit 7",
+              "greenness bin4 [%] Unit 8",
+              "greenness bin4 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Greenness Bin4",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "hue average [°] Unit 1",
+              "hue average [°] Unit 2",
+              "hue average [°] Unit 3",
+              "hue average [°] Unit 4",
+              "hue average [°] Unit 5",
+              "hue average [°] Unit 6",
+              "hue average [°] Unit 7",
+              "hue average [°] Unit 8",
+              "hue average [°] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Hue Average",
+          "unit": "°"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "hue bin0 [%] Unit 1",
+              "hue bin0 [%] Unit 2",
+              "hue bin0 [%] Unit 3",
+              "hue bin0 [%] Unit 4",
+              "hue bin0 [%] Unit 5",
+              "hue bin0 [%] Unit 6",
+              "hue bin0 [%] Unit 7",
+              "hue bin0 [%] Unit 8",
+              "hue bin0 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Hue Bin0",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "hue bin1 [%] Unit 1",
+              "hue bin1 [%] Unit 2",
+              "hue bin1 [%] Unit 3",
+              "hue bin1 [%] Unit 4",
+              "hue bin1 [%] Unit 5",
+              "hue bin1 [%] Unit 6",
+              "hue bin1 [%] Unit 7",
+              "hue bin1 [%] Unit 8",
+              "hue bin1 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Hue Bin1",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "hue bin2 [%] Unit 1",
+              "hue bin2 [%] Unit 2",
+              "hue bin2 [%] Unit 3",
+              "hue bin2 [%] Unit 4",
+              "hue bin2 [%] Unit 5",
+              "hue bin2 [%] Unit 6",
+              "hue bin2 [%] Unit 7",
+              "hue bin2 [%] Unit 8",
+              "hue bin2 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Hue Bin2",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "hue bin3 [%] Unit 1",
+              "hue bin3 [%] Unit 2",
+              "hue bin3 [%] Unit 3",
+              "hue bin3 [%] Unit 4",
+              "hue bin3 [%] Unit 5",
+              "hue bin3 [%] Unit 6",
+              "hue bin3 [%] Unit 7",
+              "hue bin3 [%] Unit 8",
+              "hue bin3 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Hue Bin3",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "hue bin4 [%] Unit 1",
+              "hue bin4 [%] Unit 2",
+              "hue bin4 [%] Unit 3",
+              "hue bin4 [%] Unit 4",
+              "hue bin4 [%] Unit 5",
+              "hue bin4 [%] Unit 6",
+              "hue bin4 [%] Unit 7",
+              "hue bin4 [%] Unit 8",
+              "hue bin4 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Hue Bin4",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "Leaf angle [°] Unit 1",
+              "Leaf angle [°] Unit 2",
+              "Leaf angle [°] Unit 3",
+              "Leaf angle [°] Unit 4",
+              "Leaf angle [°] Unit 5",
+              "Leaf angle [°] Unit 6",
+              "Leaf angle [°] Unit 7",
+              "Leaf angle [°] Unit 8",
+              "Leaf angle [°] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Leaf Angle",
+          "unit": "°"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "Leaf area [mm²] Unit 1",
+              "Leaf area [mm²] Unit 2",
+              "Leaf area [mm²] Unit 3",
+              "Leaf area [mm²] Unit 4",
+              "Leaf area [mm²] Unit 5",
+              "Leaf area [mm²] Unit 6",
+              "Leaf area [mm²] Unit 7",
+              "Leaf area [mm²] Unit 8",
+              "Leaf area [mm²] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Leaf Area",
+          "unit": "mm²"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "Leaf area index [mm²/mm²] Unit 1",
+              "Leaf area index [mm²/mm²] Unit 2",
+              "Leaf area index [mm²/mm²] Unit 3",
+              "Leaf area index [mm²/mm²] Unit 4",
+              "Leaf area index [mm²/mm²] Unit 5",
+              "Leaf area index [mm²/mm²] Unit 6",
+              "Leaf area index [mm²/mm²] Unit 7",
+              "Leaf area index [mm²/mm²] Unit 8",
+              "Leaf area index [mm²/mm²] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Leaf Area Index",
+          "unit": "mm²"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "Leaf area (projected) [mm²] Unit 1",
+              "Leaf area (projected) [mm²] Unit 2",
+              "Leaf area (projected) [mm²] Unit 3",
+              "Leaf area (projected) [mm²] Unit 4",
+              "Leaf area (projected) [mm²] Unit 5",
+              "Leaf area (projected) [mm²] Unit 6",
+              "Leaf area (projected) [mm²] Unit 7",
+              "Leaf area (projected) [mm²] Unit 8",
+              "Leaf area (projected) [mm²] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Leaf Area (Projected)",
+          "unit": "mm²"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "Leaf inclination [mm²/mm²] Unit 1",
+              "Leaf inclination [mm²/mm²] Unit 2",
+              "Leaf inclination [mm²/mm²] Unit 3",
+              "Leaf inclination [mm²/mm²] Unit 4",
+              "Leaf inclination [mm²/mm²] Unit 5",
+              "Leaf inclination [mm²/mm²] Unit 6",
+              "Leaf inclination [mm²/mm²] Unit 7",
+              "Leaf inclination [mm²/mm²] Unit 8",
+              "Leaf inclination [mm²/mm²] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Leaf Inclination",
+          "unit": "mm²"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "Light penetration depth [mm] Unit 1",
+              "Light penetration depth [mm] Unit 2",
+              "Light penetration depth [mm] Unit 3",
+              "Light penetration depth [mm] Unit 4",
+              "Light penetration depth [mm] Unit 5",
+              "Light penetration depth [mm] Unit 6",
+              "Light penetration depth [mm] Unit 7",
+              "Light penetration depth [mm] Unit 8",
+              "Light penetration depth [mm] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "Leaf Penetration Depth",
+          "unit": "mm²"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "NDVI average [] Unit 1",
+              "NDVI average [] Unit 2",
+              "NDVI average [] Unit 3",
+              "NDVI average [] Unit 4",
+              "NDVI average [] Unit 5",
+              "NDVI average [] Unit 6",
+              "NDVI average [] Unit 7",
+              "NDVI average [] Unit 8",
+              "NDVI average [] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "NDVI Average",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "NDVI bin0 [%] Unit 1",
+              "NDVI bin0 [%] Unit 2",
+              "NDVI bin0 [%] Unit 3",
+              "NDVI bin0 [%] Unit 4",
+              "NDVI bin0 [%] Unit 5",
+              "NDVI bin0 [%] Unit 6",
+              "NDVI bin0 [%] Unit 7",
+              "NDVI bin0 [%] Unit 8",
+              "NDVI bin0 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "NDVI Bin0",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "NDVI bin1 [%] Unit 1",
+              "NDVI bin1 [%] Unit 2",
+              "NDVI bin1 [%] Unit 3",
+              "NDVI bin1 [%] Unit 4",
+              "NDVI bin1 [%] Unit 5",
+              "NDVI bin1 [%] Unit 6",
+              "NDVI bin1 [%] Unit 7",
+              "NDVI bin1 [%] Unit 8",
+              "NDVI bin1 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "NDVI Bin1",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "NDVI bin2 [%] Unit 1",
+              "NDVI bin2 [%] Unit 2",
+              "NDVI bin2 [%] Unit 3",
+              "NDVI bin2 [%] Unit 4",
+              "NDVI bin2 [%] Unit 5",
+              "NDVI bin2 [%] Unit 6",
+              "NDVI bin2 [%] Unit 7",
+              "NDVI bin2 [%] Unit 8",
+              "NDVI bin2 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "NDVI Bin2",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "NDVI bin3 [%] Unit 1",
+              "NDVI bin3 [%] Unit 2",
+              "NDVI bin3 [%] Unit 3",
+              "NDVI bin3 [%] Unit 4",
+              "NDVI bin3 [%] Unit 5",
+              "NDVI bin3 [%] Unit 6",
+              "NDVI bin3 [%] Unit 7",
+              "NDVI bin3 [%] Unit 8",
+              "NDVI bin3 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "NDVI Bin3",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "NDVI bin4 [%] Unit 1",
+              "NDVI bin4 [%] Unit 2",
+              "NDVI bin4 [%] Unit 3",
+              "NDVI bin4 [%] Unit 4",
+              "NDVI bin4 [%] Unit 5",
+              "NDVI bin4 [%] Unit 6",
+              "NDVI bin4 [%] Unit 7",
+              "NDVI bin4 [%] Unit 8",
+              "NDVI bin4 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "NDVI Bin4",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "NPCI average [] Unit 1",
+              "NPCI average [] Unit 2",
+              "NPCI average [] Unit 3",
+              "NPCI average [] Unit 4",
+              "NPCI average [] Unit 5",
+              "NPCI average [] Unit 6",
+              "NPCI average [] Unit 7",
+              "NPCI average [] Unit 8",
+              "NPCI average [] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "NPCI Average",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "NPCI bin0 [%] Unit 1",
+              "NPCI bin0 [%] Unit 2",
+              "NPCI bin0 [%] Unit 3",
+              "NPCI bin0 [%] Unit 4",
+              "NPCI bin0 [%] Unit 5",
+              "NPCI bin0 [%] Unit 6",
+              "NPCI bin0 [%] Unit 7",
+              "NPCI bin0 [%] Unit 8",
+              "NPCI bin0 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "NPCI Bin0",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "NPCI bin1 [%] Unit 1",
+              "NPCI bin1 [%] Unit 2",
+              "NPCI bin1 [%] Unit 3",
+              "NPCI bin1 [%] Unit 4",
+              "NPCI bin1 [%] Unit 5",
+              "NPCI bin1 [%] Unit 6",
+              "NPCI bin1 [%] Unit 7",
+              "NPCI bin1 [%] Unit 8",
+              "NPCI bin1 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "NPCI Bin1",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "NPCI bin2 [%] Unit 1",
+              "NPCI bin2 [%] Unit 2",
+              "NPCI bin2 [%] Unit 3",
+              "NPCI bin2 [%] Unit 4",
+              "NPCI bin2 [%] Unit 5",
+              "NPCI bin2 [%] Unit 6",
+              "NPCI bin2 [%] Unit 7",
+              "NPCI bin2 [%] Unit 8",
+              "NPCI bin2 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "NPCI Bin2",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "NPCI bin3 [%] Unit 1",
+              "NPCI bin3 [%] Unit 2",
+              "NPCI bin3 [%] Unit 3",
+              "NPCI bin3 [%] Unit 4",
+              "NPCI bin3 [%] Unit 5",
+              "NPCI bin3 [%] Unit 6",
+              "NPCI bin3 [%] Unit 7",
+              "NPCI bin3 [%] Unit 8",
+              "NPCI bin3 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "NPCI Bin3",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "NPCI bin4 [%] Unit 1",
+              "NPCI bin4 [%] Unit 2",
+              "NPCI bin4 [%] Unit 3",
+              "NPCI bin4 [%] Unit 4",
+              "NPCI bin4 [%] Unit 5",
+              "NPCI bin4 [%] Unit 6",
+              "NPCI bin4 [%] Unit 7",
+              "NPCI bin4 [%] Unit 8",
+              "NPCI bin4 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "NPCI Bin4",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "PSRI average [] Unit 1",
+              "PSRI average [] Unit 2",
+              "PSRI average [] Unit 3",
+              "PSRI average [] Unit 4",
+              "PSRI average [] Unit 5",
+              "PSRI average [] Unit 6",
+              "PSRI average [] Unit 7",
+              "PSRI average [] Unit 8",
+              "PSRI average [] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "PSRI Average",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "PSRI bin0 [%] Unit 1",
+              "PSRI bin0 [%] Unit 2",
+              "PSRI bin0 [%] Unit 3",
+              "PSRI bin0 [%] Unit 4",
+              "PSRI bin0 [%] Unit 5",
+              "PSRI bin0 [%] Unit 6",
+              "PSRI bin0 [%] Unit 7",
+              "PSRI bin0 [%] Unit 8",
+              "PSRI bin0 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "PSRI Bin0",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "PSRI bin1 [%] Unit 1",
+              "PSRI bin1 [%] Unit 2",
+              "PSRI bin1 [%] Unit 3",
+              "PSRI bin1 [%] Unit 4",
+              "PSRI bin1 [%] Unit 5",
+              "PSRI bin1 [%] Unit 6",
+              "PSRI bin1 [%] Unit 7",
+              "PSRI bin1 [%] Unit 8",
+              "PSRI bin1 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "PSRI Bin1",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "PSRI bin2 [%] Unit 1",
+              "PSRI bin2 [%] Unit 2",
+              "PSRI bin2 [%] Unit 3",
+              "PSRI bin2 [%] Unit 4",
+              "PSRI bin2 [%] Unit 5",
+              "PSRI bin2 [%] Unit 6",
+              "PSRI bin2 [%] Unit 7",
+              "PSRI bin2 [%] Unit 8",
+              "PSRI bin2 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "PSRI Bin2",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "PSRI bin3 [%] Unit 1",
+              "PSRI bin3 [%] Unit 2",
+              "PSRI bin3 [%] Unit 3",
+              "PSRI bin3 [%] Unit 4",
+              "PSRI bin3 [%] Unit 5",
+              "PSRI bin3 [%] Unit 6",
+              "PSRI bin3 [%] Unit 7",
+              "PSRI bin3 [%] Unit 8",
+              "PSRI bin3 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "PSRI Bin3",
+          "unit": "%"
+        },
+        {
+          "columns": {
+            "x": "timestamp",
+            "y": [
+              "PSRI bin4 [%] Unit 1",
+              "PSRI bin4 [%] Unit 2",
+              "PSRI bin4 [%] Unit 3",
+              "PSRI bin4 [%] Unit 4",
+              "PSRI bin4 [%] Unit 5",
+              "PSRI bin4 [%] Unit 6",
+              "PSRI bin4 [%] Unit 7",
+              "PSRI bin4 [%] Unit 8",
+              "PSRI bin4 [%] Unit 9"
+            ]
+          },
+          "type": "scatter",
+          "traceNames": [
+            "Plant 1",
+            "Plant 2",
+            "Plant 3",
+            "Plant 4",
+            "Plant 5",
+            "Plant 6",
+            "Plant 7",
+            "Plant 8",
+            "Plant 9"
+          ],
+          "title": "PSRI Bin4",
+          "unit": "%"
+        }
+      ],
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210407_Batch03_20210421_planteye_basil+only_mod.csv",
+      "startDateTime": "2021-04-07T01:38:49.000Z",
+      "endDateTime": "2021-04-21T01:36:02.000Z"
     }
   ],
   "categories": [
     {
-      "id": 1,
-      "name": "WheatHub"
-    },
-    {
-      "id": 2,
-      "name": "USLN"
-    },
-    {
-      "id": 3,
-      "name": "Cyverse"
-    },
-    {
       "id": 4,
       "name": "AMRF"
+    },
+    {
+      "id": 9,
+      "name": "APPF"
     },
     {
       "id": 7,
       "name": "ARA"
     },
     {
+      "id": 3,
+      "name": "Cyverse"
+    },   
+    {
       "id": 8,
       "name": "DDP"
+    },
+    {
+      "id": 2,
+      "name": "USLN"
+    },
+    {
+      "id": 1,
+      "name": "WheatHub"
     },
     {
       "id": 5,
