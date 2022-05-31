@@ -81,7 +81,7 @@ Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(
 
 setViewer(
   new Cesium.Viewer("cesiumContainer", {
-    // imageryProvider: new Cesium.IonImageryProvider({ assetId: 3954 }),//sentinel-2
+    imageryProvider: new Cesium.IonImageryProvider({ assetId: 3954 }),//sentinel-2
     terrainProvider: Cesium.createWorldTerrain({ requestWaterMask: true }),
     vrButton: true,
     fullscreenElement: "cesiumContainer"
@@ -658,7 +658,9 @@ viewer.clock.onTick.addEventListener((clock) => {
         loadInfluxGraphs(data);
       }
       if (data.type==="CSV"){
-        loadCSVGraphs(data);
+        if (!data.graphs.every(g=>g.range)){
+          loadCSVGraphs(data);
+        }
       }
     });
   }

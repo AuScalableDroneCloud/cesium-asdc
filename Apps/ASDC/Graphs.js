@@ -336,15 +336,18 @@ export const loadCSVGraphs = (data)=> {
   data.graphs.map((graph,graphIndex)=>{
     var graphDivID = `graph_${data.id}_${graphIndex}`;
     var graphDiv = document.getElementById(graphDivID);
+    if(graphDiv && graph.range){
+      return
+    }
     if(!graphDiv){
       var newGraphDiv = document.createElement("div");
       newGraphDiv.className = "graph";
       newGraphDiv.id = `graph_${data.id}_${graphIndex}`;
       container.appendChild(newGraphDiv);
-    }
 
-    if (graphIndex==0 && !graphDiv){
-      newGraphDiv.scrollIntoView({behavior: "smooth"});
+      if (graphIndex==0){
+        newGraphDiv.scrollIntoView({behavior: "smooth"});
+      }
     }
   })
   
