@@ -79,6 +79,27 @@ Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(
   -10.6681857235
 );
 
+if (window.self !== window.top){
+  document.getElementById("nav-header").remove()
+  document.getElementById("cesiumContainer").style.height='100%';
+  document.getElementById("sidebar-wrapper").style.height='100%';
+  document.getElementById("sidebar").style.height='100%';
+  document.getElementById("sidebar-close-button").style.top='20px';
+  var shareButtonCesiumToolbar = document.createElement('button');
+  shareButtonCesiumToolbar.id = "share-button";
+  shareButtonCesiumToolbar.className="cesium-button cesium-toolbar-button cesium-home-button";
+  shareButtonCesiumToolbar.innerHTML=`
+  <svg viewBox="0 0 16 16" style="padding: 2px;">
+    <g id="share_Page-1" stroke="none" stroke-width="1" fill-rule="evenodd">
+      <g fill-rule="nonzero">
+          <g>
+              <path d="M5.97733131,7.62936833 C5.99229467,7.75081434 6,7.87450733 6,8 C6,8.1254927 5.99229467,8.2491857 5.97733131,8.3706317 L10.9173886,10.8406603 C11.456951,10.3201529 12.1910876,10 13,10 C14.6568542,10 16,11.3431458 16,13 C16,14.6568542 14.6568542,16 13,16 C11.3431458,16 10,14.6568542 10,13 C10,12.8745073 10.0077053,12.7508143 10.0226687,12.6293683 L5.08261143,10.1593397 C4.54304902,10.6798471 3.80891237,11 3,11 C1.34314575,11 0,9.6568542 0,8 C0,6.34314575 1.34314575,5 3,5 C3.80891237,5 4.54304902,5.32015293 5.08261143,5.84066029 L10.0226687,3.37063167 C10.0077053,3.24918566 10,3.12549267 10,3 C10,1.34314575 11.3431458,0 13,0 C14.6568542,0 16,1.34314575 16,3 C16,4.65685425 14.6568542,6 13,6 C12.1910876,6 11.456951,5.67984707 10.9173886,5.15933971 L5.97733131,7.62936833 Z M13,14 C13.5522847,14 14,13.5522847 14,13 C14,12.4477153 13.5522847,12 13,12 C12.4477153,12 12,12.4477153 12,13 C12,13.5522847 12.4477153,14 13,14 Z M13,4 C13.5522847,4 14,3.55228475 14,3 C14,2.44771525 13.5522847,2 13,2 C12.4477153,2 12,2.44771525 12,3 C12,3.55228475 12.4477153,4 13,4 Z M3,9 C3.55228475,9 4,8.5522847 4,8 C4,7.44771525 3.55228475,7 3,7 C2.44771525,7 2,7.44771525 2,8 C2,8.5522847 2.44771525,9 3,9 Z" id="share_path-1"></path>
+          </g>
+      </g>
+    </g>
+  </svg>`;
+}
+
 setViewer(
   new Cesium.Viewer("cesiumContainer", {
     // imageryProvider: new Cesium.IonImageryProvider({ assetId: 3954 }),//sentinel-2
@@ -87,6 +108,10 @@ setViewer(
     fullscreenElement: "cesiumContainer"
   })
 );
+
+if(window.self !== window.top){
+  document.getElementsByClassName("cesium-viewer-toolbar")[0].prepend(shareButtonCesiumToolbar);
+}
 
 viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
 viewer.scene.globe.depthTestAgainstTerrain = false;
@@ -794,81 +819,85 @@ document.getElementById("sidebar-close-button").onclick = ()=>{
   sidebarOpen=!sidebarOpen;
 }
 
-document.getElementById("user-dropdown-button").onclick = ()=>{
-  var userDropDown = document.getElementById("user-dropdown-list");
-  if (userDropDown.style.display=="block"){
-    userDropDown.style.display="none";
-    document.getElementById("user-dropdown-button").style.background = null;
-  } else {
-    userDropDown.style.display="block";
-    document.getElementById("user-dropdown-button").style.background = "#5b8b51";
+if (document.getElementById("user-dropdown-button")){
+  document.getElementById("user-dropdown-button").onclick = ()=>{
+    var userDropDown = document.getElementById("user-dropdown-list");
+    if (userDropDown.style.display=="block"){
+      userDropDown.style.display="none";
+      document.getElementById("user-dropdown-button").style.background = null;
+    } else {
+      userDropDown.style.display="block";
+      document.getElementById("user-dropdown-button").style.background = "#5b8b51";
+    }
   }
 }
 
-document.getElementById("login-logout-button").onclick = ()=>{
-  odmToken.cancel();
+if (document.getElementById("login-logout-button")){
+  document.getElementById("login-logout-button").onclick = ()=>{
+    odmToken.cancel();
 
-  fetch("https://asdc.cloud.edu.au/logout/", {
-    cache: "no-store",
-    credentials: 'include',
-    mode: 'no-cors'
-  }).then(()=>{
-    document.getElementById("login-logout-button-text").innerHTML = "Login";
+    fetch("https://asdc.cloud.edu.au/logout/", {
+      cache: "no-store",
+      credentials: 'include',
+      mode: 'no-cors'
+    }).then(()=>{
+      document.getElementById("login-logout-button-text").innerHTML = "Login";
 
-    var signInButton = document.createElement("div");
-    signInButton.className = "sidebar-item";
-    signInButton.style["text-align"] = "center";
-    signInButton.innerHTML = "Login here to view your ASDC data";
-    signInButton.onclick=()=>{
-      window.location.href = `https://asdc.cloud.edu.au/login/auth0?next=${window.location.href}`; 
-    }
+      var signInButton = document.createElement("div");
+      signInButton.className = "sidebar-item";
+      signInButton.style["text-align"] = "center";
+      signInButton.innerHTML = "Login here to view your ASDC data";
+      signInButton.onclick=()=>{
+        window.location.href = `https://asdc.cloud.edu.au/login/auth0?next=${window.location.href}`; 
+      }
 
-    const children = [...sourceDivs["WebODM Projects"].nextElementSibling.children];
-    for (var i=0;i<children.length;i++){
-        sourceDivs["WebODM Projects"].nextElementSibling.removeChild(children[i]);
-    }
+      const children = [...sourceDivs["WebODM Projects"].nextElementSibling.children];
+      for (var i=0;i<children.length;i++){
+          sourceDivs["WebODM Projects"].nextElementSibling.removeChild(children[i]);
+      }
 
-    sourceDivs["WebODM Projects"].nextElementSibling.appendChild(signInButton);
+      sourceDivs["WebODM Projects"].nextElementSibling.appendChild(signInButton);
 
-    if (sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight){
-      sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight = signInButton.scrollHeight + "px";
-    }
+      if (sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight){
+        sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight = signInButton.scrollHeight + "px";
+      }
 
-    document.getElementById("login-logout-button").onclick = signInButton.onclick;
+      document.getElementById("login-logout-button").onclick = signInButton.onclick;
 
-    selectedDatasets.filter(d=>d.asset.project).map(d=>{
-      if(d.type=="Imagery"){
-        viewer.imageryLayers.remove(imageryLayers[d.asset.id][d.id], true);
-        imageryLayers[d.asset.id][d.id] = imageryLayers[d.asset.id][d.id] && imageryLayers[d.asset.id][d.id].destroy();                  
-      } else if (d.type==="EPTPointCloud") {
-        viewer.scene.primitives.remove(tilesets[d.asset.id][d.id])
-        tilesets[d.asset.id][d.id] = tilesets[d.asset.id][d.id] && tilesets[d.asset.id][d.id].destroy();
+      selectedDatasets.filter(d=>d.asset.project).map(d=>{
+        if(d.type=="Imagery"){
+          viewer.imageryLayers.remove(imageryLayers[d.asset.id][d.id], true);
+          imageryLayers[d.asset.id][d.id] = imageryLayers[d.asset.id][d.id] && imageryLayers[d.asset.id][d.id].destroy();                  
+        } else if (d.type==="EPTPointCloud") {
+          viewer.scene.primitives.remove(tilesets[d.asset.id][d.id])
+          tilesets[d.asset.id][d.id] = tilesets[d.asset.id][d.id] && tilesets[d.asset.id][d.id].destroy();
+        }
+      })
+      setSelectedDatasets(selectedDatasets.filter(d=>!d.asset.project));
+      setDatasets(datasets.filter(d=>d.asset && !d.asset.project));
+
+      assets.filter(a=>a.project).map(a=>{
+        markersDataSource.entities.removeById("marker_" + a.id);
+      })
+
+      setAssets(assets.filter(a=>!a.project));
+      setODMProjects();
+
+      viewer.camera.moveEnd.raiseEvent();
+      if (
+        !selectedDatasets.find(
+          (d) =>
+            d.type == "PointCloud" ||
+            d.type == "EPTPointCloud" ||
+            d.type == "ModelTileset"
+        )
+      ) 
+      {
+        document.getElementById("msse-slider-row").style.display = "none";
+        document.getElementById("dims-toolbar-row").style.display = "none";
       }
     })
-    setSelectedDatasets(selectedDatasets.filter(d=>!d.asset.project));
-    setDatasets(datasets.filter(d=>d.asset && !d.asset.project));
-
-    assets.filter(a=>a.project).map(a=>{
-      markersDataSource.entities.removeById("marker_" + a.id);
-    })
-
-    setAssets(assets.filter(a=>!a.project));
-    setODMProjects();
-
-    viewer.camera.moveEnd.raiseEvent();
-    if (
-      !selectedDatasets.find(
-        (d) =>
-          d.type == "PointCloud" ||
-          d.type == "EPTPointCloud" ||
-          d.type == "ModelTileset"
-      )
-    ) 
-    {
-      document.getElementById("msse-slider-row").style.display = "none";
-      document.getElementById("dims-toolbar-row").style.display = "none";
-    }
-  })
+  }
 }
 
 document.getElementById("zoom-checkbox").onchange = (e)=>{
@@ -1014,7 +1043,9 @@ document.getElementById("share-button").onclick = ()=>{
   var shareDropDown = document.getElementById("share-dropdown-list");
   if (shareDropDown.style.display=="block"){
     shareDropDown.style.display="none";
-    document.getElementById("share-button").style.background = null;
+    if (window.self === window.top){
+      document.getElementById("share-button").style.background = null;
+    }
   } else {
     if (uploadPage || urlParams.get('task') || urlParams.get('index')){
       shareDropDown.style.right="15px";
@@ -1022,24 +1053,29 @@ document.getElementById("share-button").onclick = ()=>{
       shareDropDown.style.right="60px";
     }
     shareDropDown.style.display="block";
-    document.getElementById("share-button").style.background = "#5b8b51";
+    if (window.self === window.top){
+      document.getElementById("share-button").style.background = "#5b8b51";
+    }
   }
 }
 
-document.onclick=(e)=>{
-  if(
-    e.target!=document.getElementById("share-button") &&
-    e.target!=document.getElementById("share-dropdown-list") &&
-    e.target!=document.getElementById("share-input") &&
-    e.target!=document.getElementById("copy-share-link-button")
-  ){
-    document.getElementById("share-dropdown-list").style.display="none";
-    document.getElementById("share-button").style.background = null;
-  }
-  
-  var userDropdownChildren = [...document.getElementById("user-dropdown-button").children];
-  if (!userDropdownChildren.find(c=>c==e.target) && e.target!=document.getElementById("user-dropdown-button")){
-    document.getElementById("user-dropdown-list").style.display="none";
-    document.getElementById("user-dropdown-button").style.background = null;
+if(document.getElementById("user-dropdown-button")){
+  document.onclick=(e)=>{
+    if(
+      e.target!=document.getElementById("share-button") &&
+      e.target!=document.getElementById("share-dropdown-list") &&
+      e.target!=document.getElementById("share-input") &&
+      e.target!=document.getElementById("copy-share-link-button")
+    ){
+      document.getElementById("share-dropdown-list").style.display="none";
+      document.getElementById("share-button").style.background = null;
+    }
+    
+    
+    var userDropdownChildren = [...document.getElementById("user-dropdown-button").children];
+    if (!userDropdownChildren.find(c=>c==e.target) && e.target!=document.getElementById("user-dropdown-button")){
+      document.getElementById("user-dropdown-list").style.display="none";
+      document.getElementById("user-dropdown-button").style.background = null;
+    }
   }
 }

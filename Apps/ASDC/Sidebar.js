@@ -1448,7 +1448,7 @@ const createDownloadBtn = (asset, data, dateDiv, index) => {
       document.getElementById("sidebar-data-buttons").scrollLeft +
       "px";
     dlDropdown.style.top =
-      document.getElementById("nav-header").offsetHeight +
+    (document.getElementById("nav-header") ? document.getElementById("nav-header").offsetHeight:0) +
       evt.target.offsetTop +
       evt.target.offsetHeight / 2 -
       document.getElementById("sidebar-data-buttons").scrollTop +

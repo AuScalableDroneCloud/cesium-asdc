@@ -71,7 +71,7 @@
   align-items: center;
 }
 
-#share-button{
+.share-button{
   padding: 0px 5px;
   font-size: 18px;
   height: 100%;
@@ -101,7 +101,7 @@
   padding:5px;
 }
 
-#share-button:hover,
+.share-button:hover,
 #login-logout-button:hover,
 #user-dropdown-button:hover{
   background-color: #5b8b51;
