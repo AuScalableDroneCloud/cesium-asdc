@@ -781,6 +781,140 @@
     }
   })
 
+  app.get("/cesium/publicCatalogs.json", (req, res) => {
+    var urls = [
+      "https://terria-catalogs-public.storage.googleapis.com/nationalmap/prod.json",
+      "https://raw.githubusercontent.com/GeoscienceAustralia/dea-config/master/dev/terria/dea-maps-v8.json",
+      "https://terria-catalogs-public.storage.googleapis.com/de-australia/water-regulations-data/prod.json",
+      "https://nsw.digitaltwin.terria.io/api/v0/registry/records/map-config?aspect=terria-config&aspect=terria-init&aspect=group&optionalAspect=terria&dereference=true"
+    ];
+    var promises = [];
+
+    urls.map(url=>{
+      promises.push(
+        fetch(url)
+        .then(response => response.json())
+        )
+    })
+
+    var catalogJson = {
+      "catalog": []
+    }
+    
+    Promise.all(promises)
+    .then((responses)=>{
+      catalogJson.catalog.push({
+        type:"group",
+        name: "NationalMap Catalog",
+        members:responses[0].catalog,
+      })
+
+      catalogJson.catalog.push({
+        type:"group",
+        name: "Digital Earth Catalog",
+        members:responses[1].catalog,
+      })
+      catalogJson.catalog.push({
+        type:"group",
+        name: "Digital Earth Catalog",
+        members:responses[2].catalog,
+      })
+
+      var nswMembers = responses[3].aspects.group.members;
+      var nswPromises = [];
+
+      const checkProxyUrlAndType = (json)=>{
+        return new Promise((resolve, reject) => {
+          if(json.aspects && json.aspects.terria){
+            if (json.aspects.terria.definition) {
+              if (json.aspects.terria.definition.url){
+                if (json.aspects.terria.definition.url.startsWith("https://api.transport.nsw.gov.au")){
+                  json.aspects.terria.definition.url = json.aspects.terria.definition.url.replace("https://api.transport.nsw.gov.au","https://nsw.digitaltwin.terria.io/proxy/https://api.transport.nsw.gov.au")
+                }
+
+                if (json.aspects.terria.definition.url.startsWith("https://nsw-digital-twin-data.terria.io/geoserver/ows")){
+                  json.aspects.terria.definition.url = json.aspects.terria.definition.url.replace("https://nsw-digital-twin-data.terria.io/geoserver/ows","https://nsw.digitaltwin.terria.io/proxy/https://nsw-digital-twin-data.terria.io/geoserver/ows");
+                }
+              }
+            }
+            if (json.aspects.terria.type){
+              var filterTypes = ['nsw-fuel-price','air-quality-json','nsw-rfs','nsw-traffic'];
+              if (filterTypes.includes(json.aspects.terria.type)){
+                Object.keys(json).map(k=>delete(json[k]))
+                resolve();
+              }
+            }
+          }
+          if (json.aspects && json.aspects.group && json.aspects.group.members && json.aspects.group.members.length>0) {
+            if (json.aspects.group.members.every(jm=>typeof jm=="string")){
+              fetch(`https://nsw.digitaltwin.terria.io/api/v0/registry/records/${json.id}?optionalAspect=terria&optionalAspect=group&optionalAspect=dcat-dataset-strings&optionalAspect=dcat-distribution-strings&optionalAspect=dataset-distributions&optionalAspect=dataset-format&dereference=true`)
+              .then(response => response.json())
+              .then(expandedJson=>{
+                json.aspects.group.members = expandedJson.aspects.group.members;
+                
+                var promises=[];
+                for(var i=0;i<json.aspects.group.members.length;i++){
+                  promises.push(checkProxyUrlAndType(json.aspects.group.members[i]));
+                }
+                Promise.all(promises)
+                  .then(()=>{
+                    resolve();
+                  })
+              })
+            } else {
+              var promises=[];
+              for(var i=0;i<json.aspects.group.members.length;i++){
+                promises.push(checkProxyUrlAndType(json.aspects.group.members[i]))
+              }
+
+              Promise.all(promises)
+                .then(()=>{
+                  resolve();
+                })
+            }
+          } else {
+            resolve();
+          }
+        })
+      }
+
+      nswMembers.map(m=>{
+        delete(m.aspects);
+        delete(m.authnReadPolicyId);
+        m.url="https://nsw.digitaltwin.terria.io";
+        m.type="magda";
+        m.recordId=m.id;
+        nswPromises.push(
+          new Promise((resolve, reject) => {
+            fetch(`https://nsw.digitaltwin.terria.io/api/v0/registry/records/${m.id}?optionalAspect=terria&optionalAspect=group&optionalAspect=dcat-dataset-strings&optionalAspect=dcat-distribution-strings&optionalAspect=dataset-distributions&optionalAspect=dataset-format&dereference=true`)
+            .then(response => response.json())
+            .then(json=>{
+              checkProxyUrlAndType(json).then(()=>{
+                m.magdaRecord=json;
+                if ((json.aspects && json.aspects.group && json.aspects.group.members && Array.isArray(json.aspects.group.members)) ||
+                  (json.aspects && json.aspects.terria && json.aspects.terria.definition && json.aspects.terria.definition.isGroup)
+                ){
+                  m.isGroup=true;
+                }
+
+                resolve();
+              })
+            })
+          })
+        )
+      })
+
+      Promise.all(nswPromises).then(()=>{
+          catalogJson.catalog.push({
+            type:"group",
+            name: "NSW Spatial Digital Twin Catalog",
+            members:nswMembers
+          })
+          res.status(200).json(catalogJson);
+      })
+    })
+  })
+
 //   const key = fs.readFileSync('./key.pem');
 //   const cert = fs.readFileSync('./certificate.pem');
 //   const server = https.createServer({
