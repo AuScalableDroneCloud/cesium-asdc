@@ -33,7 +33,9 @@ import {
   setSelectedDimension,
   setMSSE,
   init,
-  odmProjects
+  odmProjects,
+  loadingFinished,
+  setLoadingFinshed
 } from "./State.js";
 import { loadAsset, loadData, setScreenSpaceError, fetchIndexAssets,fetchWebODMProjects, fetchPublicTask } from "./Datasets.js";
 import {
@@ -226,6 +228,7 @@ if (publicTask) {
     viewer.camera.up = new Cesium.Cartesian3(init.camera.up.x,init.camera.up.y,init.camera.up.z);
   }
   fetchPublicTask().then(()=>{
+    setLoadingFinshed(true);
     setupSidebar(false);
     loadSelectedDataIDs(!(init && init.camera));
 
@@ -244,6 +247,8 @@ if (publicTask) {
       viewer.camera.up = new Cesium.Cartesian3(init.camera.up.x,init.camera.up.y,init.camera.up.z);
     }
     fetchIndexAssets().then(()=>{
+      setLoadingFinshed(true);
+
       if (!(init && init.camera) && initVars && initVars.camera){
         viewer.camera.position = new Cesium.Cartesian3(initVars.camera.position.x,initVars.camera.position.y,initVars.camera.position.z);
         viewer.camera.direction = new Cesium.Cartesian3(initVars.camera.direction.x,initVars.camera.direction.y,initVars.camera.direction.z);
@@ -288,6 +293,7 @@ if (publicTask) {
       if (!uploadPage){
         fetchWebODMProjects(odmToken)
         .then(()=>{
+          setLoadingFinshed(true);
           setupSidebar(uploadPage);
           loadSelectedDataIDs(!(init && init.camera));
           
@@ -302,6 +308,7 @@ if (publicTask) {
           }
         })
         .catch(()=>{
+          setLoadingFinshed(true);
           if (initVars && initVars.selectedData && selectedDataIDs.length===0){
             setSelectedDataIDs(initVars.selectedData)
             loadSelectedDataIDs(false);
@@ -904,7 +911,10 @@ document.getElementById("zoom-checkbox").onchange = (e)=>{
   setZoomOnDataSelect(e.target.checked);
 }
 
-document.getElementById("share-button").onclick = ()=>{
+const displayShareURL = () => {
+  document.getElementById("share-question").style.display="none";
+  document.getElementById("share-link").style.display="block";
+  
   const urlParams = new URLSearchParams(window.location.search);
 
   var alphas = {};
@@ -976,7 +986,9 @@ document.getElementById("share-button").onclick = ()=>{
     delete(asset.id);
     asset.categoryID=-3;
 
-    asset.data = asset.data.map(ad=>!ad.endsWith('-s') ? ad + '-s' : ad)
+    asset.data = asset.data.map(ad=>!ad.endsWith('-s') ? ad + '-s' : ad);
+    delete(asset.permissions);
+    delete(asset.public);
   })
 
   index?.categories.map(proj=>{
@@ -1039,6 +1051,26 @@ document.getElementById("share-button").onclick = ()=>{
     shareInput.setSelectionRange(0, 99999); //mobile?
     navigator.clipboard.writeText(shareURL);
   }
+}
+
+const showSharePanel = (loadingTimer) => {
+  if (loadingFinished){
+    if (!!selectedDatasets.find(d=>d.asset.project && (Object.keys(d.asset).includes("public") ? !d.asset.public : true) && (d.asset.permissions ? d.asset.permissions.includes("change") : true))){
+      document.getElementById("share-question").style.display="block";
+      document.getElementById("share-link").style.display="none";
+      document.getElementById("share-question-text").style.display="block";
+      document.getElementById("share-question-yes").style.display="block";
+      document.getElementById("share-question-no").style.display="block";
+      document.getElementById("share-question-loader").style.display="none";
+    } else {
+      displayShareURL();
+    }
+    clearInterval( loadingTimer );
+  }
+}
+
+document.getElementById("share-button").onclick=()=>{  
+  const urlParams = new URLSearchParams(window.location.search);
 
   var shareDropDown = document.getElementById("share-dropdown-list");
   if (shareDropDown.style.display=="block"){
@@ -1057,7 +1089,68 @@ document.getElementById("share-button").onclick = ()=>{
       document.getElementById("share-button").style.background = "#5b8b51";
     }
   }
+
+  if (loadingFinished){
+    showSharePanel();
+  } else {
+    var suffixes = ["pc","op","dtm","dsm"];
+    if (selectedDataIDs.length>0 && selectedDataIDs.find(d=>suffixes.includes(d.split("-")[d.split("-").length-1]))){
+      document.getElementById("share-question-text").style.display="none";
+      document.getElementById("share-question-yes").style.display="none";
+      document.getElementById("share-question-no").style.display="none";
+      document.getElementById("share-question-loader").style.display="block";
+      var loadingTimer = setInterval( ()=>showSharePanel(loadingTimer), 500 );
+    } else {
+      displayShareURL();
+    }
+  }
 }
+
+document.getElementById("share-question-no").onclick = ()=>{
+  displayShareURL();
+};
+
+document.getElementById("share-question-yes").onclick = ()=>{
+  document.getElementById("share-question-text").style.display="none";
+  document.getElementById("share-question-yes").style.display="none";
+  document.getElementById("share-question-no").style.display="none";
+  document.getElementById("share-question-loader").style.display="block";
+
+  var odmSelectedTasks = {};
+  selectedDatasets.map(d=>{
+    if (!!d.asset.taskID && !d.asset.public && (d.asset.permissions ? d.asset.permissions.includes("change") : true)){
+      if(!odmSelectedTasks[d.asset.project]){
+        odmSelectedTasks[d.asset.project] = [d.asset.taskID]
+      } else {
+        if (!odmSelectedTasks[d.asset.project].includes(d.asset.taskID)){
+          odmSelectedTasks[d.asset.project].push(d.asset.taskID)
+        }
+      }
+    }
+  })
+
+  var makePublicPromises = [];
+  Object.keys(odmSelectedTasks).map(project=>{
+    odmSelectedTasks[project].map(task=>{
+      makePublicPromises.push(
+        fetch(`/cesium/makeWebODMTaskPublic/${project}/${task}`, {
+          "method": "PATCH",
+          "credentials": "include",
+        }).then((resp)=>{
+          if (resp.status==200){
+            selectedDatasets.filter(d=>!d.asset.public).map(d=>{
+              d.asset.public=true;
+            })
+          }
+        })
+      );
+    })
+  })
+  Promise.all(makePublicPromises)
+  .then((responses)=>{
+    displayShareURL();
+  })
+};
 
 if(document.getElementById("user-dropdown-button")){
   document.onclick=(e)=>{
@@ -1065,7 +1158,13 @@ if(document.getElementById("user-dropdown-button")){
       e.target!=document.getElementById("share-button") &&
       e.target!=document.getElementById("share-dropdown-list") &&
       e.target!=document.getElementById("share-input") &&
-      e.target!=document.getElementById("copy-share-link-button")
+      e.target!=document.getElementById("copy-share-link-button") &&
+      e.target!=document.getElementById("share-question-yes") && 
+      e.target!=document.getElementById("share-question-no") && 
+      e.target!=document.getElementById("share-question") &&
+      e.target!=document.getElementById("share-question-buttons") &&
+      e.target!=document.getElementById("share-question-loader") &&
+      e.target!=document.getElementById("share-question-text")
     ){
       document.getElementById("share-dropdown-list").style.display="none";
       document.getElementById("share-button").style.background = null;

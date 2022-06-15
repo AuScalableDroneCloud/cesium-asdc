@@ -60,8 +60,18 @@
       </div>
     </nav>
     <div id="share-dropdown-list">
-      <input readonly type="text" id="share-input" style="width: 350px;"/>
-      <button id="copy-share-link-button">Copy</button>
+      <div id="share-question">
+        <p id="share-question-text">By sharing this data, do you want to make it accessible and downloadable for anyone with the URL?</p>
+        <div id="share-question-buttons" style="display: flex;justify-content: center;">
+          <button id="share-question-yes" style="margin: 5px;width: 40px;" title="Clicking Yes will make all the selected WebODM tasks public">Yes</button>
+          <button id="share-question-no" style="margin: 5px;width: 40px;" title="Clicking No will require all the selected WebODM tasks to get manually shared with the user receiving the link">No</button>
+          <div id="share-question-loader" class="loader"></div>
+        </div>
+      </div>
+      <div id="share-link">
+        <input readonly type="text" id="share-input" style="width: 350px;"/>
+        <button id="copy-share-link-button">Copy</button>
+      </div>
     </div>
     <div id="cesiumContainer">
       <div

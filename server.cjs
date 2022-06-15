@@ -200,6 +200,7 @@
 
   const dontProxyHeaderRegex =
     /^(?:Host|Proxy-Connection|Connection|Keep-Alive|Transfer-Encoding|TE|Trailer|Proxy-Authorization|Proxy-Authenticate|Upgrade)$/i;
+    // /^(?:Host|Proxy-Connection|Connection|Keep-Alive|Transfer-Encoding|TE|Trailer|Proxy-Authorization|Proxy-Authenticate|Upgrade|Origin|Referer)$/i;
 
   function filterHeaders(req, headers) {
     const result = {};
@@ -740,6 +741,44 @@
         console.error(e);
         res.status(500).json("An error occurred while getting the catalog file");
       })
+  })
+
+  app.patch("/cesium/makeWebODMTaskPublic/:project/:taskID", (req, res) => {
+    var project = req.params.project;
+    var task = req.params.taskID;
+    if (req.headers.cookie) {
+      var cookies = req.headers.cookie.split(';')
+        .map(v => v.split('='))
+        .reduce((acc, v) => {
+          if (v[0] && v[1]) {
+            acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+          }
+          return acc;
+        }, {})
+      fetch(`https://asdc.cloud.edu.au/api/projects/${project}/tasks/${task}/`, {
+        headers: { 
+          "content-type": "application/json",
+          Cookie: req.headers.cookie,
+          "Referer": `https://asdc.cloud.edu.au/`,
+          "x-csrftoken": cookies["csrftoken"],
+        },
+        "body": "{\"public\":true}",
+        "method": "PATCH"
+      })
+      .then(response => {
+        if(response.status===200){
+          return response.json();
+        } else {
+          res.status(response.status).send(response.statusText);
+        }
+      }).then((json)=>{
+        res.status(200).send(json);
+      }).catch((e)=>{
+        res.status(500).send("Error");
+      })
+    } else {
+      res.status(401).send("uUnauthorized");
+    }
   })
 
 //   const key = fs.readFileSync('./key.pem');

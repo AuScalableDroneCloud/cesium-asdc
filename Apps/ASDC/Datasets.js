@@ -1738,7 +1738,9 @@ export const fetchWebODMProjects = (token={}) => {
                         "categoryID": -1,
                         "data": taskData,
                         project: project.id,
-                        taskID: task.id
+                        taskID: task.id,
+                        public:task.public,
+                        permissions:project.permissions
                       })
                     }
                   })

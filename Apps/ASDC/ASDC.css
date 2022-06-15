@@ -148,6 +148,14 @@
   display: none;
 }
 
+#share-question{
+  display: block;
+}
+#share-question-loader,
+#share-link{
+  display: none;
+}
+
 #sidebar-data-buttons {
   height: calc(100% - 34.6px);
   overflow: auto;

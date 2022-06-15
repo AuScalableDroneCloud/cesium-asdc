@@ -46,6 +46,8 @@ export const timelineTracks = {};
 
 export var zoomOnDataSelect = true;
 
+export var loadingFinished = false;
+
 export var indexFile =
   "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/index.json";
   // "/cesium/Apps/ASDC/index.json";
@@ -128,6 +130,10 @@ export function setInitVars(newInitVars){
 
 export function setZoomOnDataSelect(newZoomOnDataSelect) {
   zoomOnDataSelect=newZoomOnDataSelect;
+}
+
+export function setLoadingFinshed(newLoadingFinished) {
+  loadingFinished=newLoadingFinished;
 }
 
 export function setInit(newInit) {

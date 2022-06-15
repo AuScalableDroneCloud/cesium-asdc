@@ -187,6 +187,7 @@ export const setupSidebar = (uploads, indexParam=false) => {
 
           var layerCheckBox = document.createElement("input");
           layerCheckBox.type = "checkbox";
+          layerCheckBox.id = `layerCheckbox-${odmProject.id}-${suffix}`;
           layerCheckBox.style.float = "left";
           layerCheckBox.style.margin = "0 5px 0 0";
           var projectLayerDataIDs = [];
@@ -826,6 +827,20 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
   assetCheckbox.checked = checkboxes.every((cb) => cb.checked);
   assetCheckbox.indeterminate =
     !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
+
+  if(asset.project){
+    var suffix =data.id.split("-")[data.id.split("-").length-1];
+    var layerCheckBox = document.getElementById(`layerCheckbox-${asset.project}-${suffix}`);
+    if (layerCheckBox) {
+      var projectLayerDataIDs = [];
+      asset.data.map(dataID=>{
+        if (dataID.endsWith("-" + suffix)) {
+          projectLayerDataIDs.push(dataID);
+        }
+      })
+    }
+  }
+
   if (checkbox.checked) {
     if (!selectedDatasets.includes(data)) {
       selectedDatasets.push(data);
@@ -999,6 +1014,10 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
     }
   }
   syncTimeline(false);
+  
+  if (layerCheckBox){
+    layerCheckBox.checked = projectLayerDataIDs.every(id=>selectedDatasets.find(d=>d.id==id))
+  }
 }
 
 const handleAssetCheckboxChange = (checkboxes, assetCheckbox, asset, uploads) => {
