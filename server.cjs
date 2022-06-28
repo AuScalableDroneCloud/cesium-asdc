@@ -772,7 +772,17 @@
                   "targetLongitude" :metadata[metadataIndex].center[0],
                   "targetLatitude" :metadata[metadataIndex].center[1],
                 }
-              }
+              },
+              info: [
+                {
+                  name: "webODM Properties",
+                  content:"",
+                  contentAsObject:{
+                    "public": task.public,
+                  },
+                  show:false
+                }
+              ]
             })
           }
           metadataIndex++;
