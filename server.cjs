@@ -365,9 +365,12 @@
     var baseURL;
     if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
       baseURL = req.headers.origin;
+    } else if (req.headers.host && !req.headers.host.startsWith("localhost") && !req.headers.host.startsWith("localhost")) {
+      baseURL = req.headers.host;
     } else {
       baseURL = "https://asdc.cloud.edu.au";
-      //baseURL = "http://localhost:8080";
+      // baseURL = "https://dev.asdc.cloud.edu.au";
+      // baseURL = "http://localhost:8080";
     }
     const eptServer = `${baseURL}/ept`;
     var catalogJson = {
@@ -590,9 +593,12 @@
     var baseURL;
     if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
       baseURL = req.headers.origin;
+    } else if (req.headers.host && !req.headers.host.startsWith("localhost") && !req.headers.host.startsWith("localhost")) {
+      baseURL = req.headers.host;
     } else {
       baseURL = "https://asdc.cloud.edu.au";
-      //baseURL = "http://localhost:8080";
+      // baseURL = "https://dev.asdc.cloud.edu.au";
+      // baseURL = "http://localhost:8080";
     }
     
     var catalog = [];
@@ -635,9 +641,12 @@
     var baseURL;
     if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
       baseURL = req.headers.origin;
+    } else if (req.headers.host && !req.headers.host.startsWith("localhost") && !req.headers.host.startsWith("localhost")) {
+      baseURL = req.headers.host;
     } else {
       baseURL = "https://asdc.cloud.edu.au";
-      //baseURL = "http://localhost:8080";
+      // baseURL = "https://dev.asdc.cloud.edu.au";
+      // baseURL = "http://localhost:8080";
     }
 
     var project = req.params.projectId;
@@ -675,9 +684,12 @@
     var baseURL;
     if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
       baseURL = req.headers.origin;
+    } else if (req.headers.host && !req.headers.host.startsWith("localhost") && !req.headers.host.startsWith("localhost")) {
+      baseURL = req.headers.host;
     } else {
       baseURL = "https://asdc.cloud.edu.au";
-      //baseURL = "http://localhost:8080";
+      // baseURL = "https://dev.asdc.cloud.edu.au";
+      // baseURL = "http://localhost:8080";
     }
     var projectId = req.params.projectId;
     var taskId = req.params.taskId;
@@ -855,9 +867,12 @@
     var baseURL;
     if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
       baseURL = req.headers.origin;
+    } else if (req.headers.host && !req.headers.host.startsWith("localhost") && !req.headers.host.startsWith("localhost")) {
+      baseURL = req.headers.host;
     } else {
       baseURL = "https://asdc.cloud.edu.au";
-      //baseURL = "http://localhost:8080";
+      // baseURL = "https://dev.asdc.cloud.edu.au";
+      // baseURL = "http://localhost:8080";
     }
     const eptServer = `${baseURL}/ept`;
     fetch(`${baseURL}/public/task/${req.params.taskID}/json`)
@@ -1028,9 +1043,12 @@
     var baseURL;
     if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
       baseURL = req.headers.origin;
+    } else if (req.headers.host && !req.headers.host.startsWith("localhost") && !req.headers.host.startsWith("localhost")) {
+      baseURL = req.headers.host;
     } else {
       baseURL = "https://asdc.cloud.edu.au";
-      //baseURL = "http://localhost:8080";
+      // baseURL = "https://dev.asdc.cloud.edu.au";
+      // baseURL = "http://localhost:8080";
     }
     var project = req.params.project;
     var task = req.params.taskID;
