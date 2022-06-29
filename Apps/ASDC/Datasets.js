@@ -31,7 +31,7 @@ import {
 } from "./State.js";
 import { loadInfluxGraphs, loadCSVGraphs,closeGraphModal } from "./Graphs.js";
 import { setupStyleToolbar, applyStyle } from "./Style.js";
-import { highlightHeightPX, highlightColor, eptServer } from "./Constants.js";
+import { highlightHeightPX, highlightColor, eptServer, baseURL } from "./Constants.js";
 import { applyInit } from "./App.js";
 
 export const loadAsset = (asset, timeline, timelineTrack) => {
@@ -514,7 +514,7 @@ export const loadData = (
       } else {
         eptURL = data.url;
       }
-      fetch(eptURL, { cache: "no-store", credentials: eptURL.startsWith("https://asdc.cloud.edu.au/") ? "include" : "omit"})
+      fetch(eptURL, { cache: "no-store", credentials: eptURL.startsWith("https://asdc.cloud.edu.au/") || eptURL.startsWith("https://dev.asdc.cloud.edu.au/") ? "include" : "omit"})
         .then((response) => response.text())
         .then((text) => {
           var ept = JSON.parse(text);
@@ -1451,7 +1451,7 @@ export const fetchWebODMProjects = (token={}) => {
         controller.abort();
       }
 
-      fetch("https://asdc.cloud.edu.au/api/projects/?ordering=-created_at", {
+      fetch(`${baseURL}/api/projects/?ordering=-created_at`, {
         cache: "no-store",
         credentials: 'include',
         signal:controller.signal
@@ -1462,7 +1462,7 @@ export const fetchWebODMProjects = (token={}) => {
           signInButton.style["text-align"] = "center";
           signInButton.innerHTML = "Login here to view your ASDC data";
           signInButton.onclick=()=>{
-            window.location.href = `https://asdc.cloud.edu.au/login/auth0?next=${window.location.href}`; 
+            window.location.href = `${baseURL}/login/auth0?next=${window.location.href}`; 
           }
 
           if (response.status===200){
@@ -1471,7 +1471,7 @@ export const fetchWebODMProjects = (token={}) => {
               document.getElementById("login-logout-button").onclick = ()=>{
                 token.cancel();
 
-                fetch("https://asdc.cloud.edu.au/logout/", {
+                fetch(`${baseURL}/logout/`, {
                   cache: "no-store",
                   credentials: 'include',
                   mode: 'no-cors'
@@ -1549,7 +1549,7 @@ export const fetchWebODMProjects = (token={}) => {
           var metaDataPromises = [];
           if (Array.isArray(odmProjects)) {
             odmProjects.map((project) => {
-              taskInfoPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/?ordering=-created_at`, {
+              taskInfoPromises.push(fetch(`${baseURL}/api/projects/${project.id}/tasks/?ordering=-created_at`, {
                 cache: "no-store",
                 credentials: 'include',
                 signal:controller.signal
@@ -1564,7 +1564,7 @@ export const fetchWebODMProjects = (token={}) => {
                 taskInfos[projectIndex].map(task => {
                   taskDict[task.id] = task;
                   if (task.available_assets.includes("georeferenced_model.laz")) {
-                    metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`, {
+                    metaDataPromises.push(fetch(`${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`, {
                       cache: "no-store",
                       credentials: 'include',
                       signal:controller.signal
@@ -1579,7 +1579,7 @@ export const fetchWebODMProjects = (token={}) => {
                     }))
                   }
                   if (task.available_assets.includes("orthophoto.tif")) {
-                    metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/orthophoto/metadata`, {
+                    metaDataPromises.push(fetch(`${baseURL}/api/projects/${project.id}/tasks/${task.id}/orthophoto/metadata`, {
                       cache: "no-store",
                       credentials: 'include',
                       signal:controller.signal
@@ -1594,7 +1594,7 @@ export const fetchWebODMProjects = (token={}) => {
                     }))
                   }
                   if (task.available_assets.includes("dsm.tif")) {
-                    metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dsm/metadata`, {
+                    metaDataPromises.push(fetch(`${baseURL}/api/projects/${project.id}/tasks/${task.id}/dsm/metadata`, {
                       cache: "no-store",
                       credentials: 'include',
                       signal:controller.signal
@@ -1609,7 +1609,7 @@ export const fetchWebODMProjects = (token={}) => {
                     }))
                   }
                   if (task.available_assets.includes("dtm.tif")) {
-                    metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dtm/metadata`, {
+                    metaDataPromises.push(fetch(`${baseURL}/api/projects/${project.id}/tasks/${task.id}/dtm/metadata`, {
                       cache: "no-store",
                       credentials: 'include',
                       signal:controller.signal
@@ -1671,7 +1671,7 @@ export const fetchWebODMProjects = (token={}) => {
                             id: task.id + "-pc",
                             type: "EPTPointCloud",
                             name: "Point Cloud",
-                            url: `https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`,
+                            url: `${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`,
                             asset: odmAssets[odmAssets.length - 1],
                             "position": {
                               "lng": pos[0],
@@ -1680,7 +1680,7 @@ export const fetchWebODMProjects = (token={}) => {
                             },
                             boundingSphereRadius: boundingSphere.radius,
                             source:{
-                              url:`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/download/georeferenced_model.laz`
+                              url:`${baseURL}/api/projects/${project.id}/tasks/${task.id}/download/georeferenced_model.laz`
                             }
                           })
                           taskData.push(task.id + "-pc");
@@ -1699,11 +1699,11 @@ export const fetchWebODMProjects = (token={}) => {
                         if (metadata[metadataIndex]) {
                           var tilesUrl;
                           if (imageryType==="Orthophoto") {
-                            tilesUrl = `https://asdc.cloud.edu.au${metadata[metadataIndex].tiles[0]}?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
+                            tilesUrl = `${baseURL}${metadata[metadataIndex].tiles[0]}?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
                           } else if (imageryType==="DSM") {
-                            tilesUrl = `https://asdc.cloud.edu.au${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                            tilesUrl = `${baseURL}${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
                           } else if (imageryType==="DTM") {
-                            tilesUrl = `https://asdc.cloud.edu.au${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                            tilesUrl = `${baseURL}${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
                           }
 
                           odmDatasets.push({
@@ -1721,7 +1721,7 @@ export const fetchWebODMProjects = (token={}) => {
                               "height": metadata[metadataIndex].center[2],//zoom level?
                             },
                             source:{
-                              url:`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/download/${imageryType.toLowerCase()}.tif`
+                              url:`${baseURL}/api/projects/${project.id}/tasks/${task.id}/download/${imageryType.toLowerCase()}.tif`
                             }
                           })
                           taskData.push(task.id + (imageryType === "Orthophoto" ? "-op" : "-" + imageryType.toLowerCase()));
@@ -1764,7 +1764,7 @@ export const fetchWebODMProjects = (token={}) => {
 
 export const fetchPublicTask = ()=>{
   return(new Promise(function (resolve,reject){
-  fetch(`https://asdc.cloud.edu.au/public/task/${publicTask}/json`, {
+  fetch(`${baseURL}/public/task/${publicTask}/json`, {
         cache: "no-store",
       })
       .then(response => response.json())
@@ -1777,7 +1777,7 @@ export const fetchPublicTask = ()=>{
         taskDict[publicTask.id] = publicTask;
         setTaskInfos(taskDict);
         if (publicTask.available_assets.includes("georeferenced_model.laz")) {
-          metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`, {
+          metaDataPromises.push(fetch(`${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`, {
             cache: "no-store",
           }).then(response => {
             if(response.status===200){
@@ -1788,7 +1788,7 @@ export const fetchPublicTask = ()=>{
           }))
         }
         if (publicTask.available_assets.includes("orthophoto.tif")) {
-          metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/orthophoto/metadata`, {
+          metaDataPromises.push(fetch(`${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/orthophoto/metadata`, {
             cache: "no-store",
           }).then(response => {
             if(response.status===200){
@@ -1799,7 +1799,7 @@ export const fetchPublicTask = ()=>{
           }))
         }
         if (publicTask.available_assets.includes("dsm.tif")) {
-          metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/dsm/metadata`, {
+          metaDataPromises.push(fetch(`${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/dsm/metadata`, {
             cache: "no-store",
           }).then(response => {
             if(response.status===200){
@@ -1810,7 +1810,7 @@ export const fetchPublicTask = ()=>{
           }))
         }
         if (publicTask.available_assets.includes("dtm.tif")) {
-          metaDataPromises.push(fetch(`https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/dtm/metadata`, {
+          metaDataPromises.push(fetch(`${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/dtm/metadata`, {
             cache: "no-store",
           }).then(response => {
             if(response.status===200){
@@ -1861,7 +1861,7 @@ export const fetchPublicTask = ()=>{
                   id: publicTask.id + "-pc",
                   type: "EPTPointCloud",
                   name: "Point Cloud",
-                  url: `https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`,
+                  url: `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`,
                   asset: odmAssets[odmAssets.length - 1],
                   "position": {
                     "lng": pos[0],
@@ -1882,7 +1882,7 @@ export const fetchPublicTask = ()=>{
                 id: publicTask.id + "-op",
                 type: "Imagery",
                 name: "Orthophoto",
-                url: `https://asdc.cloud.edu.au${metadata[metadataIndex].tiles[0]}?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`,
+                url: `${baseURL}${metadata[metadataIndex].tiles[0]}?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`,
                 asset: odmAssets[odmAssets.length - 1],
                 bounds: metadata[metadataIndex].bounds.value,
                 minzoom: metadata[metadataIndex].minzoom,
@@ -1903,7 +1903,7 @@ export const fetchPublicTask = ()=>{
                 id: publicTask.id + "-dsm",
                 type: "Imagery",
                 name: "DSM",
-                url: `https://asdc.cloud.edu.au/${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`,
+                url: `${baseURL}/${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`,
                 asset: odmAssets[odmAssets.length - 1],
                 bounds: metadata[metadataIndex].bounds.value,
                 minzoom: metadata[metadataIndex].minzoom,
@@ -1924,7 +1924,7 @@ export const fetchPublicTask = ()=>{
                 id: publicTask.id + "-dtm",
                 type: "Imagery",
                 name: "DTM",
-                url: `https://asdc.cloud.edu.au/${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`,
+                url: `${baseURL}/${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`,
                 asset: odmAssets[odmAssets.length - 1],
                 bounds: metadata[metadataIndex].bounds.value,
                 minzoom: metadata[metadataIndex].minzoom,

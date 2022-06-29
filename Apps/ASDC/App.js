@@ -1,4 +1,4 @@
-import { cesiumIonAccessToken, eptServer } from "./Constants.js";
+import { baseURL, cesiumIonAccessToken, eptServer } from "./Constants.js";
 import {
   viewer,
   setViewer,
@@ -53,6 +53,8 @@ import { applyAlpha, getAlpha } from "./Style.js";
 Cesium.Ion.defaultAccessToken = cesiumIonAccessToken;
 
 window.CESIUM_BASE_URL = "/cesium/Build/Cesium";
+
+fetch("http://localhost:8080/cesium/terriaCatalog/projects")
 
 const handleBillboard = (billboard) => {
   setBillboard(billboard);
@@ -141,7 +143,7 @@ if (window.location.href.toLowerCase().includes("cesium/apps/asdc/uploads")) {
   uploadPage = false;
 }
 
-Cesium.TrustedServers.add("asdc.cloud.edu.au",443);
+Cesium.TrustedServers.add(baseURL,443);
 
 if(init){
   if (init.billboard!=undefined){
@@ -843,7 +845,7 @@ if (document.getElementById("login-logout-button")){
   document.getElementById("login-logout-button").onclick = ()=>{
     odmToken.cancel();
 
-    fetch("https://asdc.cloud.edu.au/logout/", {
+    fetch(`${baseURL}/logout/`, {
       cache: "no-store",
       credentials: 'include',
       mode: 'no-cors'
@@ -855,7 +857,7 @@ if (document.getElementById("login-logout-button")){
       signInButton.style["text-align"] = "center";
       signInButton.innerHTML = "Login here to view your ASDC data";
       signInButton.onclick=()=>{
-        window.location.href = `https://asdc.cloud.edu.au/login/auth0?next=${window.location.href}`; 
+        window.location.href = `${baseURL}/login/auth0?next=${window.location.href}`; 
       }
 
       const children = [...sourceDivs["WebODM Projects"].nextElementSibling.children];

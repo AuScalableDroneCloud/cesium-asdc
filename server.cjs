@@ -360,8 +360,16 @@
       });
   });
 
+  //unused
   app.get("/cesium/terriaCatalog.json", (req, res) => {
-    const eptServer = "https://asdc.cloud.edu.au/ept";
+    var baseURL;
+    if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
+      baseURL = req.headers.origin;
+    } else {
+      baseURL = "https://asdc.cloud.edu.au";
+      //baseURL = "http://localhost:8080";
+    }
+    const eptServer = `${baseURL}/ept`;
     var catalogJson = {
       "catalog": []
     }
@@ -370,7 +378,7 @@
       "name": "WebODM Projects",
       "members": []
     };
-    fetch("https://asdc.cloud.edu.au/api/projects/?ordering=-created_at", {
+    fetch(`${baseURL}/api/projects/?ordering=-created_at`, {
       headers: { Cookie: req.headers.cookie }
     })
     .then(response => {
@@ -388,7 +396,7 @@
       if (Array.isArray(odmProjects)) {
         odmProjects.map((project) => {
           taskInfoPromises.push(
-            fetch(`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/?ordering=-created_at`, {
+            fetch(`${baseURL}/api/projects/${project.id}/tasks/?ordering=-created_at`, {
               headers: { Cookie: req.headers.cookie }
             }).then(response => {
               return response.json()
@@ -406,9 +414,9 @@
                   if (task.available_assets.includes(typeFile)) {
                     var fileURL;
                     if (typeFile==="georeferenced_model.laz"){
-                      fileURL = `https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`;
+                      fileURL = `${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`;
                     } else {
-                      fileURL = `https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/${typeFile.slice(0,-4)}/metadata`;
+                      fileURL = `${baseURL}/api/projects/${project.id}/tasks/${task.id}/${typeFile.slice(0,-4)}/metadata`;
                     }
                     metaDataPromises.push(
                       fetch(fileURL, {
@@ -461,7 +469,7 @@
                       taskMember.members.push({
                         "type": "3d-tiles",
                         "name": task.name + " - Point Cloud",
-                        "url":`${eptServer}/tileset.json?ept=${`https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`}&${truncate ? "truncate" : null}`
+                        "url":`${eptServer}/tileset.json?ept=${`${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`}&${truncate ? "truncate" : null}`
                       })
                     }
                     metadataIndex++;
@@ -492,11 +500,11 @@
 
                         var tilesUrl;
                         if (imageryType==="Orthophoto") {
-                          tilesUrl = `https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/orthophoto/tiles?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
+                          tilesUrl = `${baseURL}/api/projects/${project.id}/tasks/${task.id}/orthophoto/tiles?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
                         } else if (imageryType==="DSM") {
-                          tilesUrl = `https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dsm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                          tilesUrl = `${baseURL}/api/projects/${project.id}/tasks/${task.id}/dsm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
                         } else if (imageryType==="DTM") {
-                          tilesUrl = `https://asdc.cloud.edu.au/api/projects/${project.id}/tasks/${task.id}/dtm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                          tilesUrl = `${baseURL}/api/projects/${project.id}/tasks/${task.id}/dtm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
                         }
 
                         taskMember.members.push({
@@ -578,13 +586,17 @@
     })
   })
 
-
-  const baseURL = "https://asdc.cloud.edu.au"
-  // const baseURL = "http://localhost:8080";
-
-  app.get("/cesium/terriaCatalog/projects", (req, res) => {    
+  app.get("/cesium/terriaCatalog/projects", (req, res) => { 
+    var baseURL;
+    if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
+      baseURL = req.headers.origin;
+    } else {
+      baseURL = "https://asdc.cloud.edu.au";
+      //baseURL = "http://localhost:8080";
+    }
+    
     var catalog = [];
-    fetch("https://asdc.cloud.edu.au/api/projects/?ordering=-created_at", {
+    fetch(`${baseURL}/api/projects/?ordering=-created_at`, {
       headers: { Cookie: req.headers.cookie }
     })
     .then(response => {
@@ -620,11 +632,19 @@
   })
 
   app.get("/cesium/terriaCatalog/projects/:projectId", (req, res) => {
+    var baseURL;
+    if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
+      baseURL = req.headers.origin;
+    } else {
+      baseURL = "https://asdc.cloud.edu.au";
+      //baseURL = "http://localhost:8080";
+    }
+
     var project = req.params.projectId;
 
     var catalog=[];
 
-    fetch(`https://asdc.cloud.edu.au/api/projects/${project}/tasks/?ordering=-created_at`, {
+    fetch(`${baseURL}/api/projects/${project}/tasks/?ordering=-created_at`, {
       headers: { Cookie: req.headers.cookie }
     }).then(response => {
       if (response.status === 200) {
@@ -652,14 +672,21 @@
   })
 
   app.get("/cesium/terriaCatalog/projects/:projectId/tasks/:taskId", (req, res) => {
+    var baseURL;
+    if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
+      baseURL = req.headers.origin;
+    } else {
+      baseURL = "https://asdc.cloud.edu.au";
+      //baseURL = "http://localhost:8080";
+    }
     var projectId = req.params.projectId;
     var taskId = req.params.taskId;
 
     var catalog = [];
     var metaDataPromises=[];
-    const eptServer = "https://asdc.cloud.edu.au/ept";
+    const eptServer = `${baseURL}/ept`;
 
-    fetch(`https://asdc.cloud.edu.au/api/projects/${projectId}/tasks/${taskId}`,{
+    fetch(`${baseURL}/api/projects/${projectId}/tasks/${taskId}`,{
       headers: { Cookie: req.headers.cookie }
     })
     .then(response => {
@@ -673,9 +700,9 @@
         if (task.available_assets.includes(typeFile)) {
           var fileURL;
           if (typeFile==="georeferenced_model.laz"){
-            fileURL = `https://asdc.cloud.edu.au/api/projects/${projectId}/tasks/${taskId}/assets/entwine_pointcloud/ept.json`;
+            fileURL = `${baseURL}/api/projects/${projectId}/tasks/${taskId}/assets/entwine_pointcloud/ept.json`;
           } else {
-            fileURL = `https://asdc.cloud.edu.au/api/projects/${projectId}/tasks/${taskId}/${typeFile.slice(0,-4)}/metadata`;
+            fileURL = `${baseURL}/api/projects/${projectId}/tasks/${taskId}/${typeFile.slice(0,-4)}/metadata`;
           }
           metaDataPromises.push(
             fetch(fileURL, {
@@ -710,7 +737,7 @@
           catalog.push({
             "type": "3d-tiles",
             "name": task.name + " - Point Cloud",
-            "url":`${eptServer}/tileset.json?ept=${`https://asdc.cloud.edu.au/api/projects/${projectId}/tasks/${taskId}/assets/entwine_pointcloud/ept.json`}&${truncate ? "truncate" : null}`,
+            "url":`${eptServer}/tileset.json?ept=${`${baseURL}/api/projects/${projectId}/tasks/${taskId}/assets/entwine_pointcloud/ept.json`}&${truncate ? "truncate" : null}`,
             info: [
               {
                 name: "webODM Properties",
@@ -749,11 +776,11 @@
   
             var tilesUrl;
             if (imageryType==="Orthophoto") {
-              tilesUrl = `https://asdc.cloud.edu.au/api/projects/${projectId}/tasks/${taskId}/orthophoto/tiles?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
+              tilesUrl = `${baseURL}/api/projects/${projectId}/tasks/${taskId}/orthophoto/tiles?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
             } else if (imageryType==="DSM") {
-              tilesUrl = `https://asdc.cloud.edu.au/api/projects/${projectId}/tasks/${taskId}/dsm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+              tilesUrl = `${baseURL}/api/projects/${projectId}/tasks/${taskId}/dsm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
             } else if (imageryType==="DTM") {
-              tilesUrl = `https://asdc.cloud.edu.au/api/projects/${projectId}/tasks/${taskId}/dtm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+              tilesUrl = `${baseURL}/api/projects/${projectId}/tasks/${taskId}/dtm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
             }
   
             catalog.push({
@@ -825,8 +852,15 @@
   })
 
   app.get("/cesium/terria/publictask/:taskID.json", (req, res) => {
-    const eptServer = "https://asdc.cloud.edu.au/ept";
-    fetch(`https://asdc.cloud.edu.au/public/task/${req.params.taskID}/json`)
+    var baseURL;
+    if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
+      baseURL = req.headers.origin;
+    } else {
+      baseURL = "https://asdc.cloud.edu.au";
+      //baseURL = "http://localhost:8080";
+    }
+    const eptServer = `${baseURL}/ept`;
+    fetch(`${baseURL}/public/task/${req.params.taskID}/json`)
       .then(response => response.json())
       .then((publicTask) => {
         var initUrlsFile = {
@@ -854,9 +888,9 @@
           if (publicTask.available_assets.includes(typeFile)) {
             var fileURL;
             if (typeFile==="georeferenced_model.laz"){
-              fileURL = `https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`;
+              fileURL = `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`;
             } else {
-              fileURL = `https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/${typeFile.slice(0,-4)}/metadata`;
+              fileURL = `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/${typeFile.slice(0,-4)}/metadata`;
             }
             metaDataPromises.push(
               fetch(fileURL, {
@@ -890,7 +924,7 @@
               initUrlsFile.catalog[0].members.push({
                 "type": "3d-tiles",
                 "name": publicTask.name + " - Point Cloud",
-                "url":`${eptServer}/tileset.json?ept=${`https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`}&${truncate ? "truncate" : null}`
+                "url":`${eptServer}/tileset.json?ept=${`${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`}&${truncate ? "truncate" : null}`
               })
             }
             metadataIndex++;
@@ -921,11 +955,11 @@
 
                 var tilesUrl;
                 if (imageryType==="Orthophoto") {
-                  tilesUrl = `https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/orthophoto/tiles?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
+                  tilesUrl = `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/orthophoto/tiles?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
                 } else if (imageryType==="DSM") {
-                  tilesUrl = `https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/dsm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                  tilesUrl = `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/dsm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
                 } else if (imageryType==="DTM") {
-                  tilesUrl = `https://asdc.cloud.edu.au/api/projects/${projectID}/tasks/${publicTask.id}/dtm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                  tilesUrl = `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/dtm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
                 }
 
                 initUrlsFile.catalog[0].members.push({
@@ -991,6 +1025,13 @@
   })
 
   app.patch("/cesium/makeWebODMTaskPublic/:project/:taskID", (req, res) => {
+    var baseURL;
+    if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
+      baseURL = req.headers.origin;
+    } else {
+      baseURL = "https://asdc.cloud.edu.au";
+      //baseURL = "http://localhost:8080";
+    }
     var project = req.params.project;
     var task = req.params.taskID;
     if (req.headers.cookie) {
@@ -1002,11 +1043,11 @@
           }
           return acc;
         }, {})
-      fetch(`https://asdc.cloud.edu.au/api/projects/${project}/tasks/${task}/`, {
+      fetch(`${baseURL}/api/projects/${project}/tasks/${task}/`, {
         headers: { 
           "content-type": "application/json",
           Cookie: req.headers.cookie,
-          "Referer": `https://asdc.cloud.edu.au/`,
+          "Referer": `${baseURL}/`,
           "x-csrftoken": cookies["csrftoken"],
         },
         "body": "{\"public\":true}",
