@@ -16,6 +16,12 @@
   Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI1NWZkNGFlZS1iNzVhLTRmNTAtOThmYi1kMTI1MjlmOTVlNjciLCJpZCI6NzIyNTQsImlhdCI6MTYzNTkwNDI4OX0.EXVvJZa8yaugMmQNkc9pjWfrjqeOpZ8Jg7_0Hdwnb1A";
   const https = require('https');
 
+  if (!process.env.baseURL){
+    const dotenv = require('dotenv');
+    dotenv.config();
+  }
+  const baseURL = process.env.baseURL ?? "https://asdc.cloud.edu.au";
+
   const influx = new Influx.InfluxDB({
     database: "main",
     host: "influxdb.amrf.org.au",
@@ -362,24 +368,6 @@
 
   //unused
   app.get("/cesium/terriaCatalog.json", (req, res) => {
-    var baseURL;
-    if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
-      baseURL = req.headers.origin;
-    } else if (req.headers.host && !req.headers.host.startsWith("localhost") && !req.headers.host.startsWith("localhost")) {
-      if (req.headers.referer){
-        if (req.headers.referer.startsWith("https")){
-          baseURL = `https://${req.headers.host}`;
-        } else {
-          baseURL = `http://${req.headers.host}`;
-        }
-      } else {
-        baseURL = `https://${req.headers.host}`;
-      }
-    } else {
-      baseURL = "https://asdc.cloud.edu.au";
-      // baseURL = "https://dev.asdc.cloud.edu.au";
-      // baseURL = "http://localhost:8080";
-    }
     const eptServer = `${baseURL}/ept`;
     var catalogJson = {
       "catalog": []
@@ -598,25 +586,6 @@
   })
 
   app.get("/cesium/terriaCatalog/projects", (req, res) => { 
-    var baseURL;
-    if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
-      baseURL = req.headers.origin;
-    } else if (req.headers.host && !req.headers.host.startsWith("localhost") && !req.headers.host.startsWith("localhost")) {
-      if (req.headers.referer){
-        if (req.headers.referer.startsWith("https")){
-          baseURL = `https://${req.headers.host}`;
-        } else {
-          baseURL = `http://${req.headers.host}`;
-        }
-      } else {
-        baseURL = `https://${req.headers.host}`;
-      }
-    } else {
-      baseURL = "https://asdc.cloud.edu.au";
-      // baseURL = "https://dev.asdc.cloud.edu.au";
-      // baseURL = "http://localhost:8080";
-    }
-    
     var catalog = [];
     fetch(`${baseURL}/api/projects/?ordering=-created_at`, {
       headers: { Cookie: req.headers.cookie }
@@ -649,30 +618,11 @@
       }
     })
     .catch((e)=>{
-      res.status(500).json("An error occurred while getting projects from webODM: " + e.code + " - " + baseURL);
+      res.status(500).json("An error occurred while getting projects from webODM: " + e.code);
     });
   })
 
   app.get("/cesium/terriaCatalog/projects/:projectId", (req, res) => {
-    var baseURL;
-    if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
-      baseURL = req.headers.origin;
-    } else if (req.headers.host && !req.headers.host.startsWith("localhost") && !req.headers.host.startsWith("localhost")) {
-      if (req.headers.referer){
-        if (req.headers.referer.startsWith("https")){
-          baseURL = `https://${req.headers.host}`;
-        } else {
-          baseURL = `http://${req.headers.host}`;
-        }
-      } else {
-        baseURL = `https://${req.headers.host}`;
-      }
-    } else {
-      baseURL = "https://asdc.cloud.edu.au";
-      // baseURL = "https://dev.asdc.cloud.edu.au";
-      // baseURL = "http://localhost:8080";
-    }
-
     var project = req.params.projectId;
 
     var catalog=[];
@@ -705,24 +655,6 @@
   })
 
   app.get("/cesium/terriaCatalog/projects/:projectId/tasks/:taskId", (req, res) => {
-    var baseURL;
-    if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
-      baseURL = req.headers.origin;
-    } else if (req.headers.host && !req.headers.host.startsWith("localhost") && !req.headers.host.startsWith("localhost")) {
-      if (req.headers.referer){
-        if (req.headers.referer.startsWith("https")){
-          baseURL = `https://${req.headers.host}`;
-        } else {
-          baseURL = `http://${req.headers.host}`;
-        }
-      } else {
-        baseURL = `https://${req.headers.host}`;
-      }
-    } else {
-      baseURL = "https://asdc.cloud.edu.au";
-      // baseURL = "https://dev.asdc.cloud.edu.au";
-      // baseURL = "http://localhost:8080";
-    }
     var projectId = req.params.projectId;
     var taskId = req.params.taskId;
 
@@ -896,24 +828,6 @@
   })
 
   app.get("/cesium/terria/publictask/:taskID.json", (req, res) => {
-    var baseURL;
-    if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
-      baseURL = req.headers.origin;
-    } else if (req.headers.host && !req.headers.host.startsWith("localhost") && !req.headers.host.startsWith("localhost")) {
-      if (req.headers.referer){
-        if (req.headers.referer.startsWith("https")){
-          baseURL = `https://${req.headers.host}`;
-        } else {
-          baseURL = `http://${req.headers.host}`;
-        }
-      } else {
-        baseURL = `https://${req.headers.host}`;
-      }
-    } else {
-      baseURL = "https://asdc.cloud.edu.au";
-      // baseURL = "https://dev.asdc.cloud.edu.au";
-      // baseURL = "http://localhost:8080";
-    }
     const eptServer = `${baseURL}/ept`;
     fetch(`${baseURL}/public/task/${req.params.taskID}/json`)
       .then(response => response.json())
@@ -1080,24 +994,7 @@
   })
 
   app.patch("/cesium/makeWebODMTaskPublic/:project/:taskID", (req, res) => {
-    var baseURL;
-    if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
-      baseURL = req.headers.origin;
-    } else if (req.headers.host && !req.headers.host.startsWith("localhost") && !req.headers.host.startsWith("localhost")) {
-      if (req.headers.referer){
-        if (req.headers.referer.startsWith("https")){
-          baseURL = `https://${req.headers.host}`;
-        } else {
-          baseURL = `http://${req.headers.host}`;
-        }
-      } else {
-        baseURL = `https://${req.headers.host}`;
-      }
-    } else {
-      baseURL = "https://asdc.cloud.edu.au";
-      // baseURL = "https://dev.asdc.cloud.edu.au";
-      // baseURL = "http://localhost:8080";
-    }
+    
     var project = req.params.project;
     var task = req.params.taskID;
     if (req.headers.cookie) {
