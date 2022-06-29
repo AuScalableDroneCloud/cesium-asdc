@@ -366,7 +366,15 @@
     if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
       baseURL = req.headers.origin;
     } else if (req.headers.host && !req.headers.host.startsWith("localhost") && !req.headers.host.startsWith("localhost")) {
-      baseURL = req.headers.host;
+      if (req.headers.referer){
+        if (req.headers.referer.startsWith("https")){
+          baseURL = `https://${req.headers.host}`;
+        } else {
+          baseURL = `http://${req.headers.host}`;
+        }
+      } else {
+        baseURL = `http://${req.headers.host}`;
+      }
     } else {
       baseURL = "https://asdc.cloud.edu.au";
       // baseURL = "https://dev.asdc.cloud.edu.au";
@@ -594,7 +602,15 @@
     if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
       baseURL = req.headers.origin;
     } else if (req.headers.host && !req.headers.host.startsWith("localhost") && !req.headers.host.startsWith("localhost")) {
-      baseURL = req.headers.host;
+      if (req.headers.referer){
+        if (req.headers.referer.startsWith("https")){
+          baseURL = `https://${req.headers.host}`;
+        } else {
+          baseURL = `http://${req.headers.host}`;
+        }
+      } else {
+        baseURL = `http://${req.headers.host}`;
+      }
     } else {
       baseURL = "https://asdc.cloud.edu.au";
       // baseURL = "https://dev.asdc.cloud.edu.au";
@@ -632,8 +648,8 @@
         res.status(200).json({catalog:catalog});
       }
     })
-    .catch(()=>{
-      res.status(500).json("An error occurred while getting projects from webODM");
+    .catch((e)=>{
+      res.status(500).json("An error occurred while getting projects from webODM: " + e.code);
     });
   })
 
@@ -642,7 +658,15 @@
     if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
       baseURL = req.headers.origin;
     } else if (req.headers.host && !req.headers.host.startsWith("localhost") && !req.headers.host.startsWith("localhost")) {
-      baseURL = req.headers.host;
+      if (req.headers.referer){
+        if (req.headers.referer.startsWith("https")){
+          baseURL = `https://${req.headers.host}`;
+        } else {
+          baseURL = `http://${req.headers.host}`;
+        }
+      } else {
+        baseURL = `http://${req.headers.host}`;
+      }
     } else {
       baseURL = "https://asdc.cloud.edu.au";
       // baseURL = "https://dev.asdc.cloud.edu.au";
@@ -685,7 +709,15 @@
     if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
       baseURL = req.headers.origin;
     } else if (req.headers.host && !req.headers.host.startsWith("localhost") && !req.headers.host.startsWith("localhost")) {
-      baseURL = req.headers.host;
+      if (req.headers.referer){
+        if (req.headers.referer.startsWith("https")){
+          baseURL = `https://${req.headers.host}`;
+        } else {
+          baseURL = `http://${req.headers.host}`;
+        }
+      } else {
+        baseURL = `http://${req.headers.host}`;
+      }
     } else {
       baseURL = "https://asdc.cloud.edu.au";
       // baseURL = "https://dev.asdc.cloud.edu.au";
@@ -868,7 +900,15 @@
     if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
       baseURL = req.headers.origin;
     } else if (req.headers.host && !req.headers.host.startsWith("localhost") && !req.headers.host.startsWith("localhost")) {
-      baseURL = req.headers.host;
+      if (req.headers.referer){
+        if (req.headers.referer.startsWith("https")){
+          baseURL = `https://${req.headers.host}`;
+        } else {
+          baseURL = `http://${req.headers.host}`;
+        }
+      } else {
+        baseURL = `http://${req.headers.host}`;
+      }
     } else {
       baseURL = "https://asdc.cloud.edu.au";
       // baseURL = "https://dev.asdc.cloud.edu.au";
@@ -1044,7 +1084,15 @@
     if (req.headers.origin && !req.headers.origin.startsWith("http://localhost") && !req.headers.origin.startsWith("https://localhost")){
       baseURL = req.headers.origin;
     } else if (req.headers.host && !req.headers.host.startsWith("localhost") && !req.headers.host.startsWith("localhost")) {
-      baseURL = req.headers.host;
+      if (req.headers.referer){
+        if (req.headers.referer.startsWith("https")){
+          baseURL = `https://${req.headers.host}`;
+        } else {
+          baseURL = `http://${req.headers.host}`;
+        }
+      } else {
+        baseURL = `http://${req.headers.host}`;
+      }
     } else {
       baseURL = "https://asdc.cloud.edu.au";
       // baseURL = "https://dev.asdc.cloud.edu.au";
