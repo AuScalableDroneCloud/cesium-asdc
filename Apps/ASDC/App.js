@@ -54,8 +54,6 @@ Cesium.Ion.defaultAccessToken = cesiumIonAccessToken;
 
 window.CESIUM_BASE_URL = "/cesium/Build/Cesium";
 
-fetch("http://localhost:8080/cesium/terriaCatalog/projects")
-
 const handleBillboard = (billboard) => {
   setBillboard(billboard);
   selectedDatasets.map((data) => {

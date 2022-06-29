@@ -162,10 +162,6 @@ export const setupSidebar = (uploads, indexParam=false) => {
       var projectOpacityBtn = createProjectOpacitySliderBtn(projectAssets,projectDivs[odmProject.id]);
       projectDivs[odmProject.id].firstChild.appendChild(projectOpacityBtn);
 
-      if (sourceDivs["WebODM Projects"].nextElementSibling.firstChild.className === "loader-parent"){
-        sourceDivs["WebODM Projects"].nextElementSibling.removeChild(sourceDivs["WebODM Projects"].nextElementSibling.firstChild);
-      }
-
       var sourcePanelDiv = sourceDivs["WebODM Projects"].nextElementSibling;
       sourcePanelDiv.appendChild(projectDivs[odmProject.id]);
 
@@ -237,7 +233,9 @@ export const setupSidebar = (uploads, indexParam=false) => {
         }
       })
     })
-
+    if (sourceDivs["WebODM Projects"].nextElementSibling.firstChild.className === "loader-parent"){
+      sourceDivs["WebODM Projects"].nextElementSibling.removeChild(sourceDivs["WebODM Projects"].nextElementSibling.firstChild);
+    }
     if (sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight){
       var height = 0;
       var children = [...sourceDivs["WebODM Projects"].nextElementSibling.children];
