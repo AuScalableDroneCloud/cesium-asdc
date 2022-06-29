@@ -373,7 +373,7 @@
           baseURL = `http://${req.headers.host}`;
         }
       } else {
-        baseURL = `http://${req.headers.host}`;
+        baseURL = `https://${req.headers.host}`;
       }
     } else {
       baseURL = "https://asdc.cloud.edu.au";
@@ -609,7 +609,7 @@
           baseURL = `http://${req.headers.host}`;
         }
       } else {
-        baseURL = `http://${req.headers.host}`;
+        baseURL = `https://${req.headers.host}`;
       }
     } else {
       baseURL = "https://asdc.cloud.edu.au";
@@ -649,7 +649,7 @@
       }
     })
     .catch((e)=>{
-      res.status(500).json("An error occurred while getting projects from webODM: " + e.code);
+      res.status(500).json("An error occurred while getting projects from webODM: " + e.code + " - " + baseURL);
     });
   })
 
@@ -665,7 +665,7 @@
           baseURL = `http://${req.headers.host}`;
         }
       } else {
-        baseURL = `http://${req.headers.host}`;
+        baseURL = `https://${req.headers.host}`;
       }
     } else {
       baseURL = "https://asdc.cloud.edu.au";
@@ -716,7 +716,7 @@
           baseURL = `http://${req.headers.host}`;
         }
       } else {
-        baseURL = `http://${req.headers.host}`;
+        baseURL = `https://${req.headers.host}`;
       }
     } else {
       baseURL = "https://asdc.cloud.edu.au";
@@ -907,7 +907,7 @@
           baseURL = `http://${req.headers.host}`;
         }
       } else {
-        baseURL = `http://${req.headers.host}`;
+        baseURL = `https://${req.headers.host}`;
       }
     } else {
       baseURL = "https://asdc.cloud.edu.au";
@@ -1091,7 +1091,7 @@
           baseURL = `http://${req.headers.host}`;
         }
       } else {
-        baseURL = `http://${req.headers.host}`;
+        baseURL = `https://${req.headers.host}`;
       }
     } else {
       baseURL = "https://asdc.cloud.edu.au";
