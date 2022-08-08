@@ -1044,7 +1044,8 @@
     urls.map(url=>{
       promises.push(
         fetch(url)
-        .then(response => response.json())
+        .then(response => response.text())
+        .then(text => JSON5.parse(text))
         )
     })
 
@@ -1167,6 +1168,9 @@
           })
           res.status(200).json(catalogJson);
       })
+    })
+    .catch(e=>{
+      console.log(e);
     })
   })
 

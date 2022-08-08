@@ -232,6 +232,15 @@
         91,
         92
       ]
+    },
+    {
+      "id": 24,
+      "name": "Twelve Apostles",
+      "status": "active",
+      "categoryID": 8,
+      "data": [
+        94,95,96,97,98,99,100
+      ]
     }
   ],
   "datasets": [
@@ -3651,6 +3660,103 @@
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210407_Batch03_20210421_planteye_basil+only_mod.csv",
       "startDateTime": "2021-04-07T01:38:49.000Z",
       "endDateTime": "2021-04-21T01:36:02.000Z"
+    },
+    {
+      "id": 94,
+      "type": "ModelTileset",
+      "date": "2022-07-22T00:00:00.000Z",
+      "url": "https://swift.rc.nectar.org.au/v1/AUTH_9f7c80bfd20f45bebc780b06c405f0df/ddp-projects/1014_TwelveApostlesCliffSurvey/Site1/Scene/tileset_1014_BakerOvenRock.json",
+      "useProxy": true,
+      "position": {
+        "lng": 143.04764027776696,
+        "lat": -38.64129741212718,
+        "height": 7.670984115585838
+      },
+      "boundingSphereRadius": 77.48821376832687
+    },
+    {
+      "id": 95,
+      "type": "ModelTileset",
+      "date": "2022-07-22T00:00:00.000Z",
+      "url": "https://swift.rc.nectar.org.au/v1/AUTH_9f7c80bfd20f45bebc780b06c405f0df/ddp-projects/1014_TwelveApostlesCliffSurvey/Site1/Scene/tileset_1014_Site1_RC.json",
+      "useProxy": true,
+      "position": {
+        "lng": 143.0490158040333,
+        "lat": -38.6395878018063,
+        "height": 14.452854051454421
+      },
+      "boundingSphereRadius": 446.9950995064766,
+      "zoom":"boundingSphere"
+    },
+    {
+      "id": 96,
+      "type": "ModelTileset",
+      "date": "2022-07-22T00:00:00.000Z",
+      "url": "https://swift.rc.nectar.org.au/v1/AUTH_9f7c80bfd20f45bebc780b06c405f0df/ddp-projects/1014_TwelveApostlesCliffSurvey/Site2/Scene/tileset_1014_Site2_Cesium.json",
+      "useProxy": true,
+      "position": {
+          "lng": 143.07253840180917,
+          "lat": -38.648686683027584,
+          "height": 12.033126188173595
+      },
+      "boundingSphereRadius": 384.4783637402041,
+      "zoom":"boundingSphere"
+    },
+    {
+      "id": 97,
+      "type": "ModelTileset",
+      "date": "2022-07-22T00:00:00.000Z",
+      "url": "https://swift.rc.nectar.org.au/v1/AUTH_9f7c80bfd20f45bebc780b06c405f0df/ddp-projects/1014_TwelveApostlesCliffSurvey/Site3/Scene/tileset_1014_Site3_RC.json",
+      "useProxy": true,
+      "position": {
+          "lng": 143.0818565100582,
+          "lat": -38.65328777072848,
+          "height": 11.399566025919457
+      },
+      "boundingSphereRadius": 599.5781781884222,
+      "zoom":"boundingSphere"
+    },
+    {
+      "id": 98,
+      "type": "ModelTileset",
+      "date": "2022-07-22T00:00:00.000Z",
+      "url": "https://swift.rc.nectar.org.au/v1/AUTH_9f7c80bfd20f45bebc780b06c405f0df/ddp-projects/1014_TwelveApostlesCliffSurvey/Site3/Scene/tileset_1014_Site3_Rock1.json",
+      "useProxy": true,
+      "position": {
+          "lng": 143.07568021723628,
+          "lat": -38.65212568571466,
+          "height": 8.687486501187829
+      },
+      "boundingSphereRadius": 33.1957346937067,
+      "zoom":"boundingSphere"
+    },
+    {
+      "id": 99,
+      "type": "ModelTileset",
+      "date": "2022-07-22T00:00:00.000Z",
+      "url": "https://swift.rc.nectar.org.au/v1/AUTH_9f7c80bfd20f45bebc780b06c405f0df/ddp-projects/1014_TwelveApostlesCliffSurvey/Site3/Scene/tileset_1014_Site3_Rock2.json",
+      "useProxy": true,
+      "position": {
+          "lng": 143.0766655898083,
+          "lat": -38.651381931211645,
+          "height": 3.138592923956531
+      },
+      "boundingSphereRadius": 27.84504066045424,
+      "zoom":"boundingSphere"
+    },
+    {
+      "id": 100,
+      "type": "ModelTileset",
+      "date": "2022-07-22T00:00:00.000Z",
+      "url": "https://swift.rc.nectar.org.au/v1/AUTH_9f7c80bfd20f45bebc780b06c405f0df/ddp-projects/1014_TwelveApostlesCliffSurvey/Site4/Scene/tileset_1014_Site4_RC.json",
+      "useProxy": true,
+      "position": {
+          "lng": 143.10602333074004,
+          "lat": -38.666463348019924,
+          "height": 13.502252199581712
+      },
+      "boundingSphereRadius": 481.91103102102863,
+      "zoom":"boundingSphere"
     }
   ],
   "categories": [
