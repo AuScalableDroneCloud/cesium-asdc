@@ -956,42 +956,12 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
         : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search + window.location.hash
     );
 
-    if (!selectedDatasets.find((d) => d.asset === asset)) {
-      if (timelineTracks[asset["id"]]){
-        viewer.timeline._trackList.splice(
-          viewer.timeline._trackList.indexOf(
-            timelineTracks[asset["id"]]
-          ),
-          1
-        );
-
-        timelineTracks[asset["id"]] = null;
-        delete timelineTracks[asset["id"]];
-
-        viewer.timeline._makeTics();
-        viewer.timeline.container.style.bottom =
-          Object.keys(timelineTracks).length * 8 + "px";
-        viewer.timeline._trackContainer.style.height =
-          Object.keys(timelineTracks).length * 8 + 1 + "px";
-      }
-
-      document.getElementById(`assetColorDiv-${asset.id}`).style['display']="none";
-      asset.data.map(d=>{
-        document.getElementById(`colorDiv-${d}`).style['display']="none";
-      })
-    }
     if (
       timelineTracks[asset["id"]] &&
       timelineTracks[asset["id"]].intervals
     ) {
       timelineTracks[asset["id"]].intervals.map((t) => {
-        if (
-          Cesium.JulianDate.toDate(t.start).getTime() ===
-          new Date(data.date).getTime() &&
-          !selectedDatasets.find((d) => d.asset.id === asset.id &&
-          new Date(d.date).getTime()==new Date(data.date).getTime()
-          )
-        ) {
+        if (t.data.id == data.id) {
           timelineTracks[asset["id"]].intervals.splice(
             timelineTracks[asset["id"]].intervals.indexOf(t),
             1
@@ -999,6 +969,28 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
         }
       });
       viewer.timeline._makeTics();
+    }
+    if (timelineTracks[asset["id"]].intervals.length==0) {
+      viewer.timeline._trackList.splice(
+        viewer.timeline._trackList.indexOf(
+          timelineTracks[asset["id"]]
+        ),
+        1
+      );
+
+      timelineTracks[asset["id"]] = null;
+      delete timelineTracks[asset["id"]];
+
+      viewer.timeline._makeTics();
+      viewer.timeline.container.style.bottom =
+        Object.keys(timelineTracks).length * 8 + "px";
+      viewer.timeline._trackContainer.style.height =
+        Object.keys(timelineTracks).length * 8 + 1 + "px";
+
+      document.getElementById(`assetColorDiv-${asset.id}`).style['display']="none";
+      asset.data.map(d=>{
+        document.getElementById(`colorDiv-${d}`).style['display']="none";
+      })
     }
 
     if (

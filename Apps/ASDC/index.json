@@ -627,6 +627,7 @@
       "type": "Influx",
       "station": "AMRF_PER_D01",
       "name": "Sensor Data (Live)",
+      "startDateTime":"2021-05-28T00:05:00.000Z",
       "position": {
         "lng": 148.43065,
         "lat": -36.3731306,
@@ -638,6 +639,7 @@
       "type": "Influx",
       "station": "AMRF_FRY_D01",
       "name": "Sensor Data (Live)",
+      "startDateTime":"2021-05-28T00:05:00.000Z",
       "position": {
         "lng": 147.251893,
         "lat": -36.877349,

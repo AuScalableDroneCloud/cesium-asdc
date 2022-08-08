@@ -1087,7 +1087,17 @@ export const loadData = (
 
   if (timelineTrack) {
     var date = new Date(data.date);
-    if (date == "Invalid Date") return;
+    if (date == "Invalid Date") {
+      if (data.startDateTime) var startDateTime = new Date(data.startDateTime);
+      if (data.endDateTime) var endDateTime = new Date(data.endDateTime);
+
+      if(!startDateTime || startDateTime=="Invalid Date") return;
+      if(endDateTime=="Invalid Date") return;
+
+      if (!data.endDateTime){
+        data.endDateTime = new Date();
+      }
+    }
 
     if (!timelineTracks[asset["id"]]) {
       var color = Cesium.Color.fromRandom();
@@ -1103,10 +1113,11 @@ export const loadData = (
 
       track.intervals = [
         new Cesium.TimeInterval({
-          start: Cesium.JulianDate.fromDate(new Date(date)),
-          stop: Cesium.JulianDate.fromDate(
+          start: data.startDateTime && data.startDateTime!= "Invalid Date" ? Cesium.JulianDate.fromDate(new Date(data.startDateTime)) : Cesium.JulianDate.fromDate(new Date(date)),
+          stop: data.endDateTime && data.endDateTime!= "Invalid Date" ? Cesium.JulianDate.fromDate(new Date(data.endDateTime)) : Cesium.JulianDate.fromDate(
             new Date(new Date(date).getTime() + 86400000)
           ),
+          data:data
         }),
       ];
 
@@ -1129,10 +1140,11 @@ export const loadData = (
       })
     } else {
       var interval = new Cesium.TimeInterval({
-        start: Cesium.JulianDate.fromDate(new Date(date)),
-        stop: Cesium.JulianDate.fromDate(
+        start: data.startDateTime && data.startDateTime!= "Invalid Date" ? Cesium.JulianDate.fromDate(new Date(data.startDateTime)) : Cesium.JulianDate.fromDate(new Date(date)),
+        stop: data.endDateTime && data.endDateTime!= "Invalid Date" ? Cesium.JulianDate.fromDate(new Date(data.endDateTime)) : Cesium.JulianDate.fromDate(
           new Date(new Date(date).getTime() + 86400000)
         ),
+        data:data
       });
 
       if (
