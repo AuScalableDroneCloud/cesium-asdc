@@ -107,7 +107,8 @@ setViewer(
     // imageryProvider: new Cesium.IonImageryProvider({ assetId: 3954 }),//sentinel-2
     terrainProvider: Cesium.createWorldTerrain({ requestWaterMask: true }),
     vrButton: true,
-    fullscreenElement: "cesiumContainer"
+    fullscreenElement: "cesiumContainer",
+    animation:false
   })
 );
 
@@ -118,15 +119,15 @@ if(window.self !== window.top){
 viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
 viewer.scene.globe.depthTestAgainstTerrain = false;
 
-viewer.animation.viewModel.dateFormatter = (date, viewModel) => {
-  const localDate = Cesium.JulianDate.toDate(date);
-  return localDate.toLocaleString('en-au', {year: 'numeric', month: 'long', day: 'numeric'} )
-};
+// viewer.animation.viewModel.dateFormatter = (date, viewModel) => {
+//   const localDate = Cesium.JulianDate.toDate(date);
+//   return localDate.toLocaleString('en-au', {year: 'numeric', month: 'long', day: 'numeric'} )
+// };
 
-viewer.animation.viewModel.timeFormatter = (date, viewModel) => {
-  const localDate = Cesium.JulianDate.toDate(date);
-  return localDate.toLocaleTimeString();
-};
+// viewer.animation.viewModel.timeFormatter = (date, viewModel) => {
+//   const localDate = Cesium.JulianDate.toDate(date);
+//   return localDate.toLocaleTimeString();
+// };
 
 Cesium.Timeline.prototype.makeLabel = function (time) {
   const localDate = Cesium.JulianDate.toDate(time);
