@@ -974,6 +974,11 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
         viewer.timeline._trackContainer.style.height =
           Object.keys(timelineTracks).length * 8 + 1 + "px";
       }
+
+      document.getElementById(`assetColorDiv-${asset.id}`).style['display']="none";
+      asset.data.map(d=>{
+        document.getElementById(`colorDiv-${d}`).style['display']="none";
+      })
     }
     if (
       timelineTracks[asset["id"]] &&
@@ -1023,7 +1028,6 @@ const handleAssetCheckboxChange = (checkboxes, assetCheckbox, asset, uploads) =>
     cb.checked = assetCheckbox.checked;
   });
   if (assetCheckbox.checked) {
-    console.log("here");
     var dataIDs = "";
     var newDataIDs = [];
     if (selectedDatasets) {
@@ -1154,7 +1158,31 @@ const handleAssetCheckboxChange = (checkboxes, assetCheckbox, asset, uploads) =>
     viewer.timeline._trackContainer.style.height =
       Object.keys(timelineTracks).length * 8 + 1 + "px";
 
+
+    document.getElementById(`assetColorDiv-${asset.id}`).style['display']="none";
+
+    asset.data.map(d=>{
+      document.getElementById(`colorDiv-${d}`).style['display']="none";
+    })
+
+    viewer.timeline._trackList.map((t,i)=>{
+      if (i==0){
+        t.color= Cesium.Color.fromHsl(0,1,0.5,1);
+      } else {
+        t.color= Cesium.Color.fromHsl(((i+1)/viewer.timeline._trackList.length)*300/360,1,0.5,1);          
+      }
+
+      var assetID = Object.keys(timelineTracks).find(k=>timelineTracks[k]==t);
+      document.getElementById(`assetColorDiv-${assetID}`).style['background']=timelineTracks[assetID].color.toCssColorString();
+
+      assets.find(aid=>aid.id == assetID).data.map(d=>{
+        document.getElementById(`colorDiv-${d}`).style['display']="block";
+        document.getElementById(`colorDiv-${d}`).style['background']=timelineTracks[assetID].color.toCssColorString();
+      })
+    })
+
     syncTimeline(true);
+
   }
 }
 
@@ -1246,6 +1274,7 @@ const createOpacitySliderBtn = (asset, data, dateDiv) => {
   opacitySliderBtn.className = "fa fa-sliders";
   opacitySliderBtn.style.float = "right";
   opacitySliderBtn.style.height = "fit-content";
+  opacitySliderBtn.style['margin-left'] = "5px";
 
   var opacityDropdown = document.getElementById(
     "alpha-slider-container"
@@ -1295,6 +1324,7 @@ const createAssetOpacitySliderBtn = (asset, dateDiv,assetDatasets) => {
   opacitySliderBtn.className = "fa fa-sliders";
   opacitySliderBtn.style.float = "right";
   opacitySliderBtn.style.height = "fit-content";
+  opacitySliderBtn.style['margin-left'] = "5px";
 
   var opacityDropdown = document.getElementById(
     "alpha-slider-container"
@@ -1451,7 +1481,7 @@ const createDownloadBtn = (asset, data, dateDiv, index) => {
   var downloadBtn = document.createElement("div");
   downloadBtn.className = "fa fa-download";
   downloadBtn.style.float = "right";
-  downloadBtn.style.paddingLeft = "10px";
+  downloadBtn.style.paddingLeft = "5px";
 
   downloadBtn.onclick = (evt) => {
     evt.stopPropagation();
@@ -1623,6 +1653,11 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
 
   assetDiv.firstChild.prepend(assetCheckbox);
 
+  var assetColorDiv = document.createElement("div");
+  assetColorDiv.style = "width: 12px;height: 12px;background: red;margin-left: 5px;border-radius: 1px;display:none;flex-shrink:0;"
+  assetColorDiv.id = `assetColorDiv-${asset.id}`;
+  assetDiv.firstChild.appendChild(assetColorDiv);
+
   if (asset.data) {
     var checkboxes = [];
     var assetDatasets = [];
@@ -1692,6 +1727,11 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
       dateContentDiv.appendChild(dateContentDivText);
       dateDiv.appendChild(dateContentDiv);
       dateDivs.push(dateDiv);
+
+      var colorDiv = document.createElement("div");
+      colorDiv.style = "width: 12px;height: 12px;background: red;margin-left: 5px;border-radius: 1px;display:none;flex-shrink:0;"
+      colorDiv.id = `colorDiv-${data.id}`;
+      dateContentDiv.appendChild(colorDiv);
 
       if (data.type === "ImageSeries") {
         var zoomButton = createZoomButton(asset, data);

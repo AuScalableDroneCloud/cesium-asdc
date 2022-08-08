@@ -437,7 +437,7 @@ export const loadData = (
         tileset._geometricError= Number.MAX_SAFE_INTEGER;
         
         // console.log(tileset.boundingSphere);
-        // var carto = Cesium.Cartographic.fromCartesian(tilesets[asset["id"]][data.id].boundingSphere.center);
+        // var carto = Cesium.Cartographic.fromCartesian(tileset.boundingSphere.center);
         // console.log(carto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
         // console.log(carto.longitude * Cesium.Math.DEGREES_PER_RADIAN);
         // console.log(carto.height);
@@ -1090,10 +1090,12 @@ export const loadData = (
     if (date == "Invalid Date") return;
 
     if (!timelineTracks[asset["id"]]) {
+      var color = Cesium.Color.fromRandom();
+
       var track = viewer.timeline.addTrack(
         null,
         8,
-        Cesium.Color.RED,
+        color,
         Object.keys(timelineTracks).length % 2 === 0
           ? Cesium.Color.BLACK
           : new Cesium.Color(0.25, 0.25, 0.25)
@@ -1109,6 +1111,22 @@ export const loadData = (
       ];
 
       timelineTracks[asset["id"]] = track;
+      viewer.timeline._trackList.map((t,i)=>{
+        if (i==0){
+          t.color= Cesium.Color.fromHsl(0,1,0.5,1);
+        } else {
+          t.color= Cesium.Color.fromHsl(((i+1)/viewer.timeline._trackList.length)*300/360,1,0.5,1);          
+        }
+
+        var assetID = Object.keys(timelineTracks).find(k=>timelineTracks[k]==t);
+        
+        document.getElementById(`assetColorDiv-${assetID}`).style['display']="block";
+        document.getElementById(`assetColorDiv-${assetID}`).style['background']=timelineTracks[assetID].color.toCssColorString();
+        assets.find(aid=>aid.id == assetID).data.map(d=>{
+          document.getElementById(`colorDiv-${d}`).style['display']="block";
+          document.getElementById(`colorDiv-${d}`).style['background']=timelineTracks[assetID].color.toCssColorString();
+        })
+      })
     } else {
       var interval = new Cesium.TimeInterval({
         start: Cesium.JulianDate.fromDate(new Date(date)),
