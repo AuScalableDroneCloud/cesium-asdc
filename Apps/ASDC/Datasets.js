@@ -27,7 +27,8 @@ import {
   setSelectedDatasets,
   markersDataSource,
   zoomOnDataSelect,
-  categories
+  categories,
+  mousePosition
 } from "./State.js";
 import { loadInfluxGraphs, loadCSVGraphs,closeGraphModal } from "./Graphs.js";
 import { setupStyleToolbar, applyStyle } from "./Style.js";
@@ -1369,7 +1370,7 @@ Cesium.TimelineTrack.prototype.render = function (context, renderState) {
       context.strokeStyle = 'white';
       // context.fillRect(0, renderState.y, renderState.timeBarWidth, this.height);
       context.beginPath();
-      context.rect(0, renderState.y, renderState.timeBarWidth, this.height);
+      context.rect(0, renderState.y+0.5, renderState.timeBarWidth, this.height-1);
       context.fill();
       context.stroke();
       context.closePath();
@@ -1416,6 +1417,96 @@ Cesium.TimelineTrack.prototype.render = function (context, renderState) {
         context.fill();
         context.stroke();
         context.closePath();
+      }
+    }
+  });
+
+  this.intervals.map((interval) => {
+    const startInterval = interval.start;
+    const stopInterval = interval.stop;
+
+    const spanStart = renderState.startJulian;
+    const spanStop = Cesium.JulianDate.addSeconds(
+      renderState.startJulian,
+      renderState.duration,
+      new Cesium.JulianDate()
+    );
+
+    if (
+      Cesium.JulianDate.lessThan(startInterval, spanStart) &&
+      Cesium.JulianDate.greaterThan(stopInterval, spanStop)
+    ) {
+      //The track takes up the entire visible span.
+      var mouseOnInterval = mousePosition.x &&
+        mousePosition.x >= 0 && 
+        mousePosition.x <= renderState.timeBarWidth &&
+        mousePosition.y &&
+        mousePosition.y >= renderState.y &&
+        mousePosition.y <= renderState.y + this.height;
+
+      if (mouseOnInterval){
+        context.fillStyle = "#00000000";
+        context.strokeStyle = 'white';
+        context.beginPath();
+        context.rect(0, renderState.y, renderState.timeBarWidth, this.height);
+        context.lineWidth = 3;
+        context.stroke();
+        context.lineWidth = 1;
+        context.closePath();
+      }
+
+    } else if (
+      Cesium.JulianDate.lessThanOrEquals(startInterval, spanStop) &&
+      Cesium.JulianDate.greaterThanOrEquals(stopInterval, spanStart)
+    ) {
+      //The track only takes up some of the visible span, compute that span.
+      let x;
+      let start, stop;
+      for (x = 0; x < renderState.timeBarWidth; ++x) {
+        const currentTime = Cesium.JulianDate.addSeconds(
+          renderState.startJulian,
+          (x / renderState.timeBarWidth) * renderState.duration,
+          new Cesium.JulianDate()
+        );
+        if (
+          !Cesium.defined(start) &&
+          Cesium.JulianDate.greaterThanOrEquals(currentTime, startInterval)
+        ) {
+          start = x;
+        } else if (
+          !Cesium.defined(stop) &&
+          Cesium.JulianDate.greaterThanOrEquals(currentTime, stopInterval)
+        ) {
+          stop = x;
+        }
+      }
+
+      if (Cesium.defined(start)) {
+        if (!Cesium.defined(stop)) {
+          stop = renderState.timeBarWidth;
+        }
+        var mouseOnInterval = mousePosition.x &&
+        mousePosition.x >= start && 
+        mousePosition.x <= stop &&
+        mousePosition.y &&
+        mousePosition.y >= renderState.y &&
+        mousePosition.y <= renderState.y + this.height;
+        
+        if (mouseOnInterval){
+          context.fillStyle = "#00000000";
+          context.strokeStyle = 'white';
+          context.beginPath();
+          context.rect(
+            start,
+            renderState.y + 0.5,
+            Math.max(stop - start, 1),
+            this.height - 1
+          );
+          context.lineWidth = 3;
+          context.stroke();
+          context.lineWidth = 1;
+          context.closePath();
+        }
       }
     }
   });

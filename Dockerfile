@@ -18,4 +18,4 @@ WORKDIR /app
 RUN node ./node_modules/webpack/bin/webpack.js --mode production
 EXPOSE 8080
 EXPOSE 3000
-CMD  node ./ept-tools-mod/lib/app/index.js serve & node server.cjs --production
+CMD  node --max_old_space_size=2048 ./ept-tools-mod/lib/app/index.js serve & node --max_old_space_size=2048 server.cjs --production

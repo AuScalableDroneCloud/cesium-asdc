@@ -35,7 +35,8 @@ import {
   init,
   odmProjects,
   loadingFinished,
-  setLoadingFinshed
+  setLoadingFinshed,
+  mousePosition
 } from "./State.js";
 import { loadAsset, loadData, setScreenSpaceError, fetchIndexAssets,fetchWebODMProjects, fetchPublicTask } from "./Datasets.js";
 import {
@@ -111,6 +112,19 @@ setViewer(
     animation:false
   })
 );
+
+viewer.timeline._trackListEle.onmousemove =  function(e){
+  mousePosition.x = e.offsetX;
+  mousePosition.y = e.offsetY;
+
+  viewer.timeline._makeTics();
+}
+
+viewer.timeline._trackListEle.onmouseleave =  function(e){
+  mousePosition.x = null;
+  mousePosition.y = null;
+  viewer.timeline._makeTics();
+}
 
 if(window.self !== window.top){
   document.getElementsByClassName("cesium-viewer-toolbar")[0].prepend(shareButtonCesiumToolbar);
