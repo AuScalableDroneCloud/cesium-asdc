@@ -27,7 +27,8 @@ import {
   taskInfos,
   initVars,
   init,
-  sharedDivs
+  sharedDivs,
+  timelineOnDataSelect
 } from "./State.js";
 import { loadAsset, loadData, syncTimeline } from "./Datasets.js";
 import { pcFormats, processingAPI } from "./Constants.js";
@@ -506,7 +507,9 @@ export const loadSelectedDataIDs = (fly)=>{
     });
 
     setSelectedDatasets(newSelectedDatasets);
-    syncTimeline(true);
+    if (timelineOnDataSelect) {
+      syncTimeline(true);
+    }
 
     setSelectedAssetIDs(assetIDs);
   }
@@ -969,30 +972,30 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
         }
       });
       viewer.timeline._makeTics();
+
+      if (timelineTracks[asset["id"]].intervals.length==0) {
+        viewer.timeline._trackList.splice(
+          viewer.timeline._trackList.indexOf(
+            timelineTracks[asset["id"]]
+          ),
+          1
+        );
+  
+        timelineTracks[asset["id"]] = null;
+        delete timelineTracks[asset["id"]];
+  
+        viewer.timeline._makeTics();
+        viewer.timeline.container.style.bottom =
+          Object.keys(timelineTracks).length * 8 + "px";
+        viewer.timeline._trackContainer.style.height =
+          Object.keys(timelineTracks).length * 8 + 1 + "px";
+  
+        document.getElementById(`assetColorDiv-${asset.id}`).style['display']="none";
+        asset.data.map(d=>{
+          document.getElementById(`colorDiv-${d}`).style['display']="none";
+        })
+      }
     }
-    if (timelineTracks[asset["id"]].intervals.length==0) {
-      viewer.timeline._trackList.splice(
-        viewer.timeline._trackList.indexOf(
-          timelineTracks[asset["id"]]
-        ),
-        1
-      );
-
-      timelineTracks[asset["id"]] = null;
-      delete timelineTracks[asset["id"]];
-
-      viewer.timeline._makeTics();
-      viewer.timeline.container.style.bottom =
-        Object.keys(timelineTracks).length * 8 + "px";
-      viewer.timeline._trackContainer.style.height =
-        Object.keys(timelineTracks).length * 8 + 1 + "px";
-
-      document.getElementById(`assetColorDiv-${asset.id}`).style['display']="none";
-      asset.data.map(d=>{
-        document.getElementById(`colorDiv-${d}`).style['display']="none";
-      })
-    }
-
     if (
       !!selectedDatasets.find(
         (d) =>
@@ -1008,7 +1011,9 @@ const handleDataCheckboxChange = (checkbox, assetCheckbox, checkboxes, asset, da
       document.getElementById("dims-toolbar-row").style.display = "none";
     }
   }
-  syncTimeline(false);
+  if (timelineOnDataSelect) {
+    syncTimeline(false);
+  }
   
   if (layerCheckBox){
     layerCheckBox.checked = projectLayerDataIDs.every(id=>selectedDatasets.find(d=>d.id==id))
@@ -1053,7 +1058,9 @@ const handleAssetCheckboxChange = (checkboxes, assetCheckbox, asset, uploads) =>
     
     var firstAssetData = selectedDatasets.find(d=>d.asset.id==asset.id);
     if (firstAssetData && firstAssetData.type!="Influx" && firstAssetData.type!="ImageSeries"){
-      syncTimeline(true);
+      if (timelineOnDataSelect) {
+        syncTimeline(true);
+      }
     }
   } else {
     selectedDatasets.map((d) => {
@@ -1173,8 +1180,9 @@ const handleAssetCheckboxChange = (checkboxes, assetCheckbox, asset, uploads) =>
       })
     })
 
-    syncTimeline(true);
-
+    if (timelineOnDataSelect) {
+      syncTimeline(true);
+    }
   }
 }
 

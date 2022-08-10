@@ -158,7 +158,6 @@ export const loadInfluxGraphs = (data) => {
       viewer.clock.currentTime
     ).getTime()}`,
     {
-      // cache: "no-store",
       cache: "no-store",
       signal: controllers[data.id].signal,
     }
@@ -171,8 +170,6 @@ export const loadInfluxGraphs = (data) => {
     })
     .then((response) => response.json())
     .then((parsedResponse) => {
-      if (parsedResponse.length === 0) return;
-
       const unpackData = (arr, key) => {
         return arr.map((obj) => obj[key]);
       };  
@@ -198,7 +195,7 @@ export const loadInfluxGraphs = (data) => {
       var mean_Soil_EC = [];
       var mean_Soil_EC_names = [];
 
-      Object.keys(parsedResponse[0]).map((key, index) => {
+      parsedResponse.length>0 && Object.keys(parsedResponse[0]).map((key, index) => {
         if (key.startsWith("mean_Soil_VWC")) {
           mean_Soil_VWC.push(unpackData(parsedResponse, key));
           mean_Soil_VWC_names.push(key);

@@ -45,6 +45,7 @@ export const pinBuilder = new Cesium.PinBuilder();
 export const timelineTracks = {};
 
 export var zoomOnDataSelect = true;
+export var timelineOnDataSelect = true;
 
 export var loadingFinished = false;
 
@@ -132,6 +133,9 @@ export function setInitVars(newInitVars){
 
 export function setZoomOnDataSelect(newZoomOnDataSelect) {
   zoomOnDataSelect=newZoomOnDataSelect;
+}
+export function setTimelineOnDataSelect(newTimelineOnDataSelect) {
+  timelineOnDataSelect=newTimelineOnDataSelect;
 }
 
 export function setLoadingFinshed(newLoadingFinished) {

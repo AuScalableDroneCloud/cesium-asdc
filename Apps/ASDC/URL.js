@@ -1,4 +1,4 @@
-import { setSelectedDataIDs, setPublicTask, setIndexFile,setInit,init, setBillboard,setSelectedDimension,setZoomOnDataSelect,setMSSE, MSSE } from "./State.js";
+import { setSelectedDataIDs, setPublicTask, setIndexFile,setInit,init, setBillboard,setSelectedDimension,setZoomOnDataSelect,setMSSE, MSSE, setTimelineOnDataSelect } from "./State.js";
 
 export const readUrlParams = () => {
   var currentUrl = window.location.href.split('?')[0];
@@ -36,6 +36,10 @@ export const readUrlParams = () => {
     if (init.zoomOnDataSelect!=undefined){
       setZoomOnDataSelect(init.zoomOnDataSelect);
       document.getElementById("zoom-checkbox").checked = init.zoomOnDataSelect;
+    }
+    if (init.timelineOnDataSelect!=undefined){
+      setTimelineOnDataSelect(init.timelineOnDataSelect);
+      document.getElementById("timeline-checkbox").checked = init.timelineOnDataSelect;
     }
     if(init.MSSE!=undefined){
       setMSSE(parseInt(init.MSSE));

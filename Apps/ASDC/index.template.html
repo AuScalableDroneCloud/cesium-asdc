@@ -115,6 +115,8 @@
               <span id="msse-value">83 %</span>
             </td>
           </tr>
+          </table>
+          <table>
           <tr>
             <td
               id="zoom-td"
@@ -129,6 +131,31 @@
                 title="If checked, clicking on layer name will zoom to that dataset"
                 checked="true"
                 id="zoom-checkbox"
+              />
+            </td>
+            <td
+              id="timeline-td"
+              style="pointer-events: auto; width: 20%;"
+              title="If checked, activating datasets will update the timeline's range"
+            >
+              Update timeline:
+            </td>
+            <td style="pointer-events: auto;">
+              <input
+                type="checkbox"
+                title="If checked, activating datasets will update the timeline's range"
+                checked="true"
+                id="timeline-checkbox"
+              />
+            </td>
+            <td style="pointer-events: auto;">
+              <input
+                type="button"
+                value="Sync Timeline"
+                title="Clicking will zoom the timeline to the activated datasets' time range"
+                id="sync-timeline-button"
+                class="cesium-button"
+                style="width:100%;"
               />
             </td>
           </tr>

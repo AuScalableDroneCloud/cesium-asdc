@@ -36,9 +36,11 @@ import {
   odmProjects,
   loadingFinished,
   setLoadingFinshed,
-  mousePosition
+  mousePosition,
+  setTimelineOnDataSelect,
+  timelineOnDataSelect
 } from "./State.js";
-import { loadAsset, loadData, setScreenSpaceError, fetchIndexAssets,fetchWebODMProjects, fetchPublicTask } from "./Datasets.js";
+import { loadAsset, loadData, setScreenSpaceError, fetchIndexAssets,fetchWebODMProjects, fetchPublicTask, syncTimeline } from "./Datasets.js";
 import {
   setupSidebar,
   upload,
@@ -681,6 +683,9 @@ viewer.clock.onTick.addEventListener((clock) => {
                 if (
                   entities[data.asset.id][
                     data.id
+                  ].polygon.material && 
+                  entities[data.asset.id][
+                    data.id
                   ].polygon.material.image.getValue() !== imageUrl
                 ) {
                   entities[data.asset.id][data.id].polygon.material =
@@ -926,6 +931,14 @@ document.getElementById("zoom-checkbox").onchange = (e)=>{
   setZoomOnDataSelect(e.target.checked);
 }
 
+document.getElementById("timeline-checkbox").onchange = (e)=>{
+  setTimelineOnDataSelect(e.target.checked);
+}
+
+document.getElementById("sync-timeline-button").onclick = (e)=>{
+  syncTimeline(false);
+}
+
 const displayShareURL = () => {
   document.getElementById("share-question").style.display="none";
   document.getElementById("share-link").style.display="block";
@@ -1021,6 +1034,7 @@ const displayShareURL = () => {
     billboard:billboard,
     imageryLayersOrder:viewer.imageryLayers._layers.filter(l=>l.data).map(l=>l.data.id),
     zoomOnDataSelect:zoomOnDataSelect,
+    timelineOnDataSelect:timelineOnDataSelect,
     MSSE:MSSE,
     timeline:{
       start: Cesium.JulianDate.toDate(viewer.timeline._startJulian).toISOString(),
