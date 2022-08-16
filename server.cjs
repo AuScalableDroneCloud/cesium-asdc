@@ -1101,6 +1101,9 @@
                   if (json.aspects.terria.definition.url.startsWith("/")){
                     json.aspects.terria.definition.url = "https://vic.digitaltwin.terria.io" + json.aspects.terria.definition.url;
                   }
+                  if (json.aspects.terria.definition.url.startsWith("https://map.aurin.org.au/geoserver/ows")){
+                    json.aspects.terria.definition.url = json.aspects.terria.definition.url.replace("https://map.aurin.org.au/geoserver/ows","https://vic.digitaltwin.terria.io/proxy/_1d/https://map.aurin.org.au/geoserver/ows");
+                  }
                 }                
               }
             }
