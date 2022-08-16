@@ -1037,7 +1037,8 @@
       "https://terria-catalogs-public.storage.googleapis.com/nationalmap/prod.json",
       "https://raw.githubusercontent.com/GeoscienceAustralia/dea-config/master/dev/terria/dea-maps-v8.json",
       "https://terria-catalogs-public.storage.googleapis.com/de-australia/water-regulations-data/prod.json",
-      "https://nsw.digitaltwin.terria.io/api/v0/registry/records/map-config?aspect=terria-config&aspect=terria-init&aspect=group&optionalAspect=terria&dereference=true"
+      "https://nsw.digitaltwin.terria.io/api/v0/registry/records/map-config?aspect=terria-config&aspect=terria-init&aspect=group&optionalAspect=terria&dereference=true",
+      "https://vic.digitaltwin.terria.io/api/v0/registry/records/map-config?aspect=terria-config&aspect=terria-init&aspect=group&optionalAspect=terria&dereference=true"
     ];
     var promises = [];
 
@@ -1059,58 +1060,71 @@
         type:"group",
         name: "NationalMap Catalog",
         members:responses[0].catalog,
+        description: "Please note that data from the NationalMap Catalog is subject to Terms & Conditions: https://nationalmap.gov.au/about.html#data-attribution"
       })
 
       catalogJson.catalog.push({
         type:"group",
         name: "Digital Earth Catalog",
         members:responses[1].catalog,
+        description: "Please note that data from the Digital Earth Catalog is subject to Terms & Conditions: https://maps.dea.ga.gov.au/about#data-attribution"
       })
       catalogJson.catalog.push({
         type:"group",
         name: "Digital Earth Catalog",
         members:responses[2].catalog,
+        description: "Please note that data from the Digital Earth Catalog is subject to Terms & Conditions: https://maps.dea.ga.gov.au/about#data-attribution"
       })
 
       var nswMembers = responses[3].aspects.group.members;
-      var nswPromises = [];
+      var vicMembers = responses[4].aspects.group.members;
+      var statePromises = [];
 
-      const checkProxyUrlAndType = (json)=>{
+      const checkProxyUrlAndType = (json, state)=>{
         return new Promise((resolve, reject) => {
           if(json.aspects && json.aspects.terria){
             if (json.aspects.terria.definition) {
               if (json.aspects.terria.definition.url){
-                if (json.aspects.terria.definition.url.startsWith("https://api.transport.nsw.gov.au")){
-                  json.aspects.terria.definition.url = json.aspects.terria.definition.url.replace("https://api.transport.nsw.gov.au","https://nsw.digitaltwin.terria.io/proxy/https://api.transport.nsw.gov.au")
-                }
-
-                if (json.aspects.terria.definition.url.startsWith("https://nsw-digital-twin-data.terria.io/geoserver/ows")){
-                  json.aspects.terria.definition.url = json.aspects.terria.definition.url.replace("https://nsw-digital-twin-data.terria.io/geoserver/ows","https://nsw.digitaltwin.terria.io/proxy/https://nsw-digital-twin-data.terria.io/geoserver/ows");
-                }
-
-                if (json.aspects.terria.definition.url.startsWith("/")){
-                  json.aspects.terria.definition.url = "https://nsw.digitaltwin.terria.io" + json.aspects.terria.definition.url;
-                }
+                if (state=="nsw"){
+                  if (json.aspects.terria.definition.url.startsWith("https://api.transport.nsw.gov.au")){
+                    json.aspects.terria.definition.url = json.aspects.terria.definition.url.replace("https://api.transport.nsw.gov.au","https://nsw.digitaltwin.terria.io/proxy/https://api.transport.nsw.gov.au")
+                  }
+  
+                  if (json.aspects.terria.definition.url.startsWith("https://nsw-digital-twin-data.terria.io/geoserver/ows")){
+                    json.aspects.terria.definition.url = json.aspects.terria.definition.url.replace("https://nsw-digital-twin-data.terria.io/geoserver/ows","https://nsw.digitaltwin.terria.io/proxy/https://nsw-digital-twin-data.terria.io/geoserver/ows");
+                  }
+  
+                  if (json.aspects.terria.definition.url.startsWith("/")){
+                    json.aspects.terria.definition.url = "https://nsw.digitaltwin.terria.io" + json.aspects.terria.definition.url;
+                  }
+                } else if (state =="vic") {
+                  if (json.aspects.terria.definition.url.startsWith("/")){
+                    json.aspects.terria.definition.url = "https://vic.digitaltwin.terria.io" + json.aspects.terria.definition.url;
+                  }
+                }                
               }
             }
-            if (json.aspects.terria.type){
-              var filterTypes = ['nsw-fuel-price','air-quality-json','nsw-rfs','nsw-traffic'];
-              if (filterTypes.includes(json.aspects.terria.type)){
-                Object.keys(json).map(k=>delete(json[k]))
-                resolve();
+            if (state=="nsw"){
+              if (json.aspects.terria.type){
+                var filterTypes = ['nsw-fuel-price','air-quality-json','nsw-rfs','nsw-traffic'];
+                if (filterTypes.includes(json.aspects.terria.type)){
+                  Object.keys(json).map(k=>delete(json[k]))
+                  resolve();
+                }
               }
             }
           }
           if (json.aspects && json.aspects.group && json.aspects.group.members && json.aspects.group.members.length>0) {
             if (json.aspects.group.members.every(jm=>typeof jm=="string")){
-              fetch(`https://nsw.digitaltwin.terria.io/api/v0/registry/records/${json.id}?optionalAspect=terria&optionalAspect=group&optionalAspect=dcat-dataset-strings&optionalAspect=dcat-distribution-strings&optionalAspect=dataset-distributions&optionalAspect=dataset-format&dereference=true`)
-              .then(response => response.json())
+              fetch(`https://${state}.digitaltwin.terria.io/api/v0/registry/records/${json.id}?optionalAspect=terria&optionalAspect=group&optionalAspect=dcat-dataset-strings&optionalAspect=dcat-distribution-strings&optionalAspect=dataset-distributions&optionalAspect=dataset-format&dereference=true`)
+              .then(response => response.text())
+              .then(text => JSON5.parse(text))
               .then(expandedJson=>{
                 json.aspects.group.members = expandedJson.aspects.group.members;
                 
                 var promises=[];
                 for(var i=0;i<json.aspects.group.members.length;i++){
-                  promises.push(checkProxyUrlAndType(json.aspects.group.members[i]));
+                  promises.push(checkProxyUrlAndType(json.aspects.group.members[i], state));
                 }
                 Promise.all(promises)
                   .then(()=>{
@@ -1120,7 +1134,7 @@
             } else {
               var promises=[];
               for(var i=0;i<json.aspects.group.members.length;i++){
-                promises.push(checkProxyUrlAndType(json.aspects.group.members[i]))
+                promises.push(checkProxyUrlAndType(json.aspects.group.members[i], state))
               }
 
               Promise.all(promises)
@@ -1140,12 +1154,14 @@
         m.url="https://nsw.digitaltwin.terria.io";
         m.type="magda";
         m.recordId=m.id;
-        nswPromises.push(
+
+        statePromises.push(
           new Promise((resolve, reject) => {
             fetch(`https://nsw.digitaltwin.terria.io/api/v0/registry/records/${m.id}?optionalAspect=terria&optionalAspect=group&optionalAspect=dcat-dataset-strings&optionalAspect=dcat-distribution-strings&optionalAspect=dataset-distributions&optionalAspect=dataset-format&dereference=true`)
-            .then(response => response.json())
+            .then(response => response.text())
+            .then(text => JSON5.parse(text))
             .then(json=>{
-              checkProxyUrlAndType(json).then(()=>{
+              checkProxyUrlAndType(json,"nsw").then(()=>{
                 m.magdaRecord=json;
                 if ((json.aspects && json.aspects.group && json.aspects.group.members && Array.isArray(json.aspects.group.members)) ||
                   (json.aspects && json.aspects.terria && json.aspects.terria.definition && json.aspects.terria.definition.isGroup)
@@ -1160,12 +1176,49 @@
         )
       })
 
-      Promise.all(nswPromises).then(()=>{
+      vicMembers.map(m=>{
+        delete(m.aspects);
+        delete(m.authnReadPolicyId);
+        m.url="https://vic.digitaltwin.terria.io";
+        m.type="magda";
+        m.recordId=m.id;
+
+        statePromises.push(
+          new Promise((resolve, reject) => {
+            fetch(`https://vic.digitaltwin.terria.io/api/v0/registry/records/${m.id}?optionalAspect=terria&optionalAspect=group&optionalAspect=dcat-dataset-strings&optionalAspect=dcat-distribution-strings&optionalAspect=dataset-distributions&optionalAspect=dataset-format&dereference=true`)
+            .then(response => response.text())
+            .then(text => JSON5.parse(text))
+            .then(json=>{
+              checkProxyUrlAndType(json,"vic").then(()=>{
+                m.magdaRecord=json;
+                if ((json.aspects && json.aspects.group && json.aspects.group.members && Array.isArray(json.aspects.group.members)) ||
+                  (json.aspects && json.aspects.terria && json.aspects.terria.definition && json.aspects.terria.definition.isGroup)
+                ){
+                  m.isGroup=true;
+                }
+
+                resolve();
+              })
+            })
+          })
+        )
+      })
+
+      Promise.all(statePromises).then(()=>{
           catalogJson.catalog.push({
             type:"group",
             name: "NSW Spatial Digital Twin Catalog",
-            members:nswMembers
+            members:nswMembers,
+            description: "Please note that data from the NSW Spatial Digital Twin Catalog is subject to Terms & Conditions: https://nsw.digitaltwin.terria.io/about.html#data-attribution"
           })
+
+          catalogJson.catalog.push({
+            type:"group",
+            name: "Digital Twin Victoria Catalog",
+            members:vicMembers,
+            description: "Please note that data from the Digital Twin Victoria Catalog is subject to Terms & Conditions: https://www.land.vic.gov.au/maps-and-spatial/digital-twin-victoria/dtv-platform/data-and-terms#heading-4"
+          })
+
           res.status(200).json(catalogJson);
       })
     })
