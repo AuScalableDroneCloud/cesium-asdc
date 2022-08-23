@@ -513,6 +513,7 @@ export const loadData = (
         orientation: orientation,
         model: {
           uri: data["url"],
+          scale:data.scale ?? 1
         },
       });
 
