@@ -40,6 +40,8 @@ export var MSSE = 83;
 
 export var markersDataSource;
 
+export var cropBoxes={};
+
 export const pinBuilder = new Cesium.PinBuilder();
 
 export const timelineTracks = {};

@@ -28,12 +28,14 @@ import {
   initVars,
   init,
   sharedDivs,
-  timelineOnDataSelect
+  timelineOnDataSelect,
+  cropBoxes
 } from "./State.js";
 import { loadAsset, loadData, syncTimeline } from "./Datasets.js";
 import { pcFormats, processingAPI } from "./Constants.js";
 import { closeGraphModal } from "./Graphs.js";
 import { applyAlpha, getAlpha } from "./Style.js";
+import {cropBox} from "./CropBox.js";
 
 export const setupSidebar = (uploads, indexParam=false) => {
   if (!assets) return;
@@ -46,10 +48,7 @@ export const setupSidebar = (uploads, indexParam=false) => {
       var sources = ["Public Data", "WebODM Projects"];
 
       var sharedODMAssetsExist = false
-      if(init && init.index && init.index.categories && init.index.categories.length){//
-      // if(init && init.index && init.index.categories && !sourceDivs["Shared WebODM Datasets"]){//
-      // if(init && init.index){
-        //// sources.push(init.index.source);
+      if(init && init.index && init.index.categories && init.index.categories.length){
         sources.push("Shared WebODM Datasets");
         sharedODMAssetsExist=true;
       }
@@ -1188,7 +1187,7 @@ const handleAssetCheckboxChange = (checkboxes, assetCheckbox, asset, uploads) =>
 
 const createZoomButton = (asset, data) => {
   var zoomButton = document.createElement("div");
-  zoomButton.className = "fa fa-video-camera zoom-button";
+  zoomButton.className = "fa fa-video-camera sidebar-button";
   zoomButton.onclick = (evt) => {
     if (entities[asset.id] && entities[asset.id][data.id]) {
       Cesium.sampleTerrainMostDetailed(
@@ -1699,6 +1698,20 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
 
       checkbox.onchange = (e) => {
+        if (cropDiv){
+          if (checkbox.checked){
+            if (cropBoxes[data.id] && cropBoxes[data.id].tileset.clippingPlanes.enabled){
+              cropDiv.style.display = "block";
+              cropButton.style.color = "#0075ff";
+              cropBoxes[data.id].toggleVisibilityOn();
+            }
+          } else {
+            cropDiv.style.display = "none";
+            cropButton.style.color = null;
+            cropBoxes[data.id].toggleVisibilityOff();
+          }
+        }
+
         handleDataCheckboxChange(checkbox, assetCheckbox, checkboxes, asset, data, uploads)
       };
 
@@ -1728,11 +1741,212 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
       dateDiv.appendChild(dateContentDiv);
       dateDivs.push(dateDiv);
 
+      if (data.type == "PointCloud" || 
+          (data.type == "EPTPointCloud" && !Array.isArray(data.url)) ||
+          data.type == "ModelTileset") {
+        var cropDiv = document.createElement('div');
+        cropDiv.style.display = "none";
+        cropDiv.style['border-bottom'] = "1px solid #efe5d5";
+        cropDiv.style.background = "wheat";
+        cropDiv.id = `cropDiv-${data.id}`;
+
+        var cropTable1 = document.createElement('table');
+        cropTable1.style="width: 100%;padding: 5px;";
+        var tr1 = document.createElement('tr');
+        var td = document.createElement('td');
+        td.innerHTML = "Show: ";
+        var td2 = document.createElement('td');
+        var showCheckbox = document.createElement("input");
+        showCheckbox.id = `crop-checkbox-${data.id}`;
+        showCheckbox.type = "checkbox";
+        showCheckbox.style="float: right;padding: 0;";
+        showCheckbox.checked=true;
+        showCheckbox.onchange=()=>{
+          if (tilesets[data.asset.id][data.id].show)
+            cropBoxes[data.id].toggleVisibility();
+        };
+        td2.appendChild(showCheckbox);
+        var td3 = document.createElement('td');
+        td3.innerHTML = "Above ground: ";
+        var td4 = document.createElement('td');
+        var aboveGroundCheckbox = document.createElement("input");
+        aboveGroundCheckbox.type = "checkbox";
+        aboveGroundCheckbox.style="float: right;padding: 0;";
+        aboveGroundCheckbox.id = `aboveGroundCheckbox-${data.id}`;
+        aboveGroundCheckbox.checked=true;
+        aboveGroundCheckbox.onchange=()=>{
+          cropBoxes[data.id].toggleAboveGround();
+        };
+        td4.appendChild(aboveGroundCheckbox);
+        tr1.appendChild(td);
+        tr1.appendChild(td2);
+        tr1.appendChild(td3);
+        tr1.appendChild(td4);
+        cropTable1.appendChild(tr1);
+
+        var cropTable2 = document.createElement('table');
+        cropTable2.style="width: 100%;padding: 5px;";
+        var tr2 = document.createElement('tr');
+        var td5 = document.createElement('td');
+        td5.innerHTML = "Direction: ";
+        var td6 = document.createElement('td');
+        var directionSelect = document.createElement("select");
+        directionSelect.id = `crop-direction-${data.id}`;
+        var insideOption = document.createElement("option");
+        insideOption.innerHTML = "Inside";
+        insideOption.value = "inside";
+        var outsideOption = document.createElement("option");
+        outsideOption.innerHTML = "Outside";
+        outsideOption.value = "outside";
+        directionSelect.appendChild(insideOption);
+        directionSelect.appendChild(outsideOption);
+        directionSelect.onchange=()=>{
+          var val = directionSelect.value;
+          const clipDirection = val === "inside" ? -1 : 1;
+          var clippingPlanes = tilesets[data.asset.id][data.id].clippingPlanes;
+
+          clippingPlanes._planes.map(p=>{
+            p.distance = Math.abs(p.distance) * clipDirection;
+          })
+
+          clippingPlanes.unionClippingRegions=val==="inside"?false:true;
+        }
+        td6.appendChild(directionSelect);
+        if (data.type == "EPTPointCloud" && !Array.isArray(data.url)){
+          var td7 = document.createElement('td');
+          var exportButton  = document.createElement('button');
+          exportButton.innerHTML = "Export";
+          exportButton.style="width:100%;"
+          exportButton.onclick = ()=>{
+            var scalePoints = cropBoxes[data.id]?.scalePoints.slice(0, 8);
+            var groundScalePoints= [scalePoints[1],scalePoints[3],scalePoints[5], scalePoints[7], scalePoints[1]]
+            var wktPolygon = "POLYGON((";
+            groundScalePoints.map((entity,index)=>{
+                var pos = Cesium.Cartographic.fromCartesian(entity.position.getValue(Cesium.JulianDate.now()));
+                var lon = pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
+                var lat = pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
+                wktPolygon += `${lon} ${lat}`;
+                if (index!=groundScalePoints.length-1){
+                    wktPolygon+=",";
+                }
+            })
+
+            wktPolygon+="))"
+
+            var now = Cesium.JulianDate.now();
+            var heights = scalePoints.map(entity =>{
+              var pos = Cesium.Cartographic.fromCartesian(entity.position.getValue(now));
+              return pos.height;
+            });
+
+            var maxHeight = Math.max(...heights)
+            var minHeight = Math.min(...heights)
+
+            var lons=scalePoints.map(entity =>{
+              var pos = Cesium.Cartographic.fromCartesian(entity.position.getValue(now));
+              return pos.longitude* Cesium.Math.DEGREES_PER_RADIAN;
+            });
+            var minLon = Math.min(...lons);
+            var maxLon = Math.max(...lons);
+
+            var lats=scalePoints.map(entity =>{
+              var pos = Cesium.Cartographic.fromCartesian(entity.position.getValue(now));
+              return pos.latitude* Cesium.Math.DEGREES_PER_RADIAN;
+            });
+            var minLat = Math.min(...lats);
+            var maxLat = Math.max(...lats);
+
+            const urlParams = new URLSearchParams(tilesets[data.asset.id][data.id]._url.split('?')[1]);
+            const ept = urlParams.get('ept');
+
+            const bbox = [minLon, maxLon, minLat, maxLat, minHeight,maxHeight];
+            const outside = !tilesets[data.asset.id][data.id].clippingPlanes?.unionClippingRegions;
+
+            var a = document.createElement('a');
+            a.target = "_blank";
+            a.href = `https://cesium-api.asdc.cloud.edu.au/crop?ept=${ept}&polygon=${wktPolygon}&bbox=${bbox}&outside=${outside}`;
+            a.click();
+            a.remove();
+          }
+          td7.appendChild(exportButton);
+        }
+        tr2.appendChild(td5);
+        tr2.appendChild(td6);
+        if (td7) tr2.appendChild(td7);
+        cropTable2.appendChild(tr2);
+
+        cropDiv.appendChild(cropTable1);
+        cropDiv.appendChild(cropTable2);
+
+        dateDivs.push(cropDiv)
+      }
+      
       var colorDiv = document.createElement("div");
       colorDiv.style = "width: 12px;height: 12px;background: red;margin-left: 5px;border-radius: 1px;display:none;flex-shrink:0;"
       colorDiv.id = `colorDiv-${data.id}`;
       dateContentDiv.appendChild(colorDiv);
 
+    if (data.type == "PointCloud" || 
+      (data.type == "EPTPointCloud" && !Array.isArray(data.url)) ||
+      data.type == "ModelTileset") {
+      var cropButton = document.createElement("div");
+      cropButton.className = "fa fa-crop sidebar-button";
+      cropButton.style['margin-left'] = "5px";
+      cropButton.id = `cropButton-${data.id}`;
+      
+      cropButton.onclick=(e)=>{
+        if (!cropButton.style.color || cropButton.style.color=="white"){
+          cropButton.style.color = "#0075ff";
+        } else {
+          cropButton.style.color = null;
+        }
+
+        cropDiv.style.display = cropDiv.style.display=="none" ? "block" : "none";
+        
+        if (!cropBoxes[data.id]){
+          if (!(tilesets[data.asset.id] && tilesets[data.asset.id][data.id])){
+            dateDiv.onclick();
+            tilesets[data.asset["id"]][data.id].readyPromise.then(function (
+              tileset
+            ) {
+              cropBoxes[data.id] = new cropBox(data);
+            })
+          } else {
+            cropBoxes[data.id] = new cropBox(data);
+          }
+        } else {
+          cropBoxes[data.id].toggleEnable();
+        }
+        
+        var panel = datesPanelDiv;
+
+        var height=0;
+        var children = [...panel.children];
+        for (var i=0;i<children.length;i++) {
+          height+=children[i].scrollHeight + children[i].getBoundingClientRect().height;
+        }
+        
+        panel.style.maxHeight = height + "px";
+
+        var elem = panel.parentElement;
+        while (elem && elem.id != "sidebar" && elem.id != "sidebar-data-buttons") {          
+          var height = 0;
+          var children = [...elem.children];
+          for(var i=0;i<children.length;i++){
+            if (children[i].style.maxHeight){
+              height+=parseFloat(children[i].style.maxHeight.slice(0,-2));
+            } else {
+              height+=children[i].scrollHeight + children[i].getBoundingClientRect().height;
+            }
+          }
+          elem.style.maxHeight = height + "px";
+
+          elem = elem.parentElement;
+        }
+      }
+
+      dateContentDiv.appendChild(cropButton);
+    }
       if (data.type === "ImageSeries") {
         var zoomButton = createZoomButton(asset, data);
         dateContentDiv.appendChild(zoomButton);

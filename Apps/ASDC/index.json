@@ -184,6 +184,8 @@
         73,
         70,
         66,
+        101,
+        102,
         71,
         72,
         29
@@ -3759,6 +3761,50 @@
       },
       "boundingSphereRadius": 481.91103102102863,
       "zoom":"boundingSphere"
+    },
+    {
+      "id": 101,
+      "type": "Model",
+      "name": "Growth Capsule Model 3 - New",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/Capsule/APPF.gltf",
+      "position": {
+        "lng": 149.116541432,
+        "lat": -35.2785529873,
+        "height": 584.5890930951741
+      },
+      "rotation": {
+        "heading": 33,
+        "pitch": 0,
+        "roll": 0
+      },
+      "scale":0.01,
+      "boundingSphereRadius": 6.354320339206865,
+      "zoom": "boundingSphere",
+      "source": {
+        "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/Capsule/APPF.gltf"
+      }
+    },
+    {
+      "id": 102,
+      "type": "Model",
+      "name": "Growth Capsule Model 3 - New Unlit",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/Capsule/APPF_Unlit.gltf",
+      "position": {
+        "lng": 149.116541432,
+        "lat": -35.2785529873,
+        "height": 584.5890930951741
+      },
+      "rotation": {
+        "heading": 33,
+        "pitch": 0,
+        "roll": 0
+      },
+      "scale":0.01,
+      "boundingSphereRadius": 6.354320339206865,
+      "zoom": "boundingSphere",
+      "source": {
+        "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/Capsule/APPF_Unlit.gltf"
+      }
     }
   ],
   "categories": [

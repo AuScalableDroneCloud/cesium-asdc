@@ -38,7 +38,8 @@ import {
   setLoadingFinshed,
   mousePosition,
   setTimelineOnDataSelect,
-  timelineOnDataSelect
+  timelineOnDataSelect,
+  cropBoxes
 } from "./State.js";
 import { loadAsset, loadData, setScreenSpaceError, fetchIndexAssets,fetchWebODMProjects, fetchPublicTask, syncTimeline } from "./Datasets.js";
 import {
@@ -52,6 +53,7 @@ import {
 import { closeGraphModal, loadCSVGraphs, loadInfluxGraphs } from "./Graphs.js";
 import { readUrlParams } from "./URL.js";
 import { applyAlpha, getAlpha } from "./Style.js";
+import { cropBox } from "./CropBox.js";
 
 Cesium.Ion.defaultAccessToken = cesiumIonAccessToken;
 
@@ -231,6 +233,76 @@ export const applyInit = ()=>{
         .map(data=>{
           applyAlpha(parseFloat(init.opacity[data.id.toString()]),data.asset,data);
         })
+    }
+    if (init.cropBoxes){
+      selectedDatasets.map(data=>{
+        if (init.cropBoxes[data.id]){
+          tilesets[data.asset["id"]][data.id].readyPromise.then(function (
+            tileset
+          ) {
+              if (!cropBoxes[data.id]){
+                cropBoxes[data.id] = new cropBox(data);                
+
+                var cropButton = document.getElementById(`cropButton-${data.id}`);
+                cropButton.style.color = "#0075ff";
+
+                var cropDiv = document.getElementById(`cropDiv-${data.id}`);
+                cropDiv.style.display = "block";
+
+                var panel = cropDiv.parentElement;
+                var height=0;
+                var children = [...panel.children];
+                for (var i=0;i<children.length;i++) {
+                  height+=children[i].scrollHeight + children[i].getBoundingClientRect().height;
+                }
+                
+                panel.style.maxHeight = height + "px";
+
+                var elem = panel.parentElement;
+                while (elem && elem.id != "sidebar" && elem.id != "sidebar-data-buttons") {          
+                  var height = 0;
+                  var children = [...elem.children];
+                  for(var i=0;i<children.length;i++){
+                    if (children[i].style.maxHeight){
+                      height+=parseFloat(children[i].style.maxHeight.slice(0,-2));
+                    } else {
+                      height+=children[i].scrollHeight + children[i].getBoundingClientRect().height;
+                    }
+                  }
+                  elem.style.maxHeight = height + "px";
+
+                  elem = elem.parentElement;
+                }
+
+                var showCheckbox = document.getElementById(`crop-checkbox-${data.id}`);
+                showCheckbox.checked=init.cropBoxes[data.id].show;
+                showCheckbox.onchange();
+
+                var aboveGroundCheckbox = document.getElementById(`aboveGroundCheckbox-${data.id}`)
+                aboveGroundCheckbox.checked=init.cropBoxes[data.id].keepBoxAboveGround;
+                if (cropBoxes[data.id].keepBoxAboveGround) {
+                  cropBoxes[data.id].keepBoxAboveGround = init.cropBoxes[data.id].keepBoxAboveGround;
+                  cropBoxes[data.id].setBoxAboveGround();
+                }
+
+                cropBoxes[data.id].trs=init.cropBoxes[data.id].trs;
+                
+
+                var directionSelect = document.getElementById(`crop-direction-${data.id}`);
+                directionSelect.value=init.cropBoxes[data.id].direction;
+                directionSelect.onchange();
+
+                cropBoxes[data.id].updateBox();
+                cropBoxes[data.id].onChange({
+                  modelMatrix: cropBoxes[data.id].modelMatrix,
+                  translationRotationScale:cropBoxes[data.id].trs
+                });
+                cropBoxes[data.id].updateEntitiesOnOrientationChange();
+              }
+            })
+          }
+        }
+      )
     }
   }
 }
@@ -528,6 +600,13 @@ viewer.clock.onTick.addEventListener((clock) => {
           } else {
             if (MSSE !== 0) {
               tilesets[assetID][timelineAssetDatasets[i].id].show = true;
+
+              if (cropBoxes[timelineAssetDatasets[i].id] &&
+                  cropBoxes[timelineAssetDatasets[i].id].tileset.clippingPlanes.enabled &&
+                  document.getElementById(`crop-checkbox-${timelineAssetDatasets[i].id}`).checked
+                ){
+                cropBoxes[timelineAssetDatasets[i].id].toggleVisibilityOn();
+              }
             }
           }
         }
@@ -547,6 +626,10 @@ viewer.clock.onTick.addEventListener((clock) => {
             });
           } else {
             tilesets[assetID][timelineAssetDatasets[i].id].show = false;
+
+            if (cropBoxes[timelineAssetDatasets[i].id]){
+              cropBoxes[timelineAssetDatasets[i].id].toggleVisibilityOff();
+            }
           }
         }
         if (imageryLayers[assetID] && imageryLayers[assetID][timelineAssetDatasets[i].id]){
@@ -1023,6 +1106,15 @@ const displayShareURL = () => {
     delete(proj.permissions);
   })
 
+  var shareCropBoxes = {};
+  Object.keys(cropBoxes).map(b=>{
+    shareCropBoxes[b] = {};
+    shareCropBoxes[b].trs = cropBoxes[b].trs;
+    shareCropBoxes[b].show = document.getElementById(`crop-checkbox-${b}`).checked;    
+    shareCropBoxes[b].keepBoxAboveGround = cropBoxes[b].keepBoxAboveGround;
+    shareCropBoxes[b].direction = document.getElementById(`crop-direction-${b}`).value;
+  })
+
   var initParams={
     camera:{
       position:viewer.camera.positionWC,
@@ -1041,6 +1133,7 @@ const displayShareURL = () => {
       end: Cesium.JulianDate.toDate(viewer.timeline._endJulian).toISOString()
     },
     opacity:alphas,
+    cropBoxes:shareCropBoxes
   }
 
   if (selectedData){
@@ -1064,7 +1157,7 @@ const displayShareURL = () => {
                   } else {
                     return d.id
                   }
-                }).join("&")
+                }).sort().join("&")
                 + "?"
                 + (urlParams.get('index') ? 'index=' + urlParams.get('index') : "")
                 + (urlParams.get('task') ? '&task=' + urlParams.get('task') : "")

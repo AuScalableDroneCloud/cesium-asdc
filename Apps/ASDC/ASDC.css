@@ -333,12 +333,12 @@
   cursor: pointer;
 }
 
-.zoom-button {
+.sidebar-button {
   float: right;
   margin-left: 5px;
 }
 
-.zoom-button:hover {
+.sidebar-button:hover {
   color: white;
 }
 
