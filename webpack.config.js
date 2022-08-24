@@ -37,6 +37,7 @@ module.exports = {
         { from: "./Apps/SampleData", to: "../SampleData" },
         { from: "./Apps/TimelineDemo", to: "../TimelineDemo" },
         { from: "./Apps/ASDC/index.json", to: "./index.json" },
+        { from: "./Apps/ASDC/box.glb", to: "./box.glb" },
         { from: "./ThirdParty", to: "../../ThirdParty" },
         // { from: "./node_modules/cesium/Build", to: "../../Build" },
       ],
