@@ -482,7 +482,7 @@ export class cropBox {
         var scalePoint = this.dataSource.entities.add({
             position: new Cesium.CallbackProperty(() => pos, false),
             model: {
-                uri: "/cesium/Apps/ASDC/box.glb",
+                uri: "/cesium/Apps/ASDC/Box.glb",
                 minimumPixelSize: 12,
                 color: new Cesium.CallbackProperty(() => getColor(), false),
                 colorBlendMode: Cesium.ColorBlendMode.REPLACE,
