@@ -1698,19 +1698,21 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
 
       checkbox.onchange = (e) => {
+        if (cropBoxes[data.id] && cropBoxes[data.id].tileset.clippingPlanes.enabled){
         if (cropDiv){
           if (checkbox.checked){
-            if (cropBoxes[data.id] && cropBoxes[data.id].tileset.clippingPlanes.enabled){
+            // if (cropBoxes[data.id] && cropBoxes[data.id].tileset.clippingPlanes.enabled){
               cropDiv.style.display = "block";
               cropButton.style.color = "#0075ff";
               cropBoxes[data.id].toggleVisibilityOn();
-            }
+            // }
           } else {
             cropDiv.style.display = "none";
             cropButton.style.color = null;
             cropBoxes[data.id].toggleVisibilityOff();
           }
         }
+      }
 
         handleDataCheckboxChange(checkbox, assetCheckbox, checkboxes, asset, data, uploads)
       };

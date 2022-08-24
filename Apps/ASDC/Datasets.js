@@ -79,9 +79,9 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
       if (timelineOnDataSelect) {
         viewer.timeline.zoomTo(
           Cesium.JulianDate.fromDate(
-            new Date(initialDate.getTime() - 2 * 7 * 86400000)
+            new Date(initialDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01)
           ),
-          Cesium.JulianDate.fromDate(initialDate)
+          Cesium.JulianDate.fromDate(new Date(initialDate.getTime() + 2 * 7 * 86400000 * 0.01))
         );
       }
     } else {
@@ -91,10 +91,9 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
       if (timelineOnDataSelect) {
         viewer.timeline.zoomTo(
           Cesium.JulianDate.fromDate(
-            new Date(currentDate.getTime() - 2 * 7 * 86400000)
-            // new Date(currentDate.getTime() + 86400000)
+            new Date(currentDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01)
           ),
-          Cesium.JulianDate.fromDate(new Date())
+          Cesium.JulianDate.fromDate(new Date((new Date()).getTime() + 2 * 7 * 86400000 * 0.01))
         );
       }
     }
@@ -104,11 +103,14 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
         viewer.clock.currentTime = new Cesium.JulianDate.fromDate(new Date(assetDataset[0].endDateTime));
         viewer.timeline.updateFromClock();
         if (timelineOnDataSelect) {
+          var diff = new Date(new Date(assetDataset[0].endDateTime).getTime() - new Date(assetDataset[0].startDateTime).getTime())
           viewer.timeline.zoomTo(
             Cesium.JulianDate.fromDate(
-              new Date(assetDataset[0].startDateTime)
+              new Date(new Date(assetDataset[0].startDateTime).getTime() - 0.01 * diff)
             ),
-            Cesium.JulianDate.fromDate(new Date(assetDataset[0].endDateTime))
+            Cesium.JulianDate.fromDate(
+              new Date(new Date(assetDataset[0].endDateTime).getTime() + 0.01 * diff)
+            )
           );
         }
       } else {
@@ -118,9 +120,9 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
         if (timelineOnDataSelect) {
           viewer.timeline.zoomTo(
             Cesium.JulianDate.fromDate(
-              new Date(initialDate.getTime() - 2 * 7 * 86400000)
+              new Date(initialDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01)
             ),
-            Cesium.JulianDate.fromDate(initialDate)
+            Cesium.JulianDate.fromDate(new Date(initialDate.getTime() + 2 * 7 * 86400000 * 0.01))
           );
         }
       }
@@ -131,9 +133,9 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
       if (timelineOnDataSelect) {
         viewer.timeline.zoomTo(
           Cesium.JulianDate.fromDate(
-            new Date(currentDate.getTime() - 2 * 7 * 86400000)
+            new Date(currentDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01)
           ),
-          Cesium.JulianDate.fromDate(new Date())
+          Cesium.JulianDate.fromDate(new Date((new Date()).getTime() + 2 * 7 * 86400000 * 0.01))
         );
       }
     }
@@ -174,9 +176,10 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
           viewer.clock.currentTime = new Cesium.JulianDate.fromDate(minDate);
           viewer.timeline.updateFromClock();
           if (timelineOnDataSelect) {
+            var diff = (new Date(maxDate.getTime() + 86400000 - minDate.getTime())).getTime();
             viewer.timeline.zoomTo(
-              Cesium.JulianDate.fromDate(minDate),
-              Cesium.JulianDate.fromDate(new Date(maxDate.getTime() + 86400000))
+              Cesium.JulianDate.fromDate(new Date(minDate.getTime() - diff * 0.01)),
+              Cesium.JulianDate.fromDate(new Date(maxDate.getTime() + 86400000 + diff * 0.01))
             );
           }
         } else {
@@ -372,9 +375,9 @@ export const loadData = (
       if (timelineOnDataSelect) {
         viewer.timeline.zoomTo(
           Cesium.JulianDate.fromDate(
-            new Date(initialDate.getTime() - 2 * 7 * 86400000)
+            new Date(initialDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01)
           ),
-          Cesium.JulianDate.fromDate(initialDate)
+          Cesium.JulianDate.fromDate(new Date(initialDate.getTime() + 2 * 7 * 86400000 * 0.01))
         );
       }
     } else {
@@ -384,9 +387,9 @@ export const loadData = (
       if (timelineOnDataSelect) {
         viewer.timeline.zoomTo(
           Cesium.JulianDate.fromDate(
-            new Date(currentDate.getTime() - 2 * 7 * 86400000)
+            new Date(currentDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01)
           ),
-          Cesium.JulianDate.fromDate(new Date())
+          Cesium.JulianDate.fromDate(new Date((new Date()).getTime() + 2 * 7 * 86400000 * 0.01))
         );
       }
     }
@@ -396,11 +399,14 @@ export const loadData = (
         viewer.clock.currentTime = new Cesium.JulianDate.fromDate(new Date(data.endDateTime));
         viewer.timeline.updateFromClock();
         if (timelineOnDataSelect) {
+          var diff = new Date(new Date(data.endDateTime).getTime() - new Date(data.startDateTime).getTime())
           viewer.timeline.zoomTo(
             Cesium.JulianDate.fromDate(
-              new Date(data.startDateTime)
+              new Date(new Date(data.startDateTime).getTime() - 0.01 * diff)
             ),
-            Cesium.JulianDate.fromDate(new Date(data.endDateTime))
+            Cesium.JulianDate.fromDate(
+              new Date(new Date(data.endDateTime).getTime() + 0.01 * diff)
+            )
           );
         }
       } else {
@@ -410,9 +416,9 @@ export const loadData = (
         if (timelineOnDataSelect) {
           viewer.timeline.zoomTo(
             Cesium.JulianDate.fromDate(
-              new Date(initialDate.getTime() - 2 * 7 * 86400000)
+              new Date(initialDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01)
             ),
-            Cesium.JulianDate.fromDate(initialDate)
+            Cesium.JulianDate.fromDate(new Date(initialDate.getTime() + 2 * 7 * 86400000 * 0.01))
           );
         }
       }
@@ -423,9 +429,9 @@ export const loadData = (
       if (timelineOnDataSelect) {
         viewer.timeline.zoomTo(
           Cesium.JulianDate.fromDate(
-            new Date(currentDate.getTime() - 2 * 7 * 86400000)
+            new Date(currentDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01)
           ),
-          Cesium.JulianDate.fromDate(new Date())
+          Cesium.JulianDate.fromDate(new Date((new Date()).getTime() + 2 * 7 * 86400000 * 0.01))
         );
       }
     }
@@ -1074,8 +1080,8 @@ export const loadData = (
         viewer.timeline.updateFromClock();
         if (timelineOnDataSelect) {
           viewer.timeline.zoomTo(
-            Cesium.JulianDate.fromDate(date),
-            Cesium.JulianDate.fromDate(new Date(date.getTime() + 86400000))
+            Cesium.JulianDate.fromDate(new Date(date.getTime() - 86400000 * 0.01)),
+            Cesium.JulianDate.fromDate(new Date(date.getTime() + 86400000 + 86400000 * 0.01))
           );
         }
         // if (data["type"] === "PointCloud" || data["type"] === "EPTPointCloud") {
@@ -1584,9 +1590,14 @@ export const syncTimeline = (setCurrentTime) => {
       viewer.clock.currentTime = new Cesium.JulianDate.fromDate(minDate);
       viewer.timeline.updateFromClock();
     }
+
+    var dif = maxDate.getTime() - minDate.getTime();
+    var zoomMin = new Date(minDate.getTime() - (dif/100));
+    var zoomMax = new Date(maxDate.getTime() + (dif/100));
+
     viewer.timeline.zoomTo(
-      Cesium.JulianDate.fromDate(minDate),
-      Cesium.JulianDate.fromDate(new Date(maxDate.getTime()))
+      Cesium.JulianDate.fromDate(zoomMin),
+      Cesium.JulianDate.fromDate(zoomMax)
     );
   }
 
