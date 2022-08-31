@@ -1904,10 +1904,20 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
 
             const bbox = [minLon, maxLon, minLat, maxLat, minHeight,maxHeight];
             const outside = !tilesets[data.asset.id][data.id].clippingPlanes?.unionClippingRegions;
-
+            
+            if (data.asset.project){
+              var projectName = odmProjects.find(p=>p.id==data.asset.project).name;
+              var fileName = `${projectName}_${data.asset.name}_PointCloud_Crop.laz`;
+            } else {
+              var fileName = `${data.asset.name}_${data.date?new Date(data.date).toLocaleDateString("en-au", {
+                year: "numeric",
+                month: "numeric",
+                day: "numeric"
+              })+'-':''}${data.name}_PointCloud_Crop.laz`;
+            }
             var a = document.createElement('a');
             a.target = "_blank";
-            a.href = `${processingAPI}/crop?ept=${ept}&polygon=${wktPolygon}&bbox=${bbox}&outside=${outside}`;
+            a.href = `${processingAPI}/crop?ept=${ept}&polygon=${wktPolygon}&bbox=${bbox}&outside=${outside}&filename=${fileName}`;
             a.click();
             a.remove();
           }
