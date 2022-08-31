@@ -37,7 +37,7 @@ export class cropBox {
         this.scalePoints.forEach(scalePoint => scalePoint.updateOnCameraChange());
     }
 
-    onChange = ({ modelMatrix, isFinished }) => {
+    onChange = ({ modelMatrix }) => {
         Cesium.Matrix4.multiply(
             this.inverseClippingPlanesOriginMatrix,
             modelMatrix,
@@ -118,6 +118,10 @@ export class cropBox {
         this.updateTerrainHeightEstimate(true).then(() => {
             this.moveBoxWithClamping(Cesium.Cartesian3.ZERO);
             this.updateBox();
+            this.onChange({
+                modelMatrix: this.modelMatrix,
+                translationRotationScale:this.trs
+            });
         });
     }
 
@@ -391,7 +395,6 @@ export class cropBox {
             moveBoxWithClamping(moveStep);
             this.updateBox();
             this.onChange({
-                isFinished: false,
                 modelMatrix: this.modelMatrix,
                 translationRotationScale: this.trs
             });
@@ -432,7 +435,6 @@ export class cropBox {
             this.onChange({
                 modelMatrix: this.modelMatrix,
                 translationRotationScale: this.trs,
-                isFinished: true
             });
         }
 
@@ -548,7 +550,6 @@ export class cropBox {
             this.onChange({
                 modelMatrix: this.modelMatrix,
                 translationRotationScale: this.trs,
-                isFinished: true
             });
             this.setCanvasCursor(viewer.scene, "auto");
         }
@@ -680,7 +681,6 @@ export class cropBox {
             this.updateBox();
 
             this.onChange({
-                isFinished: false,
                 modelMatrix: this.modelMatrix,
                 translationRotationScale: this.trs
             });
@@ -857,7 +857,6 @@ export class cropBox {
             isHighlighted = false;
             this.setCanvasCursor(viewer.scene, "auto");
             this.onChange({
-                isFinished: true,
                 modelMatrix: this.modelMatrix,
                 translationRotationScale: this.trs
             });
@@ -961,7 +960,7 @@ export class cropBox {
         const cartographic = Cesium.Cartographic.fromCartesian(
             Cesium.Matrix4.getTranslation(clippingPlanesOriginMatrix, new Cesium.Cartesian3())
         );
-        cartographic.height = this.dimensions.z / 2;
+
         position = Cesium.Cartographic.toCartesian(
             cartographic,
             viewer.scene.globe.ellipsoid,
@@ -1003,10 +1002,6 @@ export class cropBox {
             ),
             this.trs.rotation
         );
-
-        this.setBoxAboveGround();
-
-        this.updateBox();
 
         const eventHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
         eventHandler.setInputAction(this.handlePick, Cesium.ScreenSpaceEventType.LEFT_DOWN);
@@ -1062,18 +1057,21 @@ export class cropBox {
             this.edges.push(edge);
         });
 
-        const clipDirection = -1;
+        const clipDirection = 1;
 
         const planes = SIDE_PLANES.map(plane => {
             return new Cesium.ClippingPlane(plane.normal, plane.distance * clipDirection);
         });
         const clippingPlaneCollection = new Cesium.ClippingPlaneCollection({
             planes,
-            unionClippingRegions: false,
+            unionClippingRegions: true,
             enabled: true
         });
-        clippingPlaneCollection.modelMatrix = this.clippingPlaneModelMatrix;
 
+        this.setBoxAboveGround();
+
+        clippingPlaneCollection.modelMatrix = this.clippingPlaneModelMatrix;
+          
         this.tileset.clippingPlanes = clippingPlaneCollection;
 
         viewer.scene.camera.changed.addEventListener(this.updateEntitiesOnOrientationChange)
