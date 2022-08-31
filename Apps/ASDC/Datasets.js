@@ -634,6 +634,9 @@ export const loadData = (
                 // });
 
                 if (data["position"]) {
+                  tilesets[data.asset.id][data.id].boundingSphereCenter = new Cesium.Cartesian3();
+                  tilesets[data.asset.id][data.id].boundingSphere.center.clone(tilesets[data.asset.id][data.id].boundingSphereCenter);
+
                   var offset = Cesium.Cartographic.toCartesian(
                     new Cesium.Cartographic.fromDegrees(
                       data["position"]["lng"],
@@ -649,12 +652,6 @@ export const loadData = (
                   tileset.modelMatrix =
                   // tileset.root.transofrm =
                     Cesium.Matrix4.fromTranslation(translation);
-                    // Cesium.Matrix4.fromTranslationRotationScale(new Cesium.TranslationRotationScale(translation, Cesium.Quaternion.IDENTITY, new Cesium.Cartesian3(0.1, 0.1, 0.1)),new Cesium.Matrix4())
-                    // Cesium.Matrix4.fromTranslationRotationScale(Cesium.TranslationRotationScale(translation, Cesium.Quaternion.IDENTITY, new Cartesian3(0.001, 0.001, 0.001)));
-                    // console.log(Cesium.Matrix4.fromTranslationRotationScale(new Cesium.TranslationRotationScale(translation, new Cesium.Quaternion.IDENTITY, new Cesium.Cartesian3(0.1, 0.1, 0.1))));
-                    // console.log(Cesium.TranslationRotationScale(translation, Cesium.Quaternion.IDENTITY, new Cartesian3(0.1, 0.1, 0.1)));
-                    // console.log(new Cesium.TranslationRotationScale(translation, Cesium.Quaternion.IDENTITY, new Cesium.Cartesian3(0.1, 0.1, 0.1)));
-                    // console.log(Cesium.Matrix4.fromTranslationRotationScale(new Cesium.TranslationRotationScale(translation, Cesium.Quaternion.IDENTITY, new Cesium.Cartesian3(0.1, 0.1, 0.1)),new Cesium.Matrix4()));
                 }
 
                 setupStyleToolbar(tileset);

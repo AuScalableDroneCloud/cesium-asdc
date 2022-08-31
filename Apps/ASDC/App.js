@@ -113,7 +113,8 @@ setViewer(
     terrainProvider: Cesium.createWorldTerrain({ requestWaterMask: true }),
     vrButton: true,
     fullscreenElement: "cesiumContainer",
-    animation:false
+    animation:false,
+    useBrowserRecommendedResolution: false
   })
 );
 

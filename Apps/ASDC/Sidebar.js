@@ -1822,9 +1822,32 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
           exportButton.onclick = ()=>{
             var scalePoints = cropBoxes[data.id]?.scalePoints.slice(0, 8);
             var groundScalePoints= [scalePoints[1],scalePoints[3],scalePoints[5], scalePoints[7], scalePoints[1]]
+            
+            if (data.position && tilesets[data.asset.id][data.id].boundingSphereCenter){
+              var offset = Cesium.Cartographic.toCartesian(
+                new Cesium.Cartographic.fromDegrees(
+                  data["position"]["lng"],
+                  data["position"]["lat"],
+                  data["position"]["height"]
+                )
+              );
+              var translation = Cesium.Cartesian3.subtract(
+                offset,
+                tilesets[data.asset.id][data.id].boundingSphereCenter,
+                new Cesium.Cartesian3()
+              );
+            }
+            var now = Cesium.JulianDate.now();
+
             var wktPolygon = "POLYGON((";
             groundScalePoints.map((entity,index)=>{
-                var pos = Cesium.Cartographic.fromCartesian(entity.position.getValue(Cesium.JulianDate.now()));
+                var translatedPos = new Cesium.Cartesian3();
+                var cartesianPos = entity.position.getValue(now);
+                cartesianPos.clone(translatedPos);
+                if (translation){
+                  Cesium.Cartesian3.subtract(cartesianPos,translation,translatedPos);
+                }
+                var pos = Cesium.Cartographic.fromCartesian(translatedPos);
                 var lon = pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
                 var lat = pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
                 wktPolygon += `${lon} ${lat}`;
@@ -1833,11 +1856,16 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
                 }
             })
 
-            wktPolygon+="))"
+            wktPolygon+="))";
 
-            var now = Cesium.JulianDate.now();
             var heights = scalePoints.map(entity =>{
-              var pos = Cesium.Cartographic.fromCartesian(entity.position.getValue(now));
+              var translatedPos = new Cesium.Cartesian3();
+              var cartesianPos = entity.position.getValue(now);
+              cartesianPos.clone(translatedPos);
+              if (translation){
+                Cesium.Cartesian3.subtract(cartesianPos,translation,translatedPos);
+              }
+              var pos = Cesium.Cartographic.fromCartesian(translatedPos);
               return pos.height;
             });
 
@@ -1845,14 +1873,26 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
             var minHeight = Math.min(...heights)
 
             var lons=scalePoints.map(entity =>{
-              var pos = Cesium.Cartographic.fromCartesian(entity.position.getValue(now));
+              var translatedPos = new Cesium.Cartesian3();
+              var cartesianPos = entity.position.getValue(now);
+              cartesianPos.clone(translatedPos);
+              if (translation){
+                Cesium.Cartesian3.subtract(cartesianPos,translation,translatedPos);
+              }
+              var pos = Cesium.Cartographic.fromCartesian(translatedPos);
               return pos.longitude* Cesium.Math.DEGREES_PER_RADIAN;
             });
             var minLon = Math.min(...lons);
             var maxLon = Math.max(...lons);
 
             var lats=scalePoints.map(entity =>{
-              var pos = Cesium.Cartographic.fromCartesian(entity.position.getValue(now));
+              var translatedPos = new Cesium.Cartesian3();
+              var cartesianPos = entity.position.getValue(now);
+              cartesianPos.clone(translatedPos);
+              if (translation){
+                Cesium.Cartesian3.subtract(cartesianPos,translation,translatedPos);
+              }
+              var pos = Cesium.Cartographic.fromCartesian(translatedPos);
               return pos.latitude* Cesium.Math.DEGREES_PER_RADIAN;
             });
             var minLat = Math.min(...lats);
@@ -1866,7 +1906,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
 
             var a = document.createElement('a');
             a.target = "_blank";
-            a.href = `https://cesium-api.asdc.cloud.edu.au/crop?ept=${ept}&polygon=${wktPolygon}&bbox=${bbox}&outside=${outside}`;
+            a.href = `${processingAPI}/crop?ept=${ept}&polygon=${wktPolygon}&bbox=${bbox}&outside=${outside}`;
             a.click();
             a.remove();
           }
