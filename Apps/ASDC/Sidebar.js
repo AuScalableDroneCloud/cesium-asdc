@@ -29,7 +29,8 @@ import {
   init,
   sharedDivs,
   timelineOnDataSelect,
-  cropBoxes
+  cropBoxes,
+  cropControllers
 } from "./State.js";
 import { loadAsset, loadData, syncTimeline } from "./Datasets.js";
 import { pcFormats, processingAPI } from "./Constants.js";
@@ -1818,9 +1819,28 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         if (data.type == "EPTPointCloud" && !Array.isArray(data.url)){
           var td7 = document.createElement('td');
           var exportButton  = document.createElement('button');
+          exportButton.id = "export-btn";
           exportButton.innerHTML = "Export";
           exportButton.style="width:100%;"
+
+          var exportModal = document.getElementById("export-modal");
+          var exportCancel = document.getElementById("export-cancel");
+          var exportOk = document.getElementById("export-ok");
+
+          exportCancel.onclick = ()=>{
+            cropControllers.eptFileSize?.abort();
+            cropControllers.eptFileSize = new AbortController();
+            cropControllers.eptNumPoints?.abort();
+            cropControllers.eptNumPoints = new AbortController();
+            exportModal.style.display="none";
+          }
+
           exportButton.onclick = ()=>{
+            exportModal.style.display="block";
+
+            const urlParams = new URLSearchParams(tilesets[data.asset.id][data.id]._url.split('?')[1]);
+            const ept = urlParams.get('ept');
+
             var scalePoints = cropBoxes[data.id]?.scalePoints.slice(0, 8);
             var groundScalePoints= [scalePoints[1],scalePoints[3],scalePoints[5], scalePoints[7], scalePoints[1]]
             
@@ -1899,27 +1919,133 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
             var minLat = Math.min(...lats);
             var maxLat = Math.max(...lats);
 
-            const urlParams = new URLSearchParams(tilesets[data.asset.id][data.id]._url.split('?')[1]);
-            const ept = urlParams.get('ept');
-
             const bbox = [minLon, maxLon, minLat, maxLat, minHeight,maxHeight];
             const outside = !tilesets[data.asset.id][data.id].clippingPlanes?.unionClippingRegions;
             
-            if (data.asset.project){
-              var projectName = odmProjects.find(p=>p.id==data.asset.project).name;
-              var fileName = `${projectName}_${data.asset.name}_PointCloud_Crop.laz`;
-            } else {
-              var fileName = `${data.asset.name}_${data.date?new Date(data.date).toLocaleDateString("en-au", {
-                year: "numeric",
-                month: "numeric",
-                day: "numeric"
-              })+'-':''}${data.name}_PointCloud_Crop.laz`;
+            var totalPoints = tilesets[data.asset.id][data.id].asset.ept.points;
+            document.getElementById("export-modal-total-points").innerHTML = totalPoints;
+
+            var fileSize;
+            var numPoints;
+
+            document.getElementById("export-modal-total-size").innerHTML = '<div class="loader"></div>';
+            document.getElementById("export-modal-export-points").innerHTML = '<div class="loader"></div>';
+            document.getElementById("export-modal-export-size").innerHTML = '<div class="loader"></div>';
+
+            var exportModalUpdate = ()=>{
+              var reqs = [];
+              cropControllers.eptFileSize?.abort();
+              cropControllers.eptNumPoints?.abort();
+              cropControllers.eptFileSize = new AbortController();
+              cropControllers.eptNumPoints = new AbortController();
+              if (!tilesets[data.asset.id][data.id].fileSize){
+                reqs.push(
+                  fetch(`${processingAPI}/eptFileSize?ept=${ept}`,{
+                    signal:cropControllers.eptFileSize.signal
+                  })
+                  .then(response => {
+                    console.log(response.status);
+                    if(response.status===200){
+                      return response.text();
+                    } else {
+                      document.getElementById("export-modal-total-size").innerHTML = "Error";
+                      document.getElementById("export-modal-export-size").innerHTML = "Error";
+                    }
+                  })
+                  .then((resp)=>{
+                    if (resp) {
+                      fileSize=Number(resp) / (1024*1024); //MB
+                      tilesets[data.asset.id][data.id].fileSize=fileSize;
+                      document.getElementById("export-modal-total-size").innerHTML = (Math.round(fileSize*100)/100) + ' MB';
+                    }
+                  })
+                  .catch((error) => {
+                    if (error.name !== "AbortError") {
+                      console.log(error);
+                      document.getElementById("export-modal-total-size").innerHTML = "Error";
+                      document.getElementById("export-modal-export-size").innerHTML = "Error";
+                    }
+                  })
+                )
+              } else {
+                  fileSize = tilesets[data.asset.id][data.id].fileSize;
+                  document.getElementById("export-modal-total-size").innerHTML = (Math.round(tilesets[data.asset.id][data.id].fileSize*100)/100) + ' MB';
+              }
+              
+              reqs.push(
+                fetch(`${processingAPI}/eptNumPoints?ept=${ept}&polygon=${wktPolygon}&bbox=${bbox}`,{
+                  signal:cropControllers.eptNumPoints.signal
+                })
+                .then(response => {
+                  if(response.status===200){
+                    return response.text();
+                  } else {
+                    document.getElementById("export-modal-export-points").innerHTML = "Error";
+                    document.getElementById("export-modal-export-size").innerHTML = "Error";
+                  }
+                })
+                .then((resp)=>{
+                  if (resp){
+                    numPoints = !outside ? Number(resp) : totalPoints - Number(resp);
+                    document.getElementById("export-modal-export-points").innerHTML = numPoints;
+                  }
+                })
+                .catch((error) => {
+                  if (error.name !== "AbortError") {
+                    console.log(error);
+                    document.getElementById("export-modal-export-points").innerHTML = "Error";
+                    document.getElementById("export-modal-export-size").innerHTML = "Error";
+                  }
+                })
+              )
+
+              Promise.all(reqs)
+              .then(()=>{
+                if (fileSize){
+                  var estSize = Math.round((numPoints/totalPoints) * fileSize * 100)/100;
+                  document.getElementById("export-modal-export-size").innerHTML = estSize  + ' MB';
+                } else {
+                  document.getElementById("export-modal-export-size").innerHTML = "Error";
+                }
+              })
+              .catch(()=>{
+                document.getElementById("export-modal-export-size").innerHTML = "Error";
+              })
             }
-            var a = document.createElement('a');
-            a.target = "_blank";
-            a.href = `${processingAPI}/crop?ept=${ept}&polygon=${wktPolygon}&bbox=${bbox}&outside=${outside}&filename=${fileName}`;
-            a.click();
-            a.remove();
+
+            cropControllers.eptFileSize?.abort();
+            cropControllers.eptFileSize = new AbortController();
+            cropControllers.eptNumPoints?.abort();
+            cropControllers.eptNumPoints = new AbortController();
+            exportModalUpdate();
+
+            exportOk.onclick=()=>{
+              if (data.asset.project && odmProjects){
+                var projectName = odmProjects.find(p=>p.id==data.asset.project).name;
+                var fileName = `${projectName}_${data.asset.name}_PointCloud_Crop.laz`;
+              } else {
+                var fileName = `${data.asset.name}_${data.date?new Date(data.date).toLocaleDateString("en-au", {
+                  year: "numeric",
+                  month: "numeric",
+                  day: "numeric"
+                })+'-':''}${data.name}_PointCloud_Crop.laz`;
+              }
+
+              var cropLink = `${processingAPI}/crop?ept=${ept}&polygon=${wktPolygon}&bbox=${bbox}&outside=${outside}&filename=${fileName}`;
+
+              var tab = window.open(cropLink, '_blank'); 
+              var html = `<html><head></head><body>
+              Exporting for download. Please wait...
+              <a href="${cropLink}" id="dl"/>
+              <script>
+                document.getElementById("dl").click();
+              </script>
+              </body></html>`
+              tab.document.write(html);
+              tab.document.close();
+
+              exportModal.style.display="none";
+            }
           }
           td7.appendChild(exportButton);
         }

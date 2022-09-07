@@ -246,7 +246,48 @@
         <span id="alpha-value">100 %</span>
       </div>
     </div>
-
+    <div class="modal" id="export-modal">
+      <div class="processing-modal" id="export-modal-centre">
+        <table>
+          <tr>
+            <td>
+              Total Points:
+            </td>
+            <td id="export-modal-total-points">
+              0
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Total Size:
+            </td>
+            <td id="export-modal-total-size">
+              <div class="loader"></div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Number of Points Within the Area:
+            </td>
+            <td id="export-modal-export-points">
+              <div class="loader"></div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Approximate Export Size:
+            </td>
+            <td id="export-modal-export-size">
+              <div class="loader"></div>
+            </td>
+          </tr>
+        </table>
+        <div style="display: flex;justify-content: space-around;margin-top: 5px;">
+            <button id="export-cancel" style="width: 60px;margin: 0 10px;">Cancel</button>
+            <button id="export-ok" style="width: 60px;margin: 0 10px;">OK</button>
+        </div>
+      </div>
+    </div>
     <script src="/cesium/Apps/ASDC/App.js" type="module"></script>
   </body>
 </html>

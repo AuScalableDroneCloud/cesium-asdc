@@ -354,6 +354,7 @@
   justify-content: center;
   align-items: center;
   color: black;
+  flex-direction: column;
 }
 
 .loader-parent {

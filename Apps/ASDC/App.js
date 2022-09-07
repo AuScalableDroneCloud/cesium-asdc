@@ -39,7 +39,8 @@ import {
   mousePosition,
   setTimelineOnDataSelect,
   timelineOnDataSelect,
-  cropBoxes
+  cropBoxes,
+  cropControllers
 } from "./State.js";
 import { loadAsset, loadData, setScreenSpaceError, fetchIndexAssets,fetchWebODMProjects, fetchPublicTask, syncTimeline } from "./Datasets.js";
 import {
@@ -1275,8 +1276,8 @@ document.getElementById("share-question-yes").onclick = ()=>{
   })
 };
 
-if(document.getElementById("user-dropdown-button")){
-  document.onclick=(e)=>{
+document.onclick=(e)=>{
+  if(document.getElementById("user-dropdown-button")){
     if(
       e.target!=document.getElementById("share-button") &&
       e.target!=document.getElementById("share-dropdown-list") &&
@@ -1298,6 +1299,27 @@ if(document.getElementById("user-dropdown-button")){
     if (!userDropdownChildren.find(c=>c==e.target) && e.target!=document.getElementById("user-dropdown-button")){
       document.getElementById("user-dropdown-list").style.display="none";
       document.getElementById("user-dropdown-button").style.background = null;
+    }
+  }
+
+  var checkChildrenForTarget = (elem)=>{
+    var elemChildren = [...elem.children];
+    if (elem==e.target){
+      return true;
+    } else {
+      return elemChildren.some(c=>{
+        return checkChildrenForTarget(c);
+      })
+    }
+  }
+
+  if(e.target.id!="export-btn" && 
+    !checkChildrenForTarget(document.getElementById("export-modal"))
+    ) {
+    if (document.getElementById("export-modal").style.display!="none"){
+      cropControllers?.eptFileSize?.abort();
+      cropControllers?.eptNumPoints?.abort();
+      document.getElementById("export-modal").style.display="none";
     }
   }
 }
