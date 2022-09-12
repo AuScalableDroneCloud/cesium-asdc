@@ -162,7 +162,8 @@ if (window.location.href.toLowerCase().includes("cesium/apps/asdc/uploads")) {
   uploadPage = false;
 }
 
-Cesium.TrustedServers.add(baseURL,443);
+Cesium.TrustedServers.add("asdc.cloud.edu.au",443)
+Cesium.TrustedServers.add("dev.asdc.cloud.edu.au",443)
 
 if(init){
   if (init.billboard!=undefined){

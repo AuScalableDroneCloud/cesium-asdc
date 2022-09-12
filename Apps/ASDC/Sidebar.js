@@ -1941,10 +1941,11 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
               if (!tilesets[data.asset.id][data.id].fileSize){
                 reqs.push(
                   fetch(`${processingAPI}/eptFileSize?ept=${ept}`,{
-                    signal:cropControllers.eptFileSize.signal
+                    signal:cropControllers.eptFileSize.signal,
+                    cache: "no-store",
+                    credentials: 'include'
                   })
                   .then(response => {
-                    console.log(response.status);
                     if(response.status===200){
                       return response.text();
                     } else {
@@ -1974,7 +1975,9 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
               
               reqs.push(
                 fetch(`${processingAPI}/eptNumPoints?ept=${ept}&polygon=${wktPolygon}&bbox=${bbox}`,{
-                  signal:cropControllers.eptNumPoints.signal
+                  signal:cropControllers.eptNumPoints.signal,
+                  cache: "no-store",
+                  credentials: 'include'
                 })
                 .then(response => {
                   if(response.status===200){

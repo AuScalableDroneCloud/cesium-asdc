@@ -8,16 +8,16 @@ export const baseURL = window.location.hostname=="localhost" ? "https://asdc.clo
 // export const eptServer = "http://localhost:3000";
 // export const eptServer = "http://192.168.99.100:3000";
 // export const eptServer = "https://asdc.cloud.edu.au/ept";
-// export const eptServer = `${baseURL}/ept`;
-export const eptServer = `https://ept.asdc.cloud.edu.au`;
+export const eptServer = `${baseURL}/ept`;
+// export const eptServer = `https://ept.asdc.cloud.edu.au`; //Cookies need to get passed to subdomain
 
 export const pcFormats = ["laz", "las", "xyz", "pcd", "ply"];
 
 // export const processingAPI="http://localhost:8081";
 // export const processingAPI="http://192.168.99.100:8081";
 // export const processingAPI = "https://asdc.cloud.edu.au/cesium-api";
-// export const processingAPI = `${baseURL}/cesium-api`;
-export const processingAPI = `https://cesium-api.asdc.cloud.edu.au`;
+export const processingAPI = `${baseURL}/cesium-api`;
+// export const processingAPI = `https://cesium-api.asdc.cloud.edu.au`; //Cookies need to get passed to subdomain
 
 export const highlightHeightPX = 27.2;
 export const highlightColor = "green";

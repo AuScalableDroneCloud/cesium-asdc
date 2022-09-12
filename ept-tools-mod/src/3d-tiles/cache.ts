@@ -9,6 +9,7 @@ type Map = Record<string, Entry | undefined>
 
 export const Cache = { create }
 export type Cache = ReturnType<typeof create>
+const MAX_CACHE_SIZE=1*1024*1024*1024; //Max 1 GB
 
 function create(timeout = 60000) {
   const cache: Map = {}
@@ -36,6 +37,27 @@ function create(timeout = 60000) {
         if (now.getTime() - createdAt.getTime() > timeout)
           delete cache[filename]
       })
+
+      //remove oldest cache once past the limit
+      var size = Buffer.byteLength(JSON.stringify(cache))      
+      if (size>=MAX_CACHE_SIZE){
+        while (size>=MAX_CACHE_SIZE){
+          var minDate = new Date();
+          var oldestFilename;
+          Object.entries(cache).forEach(([filename, entry]) => {
+            if (!entry) return
+            const { createdAt } = entry;
+            if(createdAt.getTime() < minDate.getTime()){
+              minDate = createdAt;
+              oldestFilename = filename;
+            }
+          })
+          if (oldestFilename){
+            delete cache[oldestFilename];
+          }
+          size = Buffer.byteLength(JSON.stringify(cache))           
+        }
+      }
     }, 60000)
 
   function destroy() {
