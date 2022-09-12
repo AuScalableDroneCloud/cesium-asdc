@@ -1741,7 +1741,7 @@ export const fetchWebODMProjects = (token={}) => {
             if (Array.isArray(odmProjects)) {
               var taskDict = {};
               odmProjects.map((project, projectIndex) => {
-                taskInfos?.projectIndex?.map(task => {
+                taskInfos[projectIndex]?.map(task => {
                   taskDict[task.id] = task;
                   if (task.available_assets.includes("georeferenced_model.laz")) {
                     metaDataPromises.push(fetch(`${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`, {
@@ -1812,7 +1812,7 @@ export const fetchWebODMProjects = (token={}) => {
               var metadataIndex = 0;
               if (Array.isArray(odmProjects)) {
                 odmProjects.map((project, projectIndex) => {
-                  taskInfos?.projectIndex?.map((task, taskIndex) => {
+                  taskInfos[projectIndex]?.map((task, taskIndex) => {
                     var taskData = [];
                     if (task.available_assets.includes("georeferenced_model.laz")) {
                       if (metadata[metadataIndex]) {
