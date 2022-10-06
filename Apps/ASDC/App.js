@@ -40,16 +40,25 @@ import {
   setTimelineOnDataSelect,
   timelineOnDataSelect,
   cropBoxes,
-  cropControllers
+  cropControllers,
+  cropRectangles,
 } from "./State.js";
-import { loadAsset, loadData, setScreenSpaceError, fetchIndexAssets,fetchWebODMProjects, fetchPublicTask, syncTimeline } from "./Datasets.js";
+import {
+  loadAsset,
+  loadData,
+  setScreenSpaceError,
+  fetchIndexAssets,
+  fetchWebODMProjects,
+  fetchPublicTask,
+  syncTimeline,
+} from "./Datasets.js";
 import {
   setupSidebar,
   upload,
   addFileInput,
   openModal,
   closeModal,
-  loadSelectedDataIDs
+  loadSelectedDataIDs,
 } from "./Sidebar.js";
 import { closeGraphModal, loadCSVGraphs, loadInfluxGraphs } from "./Graphs.js";
 import { readUrlParams } from "./URL.js";
@@ -87,16 +96,17 @@ Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(
   -10.6681857235
 );
 
-if (window.self !== window.top){
-  document.getElementById("nav-header").remove()
-  document.getElementById("cesiumContainer").style.height='100%';
-  document.getElementById("sidebar-wrapper").style.height='100%';
-  document.getElementById("sidebar").style.height='100%';
-  document.getElementById("sidebar-close-button").style.top='20px';
-  var shareButtonCesiumToolbar = document.createElement('button');
+if (window.self !== window.top) {
+  document.getElementById("nav-header").remove();
+  document.getElementById("cesiumContainer").style.height = "100%";
+  document.getElementById("sidebar-wrapper").style.height = "100%";
+  document.getElementById("sidebar").style.height = "100%";
+  document.getElementById("sidebar-close-button").style.top = "20px";
+  var shareButtonCesiumToolbar = document.createElement("button");
   shareButtonCesiumToolbar.id = "share-button";
-  shareButtonCesiumToolbar.className="cesium-button cesium-toolbar-button cesium-home-button";
-  shareButtonCesiumToolbar.innerHTML=`
+  shareButtonCesiumToolbar.className =
+    "cesium-button cesium-toolbar-button cesium-home-button";
+  shareButtonCesiumToolbar.innerHTML = `
   <svg viewBox="0 0 16 16" style="padding: 2px;">
     <g id="share_Page-1" stroke="none" stroke-width="1" fill-rule="evenodd">
       <g fill-rule="nonzero">
@@ -114,26 +124,28 @@ setViewer(
     terrainProvider: Cesium.createWorldTerrain({ requestWaterMask: true }),
     vrButton: true,
     fullscreenElement: "cesiumContainer",
-    animation:false,
-    useBrowserRecommendedResolution: false
+    animation: false,
+    useBrowserRecommendedResolution: false,
   })
 );
 
-viewer.timeline._trackListEle.onmousemove =  function(e){
+viewer.timeline._trackListEle.onmousemove = function (e) {
   mousePosition.x = e.offsetX;
   mousePosition.y = e.offsetY;
 
   viewer.timeline._makeTics();
-}
+};
 
-viewer.timeline._trackListEle.onmouseleave =  function(e){
+viewer.timeline._trackListEle.onmouseleave = function (e) {
   mousePosition.x = null;
   mousePosition.y = null;
   viewer.timeline._makeTics();
-}
+};
 
-if(window.self !== window.top){
-  document.getElementsByClassName("cesium-viewer-toolbar")[0].prepend(shareButtonCesiumToolbar);
+if (window.self !== window.top) {
+  document
+    .getElementsByClassName("cesium-viewer-toolbar")[0]
+    .prepend(shareButtonCesiumToolbar);
 }
 
 viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
@@ -151,263 +163,385 @@ viewer.scene.globe.depthTestAgainstTerrain = false;
 
 Cesium.Timeline.prototype.makeLabel = function (time) {
   const localDate = Cesium.JulianDate.toDate(time);
-  return localDate.toLocaleString('en-au', {year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'});
+  return localDate.toLocaleString("en-au", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+  });
 };
 
 var uploadPage;
 if (window.location.href.toLowerCase().includes("cesium/apps/asdc/uploads")) {
   uploadPage = true;
-  document.getElementById("user-dropdown-button").style.display="none";
+  document.getElementById("user-dropdown-button").style.display = "none";
 } else {
   uploadPage = false;
 }
 
-Cesium.TrustedServers.add("asdc.cloud.edu.au",443)
-Cesium.TrustedServers.add("dev.asdc.cloud.edu.au",443)
+Cesium.TrustedServers.add("asdc.cloud.edu.au", 443);
+Cesium.TrustedServers.add("dev.asdc.cloud.edu.au", 443);
 
-if(init){
-  if (init.billboard!=undefined){
+if (init) {
+  if (init.billboard != undefined) {
     setBillboard(init.billboard);
-    document.getElementById("image-series-toolbar").childNodes[0].selectedIndex = init.billboard ? 1 : 0;
+    document.getElementById(
+      "image-series-toolbar"
+    ).childNodes[0].selectedIndex = init.billboard ? 1 : 0;
   }
-  if (init.selectedDimension!=undefined){
+  if (init.selectedDimension != undefined) {
     setSelectedDimension(init.selectedDimension);
   }
-  if (init.zoomOnDataSelect!=undefined){
+  if (init.zoomOnDataSelect != undefined) {
     setZoomOnDataSelect(init.zoomOnDataSelect);
     document.getElementById("zoom-checkbox").checked = init.zoomOnDataSelect;
   }
 
-  if(init.MSSE!=undefined){
+  if (init.MSSE != undefined) {
     setMSSE(parseInt(init.MSSE));
     document.getElementById("msse-slider").value = parseInt(init.MSSE);
     document.getElementById("msse-value").innerHTML = MSSE + " %";
   }
 
-  if (init.index) {//shared webodm datasets
-    init.index.assets.map(a=>{
-      if (assets.length>0){
-        a.id=assets[assets.length-1].id+1;
+  if (init.index) {
+    //shared webodm datasets
+    init.index.assets.map((a) => {
+      if (assets.length > 0) {
+        a.id = assets[assets.length - 1].id + 1;
       } else {
-        a.id=1;
+        a.id = 1;
       }
     });
     setAssets([...assets, ...init.index.assets]);
-    init.index.assets.map(a=>{
-      a.data.map(id=>{
-        var data = init.index.datasets.find(data=>data.id==id);
-        if (data){
-          data.asset=a;
+    init.index.assets.map((a) => {
+      a.data.map((id) => {
+        var data = init.index.datasets.find((data) => data.id == id);
+        if (data) {
+          data.asset = a;
         }
-      })      
-    })
-    setDatasets([...datasets, ...init.index.datasets])
+      });
+    });
+    setDatasets([...datasets, ...init.index.datasets]);
   }
 }
 
-export const applyInit = ()=>{
-  if (init){
-    if (init.currentTime){
-      viewer.clock.currentTime = Cesium.JulianDate.fromDate(new Date(init.currentTime));
-    }
-    if (init.timeline){
-      viewer.timeline.zoomTo(
-        Cesium.JulianDate.fromDate(
-          new Date(init.timeline.start)
-        ),
-        Cesium.JulianDate.fromDate(
-          new Date(init.timeline.end)
-        )
+export const applyInit = () => {
+  if (init) {
+    if (init.currentTime) {
+      viewer.clock.currentTime = Cesium.JulianDate.fromDate(
+        new Date(init.currentTime)
       );
     }
-    if (init.cameraSelectedDataID){
-      setSelectedData(datasets.find(d=>d.id==init.cameraSelectedDataID));
+    if (init.timeline) {
+      viewer.timeline.zoomTo(
+        Cesium.JulianDate.fromDate(new Date(init.timeline.start)),
+        Cesium.JulianDate.fromDate(new Date(init.timeline.end))
+      );
     }
-    if (init.imageryLayersOrder){
-      var layers=[];
-      viewer.imageryLayers._layers.slice(1).map(l=>{
+    if (init.cameraSelectedDataID) {
+      setSelectedData(datasets.find((d) => d.id == init.cameraSelectedDataID));
+    }
+    if (init.imageryLayersOrder) {
+      var layers = [];
+      viewer.imageryLayers._layers.slice(1).map((l) => {
         layers[init.imageryLayersOrder.indexOf(l.data.id)] = l;
-      })
-      layers.map(l=>viewer.imageryLayers.raiseToTop(l))
+      });
+      layers.map((l) => viewer.imageryLayers.raiseToTop(l));
     }
-    if(init.opacity){
-        selectedDatasets
-        .filter(d=>Object.keys(init.opacity).includes(d.id.toString()))
-        .map(data=>{
-          applyAlpha(parseFloat(init.opacity[data.id.toString()]),data.asset,data);
-        })
+    if (init.opacity) {
+      selectedDatasets
+        .filter((d) => Object.keys(init.opacity).includes(d.id.toString()))
+        .map((data) => {
+          applyAlpha(
+            parseFloat(init.opacity[data.id.toString()]),
+            data.asset,
+            data
+          );
+        });
     }
-    if (init.cropBoxes){
-      selectedDatasets.map(data=>{
-        if (init.cropBoxes[data.id]){
+
+    if (init.cropBoxes || init.cropRectangles) {
+      selectedDatasets.map((data) => {
+        if (init.cropBoxes[data.id]) {
           tilesets[data.asset["id"]][data.id].readyPromise.then(function (
             tileset
           ) {
-              if (!cropBoxes[data.id]){
-                cropBoxes[data.id] = new cropBox(data);                
+            if (!cropBoxes[data.id]) {
+              cropBoxes[data.id] = new cropBox(data);
 
-                var cropButton = document.getElementById(`cropButton-${data.id}`);
-                cropButton.style.color = "#0075ff";
+              var cropButton = document.getElementById(`cropButton-${data.id}`);
+              cropButton.style.color = "#0075ff";
 
-                var cropDiv = document.getElementById(`cropDiv-${data.id}`);
-                cropDiv.style.display = "block";
+              var cropDiv = document.getElementById(`cropDiv-${data.id}`);
+              cropDiv.style.display = "block";
 
-                var panel = cropDiv.parentElement;
-                var height=0;
-                var children = [...panel.children];
-                for (var i=0;i<children.length;i++) {
-                  height+=children[i].scrollHeight + children[i].getBoundingClientRect().height;
-                }
-                
-                panel.style.maxHeight = height + "px";
-
-                var elem = panel.parentElement;
-                while (elem && elem.id != "sidebar" && elem.id != "sidebar-data-buttons") {          
-                  var height = 0;
-                  var children = [...elem.children];
-                  for(var i=0;i<children.length;i++){
-                    if (children[i].style.maxHeight){
-                      height+=parseFloat(children[i].style.maxHeight.slice(0,-2));
-                    } else {
-                      height+=children[i].scrollHeight + children[i].getBoundingClientRect().height;
-                    }
-                  }
-                  elem.style.maxHeight = height + "px";
-
-                  elem = elem.parentElement;
-                }
-
-                var showCheckbox = document.getElementById(`crop-checkbox-${data.id}`);
-                showCheckbox.checked=init.cropBoxes[data.id].show;
-                showCheckbox.onchange();
-
-                var aboveGroundCheckbox = document.getElementById(`aboveGroundCheckbox-${data.id}`)
-                aboveGroundCheckbox.checked=init.cropBoxes[data.id].keepBoxAboveGround;
-                if (cropBoxes[data.id].keepBoxAboveGround) {
-                  cropBoxes[data.id].keepBoxAboveGround = init.cropBoxes[data.id].keepBoxAboveGround;
-                  cropBoxes[data.id].setBoxAboveGround();
-                }
-
-                cropBoxes[data.id].trs=init.cropBoxes[data.id].trs;
-                
-
-                var directionSelect = document.getElementById(`crop-direction-${data.id}`);
-                directionSelect.value=init.cropBoxes[data.id].direction;
-                directionSelect.onchange();
-
-                cropBoxes[data.id].updateBox();
-                cropBoxes[data.id].onChange({
-                  modelMatrix: cropBoxes[data.id].modelMatrix,
-                  translationRotationScale:cropBoxes[data.id].trs
-                });
-                cropBoxes[data.id].updateEntitiesOnOrientationChange();
+              var panel = cropDiv.parentElement;
+              var height = 0;
+              var children = [...panel.children];
+              for (var i = 0; i < children.length; i++) {
+                height +=
+                  children[i].scrollHeight +
+                  children[i].getBoundingClientRect().height;
               }
-            })
-          }
+
+              panel.style.maxHeight = height + "px";
+
+              var elem = panel.parentElement;
+              while (
+                elem &&
+                elem.id != "sidebar" &&
+                elem.id != "sidebar-data-buttons"
+              ) {
+                var height = 0;
+                var children = [...elem.children];
+                for (var i = 0; i < children.length; i++) {
+                  if (children[i].style.maxHeight) {
+                    height += parseFloat(
+                      children[i].style.maxHeight.slice(0, -2)
+                    );
+                  } else {
+                    height +=
+                      children[i].scrollHeight +
+                      children[i].getBoundingClientRect().height;
+                  }
+                }
+                elem.style.maxHeight = height + "px";
+
+                elem = elem.parentElement;
+              }
+
+              var showCheckbox = document.getElementById(
+                `crop-checkbox-${data.id}`
+              );
+              showCheckbox.checked = init.cropBoxes[data.id].show;
+              showCheckbox.onchange();
+
+              var aboveGroundCheckbox = document.getElementById(
+                `aboveGroundCheckbox-${data.id}`
+              );
+              aboveGroundCheckbox.checked =
+                init.cropBoxes[data.id].keepBoxAboveGround;
+              if (cropBoxes[data.id].keepBoxAboveGround) {
+                cropBoxes[data.id].keepBoxAboveGround =
+                  init.cropBoxes[data.id].keepBoxAboveGround;
+                cropBoxes[data.id].setBoxAboveGround();
+              }
+
+              cropBoxes[data.id].trs = init.cropBoxes[data.id].trs;
+
+              var directionSelect = document.getElementById(
+                `crop-direction-${data.id}`
+              );
+              directionSelect.value = init.cropBoxes[data.id].direction;
+              directionSelect.onchange();
+
+              cropBoxes[data.id].updateBox();
+              cropBoxes[data.id].onChange({
+                modelMatrix: cropBoxes[data.id].modelMatrix,
+                translationRotationScale: cropBoxes[data.id].trs,
+              });
+              cropBoxes[data.id].updateEntitiesOnOrientationChange();
+            }
+          });
         }
-      )
+
+        if (init.cropRectangles[data.id]) {
+          tilesets[data.asset["id"]][data.id].readyPromise.then(function (
+            tileset
+          ) {
+            if (!cropRectangles[data.id]) {
+              document.getElementById(`rectangle-btn-${data.id}`).onclick();
+              cropRectangles[data.id].positions =
+                init.cropRectangles[data.id].positions;
+              cropRectangles[data.id].polygon.polygon.height =
+                init.cropRectangles[data.id].height;
+              cropRectangles[data.id].polygon.polygon.extrudedHeight =
+                init.cropRectangles[data.id].extrudedHeight;
+              cropRectangles[data.id].removeEventHandlers();
+              var clipDirection =
+                document.getElementById(`crop-direction-${data.id}`).value ===
+                "inside"
+                  ? -1
+                  : 1;
+              cropRectangles[data.id].calcProperties();
+              cropRectangles[data.id].setClippingPlanesDirection(clipDirection);
+            }
+          });
+        }
+      });
     }
   }
-}
+};
 
-var odmToken={};
+var odmToken = {};
 //with task parameter specified
 if (publicTask) {
-  document.getElementById("user-dropdown-button").style.display="none";
-  if (init && init.camera){
-    viewer.camera.position = new Cesium.Cartesian3(init.camera.position.x,init.camera.position.y,init.camera.position.z);
-    viewer.camera.direction = new Cesium.Cartesian3(init.camera.direction.x,init.camera.direction.y,init.camera.direction.z);
-    viewer.camera.up = new Cesium.Cartesian3(init.camera.up.x,init.camera.up.y,init.camera.up.z);
+  document.getElementById("user-dropdown-button").style.display = "none";
+  if (init && init.camera) {
+    viewer.camera.position = new Cesium.Cartesian3(
+      init.camera.position.x,
+      init.camera.position.y,
+      init.camera.position.z
+    );
+    viewer.camera.direction = new Cesium.Cartesian3(
+      init.camera.direction.x,
+      init.camera.direction.y,
+      init.camera.direction.z
+    );
+    viewer.camera.up = new Cesium.Cartesian3(
+      init.camera.up.x,
+      init.camera.up.y,
+      init.camera.up.z
+    );
   }
-  fetchPublicTask().then(()=>{
+  fetchPublicTask().then(() => {
     setLoadingFinshed(true);
     setupSidebar(false);
     loadSelectedDataIDs(!(init && init.camera));
 
-    if (init){
+    if (init) {
       applyInit(init);
       cameraMoveEndListener();
     }
-  })
+  });
 } else {
   //with index param specified
-  if (new URLSearchParams(window.location.search).get('index')){
-    document.getElementById("user-dropdown-button").style.display="none";
-    if (init && init.camera){
-      viewer.camera.position = new Cesium.Cartesian3(init.camera.position.x,init.camera.position.y,init.camera.position.z);
-      viewer.camera.direction = new Cesium.Cartesian3(init.camera.direction.x,init.camera.direction.y,init.camera.direction.z);
-      viewer.camera.up = new Cesium.Cartesian3(init.camera.up.x,init.camera.up.y,init.camera.up.z);
+  if (new URLSearchParams(window.location.search).get("index")) {
+    document.getElementById("user-dropdown-button").style.display = "none";
+    if (init && init.camera) {
+      viewer.camera.position = new Cesium.Cartesian3(
+        init.camera.position.x,
+        init.camera.position.y,
+        init.camera.position.z
+      );
+      viewer.camera.direction = new Cesium.Cartesian3(
+        init.camera.direction.x,
+        init.camera.direction.y,
+        init.camera.direction.z
+      );
+      viewer.camera.up = new Cesium.Cartesian3(
+        init.camera.up.x,
+        init.camera.up.y,
+        init.camera.up.z
+      );
     }
-    fetchIndexAssets().then(()=>{
+    fetchIndexAssets().then(() => {
       setLoadingFinshed(true);
 
-      if (!(init && init.camera) && initVars && initVars.camera){
-        viewer.camera.position = new Cesium.Cartesian3(initVars.camera.position.x,initVars.camera.position.y,initVars.camera.position.z);
-        viewer.camera.direction = new Cesium.Cartesian3(initVars.camera.direction.x,initVars.camera.direction.y,initVars.camera.direction.z);
-        viewer.camera.up = new Cesium.Cartesian3(initVars.camera.up.x,initVars.camera.up.y,initVars.camera.up.z);
+      if (!(init && init.camera) && initVars && initVars.camera) {
+        viewer.camera.position = new Cesium.Cartesian3(
+          initVars.camera.position.x,
+          initVars.camera.position.y,
+          initVars.camera.position.z
+        );
+        viewer.camera.direction = new Cesium.Cartesian3(
+          initVars.camera.direction.x,
+          initVars.camera.direction.y,
+          initVars.camera.direction.z
+        );
+        viewer.camera.up = new Cesium.Cartesian3(
+          initVars.camera.up.x,
+          initVars.camera.up.y,
+          initVars.camera.up.z
+        );
       }
-      
-      setupSidebar(uploadPage,true);
+
+      setupSidebar(uploadPage, true);
       loadSelectedDataIDs(!(init && init.camera));
 
-      if (initVars && initVars.selectedData && selectedDataIDs.length===0){
-        setSelectedDataIDs(initVars.selectedData)
+      if (initVars && initVars.selectedData && selectedDataIDs.length === 0) {
+        setSelectedDataIDs(initVars.selectedData);
         loadSelectedDataIDs(false);
       }
 
-      if (init){
+      if (init) {
         applyInit(init);
         cameraMoveEndListener();
       }
-    })
+    });
   } else {
-    if (init && init.camera){
-      viewer.camera.position = new Cesium.Cartesian3(init.camera.position.x,init.camera.position.y,init.camera.position.z);
-      viewer.camera.direction = new Cesium.Cartesian3(init.camera.direction.x,init.camera.direction.y,init.camera.direction.z);
-      viewer.camera.up = new Cesium.Cartesian3(init.camera.up.x,init.camera.up.y,init.camera.up.z);
+    if (init && init.camera) {
+      viewer.camera.position = new Cesium.Cartesian3(
+        init.camera.position.x,
+        init.camera.position.y,
+        init.camera.position.z
+      );
+      viewer.camera.direction = new Cesium.Cartesian3(
+        init.camera.direction.x,
+        init.camera.direction.y,
+        init.camera.direction.z
+      );
+      viewer.camera.up = new Cesium.Cartesian3(
+        init.camera.up.x,
+        init.camera.up.y,
+        init.camera.up.z
+      );
     }
     //main page and upload
-    fetchIndexAssets().then(()=>{
-      if (!(init && init.camera) && initVars && initVars.camera){
-        viewer.camera.position = new Cesium.Cartesian3(initVars.camera.position.x,initVars.camera.position.y,initVars.camera.position.z);
-        viewer.camera.direction = new Cesium.Cartesian3(initVars.camera.direction.x,initVars.camera.direction.y,initVars.camera.direction.z);
-        viewer.camera.up = new Cesium.Cartesian3(initVars.camera.up.x,initVars.camera.up.y,initVars.camera.up.z);
+    fetchIndexAssets().then(() => {
+      if (!(init && init.camera) && initVars && initVars.camera) {
+        viewer.camera.position = new Cesium.Cartesian3(
+          initVars.camera.position.x,
+          initVars.camera.position.y,
+          initVars.camera.position.z
+        );
+        viewer.camera.direction = new Cesium.Cartesian3(
+          initVars.camera.direction.x,
+          initVars.camera.direction.y,
+          initVars.camera.direction.z
+        );
+        viewer.camera.up = new Cesium.Cartesian3(
+          initVars.camera.up.x,
+          initVars.camera.up.y,
+          initVars.camera.up.z
+        );
       }
 
       setupSidebar(uploadPage);
       loadSelectedDataIDs(!(init && init.camera));
-      
-      if (init){
+
+      if (init) {
         applyInit(init);
         cameraMoveEndListener();
       }
-      
-      if (!uploadPage){
-        fetchWebODMProjects(odmToken)
-        .then(()=>{
-          setLoadingFinshed(true);
-          setupSidebar(uploadPage);
-          loadSelectedDataIDs(!(init && init.camera));
-          
-          if (initVars && initVars.selectedData && selectedDataIDs.length===0){ //todo: use applyInit as well
-            setSelectedDataIDs(initVars.selectedData)
-            loadSelectedDataIDs(false);
-          }
 
-          if (init){
-            applyInit(init);
-            cameraMoveEndListener();
-          }
-        })
-        .catch(()=>{
-          setLoadingFinshed(true);
-          if (initVars && initVars.selectedData && selectedDataIDs.length===0){
-            setSelectedDataIDs(initVars.selectedData)
-            loadSelectedDataIDs(false);
-          }
-        })
+      if (!uploadPage) {
+        fetchWebODMProjects(odmToken)
+          .then(() => {
+            setLoadingFinshed(true);
+            setupSidebar(uploadPage);
+            loadSelectedDataIDs(!(init && init.camera));
+
+            if (
+              initVars &&
+              initVars.selectedData &&
+              selectedDataIDs.length === 0
+            ) {
+              //todo: use applyInit as well
+              setSelectedDataIDs(initVars.selectedData);
+              loadSelectedDataIDs(false);
+            }
+
+            if (init) {
+              applyInit(init);
+              cameraMoveEndListener();
+            }
+          })
+          .catch(() => {
+            setLoadingFinshed(true);
+            if (
+              initVars &&
+              initVars.selectedData &&
+              selectedDataIDs.length === 0
+            ) {
+              setSelectedDataIDs(initVars.selectedData);
+              loadSelectedDataIDs(false);
+            }
+          });
       }
-    })
+    });
   }
 }
 
@@ -445,7 +579,7 @@ var cameraMoveEndListener = () => {
             viewer.camera.position,
             dataPosition
           );
-          if (data.bounds){
+          if (data.bounds) {
             var rect = new Cesium.Rectangle.fromDegrees(
               data.bounds[0],
               data.bounds[1],
@@ -453,21 +587,29 @@ var cameraMoveEndListener = () => {
               data.bounds[3]
             );
 
-            var rectBoundingSphere = Cesium.BoundingSphere.fromPoints(Cesium.Rectangle.subsample(rect));
+            var rectBoundingSphere = Cesium.BoundingSphere.fromPoints(
+              Cesium.Rectangle.subsample(rect)
+            );
           }
           if (
             distance <=
-            (data.boundingSphereRadius ? data.boundingSphereRadius * 2.5 > 2000 ? data.boundingSphereRadius * 2.5:2000:
-              data.bounds ? rectBoundingSphere.radius * 2.5>2000 ? rectBoundingSphere.radius * 2.5 : 2000:
-              2000)
+            (data.boundingSphereRadius
+              ? data.boundingSphereRadius * 2.5 > 2000
+                ? data.boundingSphereRadius * 2.5
+                : 2000
+              : data.bounds
+              ? rectBoundingSphere.radius * 2.5 > 2000
+                ? rectBoundingSphere.radius * 2.5
+                : 2000
+              : 2000)
           ) {
             viewMenu.push({
               text:
                 (data.date
                   ? `${asset.name} - ${data.date}`
                   : `${asset.name} - No Date`) +
-                (data.name ? " - " + data.name : "") + 
-                (data.asset.categoryID==-3 ? " - Shared" : ""),
+                (data.name ? " - " + data.name : "") +
+                (data.asset.categoryID == -3 ? " - Shared" : ""),
               onselect: () => {
                 if (data != selectedData) {
                   loadData(asset, data, false, true, true, true);
@@ -479,17 +621,23 @@ var cameraMoveEndListener = () => {
 
                   newDataIDs.sort((a, b) => a - b);
 
-                  var dataIDs = newDataIDs.join('&');
+                  var dataIDs = newDataIDs.join("&");
 
                   window.history.pushState(
                     "",
                     "",
                     uploadPage
-                      ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` + window.location.search + window.location.hash
-                      : `/cesium/Apps/ASDC/${dataIDs}` + window.location.search + window.location.hash
+                      ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` +
+                          window.location.search +
+                          window.location.hash
+                      : `/cesium/Apps/ASDC/${dataIDs}` +
+                          window.location.search +
+                          window.location.hash
                   );
 
-                  var checkbox = document.getElementById(`dataCheckbox-${data.id}`);
+                  var checkbox = document.getElementById(
+                    `dataCheckbox-${data.id}`
+                  );
                   if (checkbox) {
                     checkbox.checked = true;
                   }
@@ -497,7 +645,11 @@ var cameraMoveEndListener = () => {
                   var assetCheckbox = document.getElementById(
                     `assetCheckbox-${asset.id}`
                   );
-                  if (asset.data.every(ad => selectedDatasets.map(d=>d.id).includes(ad))){
+                  if (
+                    asset.data.every((ad) =>
+                      selectedDatasets.map((d) => d.id).includes(ad)
+                    )
+                  ) {
                     if (assetCheckbox) {
                       assetCheckbox.checked = true;
                       assetCheckbox.indeterminate = false;
@@ -513,17 +665,22 @@ var cameraMoveEndListener = () => {
               data: data,
             });
 
-            if ((selectedData && selectedData == data)) {
+            if (selectedData && selectedData == data) {
               selectedIndex = viewMenu.length - 1;
-            } else if (!selectedIndex && (selectedDatasets.find(d=>d.id==data.id)
-            && (
-              data.type !="csv" || ( //todo: other types?
-              (tilesets[data.asset.id] && tilesets[data.asset.id][data.id]&& tilesets[data.asset.id][data.id].show) || 
-              (imageryLayers[data.asset.id] && imageryLayers[data.asset.id][data.id] && imageryLayers[data.asset.id][data.id].show) || 
-              (dataSources[data.asset.id] && dataSources[data.asset.id][data.id] && dataSources[data.asset.id][data.id].show)
-              )
-              )
-            )){
+            } else if (
+              !selectedIndex &&
+              selectedDatasets.find((d) => d.id == data.id) &&
+              (data.type != "csv" || //todo: other types?
+                (tilesets[data.asset.id] &&
+                  tilesets[data.asset.id][data.id] &&
+                  tilesets[data.asset.id][data.id].show) ||
+                (imageryLayers[data.asset.id] &&
+                  imageryLayers[data.asset.id][data.id] &&
+                  imageryLayers[data.asset.id][data.id].show) ||
+                (dataSources[data.asset.id] &&
+                  dataSources[data.asset.id][data.id] &&
+                  dataSources[data.asset.id][data.id].show))
+            ) {
               selectedIndex = viewMenu.length - 1;
             }
           }
@@ -545,7 +702,8 @@ var cameraMoveEndListener = () => {
     document.getElementById("cam-toolbar").childNodes[0].selectedIndex =
       selectedIndex;
 
-    if (selectedData && selectedData != viewMenu[selectedIndex].data) {//to avoid loading right after removing
+    if (selectedData && selectedData != viewMenu[selectedIndex].data) {
+      //to avoid loading right after removing
       viewMenu[selectedIndex].onselect();
     }
   } else {
@@ -557,93 +715,137 @@ viewer.camera.moveEnd.addEventListener(cameraMoveEndListener);
 viewer.clock.onTick.addEventListener((clock) => {
   var currentDate = Cesium.JulianDate.toDate(clock.currentTime);
   selectedAssetIDs.map((assetID) => {
-    var timelineAssetDatasets = selectedDatasets
-      .filter(
-        (data) =>
-          new Date(data.date) != "Invalid Date" &&
-          data.asset.id == assetID &&
-          (data.type == "PointCloud" ||
-            data.type == "EPTPointCloud" ||
-            data.type == "Imagery" ||
-            data.type == "GeoJSON" ||
-            data.type === "ModelTileset")
-      )
+    var timelineAssetDatasets = selectedDatasets.filter(
+      (data) =>
+        new Date(data.date) != "Invalid Date" &&
+        data.asset.id == assetID &&
+        (data.type == "PointCloud" ||
+          data.type == "EPTPointCloud" ||
+          data.type == "Imagery" ||
+          data.type == "GeoJSON" ||
+          data.type === "ModelTileset")
+    );
 
-    timelineAssetDatasets
-    .sort(function (a, b) {
+    timelineAssetDatasets.sort(function (a, b) {
       return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
 
     for (var i = 0; i < timelineAssetDatasets.length; i++) {
-      var prevDateDataset = timelineAssetDatasets.find((d,dataIndex)=>{
-        if (dataIndex<i && new Date(d.date).getTime()<new Date(timelineAssetDatasets[i].date).getTime()){
-          return d
+      var prevDateDataset = timelineAssetDatasets.find((d, dataIndex) => {
+        if (
+          dataIndex < i &&
+          new Date(d.date).getTime() <
+            new Date(timelineAssetDatasets[i].date).getTime()
+        ) {
+          return d;
         }
       });
-      var nextDateDataset = timelineAssetDatasets.find((d,dataIndex)=>{
-        if (dataIndex>i && new Date(d.date).getTime()>new Date(timelineAssetDatasets[i].date).getTime()){
-          return d
+      var nextDateDataset = timelineAssetDatasets.find((d, dataIndex) => {
+        if (
+          dataIndex > i &&
+          new Date(d.date).getTime() >
+            new Date(timelineAssetDatasets[i].date).getTime()
+        ) {
+          return d;
         }
       });
 
-      if ((!prevDateDataset ||
-            (new Date(timelineAssetDatasets[i].date).getTime()<=currentDate.getTime())) &&
-        ((!nextDateDataset || (new Date(nextDateDataset.date).getTime() > currentDate.getTime()))
-        )
+      if (
+        (!prevDateDataset ||
+          new Date(timelineAssetDatasets[i].date).getTime() <=
+            currentDate.getTime()) &&
+        (!nextDateDataset ||
+          new Date(nextDateDataset.date).getTime() > currentDate.getTime())
       ) {
-        if (tilesets[assetID] && tilesets[assetID][timelineAssetDatasets[i].id]){
+        if (
+          tilesets[assetID] &&
+          tilesets[assetID][timelineAssetDatasets[i].id]
+        ) {
           if (Array.isArray(tilesets[assetID][timelineAssetDatasets[i].id])) {
-              tilesets[assetID][timelineAssetDatasets[i].id].map((tileset) => {
-                if (MSSE !== 0) {
-                  if (tileset){
-                    tileset.show = true;
-                  }
+            tilesets[assetID][timelineAssetDatasets[i].id].map((tileset) => {
+              if (MSSE !== 0) {
+                if (tileset) {
+                  tileset.show = true;
                 }
-              });
+              }
+            });
           } else {
             if (MSSE !== 0) {
               tilesets[assetID][timelineAssetDatasets[i].id].show = true;
 
-              if (cropBoxes[timelineAssetDatasets[i].id] &&
-                  cropBoxes[timelineAssetDatasets[i].id].tileset.clippingPlanes.enabled &&
-                  document.getElementById(`crop-checkbox-${timelineAssetDatasets[i].id}`).checked
-                ){
+              if (
+                cropBoxes[timelineAssetDatasets[i].id] &&
+                cropBoxes[timelineAssetDatasets[i].id].clippingPlanes.enabled &&
+                document.getElementById(
+                  `crop-checkbox-${timelineAssetDatasets[i].id}`
+                ).checked
+              ) {
                 cropBoxes[timelineAssetDatasets[i].id].toggleVisibilityOn();
+              }
+
+              if (
+                cropRectangles[timelineAssetDatasets[i].id] &&
+                cropRectangles[timelineAssetDatasets[i].id].tileset
+                  .clippingPlanes.enabled &&
+                document.getElementById(
+                  `crop-checkbox-${timelineAssetDatasets[i].id}`
+                ).checked
+              ) {
+                cropRectangles[timelineAssetDatasets[i].id].polygon.show = true;
               }
             }
           }
         }
-        if (imageryLayers[assetID] && imageryLayers[assetID][timelineAssetDatasets[i].id]){
-          imageryLayers[assetID][timelineAssetDatasets[i].id].show=true;
+        if (
+          imageryLayers[assetID] &&
+          imageryLayers[assetID][timelineAssetDatasets[i].id]
+        ) {
+          imageryLayers[assetID][timelineAssetDatasets[i].id].show = true;
         }
-        if (dataSources[assetID] && dataSources[assetID][timelineAssetDatasets[i].id]){
-          dataSources[assetID][timelineAssetDatasets[i].id].show=true;
+        if (
+          dataSources[assetID] &&
+          dataSources[assetID][timelineAssetDatasets[i].id]
+        ) {
+          dataSources[assetID][timelineAssetDatasets[i].id].show = true;
         }
       } else {
-        if (tilesets[assetID] && tilesets[assetID][timelineAssetDatasets[i].id]){
+        if (
+          tilesets[assetID] &&
+          tilesets[assetID][timelineAssetDatasets[i].id]
+        ) {
           if (Array.isArray(tilesets[assetID][timelineAssetDatasets[i].id])) {
             tilesets[assetID][timelineAssetDatasets[i].id].map((tileset) => {
-              if (tileset){
+              if (tileset) {
                 tileset.show = false;
               }
             });
           } else {
             tilesets[assetID][timelineAssetDatasets[i].id].show = false;
 
-            if (cropBoxes[timelineAssetDatasets[i].id]){
+            if (cropBoxes[timelineAssetDatasets[i].id]) {
               cropBoxes[timelineAssetDatasets[i].id].toggleVisibilityOff();
+            }
+
+            if (cropRectangles[timelineAssetDatasets[i].id]) {
+              cropRectangles[timelineAssetDatasets[i].id].polygon.show = false;
             }
           }
         }
-        if (imageryLayers[assetID] && imageryLayers[assetID][timelineAssetDatasets[i].id]){
-          imageryLayers[assetID][timelineAssetDatasets[i].id].show=false;
+        if (
+          imageryLayers[assetID] &&
+          imageryLayers[assetID][timelineAssetDatasets[i].id]
+        ) {
+          imageryLayers[assetID][timelineAssetDatasets[i].id].show = false;
         }
-        if (dataSources[assetID] && dataSources[assetID][timelineAssetDatasets[i].id]){
-          dataSources[assetID][timelineAssetDatasets[i].id].show=false;
+        if (
+          dataSources[assetID] &&
+          dataSources[assetID][timelineAssetDatasets[i].id]
+        ) {
+          dataSources[assetID][timelineAssetDatasets[i].id].show = false;
         }
       }
     }
-  })
+  });
 
   if (lastCurrentTime) {
     var noon = new Date(
@@ -686,51 +888,69 @@ viewer.clock.onTick.addEventListener((clock) => {
             controllers[data.id] = new AbortController();
           }
           if (data.source && data.source.type === "csv") {
-            fetch(
-              data.source.url,
-              { cache: "no-store", signal: controllers[data.id].signal }
-            ).then((response) => {
-              return response;
+            fetch(data.source.url, {
+              cache: "no-store",
+              signal: controllers[data.id].signal,
             })
-            .then((response) => response.text())
-            .then((response) => {
-              var csvRows = response.split('\n');
-              var timeIndex = csvRows[0].split(',').indexOf(data.source.columns.time);
-              var imageIndex = csvRows[0].split(',').indexOf(data.source.columns.image);
-              csvRows = csvRows.slice(1,csvRows.length-1)
-    
-              var earliestDate;
-              var earliestRow;
-              var firstImage;
-              for (var row=0;row<csvRows.length;row++){
-                var csvRowColumns = csvRows[row].split(',');
-                if (new Date(csvRowColumns[timeIndex]).getTime() <= currentDate && (!earliestDate || (earliestDate && earliestDate.getTime()<new Date(csvRowColumns[timeIndex]).getTime()))){
-                  earliestDate = new Date(csvRowColumns[timeIndex]);
-                  earliestRow = row;
-                }
-                if (new Date(csvRowColumns[timeIndex]).getTime() === new Date(data.startDateTime).getTime()){
-                  firstImage = csvRowColumns[imageIndex];
-                }
-              }
-              if (!!earliestDate && !!earliestRow){
-                var imageUrl = data.url.replace("{Image}",csvRows[earliestRow].split(',')[imageIndex])
-              } else {
-                var imageUrl = data.url.replace("{Image}",firstImage);
-              }
-              entities[data.asset.id][data.id].polygon.material =
-                new Cesium.ImageMaterialProperty({
-                  image: imageUrl,
-                  color:
-                    entities[data.asset.id][data.id].polygon.material.color,
-                });
+              .then((response) => {
+                return response;
+              })
+              .then((response) => response.text())
+              .then((response) => {
+                var csvRows = response.split("\n");
+                var timeIndex = csvRows[0]
+                  .split(",")
+                  .indexOf(data.source.columns.time);
+                var imageIndex = csvRows[0]
+                  .split(",")
+                  .indexOf(data.source.columns.image);
+                csvRows = csvRows.slice(1, csvRows.length - 1);
 
-              entities[data.asset.id][data.id].billboard.image = imageUrl;
-            })
-            .catch((error) => {
-              if (error.name !== "AbortError") {
-                console.log(error);
-              }
-            });
+                var earliestDate;
+                var earliestRow;
+                var firstImage;
+                for (var row = 0; row < csvRows.length; row++) {
+                  var csvRowColumns = csvRows[row].split(",");
+                  if (
+                    new Date(csvRowColumns[timeIndex]).getTime() <=
+                      currentDate &&
+                    (!earliestDate ||
+                      (earliestDate &&
+                        earliestDate.getTime() <
+                          new Date(csvRowColumns[timeIndex]).getTime()))
+                  ) {
+                    earliestDate = new Date(csvRowColumns[timeIndex]);
+                    earliestRow = row;
+                  }
+                  if (
+                    new Date(csvRowColumns[timeIndex]).getTime() ===
+                    new Date(data.startDateTime).getTime()
+                  ) {
+                    firstImage = csvRowColumns[imageIndex];
+                  }
+                }
+                if (!!earliestDate && !!earliestRow) {
+                  var imageUrl = data.url.replace(
+                    "{Image}",
+                    csvRows[earliestRow].split(",")[imageIndex]
+                  );
+                } else {
+                  var imageUrl = data.url.replace("{Image}", firstImage);
+                }
+                entities[data.asset.id][data.id].polygon.material =
+                  new Cesium.ImageMaterialProperty({
+                    image: imageUrl,
+                    color:
+                      entities[data.asset.id][data.id].polygon.material.color,
+                  });
+
+                entities[data.asset.id][data.id].billboard.image = imageUrl;
+              })
+              .catch((error) => {
+                if (error.name !== "AbortError") {
+                  console.log(error);
+                }
+              });
           } else {
             fetch(
               `/cesium/influx/images?camera=${data.camera}&time=${
@@ -767,9 +987,7 @@ viewer.clock.onTick.addEventListener((clock) => {
                   ).getTime()}`;
                 }
                 if (
-                  entities[data.asset.id][
-                    data.id
-                  ].polygon.material && 
+                  entities[data.asset.id][data.id].polygon.material &&
                   entities[data.asset.id][
                     data.id
                   ].polygon.material.image.getValue() !== imageUrl
@@ -795,8 +1013,8 @@ viewer.clock.onTick.addEventListener((clock) => {
       if (data.type == "Influx") {
         loadInfluxGraphs(data);
       }
-      if (data.type==="CSV"){
-        if (!data.graphs.every(g=>g.range)){
+      if (data.type === "CSV") {
+        if (!data.graphs.every((g) => g.range)) {
           loadCSVGraphs(data);
         }
       }
@@ -859,8 +1077,12 @@ viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
             "",
             "",
             uploadPage
-              ? `/cesium/Apps/ASDC/Uploads/${dataIDs}`+ window.location.search + window.location.hash
-              : `/cesium/Apps/ASDC/${dataIDs}`+ window.location.search + window.location.hash
+              ? `/cesium/Apps/ASDC/Uploads/${dataIDs}` +
+                  window.location.search +
+                  window.location.hash
+              : `/cesium/Apps/ASDC/${dataIDs}` +
+                  window.location.search +
+                  window.location.hash
           );
           return;
         }
@@ -899,12 +1121,13 @@ document.getElementById("modal-upload-button").onclick = upload;
 document.getElementById("close-graph").onclick = closeGraphModal;
 document.getElementById("msse-slider").oninput = setScreenSpaceError;
 
-var sidebarOpen=true;
-document.getElementById("sidebar-close-button").onclick = ()=>{
-  if (sidebarOpen){
+var sidebarOpen = true;
+document.getElementById("sidebar-close-button").onclick = () => {
+  if (sidebarOpen) {
     document.getElementById("sidebar-close-button").style.left = "0";
-    document.getElementById("sidebar-close-button").innerHTML=
-      `<svg width="18" height="18" viewBox="0 0 24 24">
+    document.getElementById(
+      "sidebar-close-button"
+    ).innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24">
         <path 
           fill="black" d="M 10 2 L 20 10" stroke="black" stroke-width="3" stroke-linecap="round"
         />
@@ -916,84 +1139,102 @@ document.getElementById("sidebar-close-button").onclick = ()=>{
     document.getElementById("cesiumContainer").style.width = "100%";
   } else {
     document.getElementById("sidebar-close-button").style.left = "300px";
-    document.getElementById("sidebar-close-button").innerHTML=
-      `<svg width="18" height="18" viewBox="0 0 24 24">
+    document.getElementById(
+      "sidebar-close-button"
+    ).innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24">
         <path 
           fill="black" d="M 2 2 L 20 20" stroke="black" stroke-width="3" stroke-linecap="round"
         />
         <path fill="black" d="M 20 2 L 2 20" stroke="black" stroke-width="3" stroke-linecap="round"
         />
-      </svg>`
+      </svg>`;
     document.getElementById("sidebar").style.width = "300px";
     document.getElementById("cesiumContainer").style.left = "300px";
-    document.getElementById("cesiumContainer").style.width = "calc(100% - 300px)";
-
+    document.getElementById("cesiumContainer").style.width =
+      "calc(100% - 300px)";
   }
-  sidebarOpen=!sidebarOpen;
-}
+  sidebarOpen = !sidebarOpen;
+};
 
-if (document.getElementById("user-dropdown-button")){
-  document.getElementById("user-dropdown-button").onclick = ()=>{
+if (document.getElementById("user-dropdown-button")) {
+  document.getElementById("user-dropdown-button").onclick = () => {
     var userDropDown = document.getElementById("user-dropdown-list");
-    if (userDropDown.style.display=="block"){
-      userDropDown.style.display="none";
+    if (userDropDown.style.display == "block") {
+      userDropDown.style.display = "none";
       document.getElementById("user-dropdown-button").style.background = null;
     } else {
-      userDropDown.style.display="block";
-      document.getElementById("user-dropdown-button").style.background = "#5b8b51";
+      userDropDown.style.display = "block";
+      document.getElementById("user-dropdown-button").style.background =
+        "#5b8b51";
     }
-  }
+  };
 }
 
-if (document.getElementById("login-logout-button")){
-  document.getElementById("login-logout-button").onclick = ()=>{
+if (document.getElementById("login-logout-button")) {
+  document.getElementById("login-logout-button").onclick = () => {
     odmToken.cancel();
 
     fetch(`${baseURL}/logout/`, {
       cache: "no-store",
-      credentials: 'include',
-      mode: 'no-cors'
-    }).then(()=>{
+      credentials: "include",
+      mode: "no-cors",
+    }).then(() => {
       document.getElementById("login-logout-button-text").innerHTML = "Login";
 
       var signInButton = document.createElement("div");
       signInButton.className = "sidebar-item";
       signInButton.style["text-align"] = "center";
       signInButton.innerHTML = "Login here to view your ASDC data";
-      signInButton.onclick=()=>{
-        window.location.href = `${baseURL}/login/auth0?next=${window.location.href}`; 
+      signInButton.onclick = () => {
+        window.location.href = `${baseURL}/login/auth0?next=${window.location.href}`;
+      };
+
+      const children = [
+        ...sourceDivs["WebODM Projects"].nextElementSibling.children,
+      ];
+      for (var i = 0; i < children.length; i++) {
+        sourceDivs["WebODM Projects"].nextElementSibling.removeChild(
+          children[i]
+        );
       }
 
-      const children = [...sourceDivs["WebODM Projects"].nextElementSibling.children];
-      for (var i=0;i<children.length;i++){
-          sourceDivs["WebODM Projects"].nextElementSibling.removeChild(children[i]);
+      sourceDivs["WebODM Projects"].nextElementSibling.appendChild(
+        signInButton
+      );
+
+      if (sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight) {
+        sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight =
+          signInButton.scrollHeight + "px";
       }
 
-      sourceDivs["WebODM Projects"].nextElementSibling.appendChild(signInButton);
+      document.getElementById("login-logout-button").onclick =
+        signInButton.onclick;
 
-      if (sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight){
-        sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight = signInButton.scrollHeight + "px";
-      }
+      selectedDatasets
+        .filter((d) => d.asset.project)
+        .map((d) => {
+          if (d.type == "Imagery") {
+            viewer.imageryLayers.remove(imageryLayers[d.asset.id][d.id], true);
+            imageryLayers[d.asset.id][d.id] =
+              imageryLayers[d.asset.id][d.id] &&
+              imageryLayers[d.asset.id][d.id].destroy();
+          } else if (d.type === "EPTPointCloud") {
+            viewer.scene.primitives.remove(tilesets[d.asset.id][d.id]);
+            tilesets[d.asset.id][d.id] =
+              tilesets[d.asset.id][d.id] &&
+              tilesets[d.asset.id][d.id].destroy();
+          }
+        });
+      setSelectedDatasets(selectedDatasets.filter((d) => !d.asset.project));
+      setDatasets(datasets.filter((d) => d.asset && !d.asset.project));
 
-      document.getElementById("login-logout-button").onclick = signInButton.onclick;
+      assets
+        .filter((a) => a.project)
+        .map((a) => {
+          markersDataSource.entities.removeById("marker_" + a.id);
+        });
 
-      selectedDatasets.filter(d=>d.asset.project).map(d=>{
-        if(d.type=="Imagery"){
-          viewer.imageryLayers.remove(imageryLayers[d.asset.id][d.id], true);
-          imageryLayers[d.asset.id][d.id] = imageryLayers[d.asset.id][d.id] && imageryLayers[d.asset.id][d.id].destroy();                  
-        } else if (d.type==="EPTPointCloud") {
-          viewer.scene.primitives.remove(tilesets[d.asset.id][d.id])
-          tilesets[d.asset.id][d.id] = tilesets[d.asset.id][d.id] && tilesets[d.asset.id][d.id].destroy();
-        }
-      })
-      setSelectedDatasets(selectedDatasets.filter(d=>!d.asset.project));
-      setDatasets(datasets.filter(d=>d.asset && !d.asset.project));
-
-      assets.filter(a=>a.project).map(a=>{
-        markersDataSource.entities.removeById("marker_" + a.id);
-      })
-
-      setAssets(assets.filter(a=>!a.project));
+      setAssets(assets.filter((a) => !a.project));
       setODMProjects();
 
       viewer.camera.moveEnd.raiseEvent();
@@ -1004,323 +1245,380 @@ if (document.getElementById("login-logout-button")){
             d.type == "EPTPointCloud" ||
             d.type == "ModelTileset"
         )
-      ) 
-      {
+      ) {
         document.getElementById("msse-slider-row").style.display = "none";
         document.getElementById("dims-toolbar-row").style.display = "none";
       }
-    })
-  }
+    });
+  };
 }
 
-document.getElementById("zoom-checkbox").onchange = (e)=>{
+document.getElementById("zoom-checkbox").onchange = (e) => {
   setZoomOnDataSelect(e.target.checked);
-}
+};
 
-document.getElementById("timeline-checkbox").onchange = (e)=>{
+document.getElementById("timeline-checkbox").onchange = (e) => {
   setTimelineOnDataSelect(e.target.checked);
-}
+};
 
-document.getElementById("sync-timeline-button").onclick = (e)=>{
+document.getElementById("sync-timeline-button").onclick = (e) => {
   syncTimeline(false);
-}
+};
 
 const displayShareURL = () => {
-  document.getElementById("share-question").style.display="none";
-  document.getElementById("share-link").style.display="block";
-  
+  document.getElementById("share-question").style.display = "none";
+  document.getElementById("share-link").style.display = "block";
+
   const urlParams = new URLSearchParams(window.location.search);
 
   var alphas = {};
-  selectedDatasets.map(data=>{
-    if (data.asset.project && !data.id.endsWith("-s") && !urlParams.get('task')){
-      alphas[data.id + "-s"] = getAlpha(data.asset,data);
+  selectedDatasets.map((data) => {
+    if (
+      data.asset.project &&
+      !data.id.endsWith("-s") &&
+      !urlParams.get("task")
+    ) {
+      alphas[data.id + "-s"] = getAlpha(data.asset, data);
     } else {
-      alphas[data.id] = getAlpha(data.asset,data);
+      alphas[data.id] = getAlpha(data.asset, data);
     }
-  })
-  
-  if (init && init.index){
+  });
+
+  if (init && init.index) {
     //deep copy
     var index = JSON.parse(JSON.stringify(init.index));
 
-    index.assets = index.assets.filter(a=>
-      !a.data.every(d=>!selectedDatasets.find(sd=>sd.id==d))
-    )
+    index.assets = index.assets.filter(
+      (a) => !a.data.every((d) => !selectedDatasets.find((sd) => sd.id == d))
+    );
 
-    index.categories = index.categories.filter(c=>
-      index.assets.find(a=>a && a.project==c.id)
-    )
+    index.categories = index.categories.filter((c) =>
+      index.assets.find((a) => a && a.project == c.id)
+    );
 
-    index.datasets = index.datasets.filter(d=>
-      selectedDatasets.find(sd=>sd.id==d.id)
-    )
+    index.datasets = index.datasets.filter((d) =>
+      selectedDatasets.find((sd) => sd.id == d.id)
+    );
   } else {
-    if (selectedDatasets.find(d=>d.asset.categoryID==-1)){
-      var index={
-        assets:[],
-        datasets:[],
-        categories:[],
+    if (selectedDatasets.find((d) => d.asset.categoryID == -1)) {
+      var index = {
+        assets: [],
+        datasets: [],
+        categories: [],
       };
     }
   }
 
-  var selectedWebODMDatasets = selectedDatasets.filter(d=>d.asset.categoryID==-1 || d.asset.categoryID==-3);
-  selectedWebODMDatasets.map(d=>{
-    var data = {...d};
+  var selectedWebODMDatasets = selectedDatasets.filter(
+    (d) => d.asset.categoryID == -1 || d.asset.categoryID == -3
+  );
+  selectedWebODMDatasets.map((d) => {
+    var data = { ...d };
 
-    if (!index.datasets.find(indexData=>indexData.id==d.id)){
-      delete(data.asset);
-      data.id += !data.id.endsWith('-s') ? '-s' : "";
+    if (!index.datasets.find((indexData) => indexData.id == d.id)) {
+      delete data.asset;
+      data.id += !data.id.endsWith("-s") ? "-s" : "";
 
       index.datasets.push(data);
     }
 
-    var asset = {...d.asset};
-    if (!index.assets.find(a=>a.id == d.asset.id)){
+    var asset = { ...d.asset };
+    if (!index.assets.find((a) => a.id == d.asset.id)) {
       index.assets.push(asset);
     }
-    asset.data.map(data=>{
-      var newData = {...datasets.find(dd=>dd.id==data)};
-      delete(newData.asset);
+    asset.data.map((data) => {
+      var newData = { ...datasets.find((dd) => dd.id == data) };
+      delete newData.asset;
 
-      if (!index.datasets.find(dd=>dd.id == newData.id)){
-        newData.id += !newData.id.endsWith('-s') ? '-s' : "";
+      if (!index.datasets.find((dd) => dd.id == newData.id)) {
+        newData.id += !newData.id.endsWith("-s") ? "-s" : "";
         index.datasets.push(newData);
       }
-    })
+    });
 
-    var project = odmProjects && odmProjects.find(p=>p.tasks.includes(d.asset.taskID));
-    if (project && !index.categories.find(c=>c.id == project.id)){//
+    var project =
+      odmProjects && odmProjects.find((p) => p.tasks.includes(d.asset.taskID));
+    if (project && !index.categories.find((c) => c.id == project.id)) {
+      //
       index.categories.push(project);
     }
-  })
+  });
 
-  index?.assets.map(asset=>{
-    delete(asset.id);
-    asset.categoryID=-3;
+  index?.assets.map((asset) => {
+    delete asset.id;
+    asset.categoryID = -3;
 
-    asset.data = asset.data.map(ad=>!ad.endsWith('-s') ? ad + '-s' : ad);
-    delete(asset.permissions);
-    delete(asset.public);
-  })
+    asset.data = asset.data.map((ad) => (!ad.endsWith("-s") ? ad + "-s" : ad));
+    delete asset.permissions;
+    delete asset.public;
+  });
 
-  index?.categories.map(proj=>{
-    delete(proj.permissions);
-  })
+  index?.categories.map((proj) => {
+    delete proj.permissions;
+  });
 
   var shareCropBoxes = {};
-  Object.keys(cropBoxes).map(b=>{
+  Object.keys(cropBoxes).map((b) => {
     shareCropBoxes[b] = {};
     shareCropBoxes[b].trs = cropBoxes[b].trs;
-    shareCropBoxes[b].show = document.getElementById(`crop-checkbox-${b}`).checked;    
+    shareCropBoxes[b].show = document.getElementById(
+      `crop-checkbox-${b}`
+    ).checked;
     shareCropBoxes[b].keepBoxAboveGround = cropBoxes[b].keepBoxAboveGround;
-    shareCropBoxes[b].direction = document.getElementById(`crop-direction-${b}`).value;
-  })
+    shareCropBoxes[b].direction = document.getElementById(
+      `crop-direction-${b}`
+    ).value;
+  });
 
-  var initParams={
-    camera:{
-      position:viewer.camera.positionWC,
-      direction:viewer.camera.directionWC,
-      up:viewer.camera.upWC
-    },
-    currentTime: Cesium.JulianDate.toDate(viewer.clock.currentTime).toISOString(),
-    selectedDimension:selectedDimension,
-    billboard:billboard,
-    imageryLayersOrder:viewer.imageryLayers._layers.filter(l=>l.data).map(l=>l.data.id),
-    zoomOnDataSelect:zoomOnDataSelect,
-    timelineOnDataSelect:timelineOnDataSelect,
-    MSSE:MSSE,
-    timeline:{
-      start: Cesium.JulianDate.toDate(viewer.timeline._startJulian).toISOString(),
-      end: Cesium.JulianDate.toDate(viewer.timeline._endJulian).toISOString()
-    },
-    opacity:alphas,
-    cropBoxes:shareCropBoxes
-  }
+  var shareCropRectangles = {};
+  Object.keys(cropRectangles).map((r) => {
+    shareCropRectangles[r] = {};
+    shareCropRectangles[r].positions = cropRectangles[r].positions;
+    shareCropRectangles[r].height =
+      cropRectangles[r].polygon.polygon.height.getValue();
+    shareCropRectangles[r].extrudedHeight =
+      cropRectangles[r].polygon.polygon.extrudedHeight.getValue();
+  });
 
-  if (selectedData){
-    if ((index && index.datasets.find(d=>d.id==selectedData.id)) || 
-        selectedData.asset.categoryID == -1){
-      initParams.cameraSelectedDataID = selectedData.id + '-s';
+  var initParams = {
+    camera: {
+      position: viewer.camera.positionWC,
+      direction: viewer.camera.directionWC,
+      up: viewer.camera.upWC,
+    },
+    currentTime: Cesium.JulianDate.toDate(
+      viewer.clock.currentTime
+    ).toISOString(),
+    selectedDimension: selectedDimension,
+    billboard: billboard,
+    imageryLayersOrder: viewer.imageryLayers._layers
+      .filter((l) => l.data)
+      .map((l) => l.data.id),
+    zoomOnDataSelect: zoomOnDataSelect,
+    timelineOnDataSelect: timelineOnDataSelect,
+    MSSE: MSSE,
+    timeline: {
+      start: Cesium.JulianDate.toDate(
+        viewer.timeline._startJulian
+      ).toISOString(),
+      end: Cesium.JulianDate.toDate(viewer.timeline._endJulian).toISOString(),
+    },
+    opacity: alphas,
+    cropBoxes: shareCropBoxes,
+    cropRectangles: shareCropRectangles,
+  };
+
+  if (selectedData) {
+    if (
+      (index && index.datasets.find((d) => d.id == selectedData.id)) ||
+      selectedData.asset.categoryID == -1
+    ) {
+      initParams.cameraSelectedDataID = selectedData.id + "-s";
     } else {
       initParams.cameraSelectedDataID = selectedData.id;
     }
   }
 
-  if (!urlParams.get('task')){
+  if (!urlParams.get("task")) {
     initParams.index = index;
   }
 
-  var shareURL = window.location.origin + "/cesium/Apps/ASDC/"
-                + (uploadPage ? "Uploads/" : "")
-                + selectedDatasets.map(d=>{
-                  if (d.asset.project && !d.id.endsWith("-s") && !urlParams.get('task')){
-                    return d.id + "-s"
-                  } else {
-                    return d.id
-                  }
-                }).sort().join("&")
-                + "?"
-                + (urlParams.get('index') ? 'index=' + urlParams.get('index') : "")
-                + (urlParams.get('task') ? '&task=' + urlParams.get('task') : "")
-                + "#init=" 
-                + encodeURIComponent(JSON.stringify(initParams));
+  var shareURL =
+    window.location.origin +
+    "/cesium/Apps/ASDC/" +
+    (uploadPage ? "Uploads/" : "") +
+    selectedDatasets
+      .map((d) => {
+        if (d.asset.project && !d.id.endsWith("-s") && !urlParams.get("task")) {
+          return d.id + "-s";
+        } else {
+          return d.id;
+        }
+      })
+      .sort()
+      .join("&") +
+    "?" +
+    (urlParams.get("index") ? "index=" + urlParams.get("index") : "") +
+    (urlParams.get("task") ? "&task=" + urlParams.get("task") : "") +
+    "#init=" +
+    encodeURIComponent(JSON.stringify(initParams));
 
   var shareInput = document.getElementById("share-input");
-  shareInput.value=shareURL;
+  shareInput.value = shareURL;
 
   var copyBtn = document.getElementById("copy-share-link-button");
-  copyBtn.onclick=()=>{
+  copyBtn.onclick = () => {
     shareInput.select();
     shareInput.setSelectionRange(0, 99999); //mobile?
     navigator.clipboard.writeText(shareURL);
-  }
-}
+  };
+};
 
 const showSharePanel = (loadingTimer) => {
-  if (loadingFinished){
-    if (!!selectedDatasets.find(d=>d.asset.project && (Object.keys(d.asset).includes("public") ? !d.asset.public : true) && (d.asset.permissions ? d.asset.permissions.includes("change") : true))){
-      document.getElementById("share-question").style.display="block";
-      document.getElementById("share-link").style.display="none";
-      document.getElementById("share-question-text").style.display="block";
-      document.getElementById("share-question-yes").style.display="block";
-      document.getElementById("share-question-no").style.display="block";
-      document.getElementById("share-question-loader").style.display="none";
+  if (loadingFinished) {
+    if (
+      !!selectedDatasets.find(
+        (d) =>
+          d.asset.project &&
+          (Object.keys(d.asset).includes("public") ? !d.asset.public : true) &&
+          (d.asset.permissions ? d.asset.permissions.includes("change") : true)
+      )
+    ) {
+      document.getElementById("share-question").style.display = "block";
+      document.getElementById("share-link").style.display = "none";
+      document.getElementById("share-question-text").style.display = "block";
+      document.getElementById("share-question-yes").style.display = "block";
+      document.getElementById("share-question-no").style.display = "block";
+      document.getElementById("share-question-loader").style.display = "none";
     } else {
       displayShareURL();
     }
-    clearInterval( loadingTimer );
+    clearInterval(loadingTimer);
   }
-}
+};
 
-document.getElementById("share-button").onclick=()=>{  
+document.getElementById("share-button").onclick = () => {
   const urlParams = new URLSearchParams(window.location.search);
 
   var shareDropDown = document.getElementById("share-dropdown-list");
-  if (shareDropDown.style.display=="block"){
-    shareDropDown.style.display="none";
-    if (window.self === window.top){
+  if (shareDropDown.style.display == "block") {
+    shareDropDown.style.display = "none";
+    if (window.self === window.top) {
       document.getElementById("share-button").style.background = null;
     }
   } else {
-    if (uploadPage || urlParams.get('task') || urlParams.get('index')){
-      shareDropDown.style.right="15px";
+    if (uploadPage || urlParams.get("task") || urlParams.get("index")) {
+      shareDropDown.style.right = "15px";
     } else {
-      shareDropDown.style.right="60px";
+      shareDropDown.style.right = "60px";
     }
-    shareDropDown.style.display="block";
-    if (window.self === window.top){
+    shareDropDown.style.display = "block";
+    if (window.self === window.top) {
       document.getElementById("share-button").style.background = "#5b8b51";
     }
   }
 
-  if (loadingFinished){
+  if (loadingFinished) {
     showSharePanel();
   } else {
-    var suffixes = ["pc","op","dtm","dsm"];
-    if (selectedDataIDs.length>0 && selectedDataIDs.find(d=>suffixes.includes(d.split("-")[d.split("-").length-1]))){
-      document.getElementById("share-question-text").style.display="none";
-      document.getElementById("share-question-yes").style.display="none";
-      document.getElementById("share-question-no").style.display="none";
-      document.getElementById("share-question-loader").style.display="block";
-      var loadingTimer = setInterval( ()=>showSharePanel(loadingTimer), 500 );
+    var suffixes = ["pc", "op", "dtm", "dsm"];
+    if (
+      selectedDataIDs.length > 0 &&
+      selectedDataIDs.find((d) =>
+        suffixes.includes(d.split("-")[d.split("-").length - 1])
+      )
+    ) {
+      document.getElementById("share-question-text").style.display = "none";
+      document.getElementById("share-question-yes").style.display = "none";
+      document.getElementById("share-question-no").style.display = "none";
+      document.getElementById("share-question-loader").style.display = "block";
+      var loadingTimer = setInterval(() => showSharePanel(loadingTimer), 500);
     } else {
       displayShareURL();
     }
   }
-}
+};
 
-document.getElementById("share-question-no").onclick = ()=>{
+document.getElementById("share-question-no").onclick = () => {
   displayShareURL();
 };
 
-document.getElementById("share-question-yes").onclick = ()=>{
-  document.getElementById("share-question-text").style.display="none";
-  document.getElementById("share-question-yes").style.display="none";
-  document.getElementById("share-question-no").style.display="none";
-  document.getElementById("share-question-loader").style.display="block";
+document.getElementById("share-question-yes").onclick = () => {
+  document.getElementById("share-question-text").style.display = "none";
+  document.getElementById("share-question-yes").style.display = "none";
+  document.getElementById("share-question-no").style.display = "none";
+  document.getElementById("share-question-loader").style.display = "block";
 
   var odmSelectedTasks = {};
-  selectedDatasets.map(d=>{
-    if (!!d.asset.taskID && !d.asset.public && (d.asset.permissions ? d.asset.permissions.includes("change") : true)){
-      if(!odmSelectedTasks[d.asset.project]){
-        odmSelectedTasks[d.asset.project] = [d.asset.taskID]
+  selectedDatasets.map((d) => {
+    if (
+      !!d.asset.taskID &&
+      !d.asset.public &&
+      (d.asset.permissions ? d.asset.permissions.includes("change") : true)
+    ) {
+      if (!odmSelectedTasks[d.asset.project]) {
+        odmSelectedTasks[d.asset.project] = [d.asset.taskID];
       } else {
-        if (!odmSelectedTasks[d.asset.project].includes(d.asset.taskID)){
-          odmSelectedTasks[d.asset.project].push(d.asset.taskID)
+        if (!odmSelectedTasks[d.asset.project].includes(d.asset.taskID)) {
+          odmSelectedTasks[d.asset.project].push(d.asset.taskID);
         }
       }
     }
-  })
+  });
 
   var makePublicPromises = [];
-  Object.keys(odmSelectedTasks).map(project=>{
-    odmSelectedTasks[project].map(task=>{
+  Object.keys(odmSelectedTasks).map((project) => {
+    odmSelectedTasks[project].map((task) => {
       makePublicPromises.push(
         fetch(`/cesium/makeWebODMTaskPublic/${project}/${task}`, {
-          "method": "PATCH",
-          "credentials": "include",
-        }).then((resp)=>{
-          if (resp.status==200){
-            selectedDatasets.filter(d=>!d.asset.public).map(d=>{
-              d.asset.public=true;
-            })
+          method: "PATCH",
+          credentials: "include",
+        }).then((resp) => {
+          if (resp.status == 200) {
+            selectedDatasets
+              .filter((d) => !d.asset.public)
+              .map((d) => {
+                d.asset.public = true;
+              });
           }
         })
       );
-    })
-  })
-  Promise.all(makePublicPromises)
-  .then((responses)=>{
+    });
+  });
+  Promise.all(makePublicPromises).then((responses) => {
     displayShareURL();
-  })
+  });
 };
 
-document.onclick=(e)=>{
-  if(document.getElementById("user-dropdown-button")){
-    if(
-      e.target!=document.getElementById("share-button") &&
-      e.target!=document.getElementById("share-dropdown-list") &&
-      e.target!=document.getElementById("share-input") &&
-      e.target!=document.getElementById("copy-share-link-button") &&
-      e.target!=document.getElementById("share-question-yes") && 
-      e.target!=document.getElementById("share-question-no") && 
-      e.target!=document.getElementById("share-question") &&
-      e.target!=document.getElementById("share-question-buttons") &&
-      e.target!=document.getElementById("share-question-loader") &&
-      e.target!=document.getElementById("share-question-text")
-    ){
-      document.getElementById("share-dropdown-list").style.display="none";
+document.onclick = (e) => {
+  if (document.getElementById("user-dropdown-button")) {
+    if (
+      e.target != document.getElementById("share-button") &&
+      e.target != document.getElementById("share-dropdown-list") &&
+      e.target != document.getElementById("share-input") &&
+      e.target != document.getElementById("copy-share-link-button") &&
+      e.target != document.getElementById("share-question-yes") &&
+      e.target != document.getElementById("share-question-no") &&
+      e.target != document.getElementById("share-question") &&
+      e.target != document.getElementById("share-question-buttons") &&
+      e.target != document.getElementById("share-question-loader") &&
+      e.target != document.getElementById("share-question-text")
+    ) {
+      document.getElementById("share-dropdown-list").style.display = "none";
       document.getElementById("share-button").style.background = null;
     }
-    
-    
-    var userDropdownChildren = [...document.getElementById("user-dropdown-button").children];
-    if (!userDropdownChildren.find(c=>c==e.target) && e.target!=document.getElementById("user-dropdown-button")){
-      document.getElementById("user-dropdown-list").style.display="none";
+
+    var userDropdownChildren = [
+      ...document.getElementById("user-dropdown-button").children,
+    ];
+    if (
+      !userDropdownChildren.find((c) => c == e.target) &&
+      e.target != document.getElementById("user-dropdown-button")
+    ) {
+      document.getElementById("user-dropdown-list").style.display = "none";
       document.getElementById("user-dropdown-button").style.background = null;
     }
   }
 
-  var checkChildrenForTarget = (elem)=>{
+  var checkChildrenForTarget = (elem) => {
     var elemChildren = [...elem.children];
-    if (elem==e.target){
+    if (elem == e.target) {
       return true;
     } else {
-      return elemChildren.some(c=>{
+      return elemChildren.some((c) => {
         return checkChildrenForTarget(c);
-      })
+      });
     }
-  }
+  };
 
-  if(e.target.id!="export-btn" && 
+  if (
+    e.target.id != "export-btn" &&
     !checkChildrenForTarget(document.getElementById("export-modal"))
-    ) {
-    if (document.getElementById("export-modal").style.display!="none"){
+  ) {
+    if (document.getElementById("export-modal").style.display != "none") {
       cropControllers?.eptFileSize?.abort();
       cropControllers?.eptNumPoints?.abort();
-      document.getElementById("export-modal").style.display="none";
+      document.getElementById("export-modal").style.display = "none";
     }
   }
-}
+};

@@ -29,7 +29,7 @@ export var categoryDivs = {};
 export var sharedDivs = {};
 
 export var initVars = {}; //index file init variables
-export var init;  //url index query parameter used for sharing
+export var init; //url index query parameter used for sharing
 
 export var taskInfos;
 
@@ -40,7 +40,9 @@ export var MSSE = 83;
 
 export var markersDataSource;
 
-export var cropBoxes={};
+export var cropBoxes = {};
+export var cropRectangles = {};
+export var cropPolygons = {};
 
 export const pinBuilder = new Cesium.PinBuilder();
 
@@ -53,9 +55,9 @@ export var loadingFinished = false;
 
 export var indexFile =
   "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/index.json";
-  // "/cesium/Apps/ASDC/index.json";
+// "/cesium/Apps/ASDC/index.json";
 
-export var mousePosition={};
+export var mousePosition = {};
 
 export var cropControllers = {};
 
@@ -75,11 +77,11 @@ export function setCategories(newCategories) {
   categories = newCategories;
 }
 
-export function setODMProjects(newODMProjects){
+export function setODMProjects(newODMProjects) {
   odmProjects = newODMProjects;
 }
 
-export function setPublicTask(newPublicTask){
+export function setPublicTask(newPublicTask) {
   publicTask = newPublicTask;
 }
 
@@ -123,29 +125,29 @@ export function setBillboard(newBillboard) {
   billboard = newBillboard;
 }
 
-export function setTaskInfos(newTaskInfos){
+export function setTaskInfos(newTaskInfos) {
   taskInfos = newTaskInfos;
 }
 
-export function setIndexFile(newIndexFile){
+export function setIndexFile(newIndexFile) {
   indexFile = newIndexFile;
 }
 
-export function setInitVars(newInitVars){
+export function setInitVars(newInitVars) {
   initVars = newInitVars;
 }
 
 export function setZoomOnDataSelect(newZoomOnDataSelect) {
-  zoomOnDataSelect=newZoomOnDataSelect;
+  zoomOnDataSelect = newZoomOnDataSelect;
 }
 export function setTimelineOnDataSelect(newTimelineOnDataSelect) {
-  timelineOnDataSelect=newTimelineOnDataSelect;
+  timelineOnDataSelect = newTimelineOnDataSelect;
 }
 
 export function setLoadingFinshed(newLoadingFinished) {
-  loadingFinished=newLoadingFinished;
+  loadingFinished = newLoadingFinished;
 }
 
 export function setInit(newInit) {
-  init=newInit;
+  init = newInit;
 }
