@@ -2541,8 +2541,8 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         cropButton.id = `cropButton-${data.id}`;
 
         cropButton.onclick = (e) => {
-          e.preventDefault();
-          e.stopImmediatePropagation();
+          // e.preventDefault();
+          // e.stopImmediatePropagation();
 
           if (!cropButton.style.color || cropButton.style.color == "white") {
             cropButton.style.color = "#0075ff";
@@ -2557,8 +2557,6 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
             if (
               !(tilesets[data.asset.id] && tilesets[data.asset.id][data.id])
             ) {
-              dateDiv.onclick();
-
               var tilesetTimer = setInterval(checkTileset, 500);
               function checkTileset() {
                 if (
