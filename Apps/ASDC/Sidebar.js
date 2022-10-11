@@ -2633,6 +2633,95 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
           }
         };
 
+        var transformButton = document.createElement("div");
+        transformButton.className = "fa fa-arrows sidebar-button";
+        transformButton.style["margin-left"] = "5px";
+
+        transformButton.onclick = (e) => {
+          // e.preventDefault();
+          // e.stopImmediatePropagation();
+
+          if (
+            !transformButton.style.color ||
+            transformButton.style.color == "white"
+          ) {
+            transformButton.style.color = "#0075ff";
+          } else {
+            transformButton.style.color = null;
+          }
+
+          function clampLowest() {
+            if (
+              tilesets[data.asset.id] &&
+              tilesets[data.asset.id][data.id] &&
+              tilesets[data.asset.id][data.id].boundingSphereCenter
+            ) {
+              clearInterval(clampTimer);
+              var tileset = tilesets[data.asset.id][data.id];
+
+              if (
+                !transformButton.style.color ||
+                transformButton.style.color == "white"
+              ) {
+                if (data["position"]) {
+                  var offset = Cesium.Cartographic.toCartesian(
+                    new Cesium.Cartographic.fromDegrees(
+                      data["position"]["lng"],
+                      data["position"]["lat"],
+                      data["position"]["height"]
+                    )
+                  );
+                  var translation = Cesium.Cartesian3.subtract(
+                    offset,
+                    tileset.boundingSphereCenter,
+                    new Cesium.Cartesian3()
+                  );
+                  tileset.modelMatrix =
+                    Cesium.Matrix4.fromTranslation(translation);
+                } else {
+                  tileset.modelMatrix = Cesium.Matrix4.IDENTITY;
+                }
+              } else {
+                var c = Cesium.Cartesian3.clone(
+                  tileset.boundingSphereCenter,
+                  new Cesium.Cartesian3()
+                );
+                var cartoC = Cesium.Cartographic.fromCartesian(c);
+                cartoC.height = tileset.root.boundingVolume.minimumHeight;
+
+                Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [
+                  cartoC,
+                ]).then((updatedPositions) => {
+                  var lowest = Cesium.Cartographic.toCartesian(
+                    updatedPositions[0]
+                  );
+                  var c = Cesium.Cartesian3.clone(
+                    tileset.boundingSphereCenter,
+                    new Cesium.Cartesian3()
+                  );
+
+                  var translation = Cesium.Cartesian3.subtract(
+                    lowest,
+                    c,
+                    new Cesium.Cartesian3()
+                  );
+
+                  tileset.modelMatrix =
+                    Cesium.Matrix4.fromTranslation(translation);
+                });
+              }
+            }
+          }
+
+          if (!(tilesets[data.asset.id] && tilesets[data.asset.id][data.id])) {
+            clearInterval(clampTimer);
+            var clampTimer = setInterval(clampLowest, 500);
+          } else {
+            clampLowest();
+          }
+        };
+
+        dateContentDiv.appendChild(transformButton);
         dateContentDiv.appendChild(cropButton);
       }
       if (data.type === "ImageSeries") {

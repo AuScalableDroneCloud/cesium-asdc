@@ -29,11 +29,16 @@ import {
   zoomOnDataSelect,
   categories,
   mousePosition,
-  timelineOnDataSelect
+  timelineOnDataSelect,
 } from "./State.js";
-import { loadInfluxGraphs, loadCSVGraphs,closeGraphModal } from "./Graphs.js";
+import { loadInfluxGraphs, loadCSVGraphs, closeGraphModal } from "./Graphs.js";
 import { setupStyleToolbar, applyStyle } from "./Style.js";
-import { highlightHeightPX, highlightColor, eptServer, baseURL } from "./Constants.js";
+import {
+  highlightHeightPX,
+  highlightColor,
+  eptServer,
+  baseURL,
+} from "./Constants.js";
 import { applyInit } from "./App.js";
 
 export const loadAsset = (asset, timeline, timelineTrack) => {
@@ -50,38 +55,46 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
     }
   });
 
-  if (timelineOnDataSelect){
+  if (timelineOnDataSelect) {
     syncTimeline(false);
   }
 
-  var assetDates = assetDataset.filter(
-    (d) => new Date(d.date) != "Invalid Date"
-  ).map(data=>{
-    return new Date(data.date)
-  });
+  var assetDates = assetDataset
+    .filter((d) => new Date(d.date) != "Invalid Date")
+    .map((data) => {
+      return new Date(data.date);
+    });
 
   assetDates.sort(function (a, b) {
     return new Date(a).getTime() - new Date(b).getTime();
   });
 
-  if (assetDates[0]){
+  if (assetDates[0]) {
     viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
       new Date(assetDates[0])
     );
   }
 
-  if (assetDataset[0]["type"] === "Influx" || assetDataset[0]["type"]==="ImageSeries") {//todo: clean with function params
+  if (
+    assetDataset[0]["type"] === "Influx" ||
+    assetDataset[0]["type"] === "ImageSeries"
+  ) {
+    //todo: clean with function params
     //Influx charts and Image Series from 2 weeks before
-    if (assetDataset[0].endDateTime){
+    if (assetDataset[0].endDateTime) {
       var initialDate = new Date(assetDataset[0].endDateTime);
       viewer.clock.currentTime = new Cesium.JulianDate.fromDate(initialDate);
       viewer.timeline.updateFromClock();
       if (timelineOnDataSelect) {
         viewer.timeline.zoomTo(
           Cesium.JulianDate.fromDate(
-            new Date(initialDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01)
+            new Date(
+              initialDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01
+            )
           ),
-          Cesium.JulianDate.fromDate(new Date(initialDate.getTime() + 2 * 7 * 86400000 * 0.01))
+          Cesium.JulianDate.fromDate(
+            new Date(initialDate.getTime() + 2 * 7 * 86400000 * 0.01)
+          )
         );
       }
     } else {
@@ -91,25 +104,38 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
       if (timelineOnDataSelect) {
         viewer.timeline.zoomTo(
           Cesium.JulianDate.fromDate(
-            new Date(currentDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01)
+            new Date(
+              currentDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01
+            )
           ),
-          Cesium.JulianDate.fromDate(new Date((new Date()).getTime() + 2 * 7 * 86400000 * 0.01))
+          Cesium.JulianDate.fromDate(
+            new Date(new Date().getTime() + 2 * 7 * 86400000 * 0.01)
+          )
         );
       }
     }
   } else if (assetDataset[0]["type"] === "CSV") {
-    if (assetDataset[0].endDateTime){
-      if (assetDataset[0].startDateTime){
-        viewer.clock.currentTime = new Cesium.JulianDate.fromDate(new Date(assetDataset[0].endDateTime));
+    if (assetDataset[0].endDateTime) {
+      if (assetDataset[0].startDateTime) {
+        viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+          new Date(assetDataset[0].endDateTime)
+        );
         viewer.timeline.updateFromClock();
         if (timelineOnDataSelect) {
-          var diff = new Date(new Date(assetDataset[0].endDateTime).getTime() - new Date(assetDataset[0].startDateTime).getTime())
+          var diff = new Date(
+            new Date(assetDataset[0].endDateTime).getTime() -
+              new Date(assetDataset[0].startDateTime).getTime()
+          );
           viewer.timeline.zoomTo(
             Cesium.JulianDate.fromDate(
-              new Date(new Date(assetDataset[0].startDateTime).getTime() - 0.01 * diff)
+              new Date(
+                new Date(assetDataset[0].startDateTime).getTime() - 0.01 * diff
+              )
             ),
             Cesium.JulianDate.fromDate(
-              new Date(new Date(assetDataset[0].endDateTime).getTime() + 0.01 * diff)
+              new Date(
+                new Date(assetDataset[0].endDateTime).getTime() + 0.01 * diff
+              )
             )
           );
         }
@@ -120,9 +146,15 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
         if (timelineOnDataSelect) {
           viewer.timeline.zoomTo(
             Cesium.JulianDate.fromDate(
-              new Date(initialDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01)
+              new Date(
+                initialDate.getTime() -
+                  2 * 7 * 86400000 -
+                  2 * 7 * 86400000 * 0.01
+              )
             ),
-            Cesium.JulianDate.fromDate(new Date(initialDate.getTime() + 2 * 7 * 86400000 * 0.01))
+            Cesium.JulianDate.fromDate(
+              new Date(initialDate.getTime() + 2 * 7 * 86400000 * 0.01)
+            )
           );
         }
       }
@@ -133,27 +165,32 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
       if (timelineOnDataSelect) {
         viewer.timeline.zoomTo(
           Cesium.JulianDate.fromDate(
-            new Date(currentDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01)
+            new Date(
+              currentDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01
+            )
           ),
-          Cesium.JulianDate.fromDate(new Date((new Date()).getTime() + 2 * 7 * 86400000 * 0.01))
+          Cesium.JulianDate.fromDate(
+            new Date(new Date().getTime() + 2 * 7 * 86400000 * 0.01)
+          )
         );
       }
     }
   }
-  if (timeline) { 
+  if (timeline) {
     var data = assetDataset[0];
     var date = new Date(data.date);
     viewer.timeline._highlightRanges = [];
     viewer.timeline._makeTics();
-    if (data.type == "PointCloud" ||
+    if (
+      data.type == "PointCloud" ||
       data.type == "EPTPointCloud" ||
       data.type == "ModelTileset" ||
-      data.type == "Imagery"||
+      data.type == "Imagery" ||
       data.type == "GeoJSON"
-      ){
+    ) {
       if (date.toString() !== "Invalid Date") {
-    // if (tilesets[asset["id"]]) {
-      //TODO: dates for entities
+        // if (tilesets[asset["id"]]) {
+        //TODO: dates for entities
         viewer.timeline._highlightRanges = [];
         assetDates.map((date) => {
           viewer.timeline
@@ -176,10 +213,16 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
           viewer.clock.currentTime = new Cesium.JulianDate.fromDate(minDate);
           viewer.timeline.updateFromClock();
           if (timelineOnDataSelect) {
-            var diff = (new Date(maxDate.getTime() + 86400000 - minDate.getTime())).getTime();
+            var diff = new Date(
+              maxDate.getTime() + 86400000 - minDate.getTime()
+            ).getTime();
             viewer.timeline.zoomTo(
-              Cesium.JulianDate.fromDate(new Date(minDate.getTime() - diff * 0.01)),
-              Cesium.JulianDate.fromDate(new Date(maxDate.getTime() + 86400000 + diff * 0.01))
+              Cesium.JulianDate.fromDate(
+                new Date(minDate.getTime() - diff * 0.01)
+              ),
+              Cesium.JulianDate.fromDate(
+                new Date(maxDate.getTime() + 86400000 + diff * 0.01)
+              )
             );
           }
         } else {
@@ -214,15 +257,16 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
   }
 
   if (assetDataset.length > 0 && zoomOnDataSelect) {
-    if (assetDataset[0].zoom){
+    if (assetDataset[0].zoom) {
       var zoom = assetDataset[0].zoom;
       viewer.camera.flyTo({
-        destination:new Cesium.Cartesian3(
+        destination: new Cesium.Cartesian3(
           zoom.position.x,
           zoom.position.y,
-          zoom.position.z),
-        orientation : {
-          direction : new Cesium.Cartesian3(
+          zoom.position.z
+        ),
+        orientation: {
+          direction: new Cesium.Cartesian3(
             zoom.orientation.direction.x,
             zoom.orientation.direction.y,
             zoom.orientation.direction.z
@@ -231,9 +275,9 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
             zoom.orientation.up.x,
             zoom.orientation.up.y,
             zoom.orientation.up.z
-          )
-        }
-      })
+          ),
+        },
+      });
     } else {
       // if (
       //   assetDataset[0]["type"] === "PointCloud" ||
@@ -250,7 +294,7 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
         assetDataset[0]["type"] === "EPTPointCloud" ||
         assetDataset[0]["type"] === "ModelTileset"
       ) {
-        if (assetDataset[0].position && assetDataset[0].boundingSphereRadius){
+        if (assetDataset[0].position && assetDataset[0].boundingSphereRadius) {
           var pos = Cesium.Cartographic.toCartesian(
             Cesium.Cartographic.fromDegrees(
               assetDataset[0].position["lng"],
@@ -262,7 +306,7 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
             new Cesium.BoundingSphere(pos, assetDataset[0].boundingSphereRadius)
           );
         } else {
-          viewer.flyTo(tilesets[assetDataset[0].asset.id][assetDataset[0].id])
+          viewer.flyTo(tilesets[assetDataset[0].asset.id][assetDataset[0].id]);
         }
       } else if (assetDataset[0]["type"] === "Model") {
         viewer.flyTo(entities[asset["id"]][assetDataset[0]["id"]]);
@@ -274,20 +318,20 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
         var position = Cesium.Cartesian3.fromDegrees(
           assetDataset[0]["position"]["lng"],
           assetDataset[0]["position"]["lat"],
-          assetDataset[0]["position"]["height"] ? assetDataset[0]["position"]["height"] + 1750 : 1750
+          assetDataset[0]["position"]["height"]
+            ? assetDataset[0]["position"]["height"] + 1750
+            : 1750
         );
 
         viewer.camera.flyTo({ destination: position });
       } else if (assetDataset[0]["type"] === "ImageSeries") {
-        if (entities[asset.id][
-          assetDataset[0].id
-        ]){
+        if (entities[asset.id][assetDataset[0].id]) {
           Cesium.sampleTerrainMostDetailed(
             viewer.terrainProvider,
             Cesium.Ellipsoid.WGS84.cartesianArrayToCartographicArray(
-                entities[asset.id][
-                  assetDataset[0].id
-                ].polygon.hierarchy.getValue().positions
+              entities[asset.id][
+                assetDataset[0].id
+              ].polygon.hierarchy.getValue().positions
             )
           ).then((updatedPositions) => {
             viewer.camera.flyToBoundingSphere(
@@ -300,7 +344,8 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
                 offset: new Cesium.HeadingPitchRange(
                   entities[asset.id][assetDataset[0].id].polygon.stRotation,
                   Cesium.Math.toRadians(-90),
-                  0)
+                  0
+                ),
               }
             );
           });
@@ -365,19 +410,22 @@ export const loadData = (
     }
   });
 
-  
-  if (data["type"] === "Influx" || data["type"]==="ImageSeries") {
+  if (data["type"] === "Influx" || data["type"] === "ImageSeries") {
     //Influx charts and Image Series from 2 weeks before
-    if (data.endDateTime){
+    if (data.endDateTime) {
       var initialDate = new Date(data.endDateTime);
       viewer.clock.currentTime = new Cesium.JulianDate.fromDate(initialDate);
       viewer.timeline.updateFromClock();
       if (timelineOnDataSelect) {
         viewer.timeline.zoomTo(
           Cesium.JulianDate.fromDate(
-            new Date(initialDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01)
+            new Date(
+              initialDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01
+            )
           ),
-          Cesium.JulianDate.fromDate(new Date(initialDate.getTime() + 2 * 7 * 86400000 * 0.01))
+          Cesium.JulianDate.fromDate(
+            new Date(initialDate.getTime() + 2 * 7 * 86400000 * 0.01)
+          )
         );
       }
     } else {
@@ -387,19 +435,28 @@ export const loadData = (
       if (timelineOnDataSelect) {
         viewer.timeline.zoomTo(
           Cesium.JulianDate.fromDate(
-            new Date(currentDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01)
+            new Date(
+              currentDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01
+            )
           ),
-          Cesium.JulianDate.fromDate(new Date((new Date()).getTime() + 2 * 7 * 86400000 * 0.01))
+          Cesium.JulianDate.fromDate(
+            new Date(new Date().getTime() + 2 * 7 * 86400000 * 0.01)
+          )
         );
       }
     }
   } else if (data["type"] === "CSV") {
-    if (data.endDateTime){
-      if (data.startDateTime){
-        viewer.clock.currentTime = new Cesium.JulianDate.fromDate(new Date(data.endDateTime));
+    if (data.endDateTime) {
+      if (data.startDateTime) {
+        viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+          new Date(data.endDateTime)
+        );
         viewer.timeline.updateFromClock();
         if (timelineOnDataSelect) {
-          var diff = new Date(new Date(data.endDateTime).getTime() - new Date(data.startDateTime).getTime())
+          var diff = new Date(
+            new Date(data.endDateTime).getTime() -
+              new Date(data.startDateTime).getTime()
+          );
           viewer.timeline.zoomTo(
             Cesium.JulianDate.fromDate(
               new Date(new Date(data.startDateTime).getTime() - 0.01 * diff)
@@ -416,9 +473,15 @@ export const loadData = (
         if (timelineOnDataSelect) {
           viewer.timeline.zoomTo(
             Cesium.JulianDate.fromDate(
-              new Date(initialDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01)
+              new Date(
+                initialDate.getTime() -
+                  2 * 7 * 86400000 -
+                  2 * 7 * 86400000 * 0.01
+              )
             ),
-            Cesium.JulianDate.fromDate(new Date(initialDate.getTime() + 2 * 7 * 86400000 * 0.01))
+            Cesium.JulianDate.fromDate(
+              new Date(initialDate.getTime() + 2 * 7 * 86400000 * 0.01)
+            )
           );
         }
       }
@@ -429,9 +492,13 @@ export const loadData = (
       if (timelineOnDataSelect) {
         viewer.timeline.zoomTo(
           Cesium.JulianDate.fromDate(
-            new Date(currentDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01)
+            new Date(
+              currentDate.getTime() - 2 * 7 * 86400000 - 2 * 7 * 86400000 * 0.01
+            )
           ),
-          Cesium.JulianDate.fromDate(new Date((new Date()).getTime() + 2 * 7 * 86400000 * 0.01))
+          Cesium.JulianDate.fromDate(
+            new Date(new Date().getTime() + 2 * 7 * 86400000 * 0.01)
+          )
         );
       }
     }
@@ -440,31 +507,35 @@ export const loadData = (
   if (data["type"] === "PointCloud" || data["type"] === "ModelTileset") {
     if (!tilesets[asset["id"]]) tilesets[asset["id"]] = {};
     if (!tilesets[asset["id"]][data.id]) {
-      tilesets[asset["id"]][data.id] =
-        viewer.scene.primitives.add(
-          new Cesium.Cesium3DTileset({
-            url:  data["url"]==="ion" ? 
-              Cesium.IonResource.fromAssetId(data.assetId) :
-              !data.useProxy ?
-              data["url"]
+      tilesets[asset["id"]][data.id] = viewer.scene.primitives.add(
+        new Cesium.Cesium3DTileset({
+          url:
+            data["url"] === "ion"
+              ? Cesium.IonResource.fromAssetId(data.assetId)
+              : !data.useProxy
+              ? data["url"]
               : new Cesium.Resource({
                   url: data["url"],
                   proxy: new Cesium.DefaultProxy("/cesium/proxy/"),
                 }),
-            maximumScreenSpaceError:
-              ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
-            // show: new Date(data["date"]) != "Invalid Date" ? false : true,
-          })
-        );
-        
+          maximumScreenSpaceError:
+            ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
+          // show: new Date(data["date"]) != "Invalid Date" ? false : true,
+        })
+      );
+
       applyInit();
 
-      tilesets[asset["id"]][data.id].readyPromise.then(function (
-        tileset
-      ) {
+      tilesets[asset["id"]][data.id].readyPromise.then(function (tileset) {
         // keep tileset visible at all times
-        tileset._geometricError= Number.MAX_SAFE_INTEGER;
-        
+        tileset._geometricError = Number.MAX_SAFE_INTEGER;
+
+        tilesets[data.asset.id][data.id].boundingSphereCenter =
+          new Cesium.Cartesian3();
+        tilesets[data.asset.id][data.id].boundingSphere.center.clone(
+          tilesets[data.asset.id][data.id].boundingSphereCenter
+        );
+
         // console.log(tileset.boundingSphere);
         // var carto = Cesium.Cartographic.fromCartesian(tileset.boundingSphere.center);
         // console.log(carto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
@@ -480,7 +551,8 @@ export const loadData = (
           );
           var translation = Cesium.Cartesian3.subtract(
             offset,
-            tileset.boundingSphere.center,
+            // tileset.boundingSphere.center,
+            tileset.boundingSphereCenter,
             new Cesium.Cartesian3()
           );
           tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
@@ -519,7 +591,7 @@ export const loadData = (
         orientation: orientation,
         model: {
           uri: data["url"],
-          scale:data.scale ?? 1
+          scale: data.scale ?? 1,
         },
       });
 
@@ -544,13 +616,20 @@ export const loadData = (
       } else {
         eptURL = data.url;
       }
-      fetch(eptURL, { cache: "no-store", credentials: eptURL.startsWith("https://asdc.cloud.edu.au/") || eptURL.startsWith("https://dev.asdc.cloud.edu.au/") ? "include" : "omit"})
+      fetch(eptURL, {
+        cache: "no-store",
+        credentials:
+          eptURL.startsWith("https://asdc.cloud.edu.au/") ||
+          eptURL.startsWith("https://dev.asdc.cloud.edu.au/")
+            ? "include"
+            : "omit",
+      })
         .then((response) => response.text())
         .then((text) => {
           var ept = JSON.parse(text);
           var dimensions = [];
           var truncate = true;
-          if (!ept.schema) return
+          if (!ept.schema) return;
           ept.schema.map((s) => {
             if (s.minimum && s.maximum) {
               if (s.minimum != s.maximum) {
@@ -581,10 +660,10 @@ export const loadData = (
               if (index == 0) {
                 applyInit();
 
-                tilesets[asset["id"]][
-                  data.id
-                ][0].readyPromise.then(function (tileset) {
-                  tileset._geometricError= Number.MAX_SAFE_INTEGER;
+                tilesets[asset["id"]][data.id][0].readyPromise.then(function (
+                  tileset
+                ) {
+                  tileset._geometricError = Number.MAX_SAFE_INTEGER;
 
                   setupStyleToolbar(tileset);
                   applyStyle(selectedDimension);
@@ -592,72 +671,75 @@ export const loadData = (
               }
             });
           } else {
-            tilesets[asset["id"]][data.id] =
-              viewer.scene.primitives.add(
-                new Cesium.Cesium3DTileset({
-                  url: `${eptServer}/tileset.json?ept=${
-                    data.url
-                  }&dimensions=${dimensions.join(",")}&${
-                    truncate ? "truncate" : null
-                  }`,
-                  maximumScreenSpaceError:
-                    ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
-                  // show: new Date(data["date"]) != "Invalid Date" ? false : true,
-                  // debugShowBoundingVolume:true
-                })
-              );
-            
+            tilesets[asset["id"]][data.id] = viewer.scene.primitives.add(
+              new Cesium.Cesium3DTileset({
+                url: `${eptServer}/tileset.json?ept=${
+                  data.url
+                }&dimensions=${dimensions.join(",")}&${
+                  truncate ? "truncate" : null
+                }`,
+                maximumScreenSpaceError:
+                  ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
+                // show: new Date(data["date"]) != "Invalid Date" ? false : true,
+                // debugShowBoundingVolume:true
+              })
+            );
+
             applyInit();
 
-            tilesets[asset["id"]][data.id].readyPromise.then(
-              function (tileset) {
-                tileset._geometricError= Number.MAX_SAFE_INTEGER;
+            tilesets[asset["id"]][data.id].readyPromise.then(function (
+              tileset
+            ) {
+              tileset._geometricError = Number.MAX_SAFE_INTEGER;
 
-                // console.log(tilesets[asset["id"]][
-                //   data.id
-                //   ].boundingSphere);
-                // var carto = Cesium.Cartographic.fromCartesian(tilesets[asset["id"]][data.id].boundingSphere.center);
-                // console.log(carto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
-                // console.log(carto.longitude * Cesium.Math.DEGREES_PER_RADIAN);
-                // console.log(carto.height);
-                // Cesium.sampleTerrainMostDetailed(
-                //   viewer.terrainProvider,
-                //   [Cesium.Cartographic.fromCartesian(tilesets[asset["id"]][data.id].boundingSphere.center)]
-                // ).then((updatedPositions) => {
-                //   console.log(updatedPositions);
-                //   // var cartesians =
-                //   //   Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-                //   //     updatedPositions
-                //   //   );
-                //   // var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
-                //   // viewer.camera.flyToBoundingSphere(boundingSphere);
-                // });
+              tilesets[data.asset.id][data.id].boundingSphereCenter =
+                new Cesium.Cartesian3();
+              tilesets[data.asset.id][data.id].boundingSphere.center.clone(
+                tilesets[data.asset.id][data.id].boundingSphereCenter
+              );
 
-                if (data["position"]) {
-                  tilesets[data.asset.id][data.id].boundingSphereCenter = new Cesium.Cartesian3();
-                  tilesets[data.asset.id][data.id].boundingSphere.center.clone(tilesets[data.asset.id][data.id].boundingSphereCenter);
+              // console.log(tilesets[asset["id"]][
+              //   data.id
+              //   ].boundingSphere);
+              // var carto = Cesium.Cartographic.fromCartesian(tilesets[asset["id"]][data.id].boundingSphere.center);
+              // console.log(carto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
+              // console.log(carto.longitude * Cesium.Math.DEGREES_PER_RADIAN);
+              // console.log(carto.height);
+              // Cesium.sampleTerrainMostDetailed(
+              //   viewer.terrainProvider,
+              //   [Cesium.Cartographic.fromCartesian(tilesets[asset["id"]][data.id].boundingSphere.center)]
+              // ).then((updatedPositions) => {
+              //   console.log(updatedPositions);
+              //   // var cartesians =
+              //   //   Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+              //   //     updatedPositions
+              //   //   );
+              //   // var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
+              //   // viewer.camera.flyToBoundingSphere(boundingSphere);
+              // });
 
-                  var offset = Cesium.Cartographic.toCartesian(
-                    new Cesium.Cartographic.fromDegrees(
-                      data["position"]["lng"],
-                      data["position"]["lat"],
-                      data["position"]["height"]
-                    )
-                  );
-                  var translation = Cesium.Cartesian3.subtract(
-                    offset,
-                    tileset.boundingSphere.center,
-                    new Cesium.Cartesian3()
-                  );
-                  tileset.modelMatrix =
+              if (data["position"]) {
+                var offset = Cesium.Cartographic.toCartesian(
+                  new Cesium.Cartographic.fromDegrees(
+                    data["position"]["lng"],
+                    data["position"]["lat"],
+                    data["position"]["height"]
+                  )
+                );
+                var translation = Cesium.Cartesian3.subtract(
+                  offset,
+                  // tileset.boundingSphere.center,
+                  tileset.boundingSphereCenter,
+                  new Cesium.Cartesian3()
+                );
+                tileset.modelMatrix =
                   // tileset.root.transofrm =
-                    Cesium.Matrix4.fromTranslation(translation);
-                }
-
-                setupStyleToolbar(tileset);
-                applyStyle(selectedDimension);
+                  Cesium.Matrix4.fromTranslation(translation);
               }
-            );
+
+              setupStyleToolbar(tileset);
+              applyStyle(selectedDimension);
+            });
           }
         });
     } else {
@@ -684,28 +766,31 @@ export const loadData = (
         viewer.imageryLayers.addImageryProvider(
           new Cesium.UrlTemplateImageryProvider({
             url: !data.useProxy
-            ? data["url"]
-            : new Cesium.Resource({
-                url: data["url"],
-                proxy: new Cesium.DefaultProxy("/cesium/proxy/"),
-              }),
-            rectangle: data.bounds ? new Cesium.Rectangle.fromDegrees(
-              data.bounds[0],
-              data.bounds[1],
-              data.bounds[2],
-              data.bounds[3]
-            ):Cesium.Rectangle.MAX_VALUE,
+              ? data["url"]
+              : new Cesium.Resource({
+                  url: data["url"],
+                  proxy: new Cesium.DefaultProxy("/cesium/proxy/"),
+                }),
+            rectangle: data.bounds
+              ? new Cesium.Rectangle.fromDegrees(
+                  data.bounds[0],
+                  data.bounds[1],
+                  data.bounds[2],
+                  data.bounds[3]
+                )
+              : Cesium.Rectangle.MAX_VALUE,
             minimumLevel: data.minzoom ? data.minzoom : 0,
             maximumLevel: data.maxzoom ? data.maxzoom : undefined,
           })
         );
-        imageryLayers[asset.id][data.id].data=data;
+      imageryLayers[asset.id][data.id].data = data;
     } else {
       viewer.imageryLayers.raiseToTop(imageryLayers[asset.id][data.id]);
       imageryLayers[asset.id][data.id].show = true;
     }
   } else if (data["type"] === "ImageSeries") {
-    document.getElementById("image-series-toolbar-row").style.display = "table-row";
+    document.getElementById("image-series-toolbar-row").style.display =
+      "table-row";
     if (!entities[asset.id]) entities[asset.id] = {};
     if (!entities[asset.id][data.id]) {
       var currentDate = Cesium.JulianDate.toDate(viewer.clock.currentTime);
@@ -715,102 +800,129 @@ export const loadData = (
       }
       currentDate.setHours(12, 0, 0);
 
-      var halfWidth = ((data.halfHeightDeg ? data.halfHeightDeg : 0.0025) * data.width) / data.height;
-      var halfHeight = (data.halfHeightDeg ? data.halfHeightDeg : 0.0025);
+      var halfWidth =
+        ((data.halfHeightDeg ? data.halfHeightDeg : 0.0025) * data.width) /
+        data.height;
+      var halfHeight = data.halfHeightDeg ? data.halfHeightDeg : 0.0025;
 
-      if (data.rotation){
-        var poly = turf.polygon([[
-          [data.position["lng"] - halfWidth, data.position["lat"]],
-          [data.position["lng"] + halfWidth,data.position["lat"]],
-          [data.position["lng"] + halfWidth,data.position["lat"] + 2 * halfHeight],
-          [data.position["lng"] - halfWidth,data.position["lat"] + 2 * halfHeight],
-          [data.position["lng"] - halfWidth, data.position["lat"]],
-        ]]);
-        var options = {pivot: [data.position["lng"], data.position["lat"]]};
+      if (data.rotation) {
+        var poly = turf.polygon([
+          [
+            [data.position["lng"] - halfWidth, data.position["lat"]],
+            [data.position["lng"] + halfWidth, data.position["lat"]],
+            [
+              data.position["lng"] + halfWidth,
+              data.position["lat"] + 2 * halfHeight,
+            ],
+            [
+              data.position["lng"] - halfWidth,
+              data.position["lat"] + 2 * halfHeight,
+            ],
+            [data.position["lng"] - halfWidth, data.position["lat"]],
+          ],
+        ]);
+        var options = { pivot: [data.position["lng"], data.position["lat"]] };
         var rotatedPoly = turf.transformRotate(poly, data.rotation, options);
 
         var pointsArray = [];
 
-        for(let point of rotatedPoly.geometry.coordinates[0]) {
+        for (let point of rotatedPoly.geometry.coordinates[0]) {
           pointsArray.push(point[0]);
           pointsArray.push(point[1]);
         }
       } else {
         var pointsArray = [
-          data.position["lng"] - halfWidth, data.position["lat"],
-          data.position["lng"] + halfWidth, data.position["lat"],
-          data.position["lng"] + halfWidth,data.position["lat"] + 2 * halfHeight,
-          data.position["lng"] - halfWidth,data.position["lat"] + 2 * halfHeight
-        ]
+          data.position["lng"] - halfWidth,
+          data.position["lat"],
+          data.position["lng"] + halfWidth,
+          data.position["lat"],
+          data.position["lng"] + halfWidth,
+          data.position["lat"] + 2 * halfHeight,
+          data.position["lng"] - halfWidth,
+          data.position["lat"] + 2 * halfHeight,
+        ];
       }
 
       var points = Cesium.Cartesian3.fromDegreesArray(pointsArray);
       entities[asset.id][data.id] = viewer.entities.add({
-              polygon:{
-                hierarchy:points,
-                stRotation:data.rotation ? Cesium.Math.toRadians(data.rotation): 0,
-                show: !billboard,
-              },
-              position: Cesium.Cartesian3.fromDegrees(
-                data.position["lng"],
-                data.position["lat"]
-              ),
-              billboard: {
-                height: 300,
-                width: (300 * data.width) / data.height,
-                pixelOffset: new Cesium.Cartesian2(0, -150),
-                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-                distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
-                  0,
-                  5000
-                ),
-                color: new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
-                show: billboard,
-              },
-            });
+        polygon: {
+          hierarchy: points,
+          stRotation: data.rotation ? Cesium.Math.toRadians(data.rotation) : 0,
+          show: !billboard,
+        },
+        position: Cesium.Cartesian3.fromDegrees(
+          data.position["lng"],
+          data.position["lat"]
+        ),
+        billboard: {
+          height: 300,
+          width: (300 * data.width) / data.height,
+          pixelOffset: new Cesium.Cartesian2(0, -150),
+          heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+          distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
+            0,
+            5000
+          ),
+          color: new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
+          show: billboard,
+        },
+      });
       if (data.source && data.source.type === "csv") {
-        fetch(
-          data.source.url,
-          { cache: "no-store" }
-        ).then((response) => {
-          return response;
-        })
-        .then((response) => response.text())
-        .then((response) => {
-          var csvRows = response.split('\n');
-          var timeIndex = csvRows[0].split(',').indexOf(data.source.columns.time);
-          var imageIndex = csvRows[0].split(',').indexOf(data.source.columns.image);
-          csvRows = csvRows.slice(1,csvRows.length-1)
+        fetch(data.source.url, { cache: "no-store" })
+          .then((response) => {
+            return response;
+          })
+          .then((response) => response.text())
+          .then((response) => {
+            var csvRows = response.split("\n");
+            var timeIndex = csvRows[0]
+              .split(",")
+              .indexOf(data.source.columns.time);
+            var imageIndex = csvRows[0]
+              .split(",")
+              .indexOf(data.source.columns.image);
+            csvRows = csvRows.slice(1, csvRows.length - 1);
 
-          var earliestDate;
-          var earliestRow;
-          var firstImage;
-          for (var row=0;row<csvRows.length;row++){
-            var csvRowColumns = csvRows[row].split(',');
-            
-            if (new Date(csvRowColumns[timeIndex]).getTime() <= currentDate && (!earliestDate || (earliestDate && earliestDate.getTime()<new Date(csvRowColumns[timeIndex]).getTime()))){
-              earliestDate = new Date(csvRowColumns[timeIndex]);
-              earliestRow = row;
+            var earliestDate;
+            var earliestRow;
+            var firstImage;
+            for (var row = 0; row < csvRows.length; row++) {
+              var csvRowColumns = csvRows[row].split(",");
+
+              if (
+                new Date(csvRowColumns[timeIndex]).getTime() <= currentDate &&
+                (!earliestDate ||
+                  (earliestDate &&
+                    earliestDate.getTime() <
+                      new Date(csvRowColumns[timeIndex]).getTime()))
+              ) {
+                earliestDate = new Date(csvRowColumns[timeIndex]);
+                earliestRow = row;
+              }
+              if (
+                new Date(csvRowColumns[timeIndex]).getTime() ===
+                new Date(data.startDateTime).getTime()
+              ) {
+                firstImage = csvRowColumns[imageIndex];
+              }
             }
-            if (new Date(csvRowColumns[timeIndex]).getTime() === new Date(data.startDateTime).getTime()){
-              firstImage = csvRowColumns[imageIndex];
+
+            if (!!earliestDate && !!earliestRow) {
+              var imageUrl = data.url.replace(
+                "{Image}",
+                csvRows[earliestRow].split(",")[imageIndex]
+              );
+            } else {
+              var imageUrl = data.url.replace("{Image}", firstImage);
             }
-          }
+            entities[data.asset.id][data.id].polygon.material =
+              new Cesium.ImageMaterialProperty({
+                image: imageUrl,
+                color: new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
+              });
 
-          if (!!earliestDate && !!earliestRow){
-            var imageUrl = data.url.replace("{Image}",csvRows[earliestRow].split(',')[imageIndex])
-          } else {
-            var imageUrl = data.url.replace("{Image}",firstImage);
-          }
-          entities[data.asset.id][data.id].polygon.material =
-                    new Cesium.ImageMaterialProperty({
-                      image: imageUrl,
-                      color:
-                      new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
-                    });
-
-          entities[data.asset.id][data.id].billboard.image = imageUrl;
-        })
+            entities[data.asset.id][data.id].billboard.image = imageUrl;
+          });
       } else {
         fetch(
           `/cesium/influx/images?camera=${data.camera}&time=${
@@ -843,11 +955,10 @@ export const loadData = (
               ).getTime()}`;
             }
             entities[data.asset.id][data.id].polygon.material =
-                    new Cesium.ImageMaterialProperty({
-                      image: imageUrl,
-                      color:
-                      new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
-                    });
+              new Cesium.ImageMaterialProperty({
+                image: imageUrl,
+                color: new Cesium.Color.fromAlpha(Cesium.Color.WHITE, 1),
+              });
 
             entities[data.asset.id][data.id].billboard.image = imageUrl;
           })
@@ -881,9 +992,9 @@ export const loadData = (
     // if (true){
     // viewer.flyTo(tilesets[asset.id][data.id]);
     // } else
-    if (data.zoom){
+    if (data.zoom) {
       if (data.zoom === "boundingSphere") {
-        if (data.position && data.boundingSphereRadius){
+        if (data.position && data.boundingSphereRadius) {
           var pos = Cesium.Cartographic.toCartesian(
             Cesium.Cartographic.fromDegrees(
               data.position["lng"],
@@ -895,22 +1006,23 @@ export const loadData = (
             new Cesium.BoundingSphere(pos, data.boundingSphereRadius)
           );
         } else {
-          if (entities[asset["id"]] && entities[asset["id"]][data["id"]]){
+          if (entities[asset["id"]] && entities[asset["id"]][data["id"]]) {
             viewer.flyTo(entities[asset["id"]][data["id"]]);
           }
-          if (tilesets[asset["id"]] && tilesets[asset["id"]][data["id"]]){
+          if (tilesets[asset["id"]] && tilesets[asset["id"]][data["id"]]) {
             viewer.flyTo(tilesets[asset["id"]][data["id"]]);
           }
         }
       } else {
         var zoom = data.zoom;
         viewer.camera.flyTo({
-          destination:new Cesium.Cartesian3(
+          destination: new Cesium.Cartesian3(
             zoom.position.x,
             zoom.position.y,
-            zoom.position.z),
-          orientation : {
-            direction : new Cesium.Cartesian3(
+            zoom.position.z
+          ),
+          orientation: {
+            direction: new Cesium.Cartesian3(
               zoom.orientation.direction.x,
               zoom.orientation.direction.y,
               zoom.orientation.direction.z
@@ -919,20 +1031,21 @@ export const loadData = (
               zoom.orientation.up.x,
               zoom.orientation.up.y,
               zoom.orientation.up.z
-            )
-          }
-        })
+            ),
+          },
+        });
       }
     } else {
-      if (assetDataset[0].zoom){
+      if (assetDataset[0].zoom) {
         var zoom = assetDataset[0].zoom;
         viewer.camera.flyTo({
-          destination:new Cesium.Cartesian3(
+          destination: new Cesium.Cartesian3(
             zoom.position.x,
             zoom.position.y,
-            zoom.position.z),
-          orientation : {
-            direction : new Cesium.Cartesian3(
+            zoom.position.z
+          ),
+          orientation: {
+            direction: new Cesium.Cartesian3(
               zoom.orientation.direction.x,
               zoom.orientation.direction.y,
               zoom.orientation.direction.z
@@ -941,16 +1054,19 @@ export const loadData = (
               zoom.orientation.up.x,
               zoom.orientation.up.y,
               zoom.orientation.up.z
-            )
-          }
-        })
+            ),
+          },
+        });
       } else {
         if (
           assetDataset[0]["type"] === "PointCloud" ||
           assetDataset[0]["type"] === "EPTPointCloud" ||
           assetDataset[0]["type"] === "ModelTileset"
         ) {
-          if (assetDataset[0].position && assetDataset[0].boundingSphereRadius){
+          if (
+            assetDataset[0].position &&
+            assetDataset[0].boundingSphereRadius
+          ) {
             var pos = Cesium.Cartographic.toCartesian(
               Cesium.Cartographic.fromDegrees(
                 assetDataset[0].position["lng"],
@@ -959,10 +1075,13 @@ export const loadData = (
               )
             );
             viewer.camera.flyToBoundingSphere(
-              new Cesium.BoundingSphere(pos, assetDataset[0].boundingSphereRadius)
+              new Cesium.BoundingSphere(
+                pos,
+                assetDataset[0].boundingSphereRadius
+              )
             );
           } else {
-            viewer.flyTo(tilesets[asset.id][data.id])
+            viewer.flyTo(tilesets[asset.id][data.id]);
           }
         } else if (assetDataset[0]["type"] === "Model") {
           viewer.flyTo(entities[asset["id"]][data["id"]]);
@@ -972,29 +1091,30 @@ export const loadData = (
           assetDataset[0]["type"] === "CSV"
         ) {
           // if (assetDataset[0] && assetDataset[0]["position"]){
-            var position = Cesium.Cartesian3.fromDegrees(
-              assetDataset[0]["position"]["lng"],
-              assetDataset[0]["position"]["lat"],
-              assetDataset[0]["position"]["height"] ? assetDataset[0]["position"]["height"] + 1750 : 1750
-            );
+          var position = Cesium.Cartesian3.fromDegrees(
+            assetDataset[0]["position"]["lng"],
+            assetDataset[0]["position"]["lat"],
+            assetDataset[0]["position"]["height"]
+              ? assetDataset[0]["position"]["height"] + 1750
+              : 1750
+          );
 
-            viewer.camera.flyTo({ 
-              destination: position,
-              orientation:{
-                heading: assetDataset[0]["rotation"] ? Cesium.Math.toRadians(assetDataset[0]["rotation"]):0
-              }
-            });
+          viewer.camera.flyTo({
+            destination: position,
+            orientation: {
+              heading: assetDataset[0]["rotation"]
+                ? Cesium.Math.toRadians(assetDataset[0]["rotation"])
+                : 0,
+            },
+          });
           // }
         } else if (assetDataset[0]["type"] === "ImageSeries") {
-          if (entities[asset.id][
-            data.id
-          ]){
+          if (entities[asset.id][data.id]) {
             Cesium.sampleTerrainMostDetailed(
               viewer.terrainProvider,
               Cesium.Ellipsoid.WGS84.cartesianArrayToCartographicArray(
-                  entities[asset.id][
-                    data.id
-                  ].polygon.hierarchy.getValue().positions
+                entities[asset.id][data.id].polygon.hierarchy.getValue()
+                  .positions
               )
             ).then((updatedPositions) => {
               viewer.camera.flyToBoundingSphere(
@@ -1007,13 +1127,14 @@ export const loadData = (
                   offset: new Cesium.HeadingPitchRange(
                     entities[asset.id][data.id].polygon.stRotation,
                     Cesium.Math.toRadians(-90),
-                    0)
+                    0
+                  ),
                 }
               );
             });
           }
         } else if (assetDataset[0]["type"] === "Imagery") {
-          if (assetDataset[0].bounds){
+          if (assetDataset[0].bounds) {
             var rectangle = new Cesium.Rectangle.fromDegrees(
               assetDataset[0].bounds[0],
               assetDataset[0].bounds[1],
@@ -1042,9 +1163,12 @@ export const loadData = (
           } else {
             console.log(asset);
             console.log(data);
-            if (tilesets[asset.id] && tilesets[asset.id][data.id]){
+            if (tilesets[asset.id] && tilesets[asset.id][data.id]) {
               viewer.flyTo(tilesets[asset.id][data.id]);
-            } else if (imageryLayers[asset.id] && imageryLayers[asset.id][data.id]){
+            } else if (
+              imageryLayers[asset.id] &&
+              imageryLayers[asset.id][data.id]
+            ) {
               viewer.flyTo(imageryLayers[asset.id][data.id]);
             }
           }
@@ -1057,12 +1181,13 @@ export const loadData = (
     var date = new Date(data.date);
     viewer.timeline._highlightRanges = [];
     viewer.timeline._makeTics();
-    if (data.type == "PointCloud" ||
+    if (
+      data.type == "PointCloud" ||
       data.type == "EPTPointCloud" ||
       data.type == "ModelTileset" ||
-      data.type == "Imagery"||
+      data.type == "Imagery" ||
       data.type == "GeoJSON"
-      ){
+    ) {
       if (date.toString() !== "Invalid Date") {
         viewer.timeline
           .addHighlightRange(highlightColor, highlightHeightPX)
@@ -1077,8 +1202,12 @@ export const loadData = (
         viewer.timeline.updateFromClock();
         if (timelineOnDataSelect) {
           viewer.timeline.zoomTo(
-            Cesium.JulianDate.fromDate(new Date(date.getTime() - 86400000 * 0.01)),
-            Cesium.JulianDate.fromDate(new Date(date.getTime() + 86400000 + 86400000 * 0.01))
+            Cesium.JulianDate.fromDate(
+              new Date(date.getTime() - 86400000 * 0.01)
+            ),
+            Cesium.JulianDate.fromDate(
+              new Date(date.getTime() + 86400000 + 86400000 * 0.01)
+            )
           );
         }
         // if (data["type"] === "PointCloud" || data["type"] === "EPTPointCloud") {
@@ -1120,10 +1249,10 @@ export const loadData = (
       if (data.startDateTime) var startDateTime = new Date(data.startDateTime);
       if (data.endDateTime) var endDateTime = new Date(data.endDateTime);
 
-      if(!startDateTime || startDateTime=="Invalid Date") return;
-      if(endDateTime=="Invalid Date") return;
+      if (!startDateTime || startDateTime == "Invalid Date") return;
+      if (endDateTime == "Invalid Date") return;
 
-      if (!data.endDateTime){
+      if (!data.endDateTime) {
         data.endDateTime = new Date();
       }
     }
@@ -1142,38 +1271,63 @@ export const loadData = (
 
       track.intervals = [
         new Cesium.TimeInterval({
-          start: data.startDateTime && data.startDateTime!= "Invalid Date" ? Cesium.JulianDate.fromDate(new Date(data.startDateTime)) : Cesium.JulianDate.fromDate(new Date(date)),
-          stop: data.endDateTime && data.endDateTime!= "Invalid Date" ? Cesium.JulianDate.fromDate(new Date(data.endDateTime)) : Cesium.JulianDate.fromDate(
-            new Date(new Date(date).getTime() + 86400000)
-          ),
-          data:data
+          start:
+            data.startDateTime && data.startDateTime != "Invalid Date"
+              ? Cesium.JulianDate.fromDate(new Date(data.startDateTime))
+              : Cesium.JulianDate.fromDate(new Date(date)),
+          stop:
+            data.endDateTime && data.endDateTime != "Invalid Date"
+              ? Cesium.JulianDate.fromDate(new Date(data.endDateTime))
+              : Cesium.JulianDate.fromDate(
+                  new Date(new Date(date).getTime() + 86400000)
+                ),
+          data: data,
         }),
       ];
 
       timelineTracks[asset["id"]] = track;
-      viewer.timeline._trackList.map((t,i)=>{
-        if (i==0){
-          t.color= Cesium.Color.fromHsl(0,1,0.5,1);
+      viewer.timeline._trackList.map((t, i) => {
+        if (i == 0) {
+          t.color = Cesium.Color.fromHsl(0, 1, 0.5, 1);
         } else {
-          t.color= Cesium.Color.fromHsl(((i+1)/viewer.timeline._trackList.length)*300/360,1,0.5,1);          
+          t.color = Cesium.Color.fromHsl(
+            (((i + 1) / viewer.timeline._trackList.length) * 300) / 360,
+            1,
+            0.5,
+            1
+          );
         }
 
-        var assetID = Object.keys(timelineTracks).find(k=>timelineTracks[k]==t);
-        
-        document.getElementById(`assetColorDiv-${assetID}`).style['display']="block";
-        document.getElementById(`assetColorDiv-${assetID}`).style['background']=timelineTracks[assetID].color.toCssColorString();
-        assets.find(aid=>aid.id == assetID).data.map(d=>{
-          document.getElementById(`colorDiv-${d}`).style['display']="block";
-          document.getElementById(`colorDiv-${d}`).style['background']=timelineTracks[assetID].color.toCssColorString();
-        })
-      })
+        var assetID = Object.keys(timelineTracks).find(
+          (k) => timelineTracks[k] == t
+        );
+
+        document.getElementById(`assetColorDiv-${assetID}`).style["display"] =
+          "block";
+        document.getElementById(`assetColorDiv-${assetID}`).style[
+          "background"
+        ] = timelineTracks[assetID].color.toCssColorString();
+        assets
+          .find((aid) => aid.id == assetID)
+          .data.map((d) => {
+            document.getElementById(`colorDiv-${d}`).style["display"] = "block";
+            document.getElementById(`colorDiv-${d}`).style["background"] =
+              timelineTracks[assetID].color.toCssColorString();
+          });
+      });
     } else {
       var interval = new Cesium.TimeInterval({
-        start: data.startDateTime && data.startDateTime!= "Invalid Date" ? Cesium.JulianDate.fromDate(new Date(data.startDateTime)) : Cesium.JulianDate.fromDate(new Date(date)),
-        stop: data.endDateTime && data.endDateTime!= "Invalid Date" ? Cesium.JulianDate.fromDate(new Date(data.endDateTime)) : Cesium.JulianDate.fromDate(
-          new Date(new Date(date).getTime() + 86400000)
-        ),
-        data:data
+        start:
+          data.startDateTime && data.startDateTime != "Invalid Date"
+            ? Cesium.JulianDate.fromDate(new Date(data.startDateTime))
+            : Cesium.JulianDate.fromDate(new Date(date)),
+        stop:
+          data.endDateTime && data.endDateTime != "Invalid Date"
+            ? Cesium.JulianDate.fromDate(new Date(data.endDateTime))
+            : Cesium.JulianDate.fromDate(
+                new Date(new Date(date).getTime() + 86400000)
+              ),
+        data: data,
       });
 
       if (
@@ -1349,8 +1503,11 @@ export const setScreenSpaceError = (evt) => {
           if (MSSE === 0) {
             t.show = false;
           } else {
-            if (!!selectedDatasets.find(d=>d.id==id) || selectedData.id ==id ){
-              t.show=true;
+            if (
+              !!selectedDatasets.find((d) => d.id == id) ||
+              selectedData.id == id
+            ) {
+              t.show = true;
             }
           }
         });
@@ -1358,12 +1515,18 @@ export const setScreenSpaceError = (evt) => {
         tilesets[tileset][id].maximumScreenSpaceError =
           ((100 - MSSE) / 100) * viewer.canvas.height * 0.25;
         if (MSSE === 0) {
-          if (!!selectedDatasets.find(d=>d.id==id) || (selectedData && selectedData.id ==id) ){
+          if (
+            !!selectedDatasets.find((d) => d.id == id) ||
+            (selectedData && selectedData.id == id)
+          ) {
             tilesets[tileset][id].show = false;
           }
         } else {
-          if (!!selectedDatasets.find(d=>d.id==id) || (selectedData && selectedData.id ==id)){
-            tilesets[tileset][id].show=true;
+          if (
+            !!selectedDatasets.find((d) => d.id == id) ||
+            (selectedData && selectedData.id == id)
+          ) {
+            tilesets[tileset][id].show = true;
           }
         }
       }
@@ -1395,14 +1558,13 @@ Cesium.TimelineTrack.prototype.render = function (context, renderState) {
     ) {
       //The track takes up the entire visible span.
       context.fillStyle = this.color.toCssColorString();
-      context.strokeStyle = 'white';
+      context.strokeStyle = "white";
       // context.fillRect(0, renderState.y, renderState.timeBarWidth, this.height);
       context.beginPath();
       context.rect(0, renderState.y, renderState.timeBarWidth, this.height);
       context.fill();
       context.stroke();
       context.closePath();
-
     } else if (
       Cesium.JulianDate.lessThanOrEquals(startInterval, spanStop) &&
       Cesium.JulianDate.greaterThanOrEquals(stopInterval, spanStart)
@@ -1434,7 +1596,7 @@ Cesium.TimelineTrack.prototype.render = function (context, renderState) {
           stop = renderState.timeBarWidth;
         }
         context.fillStyle = this.color.toCssColorString();
-        context.strokeStyle = 'white';
+        context.strokeStyle = "white";
         context.beginPath();
         context.rect(
           start,
@@ -1465,16 +1627,17 @@ Cesium.TimelineTrack.prototype.render = function (context, renderState) {
       Cesium.JulianDate.greaterThan(stopInterval, spanStop)
     ) {
       //The track takes up the entire visible span.
-      var mouseOnInterval = mousePosition.x &&
-        mousePosition.x >= 0 && 
+      var mouseOnInterval =
+        mousePosition.x &&
+        mousePosition.x >= 0 &&
         mousePosition.x <= renderState.timeBarWidth &&
         mousePosition.y &&
         mousePosition.y >= renderState.y &&
         mousePosition.y <= renderState.y + this.height;
 
-      if (mouseOnInterval){
+      if (mouseOnInterval) {
         context.fillStyle = "#00000000";
-        context.strokeStyle = 'white';
+        context.strokeStyle = "white";
         context.beginPath();
         context.rect(0, renderState.y, renderState.timeBarWidth, this.height);
         context.lineWidth = 3;
@@ -1482,7 +1645,6 @@ Cesium.TimelineTrack.prototype.render = function (context, renderState) {
         context.lineWidth = 1;
         context.closePath();
       }
-
     } else if (
       Cesium.JulianDate.lessThanOrEquals(startInterval, spanStop) &&
       Cesium.JulianDate.greaterThanOrEquals(stopInterval, spanStart)
@@ -1513,16 +1675,17 @@ Cesium.TimelineTrack.prototype.render = function (context, renderState) {
         if (!Cesium.defined(stop)) {
           stop = renderState.timeBarWidth;
         }
-        var mouseOnInterval = mousePosition.x &&
-        mousePosition.x >= start && 
-        mousePosition.x <= stop &&
-        mousePosition.y &&
-        mousePosition.y >= renderState.y &&
-        mousePosition.y <= renderState.y + this.height;
-        
-        if (mouseOnInterval){
+        var mouseOnInterval =
+          mousePosition.x &&
+          mousePosition.x >= start &&
+          mousePosition.x <= stop &&
+          mousePosition.y &&
+          mousePosition.y >= renderState.y &&
+          mousePosition.y <= renderState.y + this.height;
+
+        if (mouseOnInterval) {
           context.fillStyle = "#00000000";
-          context.strokeStyle = 'white';
+          context.strokeStyle = "white";
           context.beginPath();
           context.rect(
             start,
@@ -1542,29 +1705,29 @@ Cesium.TimelineTrack.prototype.render = function (context, renderState) {
 
 export const syncTimeline = (setCurrentTime) => {
   var validStartDates = selectedDatasets
-  .map(d=>{
-    var data_date = d.startDateTime || d.date;
-    if (data_date) {
-      if (new Date(data_date) != "Invalid Date"){
-        return new Date(data_date);
+    .map((d) => {
+      var data_date = d.startDateTime || d.date;
+      if (data_date) {
+        if (new Date(data_date) != "Invalid Date") {
+          return new Date(data_date);
+        }
       }
-    }
-  })
-  .filter(e=>e);
+    })
+    .filter((e) => e);
 
   var validEndDates = selectedDatasets
-  .map(d=>{
-    if (d.endDateTime) {
-      if (new Date(d.endDateTime) != "Invalid Date"){
-        return new Date(d.endDateTime);
+    .map((d) => {
+      if (d.endDateTime) {
+        if (new Date(d.endDateTime) != "Invalid Date") {
+          return new Date(d.endDateTime);
+        }
+      } else if (d.date) {
+        if (new Date(d.date) != "Invalid Date") {
+          return new Date(new Date(d.date).getTime() + 86400000);
+        }
       }
-    } else if (d.date) {
-      if (new Date(d.date) != "Invalid Date"){
-        return new Date(new Date(d.date).getTime() + 86400000);
-      }
-    }
-  })
-  .filter(e=>e);
+    })
+    .filter((e) => e);
 
   if (validStartDates.length === 0) return;
   if (validEndDates.length === 0) return;
@@ -1589,8 +1752,8 @@ export const syncTimeline = (setCurrentTime) => {
     }
 
     var dif = maxDate.getTime() - minDate.getTime();
-    var zoomMin = new Date(minDate.getTime() - (dif/100));
-    var zoomMax = new Date(maxDate.getTime() + (dif/100));
+    var zoomMin = new Date(minDate.getTime() - dif / 100);
+    var zoomMax = new Date(maxDate.getTime() + dif / 100);
 
     viewer.timeline.zoomTo(
       Cesium.JulianDate.fromDate(zoomMin),
@@ -1606,415 +1769,593 @@ export const syncTimeline = (setCurrentTime) => {
   viewer.timeline._makeTics();
 };
 
-export const fetchIndexAssets = ()=>{
-  return(
-  fetch(indexFile, { cache: "no-store" })
+export const fetchIndexAssets = () => {
+  return fetch(indexFile, { cache: "no-store" })
     .then((response) => response.json())
     .then((jsonResponse) => {
       setAssets([...assets, ...jsonResponse["assets"]]);
-      assets.map((a,i)=>a.id=i+1);
+      assets.map((a, i) => (a.id = i + 1));
       setDatasets([...datasets, ...jsonResponse["datasets"]]);
-      setCategories([...categories,...jsonResponse["categories"]]);
-      setInitVars(jsonResponse["initVars"])
+      setCategories([...categories, ...jsonResponse["categories"]]);
+      setInitVars(jsonResponse["initVars"]);
     })
-  ).catch(error => {
-    console.error(error);
-  })
-}
+    .catch((error) => {
+      console.error(error);
+    });
+};
 
-export const fetchWebODMProjects = (token={}) => {
-  return (
-    new Promise(function (resolve, reject) {
-      var controller = new AbortController();
-      token.cancel = ()=>{
-        reject();
-        controller.abort();
-      }
+export const fetchWebODMProjects = (token = {}) => {
+  return new Promise(function (resolve, reject) {
+    var controller = new AbortController();
+    token.cancel = () => {
+      reject();
+      controller.abort();
+    };
 
-      fetch(`${baseURL}/api/projects/?ordering=-created_at`, {
-        cache: "no-store",
-        credentials: 'include',
-        signal:controller.signal
-      })
-        .then(response => {
-          var signInButton = document.createElement("div");
-          signInButton.className = "sidebar-item";
-          signInButton.style["text-align"] = "center";
-          signInButton.innerHTML = "Login here to view your ASDC data";
-          signInButton.onclick=()=>{
-            window.location.href = `${baseURL}/login/auth0?next=${window.location.href}`; 
-          }
+    fetch(`${baseURL}/api/projects/?ordering=-created_at`, {
+      cache: "no-store",
+      credentials: "include",
+      signal: controller.signal,
+    })
+      .then((response) => {
+        var signInButton = document.createElement("div");
+        signInButton.className = "sidebar-item";
+        signInButton.style["text-align"] = "center";
+        signInButton.innerHTML = "Login here to view your ASDC data";
+        signInButton.onclick = () => {
+          window.location.href = `${baseURL}/login/auth0?next=${window.location.href}`;
+        };
 
-          if (response.status===200){
-            if (document.getElementById("login-logout-button")){
-              document.getElementById("login-logout-button-text").innerHTML = "Logout";
-              document.getElementById("login-logout-button").onclick = ()=>{
-                token.cancel();
+        if (response.status === 200) {
+          if (document.getElementById("login-logout-button")) {
+            document.getElementById("login-logout-button-text").innerHTML =
+              "Logout";
+            document.getElementById("login-logout-button").onclick = () => {
+              token.cancel();
 
-                fetch(`${baseURL}/logout/`, {
-                  cache: "no-store",
-                  credentials: 'include',
-                  mode: 'no-cors'
-                }).then(()=>{
-                  document.getElementById("login-logout-button-text").innerHTML = "Login";
-                  const children = [...sourceDivs["WebODM Projects"].nextElementSibling.children];
-                  for (var i=0;i<children.length;i++){
-                      sourceDivs["WebODM Projects"].nextElementSibling.removeChild(children[i]);
-                  }
-                  sourceDivs["WebODM Projects"].nextElementSibling.appendChild(signInButton);
-
-                  if (sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight){
-                    sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight = signInButton.scrollHeight + "px";
-                  }
-
-                  document.getElementById("login-logout-button").onclick = signInButton.onclick;
-
-                  selectedDatasets.filter(d=>d.asset.project).map(d=>{
-                    if(d.type=="Imagery"){
-                      viewer.imageryLayers.remove(imageryLayers[d.asset.id][d.id], true);
-                      imageryLayers[d.asset.id][d.id] = imageryLayers[d.asset.id][d.id] && imageryLayers[d.asset.id][d.id].destroy();                  
-                    } else if (d.type==="EPTPointCloud") {
-                      viewer.scene.primitives.remove(tilesets[d.asset.id][d.id])
-                      tilesets[d.asset.id][d.id] = tilesets[d.asset.id][d.id] && tilesets[d.asset.id][d.id].destroy();
-                    }
-                  })
-                  setSelectedDatasets(selectedDatasets.filter(d=>!d.asset.project));
-                  setDatasets(datasets.filter(d=>d.asset && !d.asset.project));
-
-                  assets.filter(a=>a.project).map(a=>{
-                    markersDataSource.entities.removeById("marker_" + a.id);
-                  })
-
-                  setAssets(assets.filter(a=>!a.project));
-                  setODMProjects();
-    
-                  // viewer.camera.moveEnd.raiseEvent();
-                  if (
-                    !selectedDatasets.find(
-                      (d) =>
-                        d.type == "PointCloud" ||
-                        d.type == "EPTPointCloud" ||
-                        d.type == "ModelTileset"
-                    )
-                  ) 
-                  {
-                    document.getElementById("msse-slider-row").style.display = "none";
-                    document.getElementById("dims-toolbar-row").style.display = "none";
-                  }
-                })
-              }
-            }
-            return response.json()
-          } else {
-            if (response.status===403){
-              if (document.getElementById("login-logout-button")){
-                document.getElementById("login-logout-button-text").innerHTML = "Login";
-                document.getElementById("login-logout-button").onclick = signInButton.onclick;
-              }
-              if (sourceDivs["WebODM Projects"].nextElementSibling.firstChild.className === "loader-parent"){
-                sourceDivs["WebODM Projects"].nextElementSibling.removeChild(sourceDivs["WebODM Projects"].nextElementSibling.firstChild);
-              }
-              sourceDivs["WebODM Projects"].nextElementSibling.appendChild(signInButton)
-              reject();
-            }
-            resolve();
-          }
-        })
-        .then((odmProjects) => {
-          if (!odmProjects) return
-          setODMProjects(odmProjects)
-          var odmAssets = [];
-          var odmDatasets = [];
-          var taskInfoPromises = [];
-          var metaDataPromises = [];
-          if (Array.isArray(odmProjects)) {
-            odmProjects.map((project) => {
-              taskInfoPromises.push(fetch(`${baseURL}/api/projects/${project.id}/tasks/?ordering=-created_at`, {
+              fetch(`${baseURL}/logout/`, {
                 cache: "no-store",
-                credentials: 'include',
-                signal:controller.signal
-              }).then(response => response.json()));
-            })
+                credentials: "include",
+                mode: "no-cors",
+              }).then(() => {
+                document.getElementById("login-logout-button-text").innerHTML =
+                  "Login";
+                const children = [
+                  ...sourceDivs["WebODM Projects"].nextElementSibling.children,
+                ];
+                for (var i = 0; i < children.length; i++) {
+                  sourceDivs["WebODM Projects"].nextElementSibling.removeChild(
+                    children[i]
+                  );
+                }
+                sourceDivs["WebODM Projects"].nextElementSibling.appendChild(
+                  signInButton
+                );
+
+                if (
+                  sourceDivs["WebODM Projects"].nextElementSibling.style
+                    .maxHeight
+                ) {
+                  sourceDivs[
+                    "WebODM Projects"
+                  ].nextElementSibling.style.maxHeight =
+                    signInButton.scrollHeight + "px";
+                }
+
+                document.getElementById("login-logout-button").onclick =
+                  signInButton.onclick;
+
+                selectedDatasets
+                  .filter((d) => d.asset.project)
+                  .map((d) => {
+                    if (d.type == "Imagery") {
+                      viewer.imageryLayers.remove(
+                        imageryLayers[d.asset.id][d.id],
+                        true
+                      );
+                      imageryLayers[d.asset.id][d.id] =
+                        imageryLayers[d.asset.id][d.id] &&
+                        imageryLayers[d.asset.id][d.id].destroy();
+                    } else if (d.type === "EPTPointCloud") {
+                      viewer.scene.primitives.remove(
+                        tilesets[d.asset.id][d.id]
+                      );
+                      tilesets[d.asset.id][d.id] =
+                        tilesets[d.asset.id][d.id] &&
+                        tilesets[d.asset.id][d.id].destroy();
+                    }
+                  });
+                setSelectedDatasets(
+                  selectedDatasets.filter((d) => !d.asset.project)
+                );
+                setDatasets(
+                  datasets.filter((d) => d.asset && !d.asset.project)
+                );
+
+                assets
+                  .filter((a) => a.project)
+                  .map((a) => {
+                    markersDataSource.entities.removeById("marker_" + a.id);
+                  });
+
+                setAssets(assets.filter((a) => !a.project));
+                setODMProjects();
+
+                // viewer.camera.moveEnd.raiseEvent();
+                if (
+                  !selectedDatasets.find(
+                    (d) =>
+                      d.type == "PointCloud" ||
+                      d.type == "EPTPointCloud" ||
+                      d.type == "ModelTileset"
+                  )
+                ) {
+                  document.getElementById("msse-slider-row").style.display =
+                    "none";
+                  document.getElementById("dims-toolbar-row").style.display =
+                    "none";
+                }
+              });
+            };
           }
-          var lastAssetIndex = assets[assets.length - 1].id;
-          Promise.all(taskInfoPromises).then((taskInfos, taskIndex) => {
-            if (Array.isArray(odmProjects)) {
-              var taskDict = {};
-              odmProjects.map((project, projectIndex) => {
-                taskInfos[projectIndex]?.map(task => {
-                  taskDict[task.id] = task;
-                  if (task.available_assets.includes("georeferenced_model.laz")) {
-                    metaDataPromises.push(fetch(`${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`, {
-                      cache: "no-store",
-                      credentials: 'include',
-                      signal:controller.signal
-                    }).then(response => {
-                      if(response.status===200){
-                        return response.json();
-                      }
-                    }).catch((e) => {
-                      if (e.name !== "AbortError") {
-                        console.log(e);
-                      }
-                    }))
-                  }
-                  if (task.available_assets.includes("orthophoto.tif")) {
-                    metaDataPromises.push(fetch(`${baseURL}/api/projects/${project.id}/tasks/${task.id}/orthophoto/metadata`, {
-                      cache: "no-store",
-                      credentials: 'include',
-                      signal:controller.signal
-                    }).then(response => {
-                      if(response.status===200){
-                        return response.json();
-                      }
-                    }).catch((e) => {
-                      if (e.name !== "AbortError") {
-                        console.log(e);
-                      }
-                    }))
-                  }
-                  if (task.available_assets.includes("dsm.tif")) {
-                    metaDataPromises.push(fetch(`${baseURL}/api/projects/${project.id}/tasks/${task.id}/dsm/metadata`, {
-                      cache: "no-store",
-                      credentials: 'include',
-                      signal:controller.signal
-                    }).then(response => {
-                      if(response.status===200){
-                        return response.json();
-                      }
-                    }).catch((e) => {
-                      if (e.name !== "AbortError") {
-                        console.log(e);
-                      }
-                    }))
-                  }
-                  if (task.available_assets.includes("dtm.tif")) {
-                    metaDataPromises.push(fetch(`${baseURL}/api/projects/${project.id}/tasks/${task.id}/dtm/metadata`, {
-                      cache: "no-store",
-                      credentials: 'include',
-                      signal:controller.signal
-                    }).then(response => {
-                      if(response.status===200){
-                        return response.json();
-                      }
-                    }).catch((e) => {
-                      if (e.name !== "AbortError") {
-                        console.log(e);
-                      }
-                    }))
-                  }
-                })
-              })
-              setTaskInfos(taskDict);
+          return response.json();
+        } else {
+          if (response.status === 403) {
+            if (document.getElementById("login-logout-button")) {
+              document.getElementById("login-logout-button-text").innerHTML =
+                "Login";
+              document.getElementById("login-logout-button").onclick =
+                signInButton.onclick;
             }
-
-            Promise.all(metaDataPromises).then((metadata) => {
-              var metadataIndex = 0;
-              if (Array.isArray(odmProjects)) {
-                odmProjects.map((project, projectIndex) => {
-                  taskInfos[projectIndex]?.map((task, taskIndex) => {
-                    var taskData = [];
-                    if (task.available_assets.includes("georeferenced_model.laz")) {
-                      if (metadata[metadataIndex]) {
-                        if (metadata[metadataIndex].srs && metadata[metadataIndex].srs.wkt){
-                          var sourcePos = [];
-                          sourcePos[0] = (metadata[metadataIndex].bounds[0] + metadata[metadataIndex].bounds[3]) / 2;
-                          sourcePos[1] = (metadata[metadataIndex].bounds[1] + metadata[metadataIndex].bounds[4]) / 2;
-                          sourcePos[2] = (metadata[metadataIndex].bounds[2] + metadata[metadataIndex].bounds[5]) / 2;
-                          var pos = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), sourcePos);
-
-                          var nw = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), [metadata[metadataIndex].bounds[0], metadata[metadataIndex].bounds[1]])
-                          var se = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), [metadata[metadataIndex].bounds[3], metadata[metadataIndex].bounds[4]])
-
-                          var rectangle = new Cesium.Rectangle.fromDegrees(
-                            nw[0],
-                            nw[1],
-                            se[0],
-                            se[1]
-                          );
-
-                          const cartographics = [
-                            Cesium.Rectangle.center(rectangle),
-                            Cesium.Rectangle.southeast(rectangle),
-                            Cesium.Rectangle.southwest(rectangle),
-                            Cesium.Rectangle.northeast(rectangle),
-                            Cesium.Rectangle.northwest(rectangle),
-                          ];
-
-                          var cartesians =
-                            Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-                              cartographics
-                            );
-                          var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
-
-                          odmDatasets.push({
-                            id: task.id + "-pc",
-                            type: "EPTPointCloud",
-                            name: "Point Cloud",
-                            url: `${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`,
-                            asset: odmAssets[odmAssets.length - 1],
-                            "position": {
-                              "lng": pos[0],
-                              "lat": pos[1],
-                              "height": pos[2]
-                            },
-                            boundingSphereRadius: boundingSphere.radius,
-                            source:{
-                              url:`${baseURL}/api/projects/${project.id}/tasks/${task.id}/download/georeferenced_model.laz`
-                            }
-                          })
-                          taskData.push(task.id + "-pc");
-                        } else {
-                          // console.log(metadata[metadataIndex])
-                          // console.log(project);
-                          // console.log(task);
+            if (
+              sourceDivs["WebODM Projects"].nextElementSibling.firstChild
+                .className === "loader-parent"
+            ) {
+              sourceDivs["WebODM Projects"].nextElementSibling.removeChild(
+                sourceDivs["WebODM Projects"].nextElementSibling.firstChild
+              );
+            }
+            sourceDivs["WebODM Projects"].nextElementSibling.appendChild(
+              signInButton
+            );
+            reject();
+          }
+          resolve();
+        }
+      })
+      .then((odmProjects) => {
+        if (!odmProjects) return;
+        setODMProjects(odmProjects);
+        var odmAssets = [];
+        var odmDatasets = [];
+        var taskInfoPromises = [];
+        var metaDataPromises = [];
+        if (Array.isArray(odmProjects)) {
+          odmProjects.map((project) => {
+            taskInfoPromises.push(
+              fetch(
+                `${baseURL}/api/projects/${project.id}/tasks/?ordering=-created_at`,
+                {
+                  cache: "no-store",
+                  credentials: "include",
+                  signal: controller.signal,
+                }
+              ).then((response) => response.json())
+            );
+          });
+        }
+        var lastAssetIndex = assets[assets.length - 1].id;
+        Promise.all(taskInfoPromises).then((taskInfos, taskIndex) => {
+          if (Array.isArray(odmProjects)) {
+            var taskDict = {};
+            odmProjects.map((project, projectIndex) => {
+              taskInfos[projectIndex]?.map((task) => {
+                taskDict[task.id] = task;
+                if (task.available_assets.includes("georeferenced_model.laz")) {
+                  metaDataPromises.push(
+                    fetch(
+                      `${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`,
+                      {
+                        cache: "no-store",
+                        credentials: "include",
+                        signal: controller.signal,
+                      }
+                    )
+                      .then((response) => {
+                        if (response.status === 200) {
+                          return response.json();
                         }
+                      })
+                      .catch((e) => {
+                        if (e.name !== "AbortError") {
+                          console.log(e);
+                        }
+                      })
+                  );
+                }
+                if (task.available_assets.includes("orthophoto.tif")) {
+                  metaDataPromises.push(
+                    fetch(
+                      `${baseURL}/api/projects/${project.id}/tasks/${task.id}/orthophoto/metadata`,
+                      {
+                        cache: "no-store",
+                        credentials: "include",
+                        signal: controller.signal,
+                      }
+                    )
+                      .then((response) => {
+                        if (response.status === 200) {
+                          return response.json();
+                        }
+                      })
+                      .catch((e) => {
+                        if (e.name !== "AbortError") {
+                          console.log(e);
+                        }
+                      })
+                  );
+                }
+                if (task.available_assets.includes("dsm.tif")) {
+                  metaDataPromises.push(
+                    fetch(
+                      `${baseURL}/api/projects/${project.id}/tasks/${task.id}/dsm/metadata`,
+                      {
+                        cache: "no-store",
+                        credentials: "include",
+                        signal: controller.signal,
+                      }
+                    )
+                      .then((response) => {
+                        if (response.status === 200) {
+                          return response.json();
+                        }
+                      })
+                      .catch((e) => {
+                        if (e.name !== "AbortError") {
+                          console.log(e);
+                        }
+                      })
+                  );
+                }
+                if (task.available_assets.includes("dtm.tif")) {
+                  metaDataPromises.push(
+                    fetch(
+                      `${baseURL}/api/projects/${project.id}/tasks/${task.id}/dtm/metadata`,
+                      {
+                        cache: "no-store",
+                        credentials: "include",
+                        signal: controller.signal,
+                      }
+                    )
+                      .then((response) => {
+                        if (response.status === 200) {
+                          return response.json();
+                        }
+                      })
+                      .catch((e) => {
+                        if (e.name !== "AbortError") {
+                          console.log(e);
+                        }
+                      })
+                  );
+                }
+              });
+            });
+            setTaskInfos(taskDict);
+          }
+
+          Promise.all(metaDataPromises).then((metadata) => {
+            var metadataIndex = 0;
+            if (Array.isArray(odmProjects)) {
+              odmProjects.map((project, projectIndex) => {
+                taskInfos[projectIndex]?.map((task, taskIndex) => {
+                  var taskData = [];
+                  if (
+                    task.available_assets.includes("georeferenced_model.laz")
+                  ) {
+                    if (metadata[metadataIndex]) {
+                      if (
+                        metadata[metadataIndex].srs &&
+                        metadata[metadataIndex].srs.wkt
+                      ) {
+                        var sourcePos = [];
+                        sourcePos[0] =
+                          (metadata[metadataIndex].bounds[0] +
+                            metadata[metadataIndex].bounds[3]) /
+                          2;
+                        sourcePos[1] =
+                          (metadata[metadataIndex].bounds[1] +
+                            metadata[metadataIndex].bounds[4]) /
+                          2;
+                        sourcePos[2] =
+                          (metadata[metadataIndex].bounds[2] +
+                            metadata[metadataIndex].bounds[5]) /
+                          2;
+                        var pos = proj4(
+                          metadata[metadataIndex].srs.wkt,
+                          proj4.defs("EPSG:4326"),
+                          sourcePos
+                        );
+
+                        var nw = proj4(
+                          metadata[metadataIndex].srs.wkt,
+                          proj4.defs("EPSG:4326"),
+                          [
+                            metadata[metadataIndex].bounds[0],
+                            metadata[metadataIndex].bounds[1],
+                          ]
+                        );
+                        var se = proj4(
+                          metadata[metadataIndex].srs.wkt,
+                          proj4.defs("EPSG:4326"),
+                          [
+                            metadata[metadataIndex].bounds[3],
+                            metadata[metadataIndex].bounds[4],
+                          ]
+                        );
+
+                        var rectangle = new Cesium.Rectangle.fromDegrees(
+                          nw[0],
+                          nw[1],
+                          se[0],
+                          se[1]
+                        );
+
+                        const cartographics = [
+                          Cesium.Rectangle.center(rectangle),
+                          Cesium.Rectangle.southeast(rectangle),
+                          Cesium.Rectangle.southwest(rectangle),
+                          Cesium.Rectangle.northeast(rectangle),
+                          Cesium.Rectangle.northwest(rectangle),
+                        ];
+
+                        var cartesians =
+                          Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                            cartographics
+                          );
+                        var boundingSphere =
+                          Cesium.BoundingSphere.fromPoints(cartesians);
+
+                        odmDatasets.push({
+                          id: task.id + "-pc",
+                          type: "EPTPointCloud",
+                          name: "Point Cloud",
+                          url: `${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`,
+                          asset: odmAssets[odmAssets.length - 1],
+                          position: {
+                            lng: pos[0],
+                            lat: pos[1],
+                            height: pos[2],
+                          },
+                          boundingSphereRadius: boundingSphere.radius,
+                          source: {
+                            url: `${baseURL}/api/projects/${project.id}/tasks/${task.id}/download/georeferenced_model.laz`,
+                          },
+                        });
+                        taskData.push(task.id + "-pc");
+                      } else {
+                        // console.log(metadata[metadataIndex])
+                        // console.log(project);
+                        // console.log(task);
+                      }
+                    }
+                    metadataIndex++;
+                  }
+
+                  var imageryTypes = ["Orthophoto", "DSM", "DTM"];
+                  imageryTypes.map((imageryType) => {
+                    if (
+                      task.available_assets.includes(
+                        `${imageryType.toLowerCase()}.tif`
+                      )
+                    ) {
+                      if (metadata[metadataIndex]) {
+                        var tilesUrl;
+                        if (imageryType === "Orthophoto") {
+                          tilesUrl = `${baseURL}${metadata[metadataIndex].tiles[0]}?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
+                        } else if (imageryType === "DSM") {
+                          tilesUrl = `${baseURL}${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                        } else if (imageryType === "DTM") {
+                          tilesUrl = `${baseURL}${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                        }
+
+                        odmDatasets.push({
+                          id:
+                            task.id +
+                            (imageryType === "Orthophoto"
+                              ? "-op"
+                              : "-" + imageryType.toLowerCase()),
+                          type: "Imagery",
+                          name: imageryType,
+                          url: tilesUrl,
+                          asset: odmAssets[odmAssets.length - 1],
+                          bounds: metadata[metadataIndex].bounds.value,
+                          minzoom: metadata[metadataIndex].minzoom,
+                          maxzoom: metadata[metadataIndex].maxzoom,
+                          position: {
+                            lng: metadata[metadataIndex].center[0],
+                            lat: metadata[metadataIndex].center[1],
+                            height: metadata[metadataIndex].center[2], //zoom level?
+                          },
+                          source: {
+                            url: `${baseURL}/api/projects/${project.id}/tasks/${
+                              task.id
+                            }/download/${imageryType.toLowerCase()}.tif`,
+                          },
+                        });
+                        taskData.push(
+                          task.id +
+                            (imageryType === "Orthophoto"
+                              ? "-op"
+                              : "-" + imageryType.toLowerCase())
+                        );
                       }
                       metadataIndex++;
                     }
+                  });
 
-                    var imageryTypes = ["Orthophoto","DSM","DTM"];
-                    imageryTypes.map(imageryType=>{
-                      if (task.available_assets.includes(`${imageryType.toLowerCase()}.tif`)) {
-                        if (metadata[metadataIndex]) {
-                          var tilesUrl;
-                          if (imageryType==="Orthophoto") {
-                            tilesUrl = `${baseURL}${metadata[metadataIndex].tiles[0]}?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
-                          } else if (imageryType==="DSM") {
-                            tilesUrl = `${baseURL}${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
-                          } else if (imageryType==="DTM") {
-                            tilesUrl = `${baseURL}${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
-                          }
-
-                          odmDatasets.push({
-                            id: task.id + (imageryType === "Orthophoto" ? "-op" : "-" + imageryType.toLowerCase()),
-                            type: "Imagery",
-                            name: imageryType,
-                            url: tilesUrl,
-                            asset: odmAssets[odmAssets.length - 1],
-                            bounds: metadata[metadataIndex].bounds.value,
-                            minzoom: metadata[metadataIndex].minzoom,
-                            maxzoom: metadata[metadataIndex].maxzoom,
-                            position: {
-                              "lng": metadata[metadataIndex].center[0],
-                              "lat": metadata[metadataIndex].center[1],
-                              "height": metadata[metadataIndex].center[2],//zoom level?
-                            },
-                            source:{
-                              url:`${baseURL}/api/projects/${project.id}/tasks/${task.id}/download/${imageryType.toLowerCase()}.tif`
-                            }
-                          })
-                          taskData.push(task.id + (imageryType === "Orthophoto" ? "-op" : "-" + imageryType.toLowerCase()));
-                        }
-                        metadataIndex++;
-                      }
-                    })
-
-                    if (taskData.length > 0) {
-                      odmAssets.push({
-                        "id": ++lastAssetIndex,
-                        "name": task.name,
-                        "status": "active",
-                        "categoryID": -1,
-                        "data": taskData,
-                        project: project.id,
-                        taskID: task.id,
-                        public:task.public,
-                        permissions:project.permissions
-                      })
-                    }
-                  })
-                })
-                setAssets(assets.concat(odmAssets));
-                setDatasets(datasets.concat(odmDatasets));
-                resolve();
-              }
-            })
-          })
-        })
-        .catch(error => {
-          if (error.name !== "AbortError") {
-            console.log(error);
-          }
-          reject();
-        })
-    })
-  );
-}
-
-export const fetchPublicTask = ()=>{
-  return(new Promise(function (resolve,reject){
-  fetch(`${baseURL}/public/task/${publicTask}/json`, {
-        cache: "no-store",
+                  if (taskData.length > 0) {
+                    odmAssets.push({
+                      id: ++lastAssetIndex,
+                      name: task.name,
+                      status: "active",
+                      categoryID: -1,
+                      data: taskData,
+                      project: project.id,
+                      taskID: task.id,
+                      public: task.public,
+                      permissions: project.permissions,
+                    });
+                  }
+                });
+              });
+              setAssets(assets.concat(odmAssets));
+              setDatasets(datasets.concat(odmDatasets));
+              resolve();
+            }
+          });
+        });
       })
-      .then(response => response.json())
+      .catch((error) => {
+        if (error.name !== "AbortError") {
+          console.log(error);
+        }
+        reject();
+      });
+  });
+};
+
+export const fetchPublicTask = () => {
+  return new Promise(function (resolve, reject) {
+    fetch(`${baseURL}/public/task/${publicTask}/json`, {
+      cache: "no-store",
+    })
+      .then((response) => response.json())
       .then((publicTask) => {
         var projectID = publicTask.project;
         var metaDataPromises = [];
         var odmAssets = [];
         var odmDatasets = [];
-        var taskDict= {};
+        var taskDict = {};
         taskDict[publicTask.id] = publicTask;
         setTaskInfos(taskDict);
         if (publicTask.available_assets.includes("georeferenced_model.laz")) {
-          metaDataPromises.push(fetch(`${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`, {
-            cache: "no-store",
-          }).then(response => {
-            if(response.status===200){
-              return response.json();
-            }
-          }).catch((e) => {
-            console.log(e);
-          }))
+          metaDataPromises.push(
+            fetch(
+              `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`,
+              {
+                cache: "no-store",
+              }
+            )
+              .then((response) => {
+                if (response.status === 200) {
+                  return response.json();
+                }
+              })
+              .catch((e) => {
+                console.log(e);
+              })
+          );
         }
         if (publicTask.available_assets.includes("orthophoto.tif")) {
-          metaDataPromises.push(fetch(`${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/orthophoto/metadata`, {
-            cache: "no-store",
-          }).then(response => {
-            if(response.status===200){
-              return response.json();
-            }
-          }).catch((e) => {
-            console.log(e);
-          }))
+          metaDataPromises.push(
+            fetch(
+              `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/orthophoto/metadata`,
+              {
+                cache: "no-store",
+              }
+            )
+              .then((response) => {
+                if (response.status === 200) {
+                  return response.json();
+                }
+              })
+              .catch((e) => {
+                console.log(e);
+              })
+          );
         }
         if (publicTask.available_assets.includes("dsm.tif")) {
-          metaDataPromises.push(fetch(`${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/dsm/metadata`, {
-            cache: "no-store",
-          }).then(response => {
-            if(response.status===200){
-              return response.json();
-            }
-          }).catch((e) => {
-            console.log(e);
-          }))
+          metaDataPromises.push(
+            fetch(
+              `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/dsm/metadata`,
+              {
+                cache: "no-store",
+              }
+            )
+              .then((response) => {
+                if (response.status === 200) {
+                  return response.json();
+                }
+              })
+              .catch((e) => {
+                console.log(e);
+              })
+          );
         }
         if (publicTask.available_assets.includes("dtm.tif")) {
-          metaDataPromises.push(fetch(`${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/dtm/metadata`, {
-            cache: "no-store",
-          }).then(response => {
-            if(response.status===200){
-              return response.json();
-            }
-          }).catch((e) => {
-            console.log(e);
-          }))
+          metaDataPromises.push(
+            fetch(
+              `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/dtm/metadata`,
+              {
+                cache: "no-store",
+              }
+            )
+              .then((response) => {
+                if (response.status === 200) {
+                  return response.json();
+                }
+              })
+              .catch((e) => {
+                console.log(e);
+              })
+          );
         }
 
-        Promise.all(metaDataPromises).then((metadata)=>{
+        Promise.all(metaDataPromises).then((metadata) => {
           var taskData = [];
-          var metadataIndex=0
+          var metadataIndex = 0;
           if (publicTask.available_assets.includes("georeferenced_model.laz")) {
             if (metadata[metadataIndex]) {
-              if (metadata[metadataIndex].srs && metadata[metadataIndex].srs.wkt){
+              if (
+                metadata[metadataIndex].srs &&
+                metadata[metadataIndex].srs.wkt
+              ) {
                 var sourcePos = [];
-                sourcePos[0] = (metadata[metadataIndex].bounds[0] + metadata[metadataIndex].bounds[3]) / 2;
-                sourcePos[1] = (metadata[metadataIndex].bounds[1] + metadata[metadataIndex].bounds[4]) / 2;
-                sourcePos[2] = (metadata[metadataIndex].bounds[2] + metadata[metadataIndex].bounds[5]) / 2;
-                var pos = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), sourcePos);
+                sourcePos[0] =
+                  (metadata[metadataIndex].bounds[0] +
+                    metadata[metadataIndex].bounds[3]) /
+                  2;
+                sourcePos[1] =
+                  (metadata[metadataIndex].bounds[1] +
+                    metadata[metadataIndex].bounds[4]) /
+                  2;
+                sourcePos[2] =
+                  (metadata[metadataIndex].bounds[2] +
+                    metadata[metadataIndex].bounds[5]) /
+                  2;
+                var pos = proj4(
+                  metadata[metadataIndex].srs.wkt,
+                  proj4.defs("EPSG:4326"),
+                  sourcePos
+                );
 
-                var nw = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), [metadata[metadataIndex].bounds[0], metadata[metadataIndex].bounds[1]])
-                var se = proj4(metadata[metadataIndex].srs.wkt, proj4.defs('EPSG:4326'), [metadata[metadataIndex].bounds[3], metadata[metadataIndex].bounds[4]])
+                var nw = proj4(
+                  metadata[metadataIndex].srs.wkt,
+                  proj4.defs("EPSG:4326"),
+                  [
+                    metadata[metadataIndex].bounds[0],
+                    metadata[metadataIndex].bounds[1],
+                  ]
+                );
+                var se = proj4(
+                  metadata[metadataIndex].srs.wkt,
+                  proj4.defs("EPSG:4326"),
+                  [
+                    metadata[metadataIndex].bounds[3],
+                    metadata[metadataIndex].bounds[4],
+                  ]
+                );
 
                 var rectangle = new Cesium.Rectangle.fromDegrees(
                   nw[0],
@@ -2035,7 +2376,8 @@ export const fetchPublicTask = ()=>{
                   Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
                     cartographics
                   );
-                var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
+                var boundingSphere =
+                  Cesium.BoundingSphere.fromPoints(cartesians);
 
                 odmDatasets.push({
                   id: publicTask.id + "-pc",
@@ -2043,13 +2385,13 @@ export const fetchPublicTask = ()=>{
                   name: "Point Cloud",
                   url: `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`,
                   asset: odmAssets[odmAssets.length - 1],
-                  "position": {
-                    "lng": pos[0],
-                    "lat": pos[1],
-                    "height": pos[2]
+                  position: {
+                    lng: pos[0],
+                    lat: pos[1],
+                    height: pos[2],
                   },
-                  boundingSphereRadius: boundingSphere.radius
-                })
+                  boundingSphereRadius: boundingSphere.radius,
+                });
                 taskData.push(publicTask.id + "-pc");
               }
             }
@@ -2068,11 +2410,11 @@ export const fetchPublicTask = ()=>{
                 minzoom: metadata[metadataIndex].minzoom,
                 maxzoom: metadata[metadataIndex].maxzoom,
                 position: {
-                  "lng": metadata[metadataIndex].center[0],
-                  "lat": metadata[metadataIndex].center[1],
-                  "height": metadata[metadataIndex].center[2],//zoom level?
-                }
-              })
+                  lng: metadata[metadataIndex].center[0],
+                  lat: metadata[metadataIndex].center[1],
+                  height: metadata[metadataIndex].center[2], //zoom level?
+                },
+              });
               taskData.push(publicTask.id + "-op");
             }
             metadataIndex++;
@@ -2089,11 +2431,11 @@ export const fetchPublicTask = ()=>{
                 minzoom: metadata[metadataIndex].minzoom,
                 maxzoom: metadata[metadataIndex].maxzoom,
                 position: {
-                  "lng": metadata[metadataIndex].center[0],
-                  "lat": metadata[metadataIndex].center[1],
-                  "height": metadata[metadataIndex].center[2],//zoom level?
-                }
-              })
+                  lng: metadata[metadataIndex].center[0],
+                  lat: metadata[metadataIndex].center[1],
+                  height: metadata[metadataIndex].center[2], //zoom level?
+                },
+              });
               taskData.push(publicTask.id + "-dsm");
             }
             metadataIndex++;
@@ -2110,35 +2452,37 @@ export const fetchPublicTask = ()=>{
                 minzoom: metadata[metadataIndex].minzoom,
                 maxzoom: metadata[metadataIndex].maxzoom,
                 position: {
-                  "lng": metadata[metadataIndex].center[0],
-                  "lat": metadata[metadataIndex].center[1],
-                  "height": metadata[metadataIndex].center[2],//zoom level?
-                }
-              })
+                  lng: metadata[metadataIndex].center[0],
+                  lat: metadata[metadataIndex].center[1],
+                  height: metadata[metadataIndex].center[2], //zoom level?
+                },
+              });
               taskData.push(publicTask.id + "-dtm");
             }
             metadataIndex++;
           }
-          setCategories([{
-            "id": -2,
-            "name": "Task"
-          }])
+          setCategories([
+            {
+              id: -2,
+              name: "Task",
+            },
+          ]);
           if (taskData.length > 0) {
             odmAssets.push({
-              "id": 1,
-              "name": publicTask.name,
-              "status": "active",
-              "categoryID": -2,
-              "data": taskData,
+              id: 1,
+              name: publicTask.name,
+              status: "active",
+              categoryID: -2,
+              data: taskData,
               project: projectID,
-              taskID:publicTask.id
-            })
+              taskID: publicTask.id,
+            });
           }
 
           setAssets(odmAssets);
           setDatasets(odmDatasets);
           resolve();
-        })
-    })
-  }))
-}
+        });
+      });
+  });
+};
