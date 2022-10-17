@@ -930,6 +930,7 @@ export class cropBox {
       e.show = true;
     });
   }
+
   toggleVisibilityOff() {
     this.sides.map((e) => {
       e.show = false;
@@ -941,6 +942,7 @@ export class cropBox {
       e.show = false;
     });
   }
+
   toggleVisibility() {
     this.sides.map((e) => {
       e.show = !e.show;
@@ -990,7 +992,6 @@ export class cropBox {
 
     this.tileset.clippingPlanes = this.clippingPlanes;
 
-    this.toggleVisibilityOn();
     this.eventHandler.setInputAction(
       this.handlePick,
       Cesium.ScreenSpaceEventType.LEFT_DOWN
@@ -1018,13 +1019,25 @@ export class cropBox {
     if (this.keepBoxAboveGround) this.setBoxAboveGround();
   }
 
+  destroy = () => {
+    this.eventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOWN);
+    this.eventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_UP);
+    this.eventHandler.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+    viewer.dataSources.remove(this.dataSource);
+
+    this.tileset.clippingPlanes.enabled = false;
+
+    viewer.scene.screenSpaceCameraController.enableInputs = true;
+  };
+
   constructor(data) {
     this.scalePoints = [];
     this.sides = [];
     this.edges = [];
     this.terrainHeightEstimate = 0;
     this.isHeightUpdateInProgress = false;
-    this.keepBoxAboveGround = true;
+    this.keepBoxAboveGround = false;
     this.state = { is: "none" };
     this.tileset = tilesets[data.asset.id][data.id];
     this.data = data;
@@ -1034,7 +1047,13 @@ export class cropBox {
 
     var clippingPlanesOriginMatrix =
       tilesets[data.asset.id][data.id].clippingPlanesOriginMatrix;
-    this.dimensions = new Cesium.Cartesian3(100, 100, 100);
+
+    // this.dimensions = new Cesium.Cartesian3(100, 100, 50);
+    this.dimensions = new Cesium.Cartesian3(
+      this.tileset.root.boundingVolume.boundingSphere.radius,
+      this.tileset.root.boundingVolume.boundingSphere.radius,
+      this.tileset.root.boundingVolume.boundingSphere.radius / 2
+    );
 
     let position;
     const cartographic = Cesium.Cartographic.fromCartesian(
@@ -1182,5 +1201,7 @@ export class cropBox {
       this.updateEntitiesOnOrientationChange
     );
     this.updateEntitiesOnOrientationChange();
+
+    this.updateBox();
   }
 }

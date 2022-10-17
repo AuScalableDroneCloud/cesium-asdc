@@ -1181,6 +1181,17 @@ const handleAssetCheckboxChange = (
   checkboxes.map((cb) => {
     cb.checked = assetCheckbox.checked;
   });
+
+  asset["data"].map((id) => {
+    if (cropBoxes[id]) {
+      if (assetCheckbox.checked) {
+        cropBoxes[id].enable();
+      } else {
+        cropBoxes[id].disable();
+      }
+    }
+  });
+
   if (assetCheckbox.checked) {
     var dataIDs = "";
     var newDataIDs = [];
@@ -1874,24 +1885,26 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
 
       checkbox.onchange = (e) => {
-        if (
-          cropBoxes[data.id] &&
-          cropBoxes[data.id].tileset.clippingPlanes.enabled
-        ) {
-          if (cropDiv) {
-            if (checkbox.checked) {
-              // if (cropBoxes[data.id] && cropBoxes[data.id].tileset.clippingPlanes.enabled){
-              cropDiv.style.display = "block";
-              cropButton.style.color = "#0075ff";
+        if (cropRectangles[data.id]) {
+          cropRectangles[data.id].destroy();
+          delete cropRectangles[data.id];
+        }
+
+        if (cropBoxes[data.id]) {
+          if (checkbox.checked) {
+            cropBoxes[data.id].enable();
+            if (showCheckbox.checked) {
               cropBoxes[data.id].toggleVisibilityOn();
-              // }
-            } else {
-              cropDiv.style.display = "none";
-              cropButton.style.color = null;
-              cropBoxes[data.id].toggleVisibilityOff();
             }
+          } else {
+            cropBoxes[data.id].disable();
+            cropBoxes[data.id].toggleVisibilityOff();
           }
         }
+
+        boxDrawButton.style["background"] = "#ededed";
+        boxDrawButton.style["color"] = "black";
+        tr4.style.display = "none";
 
         handleDataCheckboxChange(
           checkbox,
@@ -1952,10 +1965,12 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         showCheckbox.checked = true;
         showCheckbox.onchange = () => {
           if (tilesets[data.asset.id][data.id].show) {
-            if (showCheckbox.checked) {
-              cropBoxes[data.id].toggleVisibilityOn();
-            } else {
-              cropBoxes[data.id].toggleVisibilityOff();
+            if (cropBoxes[data.id]) {
+              if (showCheckbox.checked) {
+                cropBoxes[data.id].toggleVisibilityOn();
+              } else {
+                cropBoxes[data.id].toggleVisibilityOff();
+              }
             }
           }
         };
@@ -1966,7 +1981,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         aboveGroundCheckbox.type = "checkbox";
         aboveGroundCheckbox.style = "padding: 0; vertical-align:middle;";
         aboveGroundCheckbox.id = `aboveGroundCheckbox-${data.id}`;
-        aboveGroundCheckbox.checked = true;
+        aboveGroundCheckbox.checked = false;
         aboveGroundCheckbox.onchange = () => {
           cropBoxes[data.id].toggleAboveGround();
         };
@@ -1997,6 +2012,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
 
         var cropTable4 = document.createElement("table");
         var tr4 = document.createElement("tr");
+        tr4.id = `draw-msg-${data.id}`;
         tr4.innerHTML =
           "Please click on the map for the 2 vertices and the extrusion height";
         tr4.style.display = "none";
@@ -2008,25 +2024,23 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
           var val = directionSelect.value;
           const clipDirection = val === "inside" ? -1 : 1;
 
-          if (mode == "polygon") {
-            // if (cropPolygons[data.id]){
-            //   cropPolygons[data.id].setClippingPlanesDirection(clipDirection);
-            // }
-          } else if (mode == "rectangle") {
-            if (cropRectangles[data.id]) {
-              cropRectangles[data.id].setClippingPlanesDirection(clipDirection);
-            }
-          } else {
-            var clippingPlanes =
-              tilesets[data.asset.id][data.id].clippingPlanes;
+          // if (mode == "polygon") {
+          //   // if (cropPolygons[data.id]){
+          //   //   cropPolygons[data.id].setClippingPlanesDirection(clipDirection);
+          //   // }
+          // } else if (mode == "rectangle") {
+          //   if (cropRectangles[data.id]) {
+          //     cropRectangles[data.id].setClippingPlanesDirection(clipDirection);
+          //   }
+          // } else {
+          var clippingPlanes = tilesets[data.asset.id][data.id].clippingPlanes;
 
-            clippingPlanes._planes.map((p) => {
-              p.distance = Math.abs(p.distance) * clipDirection;
-            });
+          clippingPlanes._planes.map((p) => {
+            p.distance = Math.abs(p.distance) * clipDirection;
+          });
 
-            clippingPlanes.unionClippingRegions =
-              val === "inside" ? false : true;
-          }
+          clippingPlanes.unionClippingRegions = val === "inside" ? false : true;
+          // }
         };
         td4.appendChild(directionSelect);
         if (data.type == "EPTPointCloud" && !Array.isArray(data.url)) {
@@ -2075,164 +2089,164 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
             }
             var now = Cesium.JulianDate.now();
 
-            if (mode == "box") {
-              var scalePoints = cropBoxes[data.id]?.scalePoints.slice(0, 8);
-              var groundScalePoints = [
-                scalePoints[1],
-                scalePoints[3],
-                scalePoints[5],
-                scalePoints[7],
-                scalePoints[1],
-              ];
+            // if (mode == "box") {
+            var scalePoints = cropBoxes[data.id]?.scalePoints.slice(0, 8);
+            var groundScalePoints = [
+              scalePoints[1],
+              scalePoints[3],
+              scalePoints[5],
+              scalePoints[7],
+              scalePoints[1],
+            ];
 
-              var wktPolygon = "POLYGON((";
-              groundScalePoints.map((entity, index) => {
-                var translatedPos = new Cesium.Cartesian3();
-                var cartesianPos = entity.position.getValue(now);
-                cartesianPos.clone(translatedPos);
-                if (translation) {
-                  Cesium.Cartesian3.subtract(
-                    cartesianPos,
-                    translation,
-                    translatedPos
-                  );
-                }
-                var pos = Cesium.Cartographic.fromCartesian(translatedPos);
-                var lon = pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
-                var lat = pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
-                wktPolygon += `${lon} ${lat}`;
-                if (index != groundScalePoints.length - 1) {
-                  wktPolygon += ",";
-                }
-              });
-
-              wktPolygon += "))";
-
-              var heights = scalePoints.map((entity) => {
-                var translatedPos = new Cesium.Cartesian3();
-                var cartesianPos = entity.position.getValue(now);
-                cartesianPos.clone(translatedPos);
-                if (translation) {
-                  Cesium.Cartesian3.subtract(
-                    cartesianPos,
-                    translation,
-                    translatedPos
-                  );
-                }
-                var pos = Cesium.Cartographic.fromCartesian(translatedPos);
-                return pos.height;
-              });
-
-              var maxHeight = Math.max(...heights);
-              var minHeight = Math.min(...heights);
-
-              var lons = scalePoints.map((entity) => {
-                var translatedPos = new Cesium.Cartesian3();
-                var cartesianPos = entity.position.getValue(now);
-                cartesianPos.clone(translatedPos);
-                if (translation) {
-                  Cesium.Cartesian3.subtract(
-                    cartesianPos,
-                    translation,
-                    translatedPos
-                  );
-                }
-                var pos = Cesium.Cartographic.fromCartesian(translatedPos);
-                return pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
-              });
-              var minLon = Math.min(...lons);
-              var maxLon = Math.max(...lons);
-
-              var lats = scalePoints.map((entity) => {
-                var translatedPos = new Cesium.Cartesian3();
-                var cartesianPos = entity.position.getValue(now);
-                cartesianPos.clone(translatedPos);
-                if (translation) {
-                  Cesium.Cartesian3.subtract(
-                    cartesianPos,
-                    translation,
-                    translatedPos
-                  );
-                }
-                var pos = Cesium.Cartographic.fromCartesian(translatedPos);
-                return pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
-              });
-              var minLat = Math.min(...lats);
-              var maxLat = Math.max(...lats);
-
-              var bbox = [minLon, maxLon, minLat, maxLat, minHeight, maxHeight];
-              var outside =
-                !tilesets[data.asset.id][data.id].clippingPlanes
-                  ?.unionClippingRegions;
-            } else if (mode == "rectangle") {
-              var coords = cropRectangles[data.id].getCoordinates();
-              if (coords) {
-                var minHeight =
-                  cropRectangles[data.id].polygon.polygon.height.getValue(now);
-                var maxHeight =
-                  cropRectangles[
-                    data.id
-                  ].polygon.polygon.extrudedHeight.getValue(now);
-
-                var wktPolygon = "POLYGON((";
-                var lons = [];
-                var lats = [];
-
-                coords.map((pos) => {
-                  var lon = pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
-                  var lat = pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
-                  wktPolygon += `${lon} ${lat}`;
-                  wktPolygon += ",";
-
-                  lons.push(lon);
-                  lats.push(lat);
-                });
-                wktPolygon += `${lons[0]} ${lats[0]}`;
-                wktPolygon += "))";
-
-                var minLon = Math.min(...lons);
-                var maxLon = Math.max(...lons);
-                var minLat = Math.min(...lats);
-                var maxLat = Math.max(...lats);
-                var bbox = [
-                  minLon,
-                  maxLon,
-                  minLat,
-                  maxLat,
-                  minHeight,
-                  maxHeight,
-                ];
-                var outside =
-                  !tilesets[data.asset.id][data.id].clippingPlanes
-                    ?.unionClippingRegions;
+            var wktPolygon = "POLYGON((";
+            groundScalePoints.map((entity, index) => {
+              var translatedPos = new Cesium.Cartesian3();
+              var cartesianPos = entity.position.getValue(now);
+              cartesianPos.clone(translatedPos);
+              if (translation) {
+                Cesium.Cartesian3.subtract(
+                  cartesianPos,
+                  translation,
+                  translatedPos
+                );
               }
-            } else if (mode == "polygon") {
-              // var wktPolygon = "POLYGON((";
-              // var lons = [];
-              // var lats = [];
-              // var minHeight = 0; //
-              // var maxHeight = 200; //
-              // var height = Cesium.Cartographic.fromCartesian(cropPolygons[data.id].positions[0]).height;
-              // cropPolygons[data.id].positions.map((p,index)=>{
-              //   var cp = Cesium.Cartesian3.clone(p,new Cesium.Cartesian3())
-              //   var pos = Cesium.Cartographic.fromCartesian(cp)
-              //   pos.height = height;
-              //   var lon = pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
-              //   var lat = pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
-              //   wktPolygon += `${lon} ${lat}`;
-              //   wktPolygon+=",";
-              //   lons.push(lon);
-              //   lats.push(lat);
-              // })
-              // wktPolygon += `${lons[0]} ${lats[0]}`;
-              // wktPolygon += "))";
-              // var minLon = Math.min(...lons);
-              // var maxLon = Math.max(...lons);
-              // var minLat = Math.min(...lats);
-              // var maxLat = Math.max(...lats);
-              // var bbox = [minLon, maxLon, minLat, maxLat, minHeight,maxHeight];
-              // var outside = !tilesets[data.asset.id][data.id].clippingPlanes?.unionClippingRegions;
-            }
+              var pos = Cesium.Cartographic.fromCartesian(translatedPos);
+              var lon = pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
+              var lat = pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
+              wktPolygon += `${lon} ${lat}`;
+              if (index != groundScalePoints.length - 1) {
+                wktPolygon += ",";
+              }
+            });
+
+            wktPolygon += "))";
+
+            var heights = scalePoints.map((entity) => {
+              var translatedPos = new Cesium.Cartesian3();
+              var cartesianPos = entity.position.getValue(now);
+              cartesianPos.clone(translatedPos);
+              if (translation) {
+                Cesium.Cartesian3.subtract(
+                  cartesianPos,
+                  translation,
+                  translatedPos
+                );
+              }
+              var pos = Cesium.Cartographic.fromCartesian(translatedPos);
+              return pos.height;
+            });
+
+            var maxHeight = Math.max(...heights);
+            var minHeight = Math.min(...heights);
+
+            var lons = scalePoints.map((entity) => {
+              var translatedPos = new Cesium.Cartesian3();
+              var cartesianPos = entity.position.getValue(now);
+              cartesianPos.clone(translatedPos);
+              if (translation) {
+                Cesium.Cartesian3.subtract(
+                  cartesianPos,
+                  translation,
+                  translatedPos
+                );
+              }
+              var pos = Cesium.Cartographic.fromCartesian(translatedPos);
+              return pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
+            });
+            var minLon = Math.min(...lons);
+            var maxLon = Math.max(...lons);
+
+            var lats = scalePoints.map((entity) => {
+              var translatedPos = new Cesium.Cartesian3();
+              var cartesianPos = entity.position.getValue(now);
+              cartesianPos.clone(translatedPos);
+              if (translation) {
+                Cesium.Cartesian3.subtract(
+                  cartesianPos,
+                  translation,
+                  translatedPos
+                );
+              }
+              var pos = Cesium.Cartographic.fromCartesian(translatedPos);
+              return pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
+            });
+            var minLat = Math.min(...lats);
+            var maxLat = Math.max(...lats);
+
+            var bbox = [minLon, maxLon, minLat, maxLat, minHeight, maxHeight];
+            var outside =
+              !tilesets[data.asset.id][data.id].clippingPlanes
+                ?.unionClippingRegions;
+            // } else if (mode == "rectangle") {
+            //   var coords = cropRectangles[data.id].getCoordinates();
+            //   if (coords) {
+            //     var minHeight =
+            //       cropRectangles[data.id].polygon.polygon.height.getValue(now);
+            //     var maxHeight =
+            //       cropRectangles[
+            //         data.id
+            //       ].polygon.polygon.extrudedHeight.getValue(now);
+
+            //     var wktPolygon = "POLYGON((";
+            //     var lons = [];
+            //     var lats = [];
+
+            //     coords.map((pos) => {
+            //       var lon = pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
+            //       var lat = pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
+            //       wktPolygon += `${lon} ${lat}`;
+            //       wktPolygon += ",";
+
+            //       lons.push(lon);
+            //       lats.push(lat);
+            //     });
+            //     wktPolygon += `${lons[0]} ${lats[0]}`;
+            //     wktPolygon += "))";
+
+            //     var minLon = Math.min(...lons);
+            //     var maxLon = Math.max(...lons);
+            //     var minLat = Math.min(...lats);
+            //     var maxLat = Math.max(...lats);
+            //     var bbox = [
+            //       minLon,
+            //       maxLon,
+            //       minLat,
+            //       maxLat,
+            //       minHeight,
+            //       maxHeight,
+            //     ];
+            //     var outside =
+            //       !tilesets[data.asset.id][data.id].clippingPlanes
+            //         ?.unionClippingRegions;
+            //   }
+            // } else if (mode == "polygon") {
+            //   // var wktPolygon = "POLYGON((";
+            //   // var lons = [];
+            //   // var lats = [];
+            //   // var minHeight = 0; //
+            //   // var maxHeight = 200; //
+            //   // var height = Cesium.Cartographic.fromCartesian(cropPolygons[data.id].positions[0]).height;
+            //   // cropPolygons[data.id].positions.map((p,index)=>{
+            //   //   var cp = Cesium.Cartesian3.clone(p,new Cesium.Cartesian3())
+            //   //   var pos = Cesium.Cartographic.fromCartesian(cp)
+            //   //   pos.height = height;
+            //   //   var lon = pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
+            //   //   var lat = pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
+            //   //   wktPolygon += `${lon} ${lat}`;
+            //   //   wktPolygon+=",";
+            //   //   lons.push(lon);
+            //   //   lats.push(lat);
+            //   // })
+            //   // wktPolygon += `${lons[0]} ${lats[0]}`;
+            //   // wktPolygon += "))";
+            //   // var minLon = Math.min(...lons);
+            //   // var maxLon = Math.max(...lons);
+            //   // var minLat = Math.min(...lats);
+            //   // var maxLat = Math.max(...lats);
+            //   // var bbox = [minLon, maxLon, minLat, maxLat, minHeight,maxHeight];
+            //   // var outside = !tilesets[data.asset.id][data.id].clippingPlanes?.unionClippingRegions;
+            // }
 
             var totalPoints = tilesets[data.asset.id][data.id].asset.ept.points;
             document.getElementById("export-modal-total-points").innerHTML =
@@ -2418,30 +2432,21 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         var cropTable3 = document.createElement("table");
         cropTable3.style = "width: 100%;padding: 5px;";
         var tr3 = document.createElement("tr");
-        var td5 = document.createElement("td");
-        td5.innerHTML = "Draw: ";
-        td5.style.width = "100px";
-        tr3.appendChild(td5);
-        var td6 = document.createElement("td");
-        // td6.style="display: flex;align-content: center;justify-content: space-evenly;"
+        var td7 = document.createElement("td");
 
         var boxDrawButton = document.createElement("button");
         boxDrawButton.id = `rectangle-btn-${data.id}`;
-        boxDrawButton.style["background"] = "#ededed";
-        boxDrawButton.style["color"] = "black";
-        boxDrawButton.style["border"] = "1px solid #000";
-        boxDrawButton.style["border-radius"] = "3px";
-        boxDrawButton.innerHTML = "Rectangle";
-        boxDrawButton.style.width = "75px";
+        boxDrawButton.className = "button-1";
+        boxDrawButton.innerHTML = "Draw Custom Clipping Box";
         boxDrawButton.onclick = () => {
-          if (mode != "rectangle") {
+          if (!cropRectangles[data.id]) {
             boxDrawButton.style["background"] = "#e5e5e5";
             boxDrawButton.style["border"] = "1px solid #000";
             boxDrawButton.style["border-radius"] = "3px";
             boxDrawButton.style["color"] = "#0075ff";
             // polygonDrawButton.style["background"] = "#ededed";
             // polygonDrawButton.style["color"] = "black";
-            mode = "rectangle";
+            // mode = "rectangle";
 
             if (cropBoxes[data.id]) {
               cropBoxes[data.id].disable();
@@ -2449,7 +2454,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
             cropRectangles[data.id] = new cropRectangle(data);
             tr4.style.display = "table-row";
           } else {
-            mode = "box";
+            // mode = "box";
             boxDrawButton.style["background"] = "#ededed";
             boxDrawButton.style["color"] = "black";
 
@@ -2510,11 +2515,37 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         //   }
         // }
 
-        td6.appendChild(boxDrawButton);
+        td7.appendChild(boxDrawButton);
         // td6.appendChild(polygonDrawButton);
 
-        tr3.appendChild(td6);
+        tr3.appendChild(td7);
         cropTable3.appendChild(tr3);
+
+        var td8 = document.createElement("td");
+
+        var resetButton = document.createElement("button");
+        resetButton.innerHTML = "Reset";
+        resetButton.className = "button-1";
+
+        resetButton.onclick = () => {
+          if (cropBoxes[data.id]) {
+            cropBoxes[data.id].destroy();
+          }
+
+          if (cropRectangles[data.id]) {
+            cropRectangles[data.id].destroy();
+            delete cropRectangles[data.id];
+
+            boxDrawButton.style["background"] = "#ededed";
+            boxDrawButton.style["color"] = "black";
+            tr4.style.display = "none";
+          }
+
+          cropBoxes[data.id] = new cropBox(data);
+        };
+
+        td8.appendChild(resetButton);
+        tr3.appendChild(td8);
 
         cropDiv.appendChild(cropTable1);
         cropDiv.appendChild(cropTable2);
@@ -2541,58 +2572,37 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         cropButton.id = `cropButton-${data.id}`;
 
         cropButton.onclick = (e) => {
-          // e.preventDefault();
-          // e.stopImmediatePropagation();
+          e.preventDefault();
+          e.stopImmediatePropagation();
 
           if (!cropButton.style.color || cropButton.style.color == "white") {
             cropButton.style.color = "#0075ff";
+            cropDiv.style.display = "block";
+            dateDiv.onclick();
           } else {
             cropButton.style.color = null;
+            cropDiv.style.display = "none";
           }
 
-          cropDiv.style.display =
-            cropDiv.style.display == "none" ? "block" : "none";
-
           if (!cropBoxes[data.id]) {
-            if (
-              !(tilesets[data.asset.id] && tilesets[data.asset.id][data.id])
-            ) {
-              var tilesetTimer = setInterval(checkTileset, 500);
-              function checkTileset() {
-                if (
-                  tilesets[data.asset.id] &&
-                  tilesets[data.asset.id][data.id]
-                ) {
-                  cropBoxes[data.id] = new cropBox(data);
-                  clearInterval(tilesetTimer);
-                }
-              }
-            } else {
-              if (!cropRectangles[data.id]) {
+            var tilesetTimer = setInterval(checkTileset, 500);
+            function checkTileset() {
+              if (
+                tilesets[data.asset.id] &&
+                tilesets[data.asset.id][data.id] &&
+                tilesets[data.asset.id][data.id].ready
+              ) {
                 cropBoxes[data.id] = new cropBox(data);
+                clearInterval(tilesetTimer);
               }
             }
           } else {
-            if (mode == "box") {
-              cropBoxes[data.id].disable();
-              mode = null;
-            } else if (mode == null) {
-              if (!cropRectangles[data.id]) {
-                cropBoxes[data.id].enable();
-                mode = "box";
-              }
-            }
-          }
+            cropBoxes[data.id].toggleEnable();
 
-          if (cropRectangles[data.id]) {
-            if (mode == "rectangle") {
-              cropRectangles[data.id].polygon.show = false;
-              cropRectangles[data.id].tileset.clippingPlanes.enabled = false;
-              mode = null;
+            if (showCheckbox.checked) {
+              cropBoxes[data.id].toggleVisibilityOn();
             } else {
-              cropRectangles[data.id].polygon.show = true;
-              cropRectangles[data.id].tileset.clippingPlanes.enabled = true;
-              mode = "rectangle";
+              cropBoxes[data.id].toggleVisibilityOff();
             }
           }
 
@@ -2686,7 +2696,6 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
                 );
                 var cartoC = Cesium.Cartographic.fromCartesian(c);
                 cartoC.height = tileset.root.boundingVolume.minimumHeight;
-
                 Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [
                   cartoC,
                 ]).then((updatedPositions) => {

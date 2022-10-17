@@ -1,4 +1,5 @@
-import { viewer, tilesets } from "./State.js";
+import { cropBox } from "./CropBox.js";
+import { viewer, tilesets, cropBoxes, cropRectangles } from "./State.js";
 
 export class cropRectangle {
   constructor(data) {
@@ -10,36 +11,82 @@ export class cropRectangle {
       polygon: {
         hierarchy: new Cesium.CallbackProperty(() => {
           if (this.positions[0] && this.positions[1]) {
-            if (this.positions[0].longitude < this.positions[1].longitude) {
-              var west = this.positions[0].longitude;
-              var east = this.positions[1].longitude;
-            } else {
-              var west = this.positions[1].longitude;
-              var east = this.positions[0].longitude;
-            }
+            var xaxis = Cesium.Matrix4.multiplyByPointAsVector(
+              this.tileset.clippingPlanesOriginMatrix,
+              new Cesium.Cartesian3(1, 0, 0),
+              new Cesium.Cartesian3()
+            );
 
-            if (this.positions[0].latitude < this.positions[1].latitude) {
-              var south = this.positions[0].latitude;
-              var north = this.positions[1].latitude;
-            } else {
-              var south = this.positions[1].latitude;
-              var north = this.positions[0].latitude;
-            }
-            var coords = [
-              west,
-              south,
-              east,
-              south,
-              east,
-              north,
-              west,
-              north,
-              west,
-              south,
-            ];
+            var yaxis = Cesium.Matrix4.multiplyByPointAsVector(
+              this.tileset.clippingPlanesOriginMatrix,
+              new Cesium.Cartesian3(0, 1, 0),
+              new Cesium.Cartesian3()
+            );
+
+            var dot = Cesium.Cartesian3.dot(
+              Cesium.Cartographic.toCartesian(this.positions[1]),
+              xaxis,
+              new Cesium.Cartesian3()
+            );
+
+            var dot2 = Cesium.Cartesian3.dot(
+              Cesium.Cartographic.toCartesian(this.positions[0]),
+              xaxis,
+              new Cesium.Cartesian3()
+            );
+
+            this.lenX = dot - dot2;
+
+            var l1 = Cesium.Cartesian3.multiplyByScalar(
+              xaxis,
+              this.lenX,
+              new Cesium.Cartesian3()
+            );
+
+            Cesium.Cartesian3.add(
+              Cesium.Cartographic.toCartesian(this.positions[0]),
+              l1,
+              l1
+            );
+
+            l1 = Cesium.Cartographic.fromCartesian(l1);
+
+            var dot3 = Cesium.Cartesian3.dot(
+              Cesium.Cartographic.toCartesian(this.positions[1]),
+              yaxis,
+              new Cesium.Cartesian3()
+            );
+
+            var dot4 = Cesium.Cartesian3.dot(
+              Cesium.Cartographic.toCartesian(this.positions[0]),
+              yaxis,
+              new Cesium.Cartesian3()
+            );
+
+            this.lenY = dot3 - dot4;
+
+            var l2 = Cesium.Cartesian3.multiplyByScalar(
+              yaxis,
+              this.lenY,
+              new Cesium.Cartesian3()
+            );
+
+            Cesium.Cartesian3.add(
+              Cesium.Cartographic.toCartesian(this.positions[0]),
+              l2,
+              l2
+            );
+
+            l2 = Cesium.Cartographic.fromCartesian(l2);
 
             return new Cesium.PolygonHierarchy(
-              new Cesium.Cartesian3.fromRadiansArray(coords)
+              Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray([
+                this.positions[0],
+                l1,
+                this.positions[1],
+                l2,
+                this.positions[0],
+              ])
             );
           } else {
             return new Cesium.PolygonHierarchy([]);
@@ -288,6 +335,59 @@ export class cropRectangle {
       this.inverseClippingPlanesOriginMatrix;
 
     this.tileset.clippingPlanes = clippingPlaneCollection;
+
+    this.destroy();
+
+    var box = new cropBox(this.data);
+    if (!document.getElementById(`crop-checkbox-${this.data.id}`).checked)
+      box.toggleVisibilityOff();
+    box.keepBoxAboveGround = cropBoxes[this.data.id].keepBoxAboveGround;
+
+    var topPoint = Cesium.Cartesian3.clone(
+      Cesium.Cartographic.toCartesian(this.positions[1]),
+      new Cesium.Cartesian3()
+    );
+    topPoint = Cesium.Cartographic.fromCartesian(topPoint);
+    topPoint.height = this.polygon.polygon.extrudedHeight.getValue();
+    box.trs.translation = Cesium.Cartesian3.midpoint(
+      Cesium.Cartographic.toCartesian(this.positions[0]),
+      Cesium.Cartographic.toCartesian(topPoint),
+      new Cesium.Cartesian3()
+    );
+
+    var scale = new Cesium.Cartesian3(
+      Math.abs(this.lenX),
+      Math.abs(this.lenY),
+      Math.abs(
+        this.polygon.polygon.extrudedHeight.getValue() -
+          this.polygon.polygon.height.getValue()
+      )
+    );
+
+    box.trs.scale = scale;
+
+    cropBoxes[this.data.id] = box;
+
+    var val = document.getElementById(`crop-direction-${this.data.id}`).value;
+    var clipDirection = val === "inside" ? -1 : 1;
+
+    var clippingPlanes = box.tileset.clippingPlanes;
+
+    clippingPlanes._planes.map((p) => {
+      p.distance = Math.abs(p.distance) * clipDirection;
+    });
+
+    clippingPlanes.unionClippingRegions = val === "inside" ? false : true;
+
+    box.updateBox();
+    box.onChange({
+      modelMatrix: box.modelMatrix,
+      translationRotationScale: box.trs,
+    });
+
+    document.getElementById(`rectangle-btn-${this.data.id}`).style.color = null;
+    document.getElementById(`draw-msg-${this.data.id}`).style.display = "none";
+    delete cropRectangles[this.data.id];
   };
 
   getCoordinates = () => {
@@ -337,7 +437,10 @@ export class cropRectangle {
 
     viewer.entities.remove(this.polygon);
 
-    this.tileset.clippingPlanes.enabled = false;
+    if (this.tileset.clippingPlanes)
+      this.tileset.clippingPlanes.enabled = false;
+
+    viewer.scene.screenSpaceCameraController.enableInputs = true;
 
     this.drawing = false;
     this.drawingHeight = false;

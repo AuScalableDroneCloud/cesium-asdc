@@ -346,30 +346,6 @@ export const applyInit = () => {
             }
           });
         }
-
-        if (init.cropRectangles[data.id]) {
-          tilesets[data.asset["id"]][data.id].readyPromise.then(function (
-            tileset
-          ) {
-            if (!cropRectangles[data.id]) {
-              document.getElementById(`rectangle-btn-${data.id}`).onclick();
-              cropRectangles[data.id].positions =
-                init.cropRectangles[data.id].positions;
-              cropRectangles[data.id].polygon.polygon.height =
-                init.cropRectangles[data.id].height;
-              cropRectangles[data.id].polygon.polygon.extrudedHeight =
-                init.cropRectangles[data.id].extrudedHeight;
-              cropRectangles[data.id].removeEventHandlers();
-              var clipDirection =
-                document.getElementById(`crop-direction-${data.id}`).value ===
-                "inside"
-                  ? -1
-                  : 1;
-              cropRectangles[data.id].calcProperties();
-              cropRectangles[data.id].setClippingPlanesDirection(clipDirection);
-            }
-          });
-        }
       });
     }
   }
@@ -782,17 +758,6 @@ viewer.clock.onTick.addEventListener((clock) => {
               ) {
                 cropBoxes[timelineAssetDatasets[i].id].toggleVisibilityOn();
               }
-
-              if (
-                cropRectangles[timelineAssetDatasets[i].id] &&
-                cropRectangles[timelineAssetDatasets[i].id].tileset
-                  .clippingPlanes.enabled &&
-                document.getElementById(
-                  `crop-checkbox-${timelineAssetDatasets[i].id}`
-                ).checked
-              ) {
-                cropRectangles[timelineAssetDatasets[i].id].polygon.show = true;
-              }
             }
           }
         }
@@ -824,10 +789,6 @@ viewer.clock.onTick.addEventListener((clock) => {
 
             if (cropBoxes[timelineAssetDatasets[i].id]) {
               cropBoxes[timelineAssetDatasets[i].id].toggleVisibilityOff();
-            }
-
-            if (cropRectangles[timelineAssetDatasets[i].id]) {
-              cropRectangles[timelineAssetDatasets[i].id].polygon.show = false;
             }
           }
         }
@@ -1358,26 +1319,19 @@ const displayShareURL = () => {
   });
 
   var shareCropBoxes = {};
+  var selectedDataIDs = selectedDatasets.map((d) => d.id.toString());
   Object.keys(cropBoxes).map((b) => {
-    shareCropBoxes[b] = {};
-    shareCropBoxes[b].trs = cropBoxes[b].trs;
-    shareCropBoxes[b].show = document.getElementById(
-      `crop-checkbox-${b}`
-    ).checked;
-    shareCropBoxes[b].keepBoxAboveGround = cropBoxes[b].keepBoxAboveGround;
-    shareCropBoxes[b].direction = document.getElementById(
-      `crop-direction-${b}`
-    ).value;
-  });
-
-  var shareCropRectangles = {};
-  Object.keys(cropRectangles).map((r) => {
-    shareCropRectangles[r] = {};
-    shareCropRectangles[r].positions = cropRectangles[r].positions;
-    shareCropRectangles[r].height =
-      cropRectangles[r].polygon.polygon.height.getValue();
-    shareCropRectangles[r].extrudedHeight =
-      cropRectangles[r].polygon.polygon.extrudedHeight.getValue();
+    if (selectedDataIDs.includes(b)) {
+      shareCropBoxes[b] = {};
+      shareCropBoxes[b].trs = cropBoxes[b].trs;
+      shareCropBoxes[b].show = document.getElementById(
+        `crop-checkbox-${b}`
+      ).checked;
+      shareCropBoxes[b].keepBoxAboveGround = cropBoxes[b].keepBoxAboveGround;
+      shareCropBoxes[b].direction = document.getElementById(
+        `crop-direction-${b}`
+      ).value;
+    }
   });
 
   var initParams = {
@@ -1405,7 +1359,6 @@ const displayShareURL = () => {
     },
     opacity: alphas,
     cropBoxes: shareCropBoxes,
-    cropRectangles: shareCropRectangles,
   };
 
   if (selectedData) {
