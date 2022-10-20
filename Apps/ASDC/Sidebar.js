@@ -1184,10 +1184,15 @@ const handleAssetCheckboxChange = (
 
   asset["data"].map((id) => {
     if (cropBoxes[id]) {
-      if (assetCheckbox.checked) {
+      if (
+        assetCheckbox.checked &&
+        !!document.getElementById(`cropButton-${id}`).style.color
+      ) {
         cropBoxes[id].enable();
+        cropBoxes[id].toggleVisibilityOn();
       } else {
         cropBoxes[id].disable();
+        cropBoxes[id].toggleVisibilityOff();
       }
     }
   });
@@ -1892,9 +1897,13 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
 
         if (cropBoxes[data.id]) {
           if (checkbox.checked) {
-            cropBoxes[data.id].enable();
-            if (showCheckbox.checked) {
-              cropBoxes[data.id].toggleVisibilityOn();
+            if (
+              !!document.getElementById(`cropButton-${data.id}`).style.color
+            ) {
+              cropBoxes[data.id].enable();
+              if (showCheckbox.checked) {
+                cropBoxes[data.id].toggleVisibilityOn();
+              }
             }
           } else {
             cropBoxes[data.id].disable();
@@ -2599,7 +2608,10 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
           } else {
             cropBoxes[data.id].toggleEnable();
 
-            if (showCheckbox.checked) {
+            if (
+              showCheckbox.checked &&
+              cropBoxes[data.id].clippingPlanes.enabled
+            ) {
               cropBoxes[data.id].toggleVisibilityOn();
             } else {
               cropBoxes[data.id].toggleVisibilityOff();
