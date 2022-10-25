@@ -1911,9 +1911,11 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
           }
         }
 
-        boxDrawButton.style["background"] = "#ededed";
-        boxDrawButton.style["color"] = "black";
-        tr4.style.display = "none";
+        if (boxDrawButton) {
+          boxDrawButton.style["background"] = "#ededed";
+          boxDrawButton.style["color"] = "black";
+        }
+        if (tr4) tr4.style.display = "none";
 
         handleDataCheckboxChange(
           checkbox,
