@@ -18,7 +18,7 @@
     <script src="/cesium/Build/Cesium/Cesium.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="/cesium/proj4/proj4.js"></script>
-    <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+    <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
@@ -29,24 +29,30 @@
   </head>
   <body>
     <nav id="nav-header">
-      <a href="/cesium/Apps/ASDC/" style="align-self: center;margin-left: 15px;float: left;">
-        <img src="https://asdc.cloud.edu.au/media/CACHE/images/settings/ASDC_logo_c6xUEzs/cc92e66c6b036538ec085ce7e3ad93e1.png" alt="WebODM">
+      <a
+        href="/cesium/Apps/ASDC/"
+        style="align-self: center; margin-left: 15px; float: left"
+      >
+        <img
+          src="https://asdc.cloud.edu.au/media/CACHE/images/settings/ASDC_logo_c6xUEzs/cc92e66c6b036538ec085ce7e3ad93e1.png"
+          alt="WebODM"
+        />
       </a>
-      <a 
-        href="/cesium/Apps/ASDC/" 
-        style='align-self: center;
+      <a
+        href="/cesium/Apps/ASDC/"
+        style="
+          align-self: center;
           margin-left: 5px;
           text-decoration: none;
           color: white;
           font-size: 15px;
-          float: left;'
+          float: left;
+        "
       >
         ASDC Cesium Platform
       </a>
       <div class="nav-buttons">
-        <div id="share-button" class="share-button">
-          Share
-        </div>
+        <div id="share-button" class="share-button">Share</div>
         <div id="user-dropdown-button">
           <div class="fa fa-user fa-fw"></div>
           <div class="fa fa-caret-down"></div>
@@ -61,71 +67,85 @@
     </nav>
     <div id="share-dropdown-list">
       <div id="share-question">
-        <p id="share-question-text">By sharing this data, do you want to make it accessible and downloadable for anyone with the URL?</p>
-        <div id="share-question-buttons" style="display: flex;justify-content: center;">
-          <button id="share-question-yes" style="margin: 5px;width: 40px;" title="Clicking Yes will make all the selected WebODM tasks public">Yes</button>
-          <button id="share-question-no" style="margin: 5px;width: 40px;" title="Clicking No will require all the selected WebODM tasks to get manually shared with the user receiving the link">No</button>
+        <p id="share-question-text">
+          By sharing this data, do you want to make it accessible and
+          downloadable for anyone with the URL?
+        </p>
+        <div
+          id="share-question-buttons"
+          style="display: flex; justify-content: center"
+        >
+          <button
+            id="share-question-yes"
+            style="margin: 5px; width: 40px"
+            title="Clicking Yes will make all the selected WebODM tasks public"
+          >
+            Yes
+          </button>
+          <button
+            id="share-question-no"
+            style="margin: 5px; width: 40px"
+            title="Clicking No will require all the selected WebODM tasks to get manually shared with the user receiving the link"
+          >
+            No
+          </button>
           <div id="share-question-loader" class="loader"></div>
         </div>
       </div>
       <div id="share-link">
-        <input readonly type="text" id="share-input" style="width: 350px;"/>
+        <input readonly type="text" id="share-input" style="width: 350px" />
         <button id="copy-share-link-button">Copy</button>
       </div>
     </div>
     <div id="cesiumContainer">
       <div
-        style="z-index: 2; position: absolute;pointer-events: none; max-width: calc(100% - 230px); left:30px;width:50%;"
+        style="
+          z-index: 2;
+          position: absolute;
+          pointer-events: none;
+          max-width: calc(100% - 230px);
+          left: 30px;
+          width: 50%;
+        "
       >
-        <table id="toolbars-container" style="table-layout: fixed;width: 100%;">
-          <tr id="cam-toolbar-row" style="display: none;">
-            <td style="width: 20%;">
-              Datasets in Map Area:
-            </td>
-            <td id="cam-toolbar" style="pointer-events: auto;">
-            </td>
+        <table id="toolbars-container" style="table-layout: fixed; width: 100%">
+          <tr id="cam-toolbar-row" style="display: none">
+            <td style="width: 20%">Datasets in Map Area:</td>
+            <td id="cam-toolbar" style="pointer-events: auto"></td>
           </tr>
-          <tr id="dims-toolbar-row" style="display: none;">
-            <td style="width: 20%;">
-              Point Cloud Layers:
-            </td>
-            <td id="dims-toolbar" style="pointer-events: auto;">
-            </td>
+          <tr id="dims-toolbar-row" style="display: none">
+            <td style="width: 20%">Point Cloud Layers:</td>
+            <td id="dims-toolbar" style="pointer-events: auto"></td>
           </tr>
-          <tr id="image-series-toolbar-row" style="display: none;">
-            <td style="width: 20%;">
-              Image Geometry:
-            </td>
-            <td id="image-series-toolbar" style="pointer-events: auto;">
-            </td>
+          <tr id="image-series-toolbar-row" style="display: none">
+            <td style="width: 20%">Image Geometry:</td>
+            <td id="image-series-toolbar" style="pointer-events: auto"></td>
           </tr>
-          <tr id="msse-slider-row" style="display: none;">
-            <td style="width: 20%;">
-              Point Budget:
-            </td>
-            <td style="pointer-events: auto;">
+          <tr id="msse-slider-row" style="display: none">
+            <td style="width: 20%">Point Budget:</td>
+            <td style="pointer-events: auto">
               <input
                 type="range"
                 min="0"
                 max="100"
                 value="83"
                 id="msse-slider"
-                style="vertical-align: middle; max-width: 70%;"
+                style="vertical-align: middle; max-width: 70%"
               />
               <span id="msse-value">83 %</span>
             </td>
           </tr>
-          </table>
-          <table>
+        </table>
+        <table>
           <tr>
             <td
               id="zoom-td"
-              style="pointer-events: auto; width: 20%;"
+              style="pointer-events: auto; width: 20%"
               title="If checked, clicking on layer name will zoom to that dataset"
             >
               Zoom to dataset:
             </td>
-            <td style="pointer-events: auto;">
+            <td style="pointer-events: auto">
               <input
                 type="checkbox"
                 title="If checked, clicking on layer name will zoom to that dataset"
@@ -135,12 +155,12 @@
             </td>
             <td
               id="timeline-td"
-              style="pointer-events: auto; width: 20%;"
+              style="pointer-events: auto; width: 20%"
               title="If checked, activating datasets will update the timeline's range"
             >
               Update timeline:
             </td>
-            <td style="pointer-events: auto;">
+            <td style="pointer-events: auto">
               <input
                 type="checkbox"
                 title="If checked, activating datasets will update the timeline's range"
@@ -148,14 +168,47 @@
                 id="timeline-checkbox"
               />
             </td>
-            <td style="pointer-events: auto;">
+            <td style="pointer-events: auto">
               <input
                 type="button"
                 value="Sync Timeline"
                 title="Clicking will zoom the timeline to the activated datasets' time range"
                 id="sync-timeline-button"
                 class="cesium-button"
-                style="width:100%;"
+                style="width: 100%"
+              />
+            </td>
+          </tr>
+        </table>
+        <table>
+          <tr>
+            <td>Clipping Box:</td>
+            <td style="pointer-events: auto">
+              <input
+                type="button"
+                value="Draw"
+                id="clip-draw-button"
+                class="cesium-button"
+                style="width: 100%"
+              />
+            </td>
+            <td style="pointer-events: auto">
+              <input
+                type="button"
+                value="Remove"
+                id="clip-remove-button"
+                class="cesium-button"
+                style="width: 100%"
+              />
+            </td>
+            <td style="pointer-events: auto">
+              <input
+                type="button"
+                value="Export"
+                title="Clicking will crop and export all the available supported point clouds within the region"
+                id="clip-export-button"
+                class="cesium-button"
+                style="width: 100%"
               />
             </td>
           </tr>
@@ -165,16 +218,27 @@
     <div id="sidebar-wrapper">
       <div id="sidebar-close-button">
         <svg width="18" height="18" viewBox="0 0 24 24">
-          <path 
-            fill="black" d="M 2 2 L 20 20" stroke="black" stroke-width="3" stroke-linecap="round"
+          <path
+            fill="black"
+            d="M 2 2 L 20 20"
+            stroke="black"
+            stroke-width="3"
+            stroke-linecap="round"
           />
-          <path fill="black" d="M 20 2 L 2 20" stroke="black" stroke-width="3" stroke-linecap="round"
+          <path
+            fill="black"
+            d="M 20 2 L 2 20"
+            stroke="black"
+            stroke-width="3"
+            stroke-linecap="round"
           />
         </svg>
       </div>
       <div id="sidebar">
         <div id="sidebar-data-buttons"></div>
-        <div id="sidebar-upload-button" class="sidebar-upload-button">Upload</div>
+        <div id="sidebar-upload-button" class="sidebar-upload-button">
+          Upload
+        </div>
       </div>
     </div>
     <div class="modal" id="upload-modal">
@@ -211,8 +275,7 @@
         <span id="close-graph" class="close-graph">&times;</span>
         <h3 style="padding-left: 10px">Graphs</h3>
       </div>
-      <div id="graphs-container">
-      </div>
+      <div id="graphs-container"></div>
     </div>
     <div id="dlDropdown" class="dropdown">
       <div class="dlDropdownRow" id="dl-laz">LAZ Format (.laz)</div>
@@ -249,41 +312,35 @@
       <div class="processing-modal" id="export-modal-centre">
         <table>
           <tr>
-            <td>
-              Total Points:
-            </td>
-            <td id="export-modal-total-points">
-              0
-            </td>
+            <td>Total Points:</td>
+            <td id="export-modal-total-points">0</td>
           </tr>
           <tr>
-            <td>
-              Total Size:
-            </td>
+            <td>Total Size:</td>
             <td id="export-modal-total-size">
               <div class="loader"></div>
             </td>
           </tr>
           <tr>
-            <td>
-              Number of Points Within the Area:
-            </td>
+            <td>Number of Points Within the Area:</td>
             <td id="export-modal-export-points">
               <div class="loader"></div>
             </td>
           </tr>
           <tr>
-            <td>
-              Approximate Export Size:
-            </td>
+            <td>Approximate Export Size:</td>
             <td id="export-modal-export-size">
               <div class="loader"></div>
             </td>
           </tr>
         </table>
-        <div style="display: flex;justify-content: space-around;margin-top: 5px;">
-            <button id="export-cancel" style="width: 60px;margin: 0 10px;">Cancel</button>
-            <button id="export-ok" style="width: 60px;margin: 0 10px;">OK</button>
+        <div
+          style="display: flex; justify-content: space-around; margin-top: 5px"
+        >
+          <button id="export-cancel" style="width: 60px; margin: 0 10px">
+            Cancel
+          </button>
+          <button id="export-ok" style="width: 60px; margin: 0 10px">OK</button>
         </div>
       </div>
     </div>

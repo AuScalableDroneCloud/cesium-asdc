@@ -1,5 +1,4 @@
-import { tilesets, viewer } from "./State.js";
-//taken and modified from terriajs
+import { viewer } from "./State.js";
 
 const CORNER_POINT_VECTORS = [
   new Cesium.Cartesian3(0.5, 0.5, 0.5),
@@ -31,7 +30,7 @@ const scratchNearPoint2d = new Cesium.Cartesian2();
 const scratchFarPoint2d = new Cesium.Cartesian2();
 const scratchRay = new Cesium.Ray();
 
-export class cropBox {
+export class cropBoxMap {
   updateEntitiesOnOrientationChange = () => {
     this.sides.forEach((side) => side.updateOnCameraChange());
     this.scalePoints.forEach((scalePoint) => scalePoint.updateOnCameraChange());
@@ -1025,12 +1024,10 @@ export class cropBox {
 
     viewer.dataSources.remove(this.dataSource);
 
-    this.tileset.clippingPlanes.enabled = false;
-
     viewer.scene.screenSpaceCameraController.enableInputs = true;
   };
 
-  constructor(data) {
+  constructor(translation, scale) {
     this.scalePoints = [];
     this.sides = [];
     this.edges = [];
@@ -1038,29 +1035,20 @@ export class cropBox {
     this.isHeightUpdateInProgress = false;
     this.keepBoxAboveGround = false;
     this.state = { is: "none" };
-    this.tileset = tilesets[data.asset.id][data.id];
-    this.data = data;
 
     this.dataSource = new Cesium.CustomDataSource();
     viewer.dataSources.add(this.dataSource);
 
+    var trs = new Cesium.TranslationRotationScale();
+    trs.translation = translation;
+    trs.scale = scale;
     var clippingPlanesOriginMatrix =
-      tilesets[data.asset.id][data.id].clippingPlanesOriginMatrix;
+      Cesium.Matrix4.fromTranslationRotationScale(trs, new Cesium.Matrix4());
 
-    // this.dimensions = new Cesium.Cartesian3(100, 100, 50);
-    this.dimensions = new Cesium.Cartesian3(
-      this.tileset.root.boundingVolume.boundingSphere.radius,
-      this.tileset.root.boundingVolume.boundingSphere.radius,
-      this.tileset.root.boundingVolume.boundingSphere.radius / 2
-    );
+    this.dimensions = scale;
 
     let position;
-    const cartographic = Cesium.Cartographic.fromCartesian(
-      Cesium.Matrix4.getTranslation(
-        clippingPlanesOriginMatrix,
-        new Cesium.Cartesian3()
-      )
-    );
+    const cartographic = Cesium.Cartographic.fromCartesian(translation);
 
     position = Cesium.Cartographic.toCartesian(
       cartographic,
@@ -1194,7 +1182,6 @@ export class cropBox {
     clippingPlaneCollection.modelMatrix = this.clippingPlaneModelMatrix;
 
     this.clippingPlanes = clippingPlaneCollection;
-    this.tileset.clippingPlanes = this.clippingPlanes;
 
     viewer.scene.camera.changed.addEventListener(
       this.updateEntitiesOnOrientationChange

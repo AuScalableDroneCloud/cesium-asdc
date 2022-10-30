@@ -61,6 +61,8 @@ export var mousePosition = {};
 
 export var cropControllers = {};
 
+export var cropBoxMap;
+
 export function setViewer(newViewer) {
   viewer = newViewer;
 }
@@ -150,4 +152,8 @@ export function setLoadingFinshed(newLoadingFinished) {
 
 export function setInit(newInit) {
   init = newInit;
+}
+
+export function setCropBoxMap(newCropBoxMap) {
+  cropBoxMap = newCropBoxMap;
 }

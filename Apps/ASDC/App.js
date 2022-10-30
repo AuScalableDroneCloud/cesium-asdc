@@ -1,4 +1,9 @@
-import { baseURL, cesiumIonAccessToken, eptServer } from "./Constants.js";
+import {
+  baseURL,
+  cesiumIonAccessToken,
+  eptServer,
+  processingAPI,
+} from "./Constants.js";
 import {
   viewer,
   setViewer,
@@ -42,6 +47,8 @@ import {
   cropBoxes,
   cropControllers,
   cropRectangles,
+  cropBoxMap,
+  setCropBoxMap,
 } from "./State.js";
 import {
   loadAsset,
@@ -64,6 +71,7 @@ import { closeGraphModal, loadCSVGraphs, loadInfluxGraphs } from "./Graphs.js";
 import { readUrlParams } from "./URL.js";
 import { applyAlpha, getAlpha } from "./Style.js";
 import { cropBox } from "./CropBox.js";
+import { cropRectangleMap } from "./CropRectangleMap.js";
 
 Cesium.Ion.defaultAccessToken = cesiumIonAccessToken;
 
@@ -1224,6 +1232,238 @@ document.getElementById("timeline-checkbox").onchange = (e) => {
 
 document.getElementById("sync-timeline-button").onclick = (e) => {
   syncTimeline(false);
+};
+
+var mapRect;
+var clippingDrawButton = document.getElementById("clip-draw-button");
+
+clippingDrawButton.onclick = (e) => {
+  if (mapRect) {
+    mapRect.destroy();
+    mapRect = null;
+  }
+  if (cropBoxMap) {
+    cropBoxMap.destroy();
+    setCropBoxMap(null);
+  }
+  if (clippingDrawButton.style.background) {
+    clippingDrawButton.style.background = null;
+  } else {
+    clippingDrawButton.style.background = "#48b";
+    mapRect = new cropRectangleMap();
+  }
+};
+
+document.getElementById("clip-remove-button").onclick = (e) => {
+  if (mapRect) {
+    mapRect.destroy();
+    mapRect = null;
+  }
+  if (cropBoxMap) {
+    cropBoxMap.destroy();
+    setCropBoxMap(null);
+  }
+  clippingDrawButton.style.background = null;
+};
+
+document.getElementById("clip-export-button").onclick = (e) => {
+  if (!cropBoxMap) return;
+  var regions = [];
+  Object.keys(tilesets).map((a) => {
+    Object.keys(tilesets[a]).map((d) => {
+      var data = selectedDatasets.find((data) => data.id == d);
+      if (data) {
+        var t = tilesets[a][d];
+
+        if (data.asset.project && odmProjects) {
+          var projectName = odmProjects.find(
+            (p) => p.id == data.asset.project
+          ).name;
+          var fileName = `${projectName}_${data.asset.name}_PointCloud_Crop.laz`;
+        } else {
+          var fileName = `${data.asset.name}_${
+            data.date
+              ? new Date(data.date).toLocaleDateString("en-au", {
+                  year: "numeric",
+                  month: "numeric",
+                  day: "numeric",
+                })
+              : ""
+          }${data.name ? "-" + data.name : ""}_PointCloud_Crop.laz`;
+        }
+
+        var scalePoints = cropBoxMap.scalePoints.slice(0, 8);
+        var groundScalePoints = [
+          scalePoints[1],
+          scalePoints[3],
+          scalePoints[5],
+          scalePoints[7],
+        ];
+
+        var points = groundScalePoints.map((entity) => {
+          var cartesianPos = entity.position.getValue();
+          return cartesianPos;
+        });
+
+        var rect;
+        if (!t.root.boundingVolume.rectangle) {
+          if (
+            t.root.boundingVolume.boundingVolume instanceof
+            Cesium.OrientedBoundingBox
+          ) {
+            var corners = Cesium.OrientedBoundingBox.computeCorners(
+              t.root.boundingVolume.boundingVolume
+            );
+            rect = Cesium.Rectangle.fromCartesianArray(corners);
+          }
+        } else {
+          rect = t.root.boundingVolume.rectangle;
+        }
+        var intersection = Cesium.Rectangle.intersection(
+          rect,
+          Cesium.Rectangle.fromCartesianArray(points)
+        );
+
+        if (intersection) {
+          if (data.type == "EPTPointCloud") {
+            var urlParams = new URLSearchParams(t._url.split("?")[1]);
+            var ept = urlParams.get("ept");
+          } else {
+            var ept = data.source.ept;
+          }
+
+          if (!ept) return;
+
+          if (data.position && t.boundingSphereCenter) {
+            var offset = Cesium.Cartographic.toCartesian(
+              new Cesium.Cartographic.fromDegrees(
+                data["position"]["lng"],
+                data["position"]["lat"],
+                data["position"]["height"]
+              )
+            );
+            var translation = Cesium.Cartesian3.subtract(
+              offset,
+              t.boundingSphereCenter,
+              new Cesium.Cartesian3()
+            );
+          }
+          var now = Cesium.JulianDate.now();
+
+          var scalePoints = cropBoxMap?.scalePoints.slice(0, 8);
+          var groundScalePoints = [
+            scalePoints[1],
+            scalePoints[3],
+            scalePoints[5],
+            scalePoints[7],
+            scalePoints[1],
+          ];
+
+          var wktPolygon = "POLYGON((";
+          groundScalePoints.map((entity, index) => {
+            var translatedPos = new Cesium.Cartesian3();
+            var cartesianPos = entity.position.getValue(now);
+            cartesianPos.clone(translatedPos);
+            if (translation) {
+              Cesium.Cartesian3.subtract(
+                cartesianPos,
+                translation,
+                translatedPos
+              );
+            }
+            var pos = Cesium.Cartographic.fromCartesian(translatedPos);
+            var lon = pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
+            var lat = pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
+            wktPolygon += `${lon} ${lat}`;
+            if (index != groundScalePoints.length - 1) {
+              wktPolygon += ",";
+            }
+          });
+
+          wktPolygon += "))";
+
+          var heights = scalePoints.map((entity) => {
+            var translatedPos = new Cesium.Cartesian3();
+            var cartesianPos = entity.position.getValue(now);
+            cartesianPos.clone(translatedPos);
+            if (translation) {
+              Cesium.Cartesian3.subtract(
+                cartesianPos,
+                translation,
+                translatedPos
+              );
+            }
+            var pos = Cesium.Cartographic.fromCartesian(translatedPos);
+            return pos.height;
+          });
+
+          var maxHeight = Math.max(...heights);
+          var minHeight = Math.min(...heights);
+
+          var lons = scalePoints.map((entity) => {
+            var translatedPos = new Cesium.Cartesian3();
+            var cartesianPos = entity.position.getValue(now);
+            cartesianPos.clone(translatedPos);
+            if (translation) {
+              Cesium.Cartesian3.subtract(
+                cartesianPos,
+                translation,
+                translatedPos
+              );
+            }
+            var pos = Cesium.Cartographic.fromCartesian(translatedPos);
+            return pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
+          });
+          var minLon = Math.min(...lons);
+          var maxLon = Math.max(...lons);
+
+          var lats = scalePoints.map((entity) => {
+            var translatedPos = new Cesium.Cartesian3();
+            var cartesianPos = entity.position.getValue(now);
+            cartesianPos.clone(translatedPos);
+            if (translation) {
+              Cesium.Cartesian3.subtract(
+                cartesianPos,
+                translation,
+                translatedPos
+              );
+            }
+            var pos = Cesium.Cartographic.fromCartesian(translatedPos);
+            return pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
+          });
+          var minLat = Math.min(...lats);
+          var maxLat = Math.max(...lats);
+
+          var bbox = [minLon, maxLon, minLat, maxLat, minHeight, maxHeight];
+
+          regions.push({
+            fileName: fileName,
+            ept: ept,
+            polygon: wktPolygon,
+            bbox: bbox,
+            outside: false,
+          });
+        }
+      }
+    });
+  });
+
+  if (regions.length > 0) {
+    var cropLink = `${processingAPI}/crop?regions=${encodeURIComponent(
+      JSON.stringify(regions)
+    )}`;
+
+    var tab = window.open(cropLink, "_blank");
+    var html = `<html><head></head><body>
+    Exporting for download. Please wait...
+    <a href="${cropLink}" id="dl"/>
+    <script>
+      document.getElementById("dl").click();
+    </script>
+    </body></html>`;
+    tab.document.write(html);
+    tab.document.close();
+  }
 };
 
 const displayShareURL = () => {

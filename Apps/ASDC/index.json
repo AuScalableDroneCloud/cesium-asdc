@@ -5,207 +5,126 @@
       "name": "NUE",
       "status": "active",
       "categoryID": 1,
-      "data": [
-        1,
-        2,
-        3
-      ]
+      "data": [1, 2, 3]
     },
     {
       "id": 2,
       "name": "VBIR",
       "status": "active",
       "categoryID": 1,
-      "data": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ]
+      "data": [4, 5, 6, 7, 8, 9, 10]
     },
     {
       "id": 3,
       "name": "Gegedzerick Rd",
       "status": "active",
       "categoryID": 2,
-      "data": [
-        11
-      ]
+      "data": [11]
     },
     {
       "id": 4,
       "name": "Gillan Ecosphere",
       "status": "active",
       "categoryID": 3,
-      "data": [
-        12,
-        13,
-        14
-      ]
+      "data": [12, 13, 14]
     },
     {
       "id": 5,
       "name": "Dryandra Model",
       "status": "active",
       "categoryID": 5,
-      "data": [
-        15
-      ]
+      "data": [15]
     },
     {
       "id": 6,
       "name": "Dryandra Point Cloud",
       "status": "active",
       "categoryID": 5,
-      "data": [
-        16
-      ]
+      "data": [16]
     },
     {
       "id": 7,
       "name": "Graffiti Model",
       "status": "active",
       "categoryID": 5,
-      "data": [
-        17
-      ]
+      "data": [17]
     },
     {
       "id": 8,
       "name": "Graffiti Point Cloud",
       "status": "active",
       "categoryID": 5,
-      "data": [
-        18
-      ]
+      "data": [18]
     },
     {
       "id": 9,
       "name": "Perisher",
       "status": "active",
       "categoryID": 4,
-      "data": [
-        19,
-        41
-      ]
+      "data": [19, 41]
     },
     {
       "id": 10,
       "name": "Falls Creek",
       "status": "active",
       "categoryID": 4,
-      "data": [
-        20,
-        42
-      ]
+      "data": [20, 42]
     },
     {
       "id": 11,
       "name": "Adelaide Hills",
       "status": "active",
       "categoryID": 7,
-      "data": [
-        21,
-        22,
-        23,
-        24
-      ]
+      "data": [21, 22, 23, 24]
     },
     {
       "id": 12,
       "name": "Kangaroo Island",
       "status": "active",
       "categoryID": 7,
-      "data": [
-        25,
-        26,
-        27,
-        28
-      ]
+      "data": [25, 26, 27, 28]
     },
     {
       "id": 16,
       "name": "Apple maps car",
       "status": "active",
       "categoryID": 6,
-      "data": [
-        30
-      ]
+      "data": [30]
     },
     {
       "id": 18,
       "name": "Coolama",
       "status": "active",
       "categoryID": 2,
-      "data": [
-        31,
-        67,
-        32,
-        33,
-        34,
-        35
-      ]
+      "data": [31, 67, 32, 33, 34, 35]
     },
     {
       "id": 19,
       "name": "Doran",
       "status": "active",
       "categoryID": 2,
-      "data": [
-        36,
-        68,
-        37,
-        38,
-        39,
-        40
-      ]
+      "data": [36, 68, 37, 38, 39, 40]
     },
     {
       "id": 20,
       "name": "Graham Road Construction Site",
       "status": "active",
       "categoryID": 8,
-      "data": [
-        43,
-        44,
-        45,
-        57
-      ]
+      "data": [43, 44, 45, 57]
     },
     {
       "id": 21,
       "name": "APPF ANU Phenotyping Facility",
       "status": "active",
       "categoryID": 9,
-      "data": [
-        73,
-        70,
-        66,
-        101,
-        102,
-        71,
-        72,
-        29
-      ]
+      "data": [73, 70, 66, 101, 102, 71, 72, 29]
     },
     {
       "id": 22,
       "name": "STAR",
       "status": "active",
       "categoryID": 1,
-      "data": [
-        58,
-        59,
-        60,
-        61,
-        62,
-        63,
-        64,
-        65
-      ]
+      "data": [58, 59, 60, 61, 62, 63, 64, 65]
     },
     {
       "id": 23,
@@ -213,26 +132,8 @@
       "status": "active",
       "categoryID": 9,
       "data": [
-        93,
-        74,
-        75,
-        76,
-        77,
-        78,
-        79,
-        80,
-        81,
-        82,
-        83,
-        84,
-        85,
-        86,
-        87,
-        88,
-        89,
-        90,
-        91,
-        92
+        93, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
+        91, 92
       ]
     },
     {
@@ -240,9 +141,7 @@
       "name": "Twelve Apostles",
       "status": "active",
       "categoryID": 8,
-      "data": [
-        94,95,96,97,98,99,100
-      ]
+      "data": [94, 95, 96, 97, 98, 99, 100]
     }
   ],
   "datasets": [
@@ -258,7 +157,8 @@
       },
       "boundingSphereRadius": 88.32003627222949,
       "source": {
-        "url": "s3://appf-anu/Cesium/NUE/NUE_20170721_M1_RGB_group1_densified_point_cloud/NUE_20170721_M1_RGB_group1_densified_point_cloud.laz"
+        "url": "s3://appf-anu/Cesium/NUE/NUE_20170721_M1_RGB_group1_densified_point_cloud/NUE_20170721_M1_RGB_group1_densified_point_cloud.laz",
+        "ept": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE/ept/NUE_20170721_M1_RGB_group1_densified_point_cloud/ept.json"
       }
     },
     {
@@ -273,7 +173,8 @@
       },
       "boundingSphereRadius": 79.66113801914958,
       "source": {
-        "url": "s3://appf-anu/Cesium/NUE/NUE_20170922_M2_RGB_group1_densified_point_cloud/NUE_20170922_M2_RGB_group1_densified_point_cloud.laz"
+        "url": "s3://appf-anu/Cesium/NUE/NUE_20170922_M2_RGB_group1_densified_point_cloud/NUE_20170922_M2_RGB_group1_densified_point_cloud.laz",
+        "ept": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE/ept/NUE_20170922_M2_RGB_group1_densified_point_cloud/ept.json"
       }
     },
     {
@@ -288,7 +189,8 @@
       },
       "boundingSphereRadius": 91.78358847935698,
       "source": {
-        "url": "s3://appf-anu/Cesium/NUE/NUE_20171016_M4_RGB_group1_densified_point_cloud/NUE_20171016_M4_RGB_group1_densified_point_cloud.laz"
+        "url": "s3://appf-anu/Cesium/NUE/NUE_20171016_M4_RGB_group1_densified_point_cloud/NUE_20171016_M4_RGB_group1_densified_point_cloud.laz",
+        "ept": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/NUE/ept/NUE_20171016_M4_RGB_group1_densified_point_cloud/ept.json"
       }
     },
     {
@@ -303,7 +205,8 @@
       },
       "boundingSphereRadius": 95.2649054397572,
       "source": {
-        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20190702_VBIR_1_DenseCloud.laz"
+        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20190702_VBIR_1_DenseCloud.laz",
+        "ept": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190702_VBIR_1_DenseCloud_ept/ept.json"
       }
     },
     {
@@ -318,7 +221,8 @@
       },
       "boundingSphereRadius": 93.53279916333481,
       "source": {
-        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20190801_VBIR_2_DenseCloud.laz"
+        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20190801_VBIR_2_DenseCloud.laz",
+        "ept": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190801_VBIR_2_DenseCloud_ept/ept.json"
       }
     },
     {
@@ -333,7 +237,8 @@
       },
       "boundingSphereRadius": 95.26490544047932,
       "source": {
-        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20190830_VBIR_3_DenseCloud.laz"
+        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20190830_VBIR_3_DenseCloud.laz",
+        "ept": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20190830_VBIR_3_DenseCloud_ept/ept.json"
       }
     },
     {
@@ -348,7 +253,8 @@
       },
       "boundingSphereRadius": 95.26490516117929,
       "source": {
-        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20191001_VBIR_4_DenseCloud.laz"
+        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20191001_VBIR_4_DenseCloud.laz",
+        "ept": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191001_VBIR_4_DenseCloud_ept/ept.json"
       }
     },
     {
@@ -363,7 +269,8 @@
       },
       "boundingSphereRadius": 95.26489491013635,
       "source": {
-        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20191015_VBIR_5_DenseCloud.laz"
+        "url": "s3://appf-anu/Cesium/WheatHub_DPP_VBIR/20191015_VBIR_5_DenseCloud.laz",
+        "ept": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_VBIR/20191015_VBIR_5_DenseCloud_ept/ept.json"
       }
     },
     {
@@ -402,7 +309,8 @@
       },
       "boundingSphereRadius": 602.8668063852829,
       "source": {
-        "url": "s3://appf-anu/Cesium/USLN/USLN-GegedzerickRoad_2021-05-21-odm_georeferenced_model.laz"
+        "url": "s3://appf-anu/Cesium/USLN/USLN-GegedzerickRoad_2021-05-21-odm_georeferenced_model.laz",
+        "ept": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/USLN/USLN-GegedzerickRoad_2021-05-21-odm_georeferenced_model_ept/ept.json"
       }
     },
     {
@@ -629,7 +537,7 @@
       "type": "Influx",
       "station": "AMRF_PER_D01",
       "name": "Sensor Data (Live)",
-      "startDateTime":"2021-05-28T00:05:00.000Z",
+      "startDateTime": "2021-05-28T00:05:00.000Z",
       "position": {
         "lng": 148.43065,
         "lat": -36.3731306,
@@ -641,7 +549,7 @@
       "type": "Influx",
       "station": "AMRF_FRY_D01",
       "name": "Sensor Data (Live)",
-      "startDateTime":"2021-05-28T00:05:00.000Z",
+      "startDateTime": "2021-05-28T00:05:00.000Z",
       "position": {
         "lng": 147.251893,
         "lat": -36.877349,
@@ -748,7 +656,7 @@
       "id": 29,
       "date": "2022-02-14",
       "type": "PointCloud",
-      "name":"ANU hyperspec Scaniverse las",
+      "name": "ANU hyperspec Scaniverse las",
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Uploads/15/0/ept/ept-tileset/tileset.json",
       "position": {
         "lng": 149.11679563939344,
@@ -759,7 +667,7 @@
       "source": {
         "url": "s3://appf-anu/Cesium/Uploads/15/0/APPF-ANU-hyperspectral-scanner-Scaniverse.las"
       },
-      "zoom":"boundingSphere"
+      "zoom": "boundingSphere"
     },
     {
       "id": 30,
@@ -803,9 +711,7 @@
         "height": 16
       },
       "bounds": [
-        148.8749411622239,
-        -36.345729531573845,
-        148.87762159040525,
+        148.8749411622239, -36.345729531573845, 148.87762159040525,
         -36.3432744889566
       ],
       "minzoom": 13,
@@ -826,9 +732,7 @@
         "height": 16
       },
       "bounds": [
-        148.8749411622239,
-        -36.345729531573845,
-        148.87762159040525,
+        148.8749411622239, -36.345729531573845, 148.87762159040525,
         -36.3432744889566
       ],
       "minzoom": 13,
@@ -849,9 +753,7 @@
         "height": 16
       },
       "bounds": [
-        148.87494115891505,
-        -36.345729676734614,
-        148.877621544352,
+        148.87494115891505, -36.345729676734614, 148.877621544352,
         -36.34327455489103
       ],
       "minzoom": 13,
@@ -901,9 +803,7 @@
         "height": 16
       },
       "bounds": [
-        148.81171394103723,
-        -36.37338985662639,
-        148.81392586642946,
+        148.81171394103723, -36.37338985662639, 148.81392586642946,
         -36.37234246842119
       ],
       "minzoom": 14,
@@ -924,9 +824,7 @@
         "height": 16
       },
       "bounds": [
-        148.81171394103723,
-        -36.37338985662639,
-        148.81392586642946,
+        148.81171394103723, -36.37338985662639, 148.81392586642946,
         -36.37234246842119
       ],
       "minzoom": 14,
@@ -947,9 +845,7 @@
         "height": 16
       },
       "bounds": [
-        148.81171395918432,
-        -36.37338986125863,
-        148.81392532747853,
+        148.81171395918432, -36.37338986125863, 148.81392532747853,
         -36.37234248023783
       ],
       "minzoom": 14,
@@ -1417,7 +1313,8 @@
       },
       "boundingSphereRadius": 91.79346879227867,
       "source": {
-        "url": "s3://appf-anu/Cesium/WheatHub_DPP_STAR/20190703_STAR_1_DenseCloud.laz"
+        "url": "s3://appf-anu/Cesium/WheatHub_DPP_STAR/20190703_STAR_1_DenseCloud.laz",
+        "ept": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_STAR/20190703_STAR_1_DenseCloud_ept/ept.json"
       }
     },
     {
@@ -1432,7 +1329,8 @@
       },
       "boundingSphereRadius": 90.0615000738889,
       "source": {
-        "url": "s3://appf-anu/Cesium/WheatHub_DPP_STAR/20190805_STAR_2_DenseCloud.laz"
+        "url": "s3://appf-anu/Cesium/WheatHub_DPP_STAR/20190805_STAR_2_DenseCloud.laz",
+        "ept": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_STAR/20190805_STAR_2_DenseCloud_ept/ept.json"
       }
     },
     {
@@ -1447,7 +1345,8 @@
       },
       "boundingSphereRadius": 90.06150130548298,
       "source": {
-        "url": "s3://appf-anu/Cesium/WheatHub_DPP_STAR/20190827_STAR_3_DenseCloud.laz"
+        "url": "s3://appf-anu/Cesium/WheatHub_DPP_STAR/20190827_STAR_3_DenseCloud.laz",
+        "ept": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_STAR/20190827_STAR_3_DenseCloud_ept/ept.json"
       }
     },
     {
@@ -1462,7 +1361,8 @@
       },
       "boundingSphereRadius": 86.59756660669856,
       "source": {
-        "url": "s3://appf-anu/Cesium/WheatHub_DPP_STAR/20190910_STAR_4_DenseCloud.laz"
+        "url": "s3://appf-anu/Cesium/WheatHub_DPP_STAR/20190910_STAR_4_DenseCloud.laz",
+        "ept": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_STAR/20190910_STAR_4_DenseCloud_ept/ept.json"
       }
     },
     {
@@ -1477,7 +1377,8 @@
       },
       "boundingSphereRadius": 90.06150099819969,
       "source": {
-        "url": "s3://appf-anu/Cesium/WheatHub_DPP_STAR/20190924_STAR_5_DenseCloud.laz"
+        "url": "s3://appf-anu/Cesium/WheatHub_DPP_STAR/20190924_STAR_5_DenseCloud.laz",
+        "ept": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_STAR/20190924_STAR_5_DenseCloud_ept/ept.json"
       }
     },
     {
@@ -1492,7 +1393,8 @@
       },
       "boundingSphereRadius": 88.32953258986043,
       "source": {
-        "url": "s3://appf-anu/Cesium/WheatHub_DPP_STAR/20191021_STAR_6_DenseCloud.laz"
+        "url": "s3://appf-anu/Cesium/WheatHub_DPP_STAR/20191021_STAR_6_DenseCloud.laz",
+        "ept": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/WheatHub_DPP_STAR/20191021_STAR_6_DenseCloud_ept/ept.json"
       }
     },
     {
@@ -1550,12 +1452,7 @@
         "lat": -36.34448705,
         "height": 16
       },
-      "bounds": [
-        148.874895,
-        -36.345713,
-        148.8776228,
-        -36.3432611
-      ],
+      "bounds": [148.874895, -36.345713, 148.8776228, -36.3432611],
       "minzoom": 12,
       "maxzoom": 24,
       "useProxy": true,
@@ -1571,12 +1468,7 @@
         "lat": -36.3728385,
         "height": 16
       },
-      "bounds": [
-        148.8117525,
-        -36.37342,
-        148.8139072,
-        -36.372257
-      ],
+      "bounds": [148.8117525, -36.37342, 148.8139072, -36.372257],
       "minzoom": 12,
       "maxzoom": 24,
       "useProxy": true,
@@ -2363,10 +2255,7 @@
           ],
           "title": "Digital Biomass",
           "unit": "mm³",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -2397,10 +2286,7 @@
           ],
           "title": "Height",
           "unit": "mm",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -2431,10 +2317,7 @@
           ],
           "title": "Height Max",
           "unit": "mm",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -2465,10 +2348,7 @@
           ],
           "title": "Greenness Average",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -2499,10 +2379,7 @@
           ],
           "title": "Greenness Bin0",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -2533,10 +2410,7 @@
           ],
           "title": "Greenness Bin1",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -2567,10 +2441,7 @@
           ],
           "title": "Greenness Bin2",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -2601,10 +2472,7 @@
           ],
           "title": "Greenness Bin3",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -2635,10 +2503,7 @@
           ],
           "title": "Greenness Bin4",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -2669,10 +2534,7 @@
           ],
           "title": "Hue Average",
           "unit": "°",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -2703,10 +2565,7 @@
           ],
           "title": "Hue Bin0",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -2737,10 +2596,7 @@
           ],
           "title": "Hue Bin1",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -2771,10 +2627,7 @@
           ],
           "title": "Hue Bin2",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -2805,10 +2658,7 @@
           ],
           "title": "Hue Bin3",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -2839,10 +2689,7 @@
           ],
           "title": "Hue Bin4",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -2873,10 +2720,7 @@
           ],
           "title": "Leaf Angle",
           "unit": "°",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -2907,10 +2751,7 @@
           ],
           "title": "Leaf Area",
           "unit": "mm²",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -2941,10 +2782,7 @@
           ],
           "title": "Leaf Area Index",
           "unit": "mm²",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -2975,10 +2813,7 @@
           ],
           "title": "Leaf Area (Projected)",
           "unit": "mm²",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3009,10 +2844,7 @@
           ],
           "title": "Leaf Inclination",
           "unit": "mm²",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3043,10 +2875,7 @@
           ],
           "title": "Leaf Penetration Depth",
           "unit": "mm²",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3077,10 +2906,7 @@
           ],
           "title": "NDVI Average",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3111,10 +2937,7 @@
           ],
           "title": "NDVI Bin0",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3145,10 +2968,7 @@
           ],
           "title": "NDVI Bin1",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3179,10 +2999,7 @@
           ],
           "title": "NDVI Bin2",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3213,10 +3030,7 @@
           ],
           "title": "NDVI Bin3",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3247,10 +3061,7 @@
           ],
           "title": "NDVI Bin4",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3281,10 +3092,7 @@
           ],
           "title": "NPCI Average",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3315,10 +3123,7 @@
           ],
           "title": "NPCI Bin0",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3349,10 +3154,7 @@
           ],
           "title": "NPCI Bin1",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3383,10 +3185,7 @@
           ],
           "title": "NPCI Bin2",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3417,10 +3216,7 @@
           ],
           "title": "NPCI Bin3",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3451,10 +3247,7 @@
           ],
           "title": "NPCI Bin4",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3485,10 +3278,7 @@
           ],
           "title": "PSRI Average",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3519,10 +3309,7 @@
           ],
           "title": "PSRI Bin0",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3553,10 +3340,7 @@
           ],
           "title": "PSRI Bin1",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3587,10 +3371,7 @@
           ],
           "title": "PSRI Bin2",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3621,10 +3402,7 @@
           ],
           "title": "PSRI Bin3",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         },
         {
           "columns": {
@@ -3655,10 +3433,7 @@
           ],
           "title": "PSRI Bin4",
           "unit": "%",
-          "range": [
-            "2021-04-07T01:38:49.000Z",
-            "2021-04-21T01:36:02.000Z"
-          ]
+          "range": ["2021-04-07T01:38:49.000Z", "2021-04-21T01:36:02.000Z"]
         }
       ],
       "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/20210407_Batch03_20210421_planteye_basil+only_mod.csv",
@@ -3690,7 +3465,7 @@
         "height": 14.452854051454421
       },
       "boundingSphereRadius": 446.9950995064766,
-      "zoom":"boundingSphere"
+      "zoom": "boundingSphere"
     },
     {
       "id": 96,
@@ -3699,12 +3474,12 @@
       "url": "https://swift.rc.nectar.org.au/v1/AUTH_9f7c80bfd20f45bebc780b06c405f0df/ddp-projects/1014_TwelveApostlesCliffSurvey/Site2/Scene/tileset_1014_Site2_Cesium.json",
       "useProxy": true,
       "position": {
-          "lng": 143.07253840180917,
-          "lat": -38.648686683027584,
-          "height": 12.033126188173595
+        "lng": 143.07253840180917,
+        "lat": -38.648686683027584,
+        "height": 12.033126188173595
       },
       "boundingSphereRadius": 384.4783637402041,
-      "zoom":"boundingSphere"
+      "zoom": "boundingSphere"
     },
     {
       "id": 97,
@@ -3713,12 +3488,12 @@
       "url": "https://swift.rc.nectar.org.au/v1/AUTH_9f7c80bfd20f45bebc780b06c405f0df/ddp-projects/1014_TwelveApostlesCliffSurvey/Site3/Scene/tileset_1014_Site3_RC.json",
       "useProxy": true,
       "position": {
-          "lng": 143.0818565100582,
-          "lat": -38.65328777072848,
-          "height": 11.399566025919457
+        "lng": 143.0818565100582,
+        "lat": -38.65328777072848,
+        "height": 11.399566025919457
       },
       "boundingSphereRadius": 599.5781781884222,
-      "zoom":"boundingSphere"
+      "zoom": "boundingSphere"
     },
     {
       "id": 98,
@@ -3727,12 +3502,12 @@
       "url": "https://swift.rc.nectar.org.au/v1/AUTH_9f7c80bfd20f45bebc780b06c405f0df/ddp-projects/1014_TwelveApostlesCliffSurvey/Site3/Scene/tileset_1014_Site3_Rock1.json",
       "useProxy": true,
       "position": {
-          "lng": 143.07568021723628,
-          "lat": -38.65212568571466,
-          "height": 8.687486501187829
+        "lng": 143.07568021723628,
+        "lat": -38.65212568571466,
+        "height": 8.687486501187829
       },
       "boundingSphereRadius": 33.1957346937067,
-      "zoom":"boundingSphere"
+      "zoom": "boundingSphere"
     },
     {
       "id": 99,
@@ -3741,12 +3516,12 @@
       "url": "https://swift.rc.nectar.org.au/v1/AUTH_9f7c80bfd20f45bebc780b06c405f0df/ddp-projects/1014_TwelveApostlesCliffSurvey/Site3/Scene/tileset_1014_Site3_Rock2.json",
       "useProxy": true,
       "position": {
-          "lng": 143.0766655898083,
-          "lat": -38.651381931211645,
-          "height": 3.138592923956531
+        "lng": 143.0766655898083,
+        "lat": -38.651381931211645,
+        "height": 3.138592923956531
       },
       "boundingSphereRadius": 27.84504066045424,
-      "zoom":"boundingSphere"
+      "zoom": "boundingSphere"
     },
     {
       "id": 100,
@@ -3755,12 +3530,12 @@
       "url": "https://swift.rc.nectar.org.au/v1/AUTH_9f7c80bfd20f45bebc780b06c405f0df/ddp-projects/1014_TwelveApostlesCliffSurvey/Site4/Scene/tileset_1014_Site4_RC.json",
       "useProxy": true,
       "position": {
-          "lng": 143.10602333074004,
-          "lat": -38.666463348019924,
-          "height": 13.502252199581712
+        "lng": 143.10602333074004,
+        "lat": -38.666463348019924,
+        "height": 13.502252199581712
       },
       "boundingSphereRadius": 481.91103102102863,
-      "zoom":"boundingSphere"
+      "zoom": "boundingSphere"
     },
     {
       "id": 101,
@@ -3777,7 +3552,7 @@
         "pitch": 0,
         "roll": 0
       },
-      "scale":0.01,
+      "scale": 0.01,
       "boundingSphereRadius": 6.354320339206865,
       "zoom": "boundingSphere",
       "source": {
@@ -3799,7 +3574,7 @@
         "pitch": 0,
         "roll": 0
       },
-      "scale":0.01,
+      "scale": 0.01,
       "boundingSphereRadius": 6.354320339206865,
       "zoom": "boundingSphere",
       "source": {
@@ -3823,7 +3598,7 @@
     {
       "id": 3,
       "name": "Cyverse"
-    },   
+    },
     {
       "id": 8,
       "name": "DDP"

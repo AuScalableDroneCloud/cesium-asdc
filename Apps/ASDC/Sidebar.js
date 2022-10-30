@@ -2029,21 +2029,10 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         tr4.style.display = "none";
         cropTable4.appendChild(tr4);
 
-        var mode = "box";
-
         directionSelect.onchange = () => {
           var val = directionSelect.value;
           const clipDirection = val === "inside" ? -1 : 1;
 
-          // if (mode == "polygon") {
-          //   // if (cropPolygons[data.id]){
-          //   //   cropPolygons[data.id].setClippingPlanesDirection(clipDirection);
-          //   // }
-          // } else if (mode == "rectangle") {
-          //   if (cropRectangles[data.id]) {
-          //     cropRectangles[data.id].setClippingPlanesDirection(clipDirection);
-          //   }
-          // } else {
           var clippingPlanes = tilesets[data.asset.id][data.id].clippingPlanes;
 
           clippingPlanes._planes.map((p) => {
@@ -2051,10 +2040,12 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
           });
 
           clippingPlanes.unionClippingRegions = val === "inside" ? false : true;
-          // }
         };
         td4.appendChild(directionSelect);
-        if (data.type == "EPTPointCloud" && !Array.isArray(data.url)) {
+        if (
+          (data.type == "EPTPointCloud" && !Array.isArray(data.url)) ||
+          (data.source && data.source.ept)
+        ) {
           var td5 = document.createElement("td");
           var exportButton = document.createElement("button");
           exportButton.id = "export-btn";
@@ -2076,10 +2067,14 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
           exportButton.onclick = () => {
             exportModal.style.display = "block";
 
-            const urlParams = new URLSearchParams(
-              tilesets[data.asset.id][data.id]._url.split("?")[1]
-            );
-            const ept = urlParams.get("ept");
+            if (data.type == "EPTPointCloud") {
+              var urlParams = new URLSearchParams(
+                tilesets[data.asset.id][data.id]._url.split("?")[1]
+              );
+              var ept = urlParams.get("ept");
+            } else {
+              var ept = data.source.ept;
+            }
 
             if (
               data.position &&
@@ -2100,7 +2095,6 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
             }
             var now = Cesium.JulianDate.now();
 
-            // if (mode == "box") {
             var scalePoints = cropBoxes[data.id]?.scalePoints.slice(0, 8);
             var groundScalePoints = [
               scalePoints[1],
@@ -2189,75 +2183,6 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
             var outside =
               !tilesets[data.asset.id][data.id].clippingPlanes
                 ?.unionClippingRegions;
-            // } else if (mode == "rectangle") {
-            //   var coords = cropRectangles[data.id].getCoordinates();
-            //   if (coords) {
-            //     var minHeight =
-            //       cropRectangles[data.id].polygon.polygon.height.getValue(now);
-            //     var maxHeight =
-            //       cropRectangles[
-            //         data.id
-            //       ].polygon.polygon.extrudedHeight.getValue(now);
-
-            //     var wktPolygon = "POLYGON((";
-            //     var lons = [];
-            //     var lats = [];
-
-            //     coords.map((pos) => {
-            //       var lon = pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
-            //       var lat = pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
-            //       wktPolygon += `${lon} ${lat}`;
-            //       wktPolygon += ",";
-
-            //       lons.push(lon);
-            //       lats.push(lat);
-            //     });
-            //     wktPolygon += `${lons[0]} ${lats[0]}`;
-            //     wktPolygon += "))";
-
-            //     var minLon = Math.min(...lons);
-            //     var maxLon = Math.max(...lons);
-            //     var minLat = Math.min(...lats);
-            //     var maxLat = Math.max(...lats);
-            //     var bbox = [
-            //       minLon,
-            //       maxLon,
-            //       minLat,
-            //       maxLat,
-            //       minHeight,
-            //       maxHeight,
-            //     ];
-            //     var outside =
-            //       !tilesets[data.asset.id][data.id].clippingPlanes
-            //         ?.unionClippingRegions;
-            //   }
-            // } else if (mode == "polygon") {
-            //   // var wktPolygon = "POLYGON((";
-            //   // var lons = [];
-            //   // var lats = [];
-            //   // var minHeight = 0; //
-            //   // var maxHeight = 200; //
-            //   // var height = Cesium.Cartographic.fromCartesian(cropPolygons[data.id].positions[0]).height;
-            //   // cropPolygons[data.id].positions.map((p,index)=>{
-            //   //   var cp = Cesium.Cartesian3.clone(p,new Cesium.Cartesian3())
-            //   //   var pos = Cesium.Cartographic.fromCartesian(cp)
-            //   //   pos.height = height;
-            //   //   var lon = pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
-            //   //   var lat = pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
-            //   //   wktPolygon += `${lon} ${lat}`;
-            //   //   wktPolygon+=",";
-            //   //   lons.push(lon);
-            //   //   lats.push(lat);
-            //   // })
-            //   // wktPolygon += `${lons[0]} ${lats[0]}`;
-            //   // wktPolygon += "))";
-            //   // var minLon = Math.min(...lons);
-            //   // var maxLon = Math.max(...lons);
-            //   // var minLat = Math.min(...lats);
-            //   // var maxLat = Math.max(...lats);
-            //   // var bbox = [minLon, maxLon, minLat, maxLat, minHeight,maxHeight];
-            //   // var outside = !tilesets[data.asset.id][data.id].clippingPlanes?.unionClippingRegions;
-            // }
 
             var totalPoints = tilesets[data.asset.id][data.id].asset.ept.points;
             document.getElementById("export-modal-total-points").innerHTML =
@@ -2412,12 +2337,26 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
                         year: "numeric",
                         month: "numeric",
                         day: "numeric",
-                      }) + "-"
+                      })
                     : ""
-                }${data.name}_PointCloud_Crop.laz`;
+                }${data.name ? "-" + data.name : ""}_PointCloud_Crop.laz`;
               }
 
-              var cropLink = `${processingAPI}/crop?ept=${ept}&polygon=${wktPolygon}&bbox=${bbox}&outside=${outside}&filename=${fileName}`;
+              var regions = [
+                {
+                  fileName: fileName,
+                  ept: ept,
+                  polygon: wktPolygon,
+                  bbox: bbox,
+                  outside: false,
+                },
+              ];
+
+              var zipName =
+                fileName.slice(0, fileName.lastIndexOf(".")) + ".zip";
+              var cropLink = `${processingAPI}/crop?regions=${encodeURIComponent(
+                JSON.stringify(regions)
+              )}&zipName=${zipName}`;
 
               var tab = window.open(cropLink, "_blank");
               var html = `<html><head></head><body>
@@ -2455,17 +2394,14 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
             boxDrawButton.style["border"] = "1px solid #000";
             boxDrawButton.style["border-radius"] = "3px";
             boxDrawButton.style["color"] = "#0075ff";
-            // polygonDrawButton.style["background"] = "#ededed";
-            // polygonDrawButton.style["color"] = "black";
-            // mode = "rectangle";
 
             if (cropBoxes[data.id]) {
               cropBoxes[data.id].disable();
+              cropBoxes[data.id].toggleVisibilityOff();
             }
             cropRectangles[data.id] = new cropRectangle(data);
             tr4.style.display = "table-row";
           } else {
-            // mode = "box";
             boxDrawButton.style["background"] = "#ededed";
             boxDrawButton.style["color"] = "black";
 
@@ -2482,52 +2418,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
           }
         };
 
-        // var polygonDrawButton = document.createElement('button');
-        // polygonDrawButton.innerHTML = "Polygon"
-        // polygonDrawButton.style.width='75px';
-
-        // polygonDrawButton.style["background"] = "#ededed";
-        // polygonDrawButton.style["color"] = "black";
-        // polygonDrawButton.style["border"] = "1px solid #000";
-        // polygonDrawButton.style["border-radius"] = "3px";
-
-        // polygonDrawButton.onclick = ()=>{
-        //   if (cropRectangles[data.id]){
-        //     cropRectangles[data.id].destroy();
-        //     delete(cropRectangles[data.id]);
-        //   }
-
-        //   if (mode!="polygon"){
-        //     polygonDrawButton.style["background"] = "#e5e5e5";
-        //     polygonDrawButton.style["border"] = "1px solid #000";
-        //     polygonDrawButton.style["border-radius"] = "3px";
-        //     polygonDrawButton.style["color"] = "#0075ff";
-        //     boxDrawButton.style["background"] = "#ededed";
-        //     boxDrawButton.style["color"] = "black";
-        //     mode = "polygon";
-
-        //     if (cropBoxes[data.id]) {
-        //       cropBoxes[data.id].disable();
-        //     }
-        //     cropPolygons[data.id]= new cropPolygon(data);
-        //   } else {
-        //     mode="box";
-        //     polygonDrawButton.style["background"] = "#ededed";
-        //     polygonDrawButton.style["color"] = "black";
-
-        //     if (cropPolygons[data.id]){
-        //       cropPolygons[data.id].destroy();
-        //       delete(cropPolygons[data.id]);
-        //     }
-
-        //     if (cropBoxes[data.id]) {
-        //       cropBoxes[data.id].enable();
-        //     }
-        //   }
-        // }
-
         td7.appendChild(boxDrawButton);
-        // td6.appendChild(polygonDrawButton);
 
         tr3.appendChild(td7);
         cropTable3.appendChild(tr3);
@@ -2578,6 +2469,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         data.type == "ModelTileset"
       ) {
         var cropButton = document.createElement("div");
+        cropButton.title = "Crop";
         cropButton.className = "fa fa-crop sidebar-button";
         cropButton.style["margin-left"] = "5px";
         cropButton.id = `cropButton-${data.id}`;
@@ -2656,13 +2548,11 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         };
 
         var transformButton = document.createElement("div");
+        transformButton.title = "Clamp";
         transformButton.className = "fa fa-arrows sidebar-button";
         transformButton.style["margin-left"] = "5px";
 
         transformButton.onclick = (e) => {
-          // e.preventDefault();
-          // e.stopImmediatePropagation();
-
           if (
             !transformButton.style.color ||
             transformButton.style.color == "white"
