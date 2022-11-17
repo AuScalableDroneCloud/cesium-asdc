@@ -1049,8 +1049,8 @@ export class cropBox {
 
     // this.dimensions = new Cesium.Cartesian3(100, 100, 50);
     this.dimensions = new Cesium.Cartesian3(
-      this.tileset.root.boundingVolume.boundingSphere.radius,
-      this.tileset.root.boundingVolume.boundingSphere.radius,
+      this.tileset.root.boundingVolume.boundingSphere.radius / 2,
+      this.tileset.root.boundingVolume.boundingSphere.radius / 2,
       this.tileset.root.boundingVolume.boundingSphere.radius / 2
     );
 

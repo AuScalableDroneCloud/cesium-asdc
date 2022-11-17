@@ -75,14 +75,14 @@
       "name": "Adelaide Hills",
       "status": "active",
       "categoryID": 7,
-      "data": [21, 22, 23, 24]
+      "data": [103, 104, 105, 106, 107, 108]
     },
     {
       "id": 12,
       "name": "Kangaroo Island",
       "status": "active",
       "categoryID": 7,
-      "data": [25, 26, 27, 28]
+      "data": [109, 110, 111, 112, 113, 114, 115]
     },
     {
       "id": 16,
@@ -3580,6 +3580,182 @@
       "source": {
         "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Basil/Capsule/APPF_Unlit.gltf"
       }
+    },
+    {
+      "id": 103,
+      "type": "EPTPointCloud",
+      "date": "2020-01-08T00:00:00.000Z",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Adelaide+Hills/ept/2020-01-08+-+LiDAR/ept.json",
+      "name": "LiDAR",
+      "position": {
+        "lng": 138.90648719882614,
+        "lat": -34.92713115277517,
+        "height": -305.34379883304143
+      },
+      "boundingSphereRadius": 14319.805843383436,
+      "styleDimension": "Classification"
+    },
+    {
+      "id": 104,
+      "type": "EPTPointCloud",
+      "date": "2020-01-08T00:00:00.000Z",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Adelaide+Hills/ept/2020-01-08+-+RGB/ept.json",
+      "name": "RGB",
+      "position": {
+        "lng": 138.88862111067445,
+        "lat": -34.85966292478584,
+        "height": -214.03924804658268
+      },
+      "boundingSphereRadius": 6308.340945555352
+    },
+    {
+      "id": 105,
+      "type": "EPTPointCloud",
+      "date": "2020-01-15T00:00:00.000Z",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Adelaide+Hills/ept/2020-01-15+-+LiDAR/ept.json",
+      "name": "LiDAR",
+      "position": {
+        "lng": 138.90322957872723,
+        "lat": -34.92335966192928,
+        "height": -242.6044405976808
+      },
+      "boundingSphereRadius": 14665.564314703974,
+      "styleDimension": "Classification"
+    },
+    {
+      "id": 106,
+      "type": "EPTPointCloud",
+      "date": "2020-01-26T00:00:00.000Z",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Adelaide+Hills/ept/2020-01-26+-+RGB/ept.json",
+      "name": "RGB",
+      "position": {
+        "lng": 138.88418699047457,
+        "lat": -34.902924552317174,
+        "height": 480.80286524346064
+      },
+      "boundingSphereRadius": 11071.772221582447
+    },
+    {
+      "id": 107,
+      "type": "EPTPointCloud",
+      "date": "2020-09-09T00:00:00.000Z",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Adelaide+Hills/ept/2020-09-09+-+LiDAR/ept.json",
+      "name": "LiDAR",
+      "position": {
+        "lng": 138.89335195149368,
+        "lat": -34.89246777252728,
+        "height": 442.4386541437751
+      },
+      "boundingSphereRadius": 13228.324336790998,
+      "styleDimension": "Classification"
+    },
+    {
+      "id": 108,
+      "type": "EPTPointCloud",
+      "date": "2020-09-09T00:00:00.000Z",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Adelaide+Hills/ept/2020-09-09+-+RGB/ept.json",
+      "name": "RGB",
+      "position": {
+        "lng": 138.8761973143215,
+        "lat": -34.88391739576204,
+        "height": 509.78196885952786
+      },
+      "boundingSphereRadius": 2888.2118622554253
+    },
+    {
+      "id": 109,
+      "type": "EPTPointCloud",
+      "date": "2020-01-27T00:00:00.000Z",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Kangaroo+Island/ept/2020-01-27+-+LiDAR/ept.json",
+      "name": "LiDAR",
+      "position": {
+        "lng": 137.18902986431326,
+        "lat": -35.782253039425655,
+        "height": 92.28190203156086
+      },
+      "boundingSphereRadius": 44287.65977258434,
+      "styleDimension": "Classification"
+    },
+    {
+      "id": 110,
+      "type": "EPTPointCloud",
+      "date": "2020-01-27T00:00:00.000Z",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Kangaroo+Island/ept/2020-01-27+-+RGB/ept.json",
+      "name": "RGB",
+      "position": {
+        "lng": 137.0996920314918,
+        "lat": -35.771802594184294,
+        "height": -82.45897192616323
+      },
+      "boundingSphereRadius": 62789.224126557696
+    },
+    {
+      "id": 111,
+      "type": "EPTPointCloud",
+      "date": "2020-02-06T00:00:00.000Z",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Kangaroo+Island/ept/2020-02-06+-+LiDAR/ept.json",
+      "name": "LiDAR",
+      "position": {
+        "lng": 136.8638607869606,
+        "lat": -35.89318605644869,
+        "height": 120.46009265642334
+      },
+      "boundingSphereRadius": 33173.05421679532,
+      "styleDimension": "Classification"
+    },
+    {
+      "id": 112,
+      "type": "EPTPointCloud",
+      "date": "2020-02-06T00:00:00.000Z",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Kangaroo+Island/ept/2020-02-06+-+RGB/ept.json",
+      "name": "RGB",
+      "position": {
+        "lng": 136.6689829766223,
+        "lat": -35.931476390328356,
+        "height": 62.56796843676252
+      },
+      "boundingSphereRadius": 14436.655540162626
+    },
+    {
+      "id": 113,
+      "type": "EPTPointCloud",
+      "date": "2020-04-13T00:00:00.000Z",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Kangaroo+Island/ept/2020-04-13+-+LiDAR/ept.json",
+      "name": "LiDAR",
+      "position": {
+        "lng": 137.0584218076653,
+        "lat": -35.86662685224241,
+        "height": 91.88975240511134
+      },
+      "boundingSphereRadius": 66327.45548575289,
+      "styleDimension": "Classification"
+    },
+    {
+      "id": 114,
+      "type": "EPTPointCloud",
+      "date": "2020-04-13T00:00:00.000Z",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Kangaroo+Island/ept/2020-04-13+-+RGB/ept.json",
+      "name": "RGB",
+      "position": {
+        "lng": 137.10258688247953,
+        "lat": -35.86277157141006,
+        "height": -22.790618586184113
+      },
+      "boundingSphereRadius": 59370.57032427051
+    },
+    {
+      "id": 115,
+      "type": "EPTPointCloud",
+      "date": "2020-09-10T00:00:00.000Z",
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/ARA/Kangaroo+Island/ept/2020-09-10+-+LiDAR/ept.json",
+      "name": "LiDAR",
+      "position": {
+        "lng": 137.06478047687165,
+        "lat": -35.84113922202891,
+        "height": -6.143428955331402
+      },
+      "boundingSphereRadius": 77031.77845820364,
+      "styleDimension": "Classification"
     }
   ],
   "categories": [

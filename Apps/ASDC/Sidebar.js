@@ -33,11 +33,13 @@ import {
   cropControllers,
   cropRectangles,
   cropPolygons,
+  setSelectedDimension,
+  selectedDimension,
 } from "./State.js";
 import { loadAsset, loadData, syncTimeline } from "./Datasets.js";
 import { pcFormats, processingAPI } from "./Constants.js";
 import { closeGraphModal } from "./Graphs.js";
-import { applyAlpha, getAlpha } from "./Style.js";
+import { applyAlpha, getAlpha, applyStyle } from "./Style.js";
 import { cropBox } from "./CropBox.js";
 import { cropRectangle } from "./CropRectangle.js";
 // import { cropPolygon } from "./CropPolygon.js";
@@ -1029,6 +1031,14 @@ const handleDataCheckboxChange = (
     );
 
     loadData(asset, data, true, false, true);
+
+    if (data.styleDimension) {
+      setSelectedDimension(data.styleDimension);
+      applyStyle(selectedDimension);
+    } else {
+      setSelectedDimension(null);
+      applyStyle(selectedDimension);
+    }
 
     if (new Date(data.date) != "Invalid Date") {
       viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
@@ -2678,6 +2688,14 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         );
 
         loadData(asset, data, true, true, true);
+
+        if (data.styleDimension) {
+          setSelectedDimension(data.styleDimension);
+          applyStyle(selectedDimension);
+        } else {
+          setSelectedDimension(null);
+          applyStyle(selectedDimension);
+        }
 
         if (data.type === "Influx" || data.type === "CSV") {
           var container = document.getElementById("graphs-container");

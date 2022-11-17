@@ -14,14 +14,14 @@ export const applyStyle = (schemaName) => {
     var tilesetIDs = Object.keys(tilesets[assetID]);
     for (var i = 0; i < tilesetIDs.length; i++) {
       var selectedTileset = tilesets[assetID][tilesetIDs[i]];
-      
-      var alpha=1;
+
+      var alpha = 1;
       if (
         selectedTileset &&
         selectedTileset.style &&
         selectedTileset.style.color
       ) {
-        if (selectedTileset.style.color.expression){
+        if (selectedTileset.style.color.expression) {
           alpha = selectedTileset.style.color.expression
             .match(/\((.*)\)/)
             .pop()
@@ -29,13 +29,14 @@ export const applyStyle = (schemaName) => {
             .pop()
             .trim();
         } else {
-          if (selectedTileset.style.color.conditionsExpression){
-            alpha = selectedTileset.style.color.conditionsExpression.conditions[0][1]
-            .match(/\((.*)\)/)
-            .pop()
-            .split(",")
-            .pop()
-            .trim();
+          if (selectedTileset.style.color.conditionsExpression) {
+            alpha =
+              selectedTileset.style.color.conditionsExpression.conditions[0][1]
+                .match(/\((.*)\)/)
+                .pop()
+                .split(",")
+                .pop()
+                .trim();
           }
         }
       }
@@ -44,9 +45,11 @@ export const applyStyle = (schemaName) => {
       if (schemaName) {
         setSelectedDimension(schemaName);
         if (
-          selectedTileset.asset && selectedTileset.asset.options && selectedTileset.asset.options.dimensions
+          selectedTileset.asset &&
+          selectedTileset.asset.options &&
+          selectedTileset.asset.options.dimensions
         ) {
-          if (!selectedTileset.asset.options.dimensions.includes(schemaName)){
+          if (!selectedTileset.asset.options.dimensions.includes(schemaName)) {
             return;
           }
         } else {
@@ -60,14 +63,14 @@ export const applyStyle = (schemaName) => {
             }
           });
         } else {
-          if (alpha){
+          if (alpha) {
             selectedTileset.style = new Cesium.Cesium3DTileStyle({
               color: `rgba(\${COLOR}.r * 255,\${COLOR}.g* 255,\${COLOR}.b* 255,${alpha})`,
             });
           }
           return;
         }
-        console.log(schema);
+
         if (schema) {
           if (schema.name === "Classification") {
             selectedTileset.style = new Cesium.Cesium3DTileStyle({
@@ -89,9 +92,9 @@ export const applyStyle = (schemaName) => {
                 schema.mean + schema.stddev
               })*255,(\${Intensity}/${
                 schema.mean + schema.stddev
-              })*255,(\${Intensity}/${schema.mean + schema.stddev})*255,${
-                alpha
-              })`,
+              })*255,(\${Intensity}/${
+                schema.mean + schema.stddev
+              })*255,${alpha})`,
             });
           } else if (
             schema.name === "Red" ||
@@ -99,13 +102,7 @@ export const applyStyle = (schemaName) => {
             schema.name === "Blue"
           ) {
             selectedTileset.style = new Cesium.Cesium3DTileStyle({
-              color: `rgba((\${COLOR} * color('${
-                schema.name.toLowerCase()
-              }')).r *255, (\${COLOR} * color('${
-                schema.name.toLowerCase()
-              }')).g * 255, (\${COLOR} * color('${
-                schema.name.toLowerCase()
-              }')).b * 255, ${alpha})`,
+              color: `rgba((\${COLOR} * color('${schema.name.toLowerCase()}')).r *255, (\${COLOR} * color('${schema.name.toLowerCase()}')).g * 255, (\${COLOR} * color('${schema.name.toLowerCase()}')).b * 255, ${alpha})`,
             });
           } else {
             selectedTileset.style = new Cesium.Cesium3DTileStyle({
@@ -113,18 +110,18 @@ export const applyStyle = (schemaName) => {
             });
           }
         } else {
-          if (alpha){
+          if (alpha) {
             selectedTileset.style = new Cesium.Cesium3DTileStyle({
               color: `rgba(\${COLOR}.r * 255,\${COLOR}.g* 255,\${COLOR}.b* 255,${alpha})`,
             });
           }
         }
       } else {
-        if (alpha && selectedTileset.style){
+        if (alpha) {
           selectedTileset.style = new Cesium.Cesium3DTileStyle({
             color: `rgba(\${COLOR}.r * 255, \${COLOR}.g * 255, \${COLOR}.b * 255,${alpha})`,
           });
-        } 
+        }
       }
     }
   });
@@ -137,7 +134,7 @@ export const setupStyleToolbar = (tileset) => {
     toolbar.removeChild(toolbar.firstChild);
   }
 
-  document.getElementById("dims-toolbar-row").style.display="none";
+  document.getElementById("dims-toolbar-row").style.display = "none";
 
   if (!tileset.asset || !tileset.asset.ept || !tileset.asset.ept.schema) return;
   if (tileset.asset && tileset.asset.options.dimensions.length === 0) return;
@@ -174,10 +171,10 @@ export const setupStyleToolbar = (tileset) => {
       }
     });
 
-  if (styleToolbarMenu.length<=1){
-    document.getElementById("dims-toolbar-row").style.display="none";
+  if (styleToolbarMenu.length <= 1) {
+    document.getElementById("dims-toolbar-row").style.display = "none";
   } else {
-    document.getElementById("dims-toolbar-row").style.display="table-row";
+    document.getElementById("dims-toolbar-row").style.display = "table-row";
     Sandcastle.addToolbarMenu(styleToolbarMenu, "dims-toolbar");
 
     if (selectedIndex != undefined) {
@@ -188,33 +185,30 @@ export const setupStyleToolbar = (tileset) => {
 };
 
 export const applyAlpha = (alpha, asset, data) => {
-  if (isNaN(alpha))return;//
+  if (isNaN(alpha)) return; //
   if (data.type === "PointCloud" || data.type === "EPTPointCloud") {
     if (tilesets[asset.id] && tilesets[asset.id][data.id]) {
-      if (tilesets[asset.id][data.id].ready){
-        tilesets[asset.id][data.id].style =
-          new Cesium.Cesium3DTileStyle({
+      if (tilesets[asset.id][data.id].ready) {
+        tilesets[asset.id][data.id].style = new Cesium.Cesium3DTileStyle({
+          color: `rgba(\${COLOR}.r * 255,\${COLOR}.g * 255,\${COLOR}.b * 255,${alpha})`,
+        });
+
+        applyStyle(selectedDimension);
+      } else {
+        tilesets[asset.id][data.id].readyPromise.then((t) => {
+          tilesets[asset.id][data.id].style = new Cesium.Cesium3DTileStyle({
             color: `rgba(\${COLOR}.r * 255,\${COLOR}.g * 255,\${COLOR}.b * 255,${alpha})`,
           });
 
           applyStyle(selectedDimension);
-      } else {
-        tilesets[asset.id][data.id].readyPromise.then((t)=>{
-          tilesets[asset.id][data.id].style =
-          new Cesium.Cesium3DTileStyle({
-            color: `rgba(\${COLOR}.r * 255,\${COLOR}.g * 255,\${COLOR}.b * 255,${alpha})`,
-          });
-          
-          applyStyle(selectedDimension);
-        })
+        });
       }
     }
   } else if (data.type === "ModelTileset") {
     if (tilesets[asset.id] && tilesets[asset.id][data.id]) {
-      tilesets[asset.id][data.id].style =
-        new Cesium.Cesium3DTileStyle({
-          color: `rgba(255, 255, 255, ${alpha})`,
-        });
+      tilesets[asset.id][data.id].style = new Cesium.Cesium3DTileStyle({
+        color: `rgba(255, 255, 255, ${alpha})`,
+      });
     }
   } else if (data.type === "Imagery") {
     if (imageryLayers[asset.id] && imageryLayers[asset.id][data.id]) {
@@ -245,18 +239,20 @@ export const applyAlpha = (alpha, asset, data) => {
       });
     }
   } else if (data.type === "ImageSeries") {
-    if (entities[asset.id] && entities[asset.id][data.id] &&
-        entities[asset.id][data.id].polygon && 
-        entities[asset.id][data.id].polygon.material &&
-        entities[asset.id][data.id].polygon.material.color
-      ) {
+    if (
+      entities[asset.id] &&
+      entities[asset.id][data.id] &&
+      entities[asset.id][data.id].polygon &&
+      entities[asset.id][data.id].polygon.material &&
+      entities[asset.id][data.id].polygon.material.color
+    ) {
       entities[asset.id][data.id].polygon.material.color._value.alpha = alpha;
       entities[asset.id][data.id].billboard.color._value.alpha = alpha;
     }
   }
 };
 
-export const getAlpha = (asset, data) =>{
+export const getAlpha = (asset, data) => {
   var alpha = 1;
   if (
     data.type === "PointCloud" ||
@@ -269,42 +265,33 @@ export const getAlpha = (asset, data) =>{
       tilesets[asset.id][data.id].style &&
       tilesets[asset.id][data.id].style.color
     ) {
-      if (tilesets[asset.id][
-        data.id
-      ].style.color.expression){
-        alpha = tilesets[asset.id][
-          data.id
-        ].style.color.expression
+      if (tilesets[asset.id][data.id].style.color.expression) {
+        alpha = tilesets[asset.id][data.id].style.color.expression
           .match(/\((.*)\)/)
           .pop()
           .split(",")
           .pop()
           .trim();
       } else {
-        if (tilesets[asset.id][
-          data.id
-        ].style.color.conditionsExpression){
+        if (tilesets[asset.id][data.id].style.color.conditionsExpression) {
           alpha = tilesets[asset.id][
             data.id
           ].style.color.conditionsExpression.conditions[0][1]
-          .match(/\((.*)\)/)
-          .pop()
-          .split(",")
-          .pop()
-          .trim();
+            .match(/\((.*)\)/)
+            .pop()
+            .split(",")
+            .pop()
+            .trim();
         }
       }
     } else {
-      alpha = undefined
+      alpha = undefined;
     }
   } else if (data.type === "Imagery") {
-    if (
-      imageryLayers[asset.id] &&
-      imageryLayers[asset.id][data.id]
-    ) {
+    if (imageryLayers[asset.id] && imageryLayers[asset.id][data.id]) {
       alpha = imageryLayers[asset.id][data.id].alpha;
     } else {
-      alpha = undefined
+      alpha = undefined;
     }
   } else if (data.type === "Model") {
     if (
@@ -316,8 +303,7 @@ export const getAlpha = (asset, data) =>{
     }
   } else if (data.type === "GeoJSON") {
     if (dataSources[asset.id] && dataSources[asset.id][data.id]) {
-      var entity =
-        dataSources[asset.id][data.id].entities.values[0];
+      var entity = dataSources[asset.id][data.id].entities.values[0];
       if (entity) {
         if (entity.polygon) {
           alpha = entity.polygon.material.color.getValue().alpha;
@@ -325,7 +311,7 @@ export const getAlpha = (asset, data) =>{
           alpha = entity.polyline.material.color.getValue().alpha;
         }
       }
-    } 
+    }
   } else if (data.type === "ImageSeries") {
     if (
       entities[asset.id] &&
@@ -333,12 +319,10 @@ export const getAlpha = (asset, data) =>{
       entities[asset.id][data.id].polygon &&
       entities[asset.id][data.id].polygon.material
     ) {
-      alpha = 
-        entities[asset.id][
-          data.id
-        ].polygon.material.color.getValue().alpha;
+      alpha =
+        entities[asset.id][data.id].polygon.material.color.getValue().alpha;
     }
   }
 
   return alpha;
-}
+};

@@ -30,6 +30,7 @@ import {
   categories,
   mousePosition,
   timelineOnDataSelect,
+  setSelectedDimension,
 } from "./State.js";
 import { loadInfluxGraphs, loadCSVGraphs, closeGraphModal } from "./Graphs.js";
 import { setupStyleToolbar, applyStyle } from "./Style.js";
@@ -527,6 +528,10 @@ export const loadData = (
       applyInit();
 
       tilesets[asset["id"]][data.id].readyPromise.then(function (tileset) {
+        if (data.styleDimension) {
+          setSelectedDimension(data.styleDimension);
+          applyStyle(selectedDimension);
+        }
         // keep tileset visible at all times
         tileset._geometricError = Number.MAX_SAFE_INTEGER;
 
@@ -665,6 +670,11 @@ export const loadData = (
                 ) {
                   tileset._geometricError = Number.MAX_SAFE_INTEGER;
 
+                  if (data.styleDimension) {
+                    setSelectedDimension(data.styleDimension);
+                    applyStyle(selectedDimension);
+                  }
+
                   setupStyleToolbar(tileset);
                   applyStyle(selectedDimension);
                 });
@@ -686,6 +696,14 @@ export const loadData = (
             );
 
             applyInit();
+
+            if (data.styleDimension) {
+              setSelectedDimension(data.styleDimension);
+              applyStyle(selectedDimension);
+            } else {
+              setSelectedDimension(null);
+              applyStyle(selectedDimension);
+            }
 
             tilesets[asset["id"]][data.id].readyPromise.then(function (
               tileset
@@ -1081,7 +1099,13 @@ export const loadData = (
               )
             );
           } else {
-            viewer.flyTo(tilesets[asset.id][data.id]);
+            var flyTimer = setInterval(fly, 500);
+            function fly() {
+              if (tilesets[asset.id][data.id]) {
+                viewer.flyTo(tilesets[asset.id][data.id]);
+                clearInterval(flyTimer);
+              }
+            }
           }
         } else if (assetDataset[0]["type"] === "Model") {
           viewer.flyTo(entities[asset["id"]][data["id"]]);
