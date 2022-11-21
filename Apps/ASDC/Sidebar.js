@@ -2558,7 +2558,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         };
 
         var transformButton = document.createElement("div");
-        transformButton.title = "Clamp";
+        transformButton.title = "Clamp Data to Surface";
         transformButton.className = "fa fa-arrows sidebar-button";
         transformButton.style["margin-left"] = "5px";
 

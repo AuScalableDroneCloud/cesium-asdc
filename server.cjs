@@ -10,14 +10,16 @@
   const request = require("request");
   const Influx = require("influx");
   const path = require("path");
-  const fetch = (...args) =>import('node-fetch').then(({ default: fetch }) => fetch(...args));
-  const JSON5 = require('json5');
-  const Cesium = require('cesium');
-  Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI1NWZkNGFlZS1iNzVhLTRmNTAtOThmYi1kMTI1MjlmOTVlNjciLCJpZCI6NzIyNTQsImlhdCI6MTYzNTkwNDI4OX0.EXVvJZa8yaugMmQNkc9pjWfrjqeOpZ8Jg7_0Hdwnb1A";
-  const https = require('https');
+  const fetch = (...args) =>
+    import("node-fetch").then(({ default: fetch }) => fetch(...args));
+  const JSON5 = require("json5");
+  const Cesium = require("cesium");
+  Cesium.Ion.defaultAccessToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI1NWZkNGFlZS1iNzVhLTRmNTAtOThmYi1kMTI1MjlmOTVlNjciLCJpZCI6NzIyNTQsImlhdCI6MTYzNTkwNDI4OX0.EXVvJZa8yaugMmQNkc9pjWfrjqeOpZ8Jg7_0Hdwnb1A";
+  const https = require("https");
 
-  if (!process.env.baseURL){
-    const dotenv = require('dotenv');
+  if (!process.env.baseURL) {
+    const dotenv = require("dotenv");
     dotenv.config();
   }
   const baseURL = process.env.baseURL ?? "https://asdc.cloud.edu.au";
@@ -100,7 +102,10 @@
       // "Origin, X-Requested-With, Content-Type, Accept"
       "Origin, X-Requested-With, Content-Type, Accept, Cache-control"
     );
-    res.header("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
+    res.header(
+      "Access-Control-Allow-Methods",
+      "GET,HEAD,PUT,PATCH,POST,DELETE"
+    );
     next();
   });
   // app.use(cookieParser())
@@ -171,7 +176,8 @@
     )
   );
 
-  app.use('/cesium/proj4', 
+  app.use(
+    "/cesium/proj4",
     express.static(path.join(__dirname, "node_modules", "proj4", "dist"))
   );
 
@@ -207,7 +213,7 @@
 
   const dontProxyHeaderRegex =
     /^(?:Host|Proxy-Connection|Connection|Keep-Alive|Transfer-Encoding|TE|Trailer|Proxy-Authorization|Proxy-Authenticate|Upgrade)$/i;
-    // /^(?:Host|Proxy-Connection|Connection|Keep-Alive|Transfer-Encoding|TE|Trailer|Proxy-Authorization|Proxy-Authenticate|Upgrade|Origin|Referer)$/i;
+  // /^(?:Host|Proxy-Connection|Connection|Keep-Alive|Transfer-Encoding|TE|Trailer|Proxy-Authorization|Proxy-Authenticate|Upgrade|Origin|Referer)$/i;
 
   function filterHeaders(req, headers) {
     const result = {};
@@ -370,667 +376,796 @@
   app.get("/cesium/terriaCatalog.json", (req, res) => {
     const eptServer = `${baseURL}/ept`;
     var catalogJson = {
-      "catalog": []
-    }
+      catalog: [],
+    };
     var webODMgroup = {
-      "type": "group",
-      "name": "WebODM Projects",
-      "members": []
+      type: "group",
+      name: "WebODM Projects",
+      members: [],
     };
     fetch(`${baseURL}/api/projects/?ordering=-created_at`, {
-      headers: { Cookie: req.headers.cookie }
+      headers: { Cookie: req.headers.cookie },
     })
-    .then(response => {
-      if (response.status === 200) {
-        return response.json()
-      }
-    })
-    .then((odmProjects) => {
-      if (!odmProjects) {
-        res.status(404).json("No projects were found");
-        return;
-      }
-      var taskInfoPromises = [];
-      var metaDataPromises = [];
-      if (Array.isArray(odmProjects)) {
-        odmProjects.map((project) => {
-          taskInfoPromises.push(
-            fetch(`${baseURL}/api/projects/${project.id}/tasks/?ordering=-created_at`, {
-              headers: { Cookie: req.headers.cookie }
-            }).then(response => {
-              return response.json()
-            })
-            .catch(()=>{
-              res.status(500).json("An error occurred while getting projects from webODM");
-            }));
-        })
-        Promise.all(taskInfoPromises).then((taskInfos, taskIndex) => {
-          if (Array.isArray(odmProjects)) {
-            odmProjects.map((project, projectIndex) => {
-              taskInfos[projectIndex].map(task => {
-                var assetFiles= ["georeferenced_model.laz", "orthophoto.tif", "dsm.tif", "dtm.tif"];
-                assetFiles.map(typeFile=>{
-                  if (task.available_assets.includes(typeFile)) {
-                    var fileURL;
-                    if (typeFile==="georeferenced_model.laz"){
-                      fileURL = `${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`;
-                    } else {
-                      fileURL = `${baseURL}/api/projects/${project.id}/tasks/${task.id}/${typeFile.slice(0,-4)}/metadata`;
-                    }
-                    metaDataPromises.push(
-                      fetch(fileURL, {
-                        headers: { Cookie: req.headers.cookie }
-                      }).then(response => {
-                        if(response.status===200){
-                          return response.json();
-                        }
-                      }).catch((e) => {
-                        console.log("error while getting metadata");
-                      })
-                    )
-                  }
+      .then((response) => {
+        if (response.status === 200) {
+          return response.json();
+        }
+      })
+      .then((odmProjects) => {
+        if (!odmProjects) {
+          res.status(404).json("No projects were found");
+          return;
+        }
+        var taskInfoPromises = [];
+        var metaDataPromises = [];
+        if (Array.isArray(odmProjects)) {
+          odmProjects.map((project) => {
+            taskInfoPromises.push(
+              fetch(
+                `${baseURL}/api/projects/${project.id}/tasks/?ordering=-created_at`,
+                {
+                  headers: { Cookie: req.headers.cookie },
+                }
+              )
+                .then((response) => {
+                  return response.json();
                 })
-              })
-            })
-          }
-          
-          Promise.all(metaDataPromises)
-          .then((metadata) => {
-            var metadataIndex = 0;
-            var samplePromises = [];
-            var terrainProvider = Cesium.createWorldTerrain();
+                .catch(() => {
+                  res
+                    .status(500)
+                    .json(
+                      "An error occurred while getting projects from webODM"
+                    );
+                })
+            );
+          });
+          Promise.all(taskInfoPromises).then((taskInfos, taskIndex) => {
             if (Array.isArray(odmProjects)) {
               odmProjects.map((project, projectIndex) => {
-                var projectMember = {
-                  "type": "group",
-                  "name": project.name,
-                  "members": []
-                };
+                taskInfos[projectIndex].map((task) => {
+                  var assetFiles = [
+                    "georeferenced_model.laz",
+                    "orthophoto.tif",
+                    "dsm.tif",
+                    "dtm.tif",
+                  ];
+                  assetFiles.map((typeFile) => {
+                    if (task.available_assets.includes(typeFile)) {
+                      var fileURL;
+                      if (typeFile === "georeferenced_model.laz") {
+                        fileURL = `${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`;
+                      } else {
+                        fileURL = `${baseURL}/api/projects/${
+                          project.id
+                        }/tasks/${task.id}/${typeFile.slice(0, -4)}/metadata`;
+                      }
+                      metaDataPromises.push(
+                        fetch(fileURL, {
+                          headers: { Cookie: req.headers.cookie },
+                        })
+                          .then((response) => {
+                            if (response.status === 200) {
+                              return response.json();
+                            }
+                          })
+                          .catch((e) => {
+                            console.log("error while getting metadata");
+                          })
+                      );
+                    }
+                  });
+                });
+              });
+            }
 
-                taskInfos[projectIndex].map((task, taskIndex) => {
-                  var taskMember = {
-                    "type": "group",
-                    "name": task.name,
-                    "members": []
-                  };
-                  
-                  if (task.available_assets.includes("georeferenced_model.laz")) {
-                    if (metadata[metadataIndex]) {
-                      var truncate = true;
-                      if (!metadata[metadataIndex].schema) return
-                      metadata[metadataIndex].schema.map((s) => {
-                        if (s.name === "Red" || s.name === "Green" || s.name === "Blue") {
-                          if (s.maximum && s.maximum <= 255) {
-                            truncate = false;
+            Promise.all(metaDataPromises)
+              .then((metadata) => {
+                var metadataIndex = 0;
+                var samplePromises = [];
+                var terrainProvider = Cesium.createWorldTerrain();
+                if (Array.isArray(odmProjects)) {
+                  odmProjects.map((project, projectIndex) => {
+                    var projectMember = {
+                      type: "group",
+                      name: project.name,
+                      members: [],
+                    };
+
+                    taskInfos[projectIndex].map((task, taskIndex) => {
+                      var taskMember = {
+                        type: "group",
+                        name: task.name,
+                        members: [],
+                      };
+
+                      if (
+                        task.available_assets.includes(
+                          "georeferenced_model.laz"
+                        )
+                      ) {
+                        if (metadata[metadataIndex]) {
+                          var truncate = true;
+                          if (!metadata[metadataIndex].schema) return;
+                          metadata[metadataIndex].schema.map((s) => {
+                            if (
+                              s.name === "Red" ||
+                              s.name === "Green" ||
+                              s.name === "Blue"
+                            ) {
+                              if (s.maximum && s.maximum <= 255) {
+                                truncate = false;
+                              }
+                            }
+                          });
+                          taskMember.members.push({
+                            type: "3d-tiles",
+                            name: task.name + " - Point Cloud",
+                            url: `${eptServer}/tileset.json?ept=${`${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`}&${
+                              truncate ? "truncate" : null
+                            }`,
+                          });
+                        }
+                        metadataIndex++;
+                      }
+
+                      var imageryTypes = ["Orthophoto", "DSM", "DTM"];
+                      imageryTypes.map((imageryType) => {
+                        if (
+                          task.available_assets.includes(
+                            `${imageryType.toLowerCase()}.tif`
+                          )
+                        ) {
+                          if (metadata[metadataIndex]) {
+                            var rectangle = new Cesium.Rectangle.fromDegrees(
+                              metadata[metadataIndex].bounds.value[0],
+                              metadata[metadataIndex].bounds.value[1],
+                              metadata[metadataIndex].bounds.value[2],
+                              metadata[metadataIndex].bounds.value[3]
+                            );
+                            const cartographics = [
+                              Cesium.Rectangle.center(rectangle),
+                              Cesium.Rectangle.southeast(rectangle),
+                              Cesium.Rectangle.southwest(rectangle),
+                              Cesium.Rectangle.northeast(rectangle),
+                              Cesium.Rectangle.northwest(rectangle),
+                            ];
+
+                            samplePromises.push(
+                              Cesium.sampleTerrainMostDetailed(
+                                terrainProvider,
+                                cartographics
+                              )
+                            );
+
+                            var tilesUrl;
+                            if (imageryType === "Orthophoto") {
+                              tilesUrl = `${baseURL}/api/projects/${project.id}/tasks/${task.id}/orthophoto/tiles?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
+                            } else if (imageryType === "DSM") {
+                              tilesUrl = `${baseURL}/api/projects/${project.id}/tasks/${task.id}/dsm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                            } else if (imageryType === "DTM") {
+                              tilesUrl = `${baseURL}/api/projects/${project.id}/tasks/${task.id}/dtm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                            }
+
+                            taskMember.members.push({
+                              type: "open-street-map",
+                              name: `${task.name} - ${imageryType}`,
+                              url: tilesUrl,
+                              maximumLevel: metadata[metadataIndex].maxzoom,
+                              rectangle: {
+                                west: metadata[metadataIndex].bounds.value[0],
+                                south: metadata[metadataIndex].bounds.value[1],
+                                east: metadata[metadataIndex].bounds.value[2],
+                                north: metadata[metadataIndex].bounds.value[3],
+                              },
+                              idealZoom: {
+                                lookAt: {
+                                  targetLongitude:
+                                    metadata[metadataIndex].center[0],
+                                  targetLatitude:
+                                    metadata[metadataIndex].center[1],
+                                },
+                              },
+                            });
                           }
+                          metadataIndex++;
                         }
                       });
-                      taskMember.members.push({
-                        "type": "3d-tiles",
-                        "name": task.name + " - Point Cloud",
-                        "url":`${eptServer}/tileset.json?ept=${`${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`}&${truncate ? "truncate" : null}`
-                      })
-                    }
-                    metadataIndex++;
-                  }
 
-                  var imageryTypes = ["Orthophoto","DSM","DTM"];
-                  imageryTypes.map(imageryType=>{
-                    if (task.available_assets.includes(`${imageryType.toLowerCase()}.tif`)) {
-                      if (metadata[metadataIndex]) {
-                        var rectangle = new Cesium.Rectangle.fromDegrees(
-                          metadata[metadataIndex].bounds.value[0],
-                          metadata[metadataIndex].bounds.value[1],
-                          metadata[metadataIndex].bounds.value[2],
-                          metadata[metadataIndex].bounds.value[3]
-                        );
-                        const cartographics = [
-                          Cesium.Rectangle.center(rectangle),
-                          Cesium.Rectangle.southeast(rectangle),
-                          Cesium.Rectangle.southwest(rectangle),
-                          Cesium.Rectangle.northeast(rectangle),
-                          Cesium.Rectangle.northwest(rectangle),
-                        ];
-
-                        samplePromises.push(Cesium.sampleTerrainMostDetailed(
-                          terrainProvider,
-                          cartographics
-                        ))
-
-                        var tilesUrl;
-                        if (imageryType==="Orthophoto") {
-                          tilesUrl = `${baseURL}/api/projects/${project.id}/tasks/${task.id}/orthophoto/tiles?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
-                        } else if (imageryType==="DSM") {
-                          tilesUrl = `${baseURL}/api/projects/${project.id}/tasks/${task.id}/dsm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
-                        } else if (imageryType==="DTM") {
-                          tilesUrl = `${baseURL}/api/projects/${project.id}/tasks/${task.id}/dtm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
-                        }
-
-                        taskMember.members.push({
-                          "type": "open-street-map",
-                          "name": `${task.name} - ${imageryType}`,
-                          "url":tilesUrl,
-                          "maximumLevel": metadata[metadataIndex].maxzoom,
-                          "rectangle":{
-                            west:metadata[metadataIndex].bounds.value[0],
-                            south:metadata[metadataIndex].bounds.value[1],
-                            east:metadata[metadataIndex].bounds.value[2],
-                            north:metadata[metadataIndex].bounds.value[3]
-                          },
-                          "idealZoom":{
-                            "lookAt":{
-                              "targetLongitude" :metadata[metadataIndex].center[0],
-                              "targetLatitude" :metadata[metadataIndex].center[1],
-                            }
-                          }
-                        })
+                      if (taskMember.members.length > 0) {
+                        projectMember.members.push(taskMember);
                       }
-                      metadataIndex++;
+                    });
+
+                    if (projectMember.members.length > 0) {
+                      webODMgroup.members.push(projectMember);
                     }
-                  })
-
-                  if (taskMember.members.length>0){
-                    projectMember.members.push(taskMember);
-                  }
-                })
-
-                if (projectMember.members.length>0){
-                  webODMgroup.members.push(projectMember);
+                  });
                 }
-              })
-            }
 
-            Promise.all(samplePromises)
-            .then((heights)=>{
-              var heightIndex = 0;
-              if (Array.isArray(odmProjects)) {
-                odmProjects.map((project, projectIndex) => {
-                  taskInfos[projectIndex].map((task, taskIndex) => {
-                    webODMgroup.members[projectIndex]?.members[taskIndex]?.members.map(member=>{
-                      if (member.type!="3d-tiles"){
-                        var cartesians =
-                        Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-                          heights[heightIndex]
-                        );
-                        var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
-                        member.idealZoom.lookAt.targetHeight = Cesium.Cartographic.fromCartesian(boundingSphere.center).height;
-                        member.idealZoom.lookAt.range = boundingSphere.radius;
-                      
-                        heightIndex++;
-                      }
-                    })
+                Promise.all(samplePromises)
+                  .then((heights) => {
+                    var heightIndex = 0;
+                    if (Array.isArray(odmProjects)) {
+                      odmProjects.map((project, projectIndex) => {
+                        taskInfos[projectIndex].map((task, taskIndex) => {
+                          webODMgroup.members[projectIndex]?.members[
+                            taskIndex
+                          ]?.members.map((member) => {
+                            if (member.type != "3d-tiles") {
+                              var cartesians =
+                                Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                                  heights[heightIndex]
+                                );
+                              var boundingSphere =
+                                Cesium.BoundingSphere.fromPoints(cartesians);
+                              member.idealZoom.lookAt.targetHeight =
+                                Cesium.Cartographic.fromCartesian(
+                                  boundingSphere.center
+                                ).height;
+                              member.idealZoom.lookAt.range =
+                                boundingSphere.radius;
+
+                              heightIndex++;
+                            }
+                          });
+                        });
+                      });
+                    }
+
+                    catalogJson.catalog.push(webODMgroup);
+                    res.header(
+                      "Access-Control-Allow-Origin",
+                      req.headers.origin
+                    );
+                    res.header("Access-Control-Allow-Credentials", true);
+                    res.status(200).json(catalogJson);
                   })
-                })
-              }
+                  .catch((e) => {
+                    console.error(e);
+                    res
+                      .status(500)
+                      .json("An error occurred while sampling heights");
+                  });
+              })
+              .catch((e) => {
+                console.error(e);
+                res
+                  .status(500)
+                  .json("An error occurred while getting all metadata");
+              });
+          });
+        }
+      })
+      .catch(() => {
+        res
+          .status(500)
+          .json("An error occurred while getting the projects from webodm");
+      });
+  });
 
-              catalogJson.catalog.push(webODMgroup);
-              res.header("Access-Control-Allow-Origin", req.headers.origin);
-              res.header("Access-Control-Allow-Credentials", true);
-              res.status(200).json(catalogJson);
-            })
-            .catch((e)=>{
-              console.error(e);
-              res.status(500).json("An error occurred while sampling heights");
-            })
-          })
-          .catch(e=>{
-            console.error(e);
-            res.status(500).json("An error occurred while getting all metadata");
-          })
-        })
-      }
-    })
-    .catch(()=>{
-      res.status(500).json("An error occurred while getting the projects from webodm");
-    })
-  })
-
-  app.get("/cesium/terriaCatalog/projects", (req, res) => { 
+  app.get("/cesium/terriaCatalog/projects", (req, res) => {
     var catalog = [];
     fetch(`${baseURL}/api/projects/?ordering=-created_at`, {
-      headers: { Cookie: req.headers.cookie }
+      headers: { Cookie: req.headers.cookie },
     })
-    .then(response => {
-      if (response.status === 200) {
-        return response.json()
-      }
-    })
-    .then((odmProjects) => {
-      if (!odmProjects) {
-        res.status(404).json("No projects were found");
-        return;
-      }
-      if (Array.isArray(odmProjects)) {
-        odmProjects.map((project, projectIndex) => {
-          var projectMember = {
-            "type": "terria-reference",
-            "name": project.name,
-            "isGroup":true,
-            "url": `${baseURL}/cesium/terriaCatalog/projects/${project.id}`,
-            itemProperties:{
-              "permissions": project.permissions,
-            }
-          };
-          catalog.push(projectMember);
-        })
-        
-        res.status(200).json({catalog:catalog});
-      }
-    })
-    .catch((e)=>{
-      res.status(500).json("An error occurred while getting projects from webODM: " + e.code);
-    });
-  })
+      .then((response) => {
+        if (response.status === 200) {
+          return response.json();
+        }
+      })
+      .then((odmProjects) => {
+        if (!odmProjects) {
+          res.status(404).json("No projects were found");
+          return;
+        }
+        if (Array.isArray(odmProjects)) {
+          odmProjects.map((project, projectIndex) => {
+            var projectMember = {
+              type: "terria-reference",
+              name: project.name,
+              isGroup: true,
+              url: `${baseURL}/cesium/terriaCatalog/projects/${project.id}`,
+              itemProperties: {
+                permissions: project.permissions,
+              },
+            };
+            catalog.push(projectMember);
+          });
+
+          res.status(200).json({ catalog: catalog });
+        }
+      })
+      .catch((e) => {
+        res
+          .status(500)
+          .json(
+            "An error occurred while getting projects from webODM: " + e.code
+          );
+      });
+  });
 
   app.get("/cesium/terriaCatalog/projects/:projectId", (req, res) => {
     var project = req.params.projectId;
 
-    var catalog=[];
+    var catalog = [];
 
     fetch(`${baseURL}/api/projects/${project}/tasks/?ordering=-created_at`, {
-      headers: { Cookie: req.headers.cookie }
-    }).then(response => {
-      if (response.status === 200) {
-        return response.json()
-      }
+      headers: { Cookie: req.headers.cookie },
     })
-    .then((odmTasks)=>{
-      odmTasks.map((task)=>{
-        if (task.available_assets.length>0){
-          var taskMember = {
-            "type": "terria-reference",
-            "name": task.name,
-            "isGroup":true,
-            "url": `${baseURL}/cesium/terriaCatalog/projects/${project}/tasks/${task.id}`
-          };
-          catalog.push(taskMember);
+      .then((response) => {
+        if (response.status === 200) {
+          return response.json();
         }
       })
-
-      res.status(200).json({catalog:catalog});
-    })
-    .catch(()=>{
-      res.status(500).json("An error occurred while getting tasks from webODM");
-    });
-  })
-
-  app.get("/cesium/terriaCatalog/projects/:projectId/tasks/:taskId", (req, res) => {
-    var projectId = req.params.projectId;
-    var taskId = req.params.taskId;
-
-    var catalog = [];
-    var metaDataPromises=[];
-    const eptServer = `${baseURL}/ept`;
-
-    fetch(`${baseURL}/api/projects/${projectId}/tasks/${taskId}`,{
-      headers: { Cookie: req.headers.cookie }
-    })
-    .then(response => {
-      if(response.status===200){
-        return response.json();
-      }
-    })
-    .then((task)=>{
-      var assetFiles= ["georeferenced_model.laz", "orthophoto.tif", "dsm.tif", "dtm.tif"];
-      assetFiles.map(typeFile=>{
-        if (task.available_assets.includes(typeFile)) {
-          var fileURL;
-          if (typeFile==="georeferenced_model.laz"){
-            fileURL = `${baseURL}/api/projects/${projectId}/tasks/${taskId}/assets/entwine_pointcloud/ept.json`;
-          } else {
-            fileURL = `${baseURL}/api/projects/${projectId}/tasks/${taskId}/${typeFile.slice(0,-4)}/metadata`;
+      .then((odmTasks) => {
+        odmTasks.map((task) => {
+          if (task.available_assets.length > 0) {
+            var taskMember = {
+              type: "terria-reference",
+              name: task.name,
+              isGroup: true,
+              url: `${baseURL}/cesium/terriaCatalog/projects/${project}/tasks/${task.id}`,
+            };
+            catalog.push(taskMember);
           }
-          metaDataPromises.push(
-            fetch(fileURL, {
-              headers: { Cookie: req.headers.cookie }
-            }).then(response => {
-              if(response.status===200){
-                return response.json();
-              }
-            }).catch((e) => {
-              console.log("error while getting metadata");
-            })
-          )
-        }
+        });
+
+        res.status(200).json({ catalog: catalog });
       })
-  
-      Promise.all(metaDataPromises)
-      .then((metadata) => {
-        var metadataIndex = 0;
-        var samplePromises = [];
-        var terrainProvider = Cesium.createWorldTerrain();
-        
-        if (metadata[metadataIndex]) {
-          var truncate = true;
-          if (!metadata[metadataIndex].schema) return
-          metadata[metadataIndex].schema.map((s) => {
-            if (s.name === "Red" || s.name === "Green" || s.name === "Blue") {
-              if (s.maximum && s.maximum <= 255) {
-                truncate = false;
+      .catch(() => {
+        res
+          .status(500)
+          .json("An error occurred while getting tasks from webODM");
+      });
+  });
+
+  app.get(
+    "/cesium/terriaCatalog/projects/:projectId/tasks/:taskId",
+    (req, res) => {
+      var projectId = req.params.projectId;
+      var taskId = req.params.taskId;
+
+      var catalog = [];
+      var metaDataPromises = [];
+
+      var url = new URL(baseURL);
+      const eptServer = `${url.protocol}//ept.${url.host}`;
+
+      fetch(`${baseURL}/api/projects/${projectId}/tasks/${taskId}`, {
+        headers: { Cookie: req.headers.cookie },
+      })
+        .then((response) => {
+          if (response.status === 200) {
+            return response.json();
+          }
+        })
+        .then((task) => {
+          var assetFiles = [
+            "georeferenced_model.laz",
+            "orthophoto.tif",
+            "dsm.tif",
+            "dtm.tif",
+          ];
+          assetFiles.map((typeFile) => {
+            if (task.available_assets.includes(typeFile)) {
+              var fileURL;
+              if (typeFile === "georeferenced_model.laz") {
+                fileURL = `${baseURL}/api/projects/${projectId}/tasks/${taskId}/assets/entwine_pointcloud/ept.json`;
+              } else {
+                fileURL = `${baseURL}/api/projects/${projectId}/tasks/${taskId}/${typeFile.slice(
+                  0,
+                  -4
+                )}/metadata`;
               }
+              metaDataPromises.push(
+                fetch(fileURL, {
+                  headers: { Cookie: req.headers.cookie },
+                })
+                  .then((response) => {
+                    if (response.status === 200) {
+                      return response.json();
+                    }
+                  })
+                  .catch((e) => {
+                    console.log("error while getting metadata");
+                  })
+              );
             }
           });
-          catalog.push({
-            "type": "3d-tiles",
-            "name": task.name + " - Point Cloud",
-            "url":`${eptServer}/tileset.json?ept=${`${baseURL}/api/projects/${projectId}/tasks/${taskId}/assets/entwine_pointcloud/ept.json`}&${truncate ? "truncate" : null}`,
-            info: [
-              {
-                name: "webODM Properties",
-                content:"",
-                contentAsObject:{
-                  "public": task.public,
-                },
-                show:false
+
+          Promise.all(metaDataPromises)
+            .then((metadata) => {
+              var metadataIndex = 0;
+              var samplePromises = [];
+              var terrainProvider = Cesium.createWorldTerrain();
+
+              if (metadata[metadataIndex]) {
+                var truncate = true;
+                if (!metadata[metadataIndex].schema) return;
+                metadata[metadataIndex].schema.map((s) => {
+                  if (
+                    s.name === "Red" ||
+                    s.name === "Green" ||
+                    s.name === "Blue"
+                  ) {
+                    if (s.maximum && s.maximum <= 255) {
+                      truncate = false;
+                    }
+                  }
+                });
+                catalog.push({
+                  type: "3d-tiles",
+                  name: task.name + " - Point Cloud",
+                  url: `${eptServer}/tileset.json?ept=${`${baseURL}/api/projects/${projectId}/tasks/${taskId}/assets/entwine_pointcloud/ept.json`}&${
+                    truncate ? "truncate" : null
+                  }`,
+                  info: [
+                    {
+                      name: "webODM Properties",
+                      content: "",
+                      contentAsObject: {
+                        public: task.public,
+                      },
+                      show: false,
+                    },
+                  ],
+                });
               }
-            ]
-          })
-        }
-        metadataIndex++;
-  
-        var imageryTypes = ["Orthophoto","DSM","DTM"];
-        imageryTypes.map(imageryType=>{
-          if (metadata[metadataIndex]) {
-            var rectangle = new Cesium.Rectangle.fromDegrees(
-              metadata[metadataIndex].bounds.value[0],
-              metadata[metadataIndex].bounds.value[1],
-              metadata[metadataIndex].bounds.value[2],
-              metadata[metadataIndex].bounds.value[3]
-            );
-            const cartographics = [
-              Cesium.Rectangle.center(rectangle),
-              Cesium.Rectangle.southeast(rectangle),
-              Cesium.Rectangle.southwest(rectangle),
-              Cesium.Rectangle.northeast(rectangle),
-              Cesium.Rectangle.northwest(rectangle),
-            ];
-  
-            samplePromises.push(Cesium.sampleTerrainMostDetailed(
-              terrainProvider,
-              cartographics
-            ))
-  
-            var tilesUrl;
-            if (imageryType==="Orthophoto") {
-              tilesUrl = `${baseURL}/api/projects/${projectId}/tasks/${taskId}/orthophoto/tiles?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
-            } else if (imageryType==="DSM") {
-              tilesUrl = `${baseURL}/api/projects/${projectId}/tasks/${taskId}/dsm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
-            } else if (imageryType==="DTM") {
-              tilesUrl = `${baseURL}/api/projects/${projectId}/tasks/${taskId}/dtm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
-            }
-  
-            catalog.push({
-              "type": "open-street-map",
-              "name": `${task.name} - ${imageryType}`,
-              "url":tilesUrl,
-              "maximumLevel": metadata[metadataIndex].maxzoom,
-              "rectangle":{
-                west:metadata[metadataIndex].bounds.value[0],
-                south:metadata[metadataIndex].bounds.value[1],
-                east:metadata[metadataIndex].bounds.value[2],
-                north:metadata[metadataIndex].bounds.value[3]
-              },
-              "idealZoom":{
-                "lookAt":{
-                  "targetLongitude" :metadata[metadataIndex].center[0],
-                  "targetLatitude" :metadata[metadataIndex].center[1],
+              metadataIndex++;
+
+              var imageryTypes = ["Orthophoto", "DSM", "DTM"];
+              imageryTypes.map((imageryType) => {
+                if (metadata[metadataIndex]) {
+                  var rectangle = new Cesium.Rectangle.fromDegrees(
+                    metadata[metadataIndex].bounds.value[0],
+                    metadata[metadataIndex].bounds.value[1],
+                    metadata[metadataIndex].bounds.value[2],
+                    metadata[metadataIndex].bounds.value[3]
+                  );
+                  const cartographics = [
+                    Cesium.Rectangle.center(rectangle),
+                    Cesium.Rectangle.southeast(rectangle),
+                    Cesium.Rectangle.southwest(rectangle),
+                    Cesium.Rectangle.northeast(rectangle),
+                    Cesium.Rectangle.northwest(rectangle),
+                  ];
+
+                  samplePromises.push(
+                    Cesium.sampleTerrainMostDetailed(
+                      terrainProvider,
+                      cartographics
+                    )
+                  );
+
+                  var tilesUrl;
+                  if (imageryType === "Orthophoto") {
+                    tilesUrl = `${baseURL}/api/projects/${projectId}/tasks/${taskId}/orthophoto/tiles?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
+                  } else if (imageryType === "DSM") {
+                    tilesUrl = `${baseURL}/api/projects/${projectId}/tasks/${taskId}/dsm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                  } else if (imageryType === "DTM") {
+                    tilesUrl = `${baseURL}/api/projects/${projectId}/tasks/${taskId}/dtm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                  }
+
+                  catalog.push({
+                    type: "open-street-map",
+                    name: `${task.name} - ${imageryType}`,
+                    url: tilesUrl,
+                    maximumLevel: metadata[metadataIndex].maxzoom,
+                    rectangle: {
+                      west: metadata[metadataIndex].bounds.value[0],
+                      south: metadata[metadataIndex].bounds.value[1],
+                      east: metadata[metadataIndex].bounds.value[2],
+                      north: metadata[metadataIndex].bounds.value[3],
+                    },
+                    idealZoom: {
+                      lookAt: {
+                        targetLongitude: metadata[metadataIndex].center[0],
+                        targetLatitude: metadata[metadataIndex].center[1],
+                      },
+                    },
+                    info: [
+                      {
+                        name: "webODM Properties",
+                        content: "",
+                        contentAsObject: {
+                          public: task.public,
+                        },
+                        show: false,
+                      },
+                    ],
+                  });
                 }
-              },
-              info: [
-                {
-                  name: "webODM Properties",
-                  content:"",
-                  contentAsObject:{
-                    "public": task.public,
-                  },
-                  show:false
-                }
-              ]
+                metadataIndex++;
+              });
+
+              Promise.all(samplePromises)
+                .then((heights) => {
+                  var heightIndex = 0;
+                  catalog.map((member) => {
+                    if (member.type != "3d-tiles") {
+                      var cartesians =
+                        Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                          heights[heightIndex]
+                        );
+                      var boundingSphere =
+                        Cesium.BoundingSphere.fromPoints(cartesians);
+                      member.idealZoom.lookAt.targetHeight =
+                        Cesium.Cartographic.fromCartesian(
+                          boundingSphere.center
+                        ).height;
+                      member.idealZoom.lookAt.range = boundingSphere.radius;
+
+                      heightIndex++;
+                    }
+                  });
+
+                  res.header("Access-Control-Allow-Origin", req.headers.origin);
+                  res.header("Access-Control-Allow-Credentials", true);
+                  res.status(200).json({ catalog: catalog });
+                })
+                .catch((e) => {
+                  console.error(e);
+                  res
+                    .status(500)
+                    .json("An error occurred while sampling heights");
+                });
             })
-          }
-          metadataIndex++;
+            .catch((e) => {
+              console.error(e);
+              res
+                .status(500)
+                .json("An error occurred while getting all metadata");
+            });
         })
-  
-        Promise.all(samplePromises)
-        .then((heights)=>{
-          var heightIndex = 0;
-          catalog.map(member=>{
-            if (member.type!="3d-tiles"){
-              var cartesians =
-              Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-                heights[heightIndex]
-              );
-              var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
-              member.idealZoom.lookAt.targetHeight = Cesium.Cartographic.fromCartesian(boundingSphere.center).height;
-              member.idealZoom.lookAt.range = boundingSphere.radius;
-            
-              heightIndex++;
-            }
-          })
-  
-          res.header("Access-Control-Allow-Origin", req.headers.origin);
-          res.header("Access-Control-Allow-Credentials", true);
-          res.status(200).json({catalog:catalog});
-        })
-        .catch((e)=>{
-          console.error(e);
-          res.status(500).json("An error occurred while sampling heights");
-        })
-      })
-      .catch(e=>{
-        console.error(e);
-        res.status(500).json("An error occurred while getting all metadata");
-      })
-    })
-    .catch((e) => {
-      console.log("error while getting metadata");
-    })
-  })
+        .catch((e) => {
+          console.log("error while getting metadata");
+        });
+    }
+  );
 
   app.get("/cesium/terria/publictask/:taskID.json", (req, res) => {
-    const eptServer = `${baseURL}/ept`;
+    var url = new URL(baseURL);
+    const eptServer = `${url.protocol}//ept.${url.host}`;
+
     fetch(`${baseURL}/public/task/${req.params.taskID}/json`)
-      .then(response => response.json())
+      .then((response) => response.json())
       .then((publicTask) => {
         var initUrlsFile = {
-          "homeCamera": {
-            "north": -8,
-            "east": 158,
-            "south": -45,
-            "west": 109
+          homeCamera: {
+            north: -8,
+            east: 158,
+            south: -45,
+            west: 109,
           },
           catalog: [
             {
-              "type": "group",
-              "name" : publicTask.name,
-              members:[]
-            }
+              type: "group",
+              name: publicTask.name ?? "None",
+              members: [],
+            },
           ],
-          "baseMaps": {
-            "defaultBaseMapId": "basemap-bing-aerial-with-labels"
-          }
-        }
+          baseMaps: {
+            defaultBaseMapId: "basemap-bing-aerial-with-labels",
+          },
+        };
         var projectID = publicTask.project;
-        var assetFiles= ["georeferenced_model.laz", "orthophoto.tif", "dsm.tif", "dtm.tif"];
+        var assetFiles = [
+          "georeferenced_model.laz",
+          "orthophoto.tif",
+          "dsm.tif",
+          "dtm.tif",
+        ];
         var metaDataPromises = [];
-        assetFiles.map(typeFile=>{
+        assetFiles.map((typeFile) => {
           if (publicTask.available_assets.includes(typeFile)) {
             var fileURL;
-            if (typeFile==="georeferenced_model.laz"){
+            if (typeFile === "georeferenced_model.laz") {
               fileURL = `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`;
             } else {
-              fileURL = `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/${typeFile.slice(0,-4)}/metadata`;
+              fileURL = `${baseURL}/api/projects/${projectID}/tasks/${
+                publicTask.id
+              }/${typeFile.slice(0, -4)}/metadata`;
             }
             metaDataPromises.push(
               fetch(fileURL, {
-                headers: { Cookie: req.headers.cookie }
-              }).then(response => {
-                if(response.status===200){
-                  return response.json();
-                }
-              }).catch((e) => {
-                // console.log(e);
+                headers: { Cookie: req.headers.cookie },
               })
-            )
-          }
-        })
-        Promise.all(metaDataPromises)
-        .then((metadata) => {
-          var metadataIndex=0;
-          var samplePromises=[];
-          var terrainProvider = Cesium.createWorldTerrain();
-          if (publicTask.available_assets.includes("georeferenced_model.laz")) {
-            if (metadata[metadataIndex]) {
-              var truncate = true;
-              if (!metadata[metadataIndex].schema) return
-              metadata[metadataIndex].schema.map((s) => {
-                if (s.name === "Red" || s.name === "Green" || s.name === "Blue") {
-                  if (s.maximum && s.maximum <= 255) {
-                    truncate = false;
-                  }
-                }
-              });
-              initUrlsFile.catalog[0].members.push({
-                "type": "3d-tiles",
-                "name": publicTask.name + " - Point Cloud",
-                "url":`${eptServer}/tileset.json?ept=${`${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`}&${truncate ? "truncate" : null}`
-              })
-            }
-            metadataIndex++;
-          }
-
-          var imageryTypes = ["Orthophoto","DSM","DTM"];
-          imageryTypes.map(imageryType=>{
-            if (publicTask.available_assets.includes(`${imageryType.toLowerCase()}.tif`)) {
-              if (metadata[metadataIndex]) {
-                var rectangle = new Cesium.Rectangle.fromDegrees(
-                  metadata[metadataIndex].bounds.value[0],
-                  metadata[metadataIndex].bounds.value[1],
-                  metadata[metadataIndex].bounds.value[2],
-                  metadata[metadataIndex].bounds.value[3]
-                );
-                const cartographics = [
-                  Cesium.Rectangle.center(rectangle),
-                  Cesium.Rectangle.southeast(rectangle),
-                  Cesium.Rectangle.southwest(rectangle),
-                  Cesium.Rectangle.northeast(rectangle),
-                  Cesium.Rectangle.northwest(rectangle),
-                ];
-
-                samplePromises.push(Cesium.sampleTerrainMostDetailed(
-                  terrainProvider,
-                  cartographics
-                ))
-
-                var tilesUrl;
-                if (imageryType==="Orthophoto") {
-                  tilesUrl = `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/orthophoto/tiles?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
-                } else if (imageryType==="DSM") {
-                  tilesUrl = `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/dsm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
-                } else if (imageryType==="DTM") {
-                  tilesUrl = `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/dtm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
-                }
-
-                initUrlsFile.catalog[0].members.push({
-                  "type": "open-street-map",
-                  "name": `${publicTask.name} - ${imageryType}`,
-                  "url":tilesUrl,
-                  "maximumLevel": metadata[metadataIndex].maxzoom,
-                  "rectangle":{
-                    west:metadata[metadataIndex].bounds.value[0],
-                    south:metadata[metadataIndex].bounds.value[1],
-                    east:metadata[metadataIndex].bounds.value[2],
-                    north:metadata[metadataIndex].bounds.value[3]
-                  },
-                  "idealZoom":{
-                    "lookAt":{
-                      "targetLongitude" :metadata[metadataIndex].center[0],
-                      "targetLatitude" :metadata[metadataIndex].center[1],
-                    }
+                .then((response) => {
+                  if (response.status === 200) {
+                    return response.json();
                   }
                 })
+                .catch((e) => {
+                  // console.log(e);
+                })
+            );
+          }
+        });
+        Promise.all(metaDataPromises)
+          .then((metadata) => {
+            var metadataIndex = 0;
+            var samplePromises = [];
+            var terrainProvider = Cesium.createWorldTerrain();
+            if (
+              publicTask.available_assets.includes("georeferenced_model.laz")
+            ) {
+              if (metadata[metadataIndex]) {
+                var truncate = true;
+                if (!metadata[metadataIndex].schema) return;
+                metadata[metadataIndex].schema.map((s) => {
+                  if (
+                    s.name === "Red" ||
+                    s.name === "Green" ||
+                    s.name === "Blue"
+                  ) {
+                    if (s.maximum && s.maximum <= 255) {
+                      truncate = false;
+                    }
+                  }
+                });
+                initUrlsFile.catalog[0].members.push({
+                  type: "3d-tiles",
+                  name: publicTask.name + " - Point Cloud",
+                  url: `${eptServer}/tileset.json?ept=${`${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/assets/entwine_pointcloud/ept.json`}&${
+                    truncate ? "truncate" : null
+                  }`,
+                });
               }
               metadataIndex++;
             }
-          })
 
-          Promise.all(samplePromises)
-            .then((heights)=>{
-              var heightIndex = 0;
-
-              initUrlsFile.catalog[0].members.map(member=>{
-                if (member.type!="3d-tiles"){
-                  var cartesians =
-                  Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-                    heights[heightIndex]
+            var imageryTypes = ["Orthophoto", "DSM", "DTM"];
+            imageryTypes.map((imageryType) => {
+              if (
+                publicTask.available_assets.includes(
+                  `${imageryType.toLowerCase()}.tif`
+                )
+              ) {
+                if (metadata[metadataIndex]) {
+                  var rectangle = new Cesium.Rectangle.fromDegrees(
+                    metadata[metadataIndex].bounds.value[0],
+                    metadata[metadataIndex].bounds.value[1],
+                    metadata[metadataIndex].bounds.value[2],
+                    metadata[metadataIndex].bounds.value[3]
                   );
-                  var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
-                  member.idealZoom.lookAt.targetHeight = Cesium.Cartographic.fromCartesian(boundingSphere.center).height;
-                  member.idealZoom.lookAt.range = boundingSphere.radius;
-                
-                  heightIndex++;
-                }
-              })
+                  const cartographics = [
+                    Cesium.Rectangle.center(rectangle),
+                    Cesium.Rectangle.southeast(rectangle),
+                    Cesium.Rectangle.southwest(rectangle),
+                    Cesium.Rectangle.northeast(rectangle),
+                    Cesium.Rectangle.northwest(rectangle),
+                  ];
 
-              // catalogJson.catalog.splice(catalogJson.catalog.length-1, 0 , webODMgroup);
-              res.header("Access-Control-Allow-Origin", req.headers.origin);
-              res.header("Access-Control-Allow-Credentials", true);
-              res.status(200).json(initUrlsFile);
-            })
-            .catch((e)=>{
-              console.error(e);
-              res.status(500).json("An error occurred while getting the catalog file");
-            })
-        })
-        .catch((e)=>{
-          console.error(e);
-          res.status(500).json("An error occurred while getting the catalog file");
-        })
+                  samplePromises.push(
+                    Cesium.sampleTerrainMostDetailed(
+                      terrainProvider,
+                      cartographics
+                    )
+                  );
+
+                  var tilesUrl;
+                  if (imageryType === "Orthophoto") {
+                    tilesUrl = `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/orthophoto/tiles?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
+                  } else if (imageryType === "DSM") {
+                    tilesUrl = `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/dsm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                  } else if (imageryType === "DTM") {
+                    tilesUrl = `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/dtm/tiles?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                  }
+
+                  initUrlsFile.catalog[0].members.push({
+                    type: "open-street-map",
+                    name: `${publicTask.name} - ${imageryType}`,
+                    url: tilesUrl,
+                    maximumLevel: metadata[metadataIndex].maxzoom,
+                    rectangle: {
+                      west: metadata[metadataIndex].bounds.value[0],
+                      south: metadata[metadataIndex].bounds.value[1],
+                      east: metadata[metadataIndex].bounds.value[2],
+                      north: metadata[metadataIndex].bounds.value[3],
+                    },
+                    idealZoom: {
+                      lookAt: {
+                        targetLongitude: metadata[metadataIndex].center[0],
+                        targetLatitude: metadata[metadataIndex].center[1],
+                      },
+                    },
+                  });
+                }
+                metadataIndex++;
+              }
+            });
+
+            Promise.all(samplePromises)
+              .then((heights) => {
+                var heightIndex = 0;
+
+                initUrlsFile.catalog[0].members.map((member) => {
+                  if (member.type != "3d-tiles") {
+                    var cartesians =
+                      Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                        heights[heightIndex]
+                      );
+                    var boundingSphere =
+                      Cesium.BoundingSphere.fromPoints(cartesians);
+                    member.idealZoom.lookAt.targetHeight =
+                      Cesium.Cartographic.fromCartesian(
+                        boundingSphere.center
+                      ).height;
+                    member.idealZoom.lookAt.range = boundingSphere.radius;
+
+                    heightIndex++;
+                  }
+                });
+
+                // catalogJson.catalog.splice(catalogJson.catalog.length-1, 0 , webODMgroup);
+                res.header("Access-Control-Allow-Origin", req.headers.origin);
+                res.header("Access-Control-Allow-Credentials", true);
+                res.status(200).json(initUrlsFile);
+              })
+              .catch((e) => {
+                console.error(e);
+                res
+                  .status(500)
+                  .json("An error occurred while getting the catalog file");
+              });
+          })
+          .catch((e) => {
+            console.error(e);
+            res
+              .status(500)
+              .json("An error occurred while getting the catalog file");
+          });
       })
-      .catch((e)=>{
+      .catch((e) => {
         console.error(e);
-        res.status(500).json("An error occurred while getting the catalog file");
-      })
-  })
+        res
+          .status(500)
+          .json("An error occurred while getting the catalog file");
+      });
+  });
 
   app.patch("/cesium/makeWebODMTaskPublic/:project/:taskID", (req, res) => {
-    
     var project = req.params.project;
     var task = req.params.taskID;
     if (req.headers.cookie) {
-      var cookies = req.headers.cookie.split(';')
-        .map(v => v.split('='))
+      var cookies = req.headers.cookie
+        .split(";")
+        .map((v) => v.split("="))
         .reduce((acc, v) => {
           if (v[0] && v[1]) {
-            acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+            acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(
+              v[1].trim()
+            );
           }
           return acc;
-        }, {})
+        }, {});
       fetch(`${baseURL}/api/projects/${project}/tasks/${task}/`, {
-        headers: { 
+        headers: {
           "content-type": "application/json",
           Cookie: req.headers.cookie,
-          "Referer": `${baseURL}/`,
+          Referer: `${baseURL}/`,
           "x-csrftoken": cookies["csrftoken"],
         },
-        "body": "{\"public\":true}",
-        "method": "PATCH"
+        body: '{"public":true}',
+        method: "PATCH",
       })
-      .then(response => {
-        if(response.status===200){
-          return response.json();
-        } else {
-          res.status(response.status).send(response.statusText);
-        }
-      }).then((json)=>{
-        res.status(200).send(json);
-      }).catch((e)=>{
-        res.status(500).send("Error");
-      })
+        .then((response) => {
+          if (response.status === 200) {
+            return response.json();
+          } else {
+            res.status(response.status).send(response.statusText);
+          }
+        })
+        .then((json) => {
+          res.status(200).send(json);
+        })
+        .catch((e) => {
+          res.status(500).send("Error");
+        });
     } else {
       res.status(401).send("Unauthorized");
     }
-  })
+  });
 
   app.get("/cesium/publicCatalogs.json", (req, res) => {
     var urls = [
@@ -1038,206 +1173,281 @@
       "https://raw.githubusercontent.com/GeoscienceAustralia/dea-config/master/dev/terria/dea-maps-v8.json",
       "https://terria-catalogs-public.storage.googleapis.com/de-australia/water-regulations-data/prod.json",
       "https://nsw.digitaltwin.terria.io/api/v0/registry/records/map-config?aspect=terria-config&aspect=terria-init&aspect=group&optionalAspect=terria&dereference=true",
-      "https://vic.digitaltwin.terria.io/api/v0/registry/records/map-config?aspect=terria-config&aspect=terria-init&aspect=group&optionalAspect=terria&dereference=true"
+      "https://vic.digitaltwin.terria.io/api/v0/registry/records/map-config?aspect=terria-config&aspect=terria-init&aspect=group&optionalAspect=terria&dereference=true",
     ];
     var promises = [];
 
-    urls.map(url=>{
+    urls.map((url) => {
       promises.push(
         fetch(url)
-        .then(response => response.text())
-        .then(text => JSON5.parse(text))
-        )
-    })
+          .then((response) => response.text())
+          .then((text) => JSON5.parse(text))
+      );
+    });
 
     var catalogJson = {
-      "catalog": []
-    }
-    
+      catalog: [],
+    };
+
     Promise.all(promises)
-    .then((responses)=>{
-      catalogJson.catalog.push({
-        type:"group",
-        name: "NationalMap Catalog",
-        members:responses[0].catalog,
-        description: "Please note that data from the NationalMap Catalog is subject to Terms & Conditions: https://nationalmap.gov.au/about.html#data-attribution"
-      })
+      .then((responses) => {
+        catalogJson.catalog.push({
+          type: "group",
+          name: "NationalMap Catalog",
+          members: responses[0].catalog,
+          description:
+            "Please note that data from the NationalMap Catalog is subject to Terms & Conditions: https://nationalmap.gov.au/about.html#data-attribution",
+        });
 
-      catalogJson.catalog.push({
-        type:"group",
-        name: "Digital Earth Catalog",
-        members:responses[1].catalog,
-        description: "Please note that data from the Digital Earth Catalog is subject to Terms & Conditions: https://maps.dea.ga.gov.au/about#data-attribution"
-      })
-      catalogJson.catalog.push({
-        type:"group",
-        name: "Digital Earth Catalog",
-        members:responses[2].catalog,
-        description: "Please note that data from the Digital Earth Catalog is subject to Terms & Conditions: https://maps.dea.ga.gov.au/about#data-attribution"
-      })
+        catalogJson.catalog.push({
+          type: "group",
+          name: "Digital Earth Catalog",
+          members: responses[1].catalog,
+          description:
+            "Please note that data from the Digital Earth Catalog is subject to Terms & Conditions: https://maps.dea.ga.gov.au/about#data-attribution",
+        });
+        catalogJson.catalog.push({
+          type: "group",
+          name: "Digital Earth Catalog",
+          members: responses[2].catalog,
+          description:
+            "Please note that data from the Digital Earth Catalog is subject to Terms & Conditions: https://maps.dea.ga.gov.au/about#data-attribution",
+        });
 
-      var nswMembers = responses[3].aspects.group.members;
-      var vicMembers = responses[4].aspects.group.members;
-      var statePromises = [];
+        var nswMembers = responses[3].aspects.group.members;
+        var vicMembers = responses[4].aspects.group.members;
+        var statePromises = [];
 
-      const checkProxyUrlAndType = (json, state)=>{
-        return new Promise((resolve, reject) => {
-          if(json.aspects && json.aspects.terria){
-            if (json.aspects.terria.definition) {
-              if (json.aspects.terria.definition.url){
-                if (state=="nsw"){
-                  if (json.aspects.terria.definition.url.startsWith("https://api.transport.nsw.gov.au")){
-                    json.aspects.terria.definition.url = json.aspects.terria.definition.url.replace("https://api.transport.nsw.gov.au","https://nsw.digitaltwin.terria.io/proxy/https://api.transport.nsw.gov.au")
+        const checkProxyUrlAndType = (json, state) => {
+          return new Promise((resolve, reject) => {
+            if (json.aspects && json.aspects.terria) {
+              if (json.aspects.terria.definition) {
+                if (json.aspects.terria.definition.url) {
+                  if (state == "nsw") {
+                    if (
+                      json.aspects.terria.definition.url.startsWith(
+                        "https://api.transport.nsw.gov.au"
+                      )
+                    ) {
+                      json.aspects.terria.definition.url =
+                        json.aspects.terria.definition.url.replace(
+                          "https://api.transport.nsw.gov.au",
+                          "https://nsw.digitaltwin.terria.io/proxy/https://api.transport.nsw.gov.au"
+                        );
+                    }
+
+                    if (
+                      json.aspects.terria.definition.url.startsWith(
+                        "https://nsw-digital-twin-data.terria.io/geoserver/ows"
+                      )
+                    ) {
+                      json.aspects.terria.definition.url =
+                        json.aspects.terria.definition.url.replace(
+                          "https://nsw-digital-twin-data.terria.io/geoserver/ows",
+                          "https://nsw.digitaltwin.terria.io/proxy/https://nsw-digital-twin-data.terria.io/geoserver/ows"
+                        );
+                    }
+
+                    if (json.aspects.terria.definition.url.startsWith("/")) {
+                      json.aspects.terria.definition.url =
+                        "https://nsw.digitaltwin.terria.io" +
+                        json.aspects.terria.definition.url;
+                    }
+                  } else if (state == "vic") {
+                    if (json.aspects.terria.definition.url.startsWith("/")) {
+                      json.aspects.terria.definition.url =
+                        "https://vic.digitaltwin.terria.io" +
+                        json.aspects.terria.definition.url;
+                    }
+                    if (
+                      json.aspects.terria.definition.url.startsWith(
+                        "https://map.aurin.org.au/geoserver/ows"
+                      )
+                    ) {
+                      json.aspects.terria.definition.url =
+                        json.aspects.terria.definition.url.replace(
+                          "https://map.aurin.org.au/geoserver/ows",
+                          "https://vic.digitaltwin.terria.io/proxy/_1d/https://map.aurin.org.au/geoserver/ows"
+                        );
+                    }
                   }
-  
-                  if (json.aspects.terria.definition.url.startsWith("https://nsw-digital-twin-data.terria.io/geoserver/ows")){
-                    json.aspects.terria.definition.url = json.aspects.terria.definition.url.replace("https://nsw-digital-twin-data.terria.io/geoserver/ows","https://nsw.digitaltwin.terria.io/proxy/https://nsw-digital-twin-data.terria.io/geoserver/ows");
-                  }
-  
-                  if (json.aspects.terria.definition.url.startsWith("/")){
-                    json.aspects.terria.definition.url = "https://nsw.digitaltwin.terria.io" + json.aspects.terria.definition.url;
-                  }
-                } else if (state =="vic") {
-                  if (json.aspects.terria.definition.url.startsWith("/")){
-                    json.aspects.terria.definition.url = "https://vic.digitaltwin.terria.io" + json.aspects.terria.definition.url;
-                  }
-                  if (json.aspects.terria.definition.url.startsWith("https://map.aurin.org.au/geoserver/ows")){
-                    json.aspects.terria.definition.url = json.aspects.terria.definition.url.replace("https://map.aurin.org.au/geoserver/ows","https://vic.digitaltwin.terria.io/proxy/_1d/https://map.aurin.org.au/geoserver/ows");
-                  }
-                }                
-              }
-            }
-            if (state=="nsw"){
-              if (json.aspects.terria.type){
-                var filterTypes = ['nsw-fuel-price','air-quality-json','nsw-rfs','nsw-traffic'];
-                if (filterTypes.includes(json.aspects.terria.type)){
-                  Object.keys(json).map(k=>delete(json[k]))
-                  resolve();
                 }
               }
-            }
-          }
-          if (json.aspects && json.aspects.group && json.aspects.group.members && json.aspects.group.members.length>0) {
-            if (json.aspects.group.members.every(jm=>typeof jm=="string")){
-              fetch(`https://${state}.digitaltwin.terria.io/api/v0/registry/records/${json.id}?optionalAspect=terria&optionalAspect=group&optionalAspect=dcat-dataset-strings&optionalAspect=dcat-distribution-strings&optionalAspect=dataset-distributions&optionalAspect=dataset-format&dereference=true`)
-              .then(response => response.text())
-              .then(text => JSON5.parse(text))
-              .then(expandedJson=>{
-                json.aspects.group.members = expandedJson.aspects.group.members;
-                
-                var promises=[];
-                for(var i=0;i<json.aspects.group.members.length;i++){
-                  promises.push(checkProxyUrlAndType(json.aspects.group.members[i], state));
-                }
-                Promise.all(promises)
-                  .then(()=>{
+              if (state == "nsw") {
+                if (json.aspects.terria.type) {
+                  var filterTypes = [
+                    "nsw-fuel-price",
+                    "air-quality-json",
+                    "nsw-rfs",
+                    "nsw-traffic",
+                  ];
+                  if (filterTypes.includes(json.aspects.terria.type)) {
+                    Object.keys(json).map((k) => delete json[k]);
                     resolve();
-                  })
-              })
-            } else {
-              var promises=[];
-              for(var i=0;i<json.aspects.group.members.length;i++){
-                promises.push(checkProxyUrlAndType(json.aspects.group.members[i], state))
+                  }
+                }
               }
-
-              Promise.all(promises)
-                .then(()=>{
-                  resolve();
-                })
             }
-          } else {
-            resolve();
-          }
-        })
-      }
+            if (
+              json.aspects &&
+              json.aspects.group &&
+              json.aspects.group.members &&
+              json.aspects.group.members.length > 0
+            ) {
+              if (
+                json.aspects.group.members.every((jm) => typeof jm == "string")
+              ) {
+                fetch(
+                  `https://${state}.digitaltwin.terria.io/api/v0/registry/records/${json.id}?optionalAspect=terria&optionalAspect=group&optionalAspect=dcat-dataset-strings&optionalAspect=dcat-distribution-strings&optionalAspect=dataset-distributions&optionalAspect=dataset-format&dereference=true`
+                )
+                  .then((response) => response.text())
+                  .then((text) => JSON5.parse(text))
+                  .then((expandedJson) => {
+                    json.aspects.group.members =
+                      expandedJson.aspects.group.members;
 
-      nswMembers.map(m=>{
-        delete(m.aspects);
-        delete(m.authnReadPolicyId);
-        m.url="https://nsw.digitaltwin.terria.io";
-        m.type="magda";
-        m.recordId=m.id;
-
-        statePromises.push(
-          new Promise((resolve, reject) => {
-            fetch(`https://nsw.digitaltwin.terria.io/api/v0/registry/records/${m.id}?optionalAspect=terria&optionalAspect=group&optionalAspect=dcat-dataset-strings&optionalAspect=dcat-distribution-strings&optionalAspect=dataset-distributions&optionalAspect=dataset-format&dereference=true`)
-            .then(response => response.text())
-            .then(text => JSON5.parse(text))
-            .then(json=>{
-              checkProxyUrlAndType(json,"nsw").then(()=>{
-                m.magdaRecord=json;
-                if ((json.aspects && json.aspects.group && json.aspects.group.members && Array.isArray(json.aspects.group.members)) ||
-                  (json.aspects && json.aspects.terria && json.aspects.terria.definition && json.aspects.terria.definition.isGroup)
-                ){
-                  m.isGroup=true;
+                    var promises = [];
+                    for (
+                      var i = 0;
+                      i < json.aspects.group.members.length;
+                      i++
+                    ) {
+                      promises.push(
+                        checkProxyUrlAndType(
+                          json.aspects.group.members[i],
+                          state
+                        )
+                      );
+                    }
+                    Promise.all(promises).then(() => {
+                      resolve();
+                    });
+                  });
+              } else {
+                var promises = [];
+                for (var i = 0; i < json.aspects.group.members.length; i++) {
+                  promises.push(
+                    checkProxyUrlAndType(json.aspects.group.members[i], state)
+                  );
                 }
 
-                resolve();
-              })
+                Promise.all(promises).then(() => {
+                  resolve();
+                });
+              }
+            } else {
+              resolve();
+            }
+          });
+        };
+
+        nswMembers.map((m) => {
+          delete m.aspects;
+          delete m.authnReadPolicyId;
+          m.url = "https://nsw.digitaltwin.terria.io";
+          m.type = "magda";
+          m.recordId = m.id;
+
+          statePromises.push(
+            new Promise((resolve, reject) => {
+              fetch(
+                `https://nsw.digitaltwin.terria.io/api/v0/registry/records/${m.id}?optionalAspect=terria&optionalAspect=group&optionalAspect=dcat-dataset-strings&optionalAspect=dcat-distribution-strings&optionalAspect=dataset-distributions&optionalAspect=dataset-format&dereference=true`
+              )
+                .then((response) => response.text())
+                .then((text) => JSON5.parse(text))
+                .then((json) => {
+                  checkProxyUrlAndType(json, "nsw").then(() => {
+                    m.magdaRecord = json;
+                    if (
+                      (json.aspects &&
+                        json.aspects.group &&
+                        json.aspects.group.members &&
+                        Array.isArray(json.aspects.group.members)) ||
+                      (json.aspects &&
+                        json.aspects.terria &&
+                        json.aspects.terria.definition &&
+                        json.aspects.terria.definition.isGroup)
+                    ) {
+                      m.isGroup = true;
+                    }
+
+                    resolve();
+                  });
+                });
             })
-          })
-        )
-      })
+          );
+        });
 
-      vicMembers.map(m=>{
-        delete(m.aspects);
-        delete(m.authnReadPolicyId);
-        m.url="https://vic.digitaltwin.terria.io";
-        m.type="magda";
-        m.recordId=m.id;
+        vicMembers.map((m) => {
+          delete m.aspects;
+          delete m.authnReadPolicyId;
+          m.url = "https://vic.digitaltwin.terria.io";
+          m.type = "magda";
+          m.recordId = m.id;
 
-        statePromises.push(
-          new Promise((resolve, reject) => {
-            fetch(`https://vic.digitaltwin.terria.io/api/v0/registry/records/${m.id}?optionalAspect=terria&optionalAspect=group&optionalAspect=dcat-dataset-strings&optionalAspect=dcat-distribution-strings&optionalAspect=dataset-distributions&optionalAspect=dataset-format&dereference=true`)
-            .then(response => response.text())
-            .then(text => JSON5.parse(text))
-            .then(json=>{
-              checkProxyUrlAndType(json,"vic").then(()=>{
-                m.magdaRecord=json;
-                if ((json.aspects && json.aspects.group && json.aspects.group.members && Array.isArray(json.aspects.group.members)) ||
-                  (json.aspects && json.aspects.terria && json.aspects.terria.definition && json.aspects.terria.definition.isGroup)
-                ){
-                  m.isGroup=true;
-                }
+          statePromises.push(
+            new Promise((resolve, reject) => {
+              fetch(
+                `https://vic.digitaltwin.terria.io/api/v0/registry/records/${m.id}?optionalAspect=terria&optionalAspect=group&optionalAspect=dcat-dataset-strings&optionalAspect=dcat-distribution-strings&optionalAspect=dataset-distributions&optionalAspect=dataset-format&dereference=true`
+              )
+                .then((response) => response.text())
+                .then((text) => JSON5.parse(text))
+                .then((json) => {
+                  checkProxyUrlAndType(json, "vic").then(() => {
+                    m.magdaRecord = json;
+                    if (
+                      (json.aspects &&
+                        json.aspects.group &&
+                        json.aspects.group.members &&
+                        Array.isArray(json.aspects.group.members)) ||
+                      (json.aspects &&
+                        json.aspects.terria &&
+                        json.aspects.terria.definition &&
+                        json.aspects.terria.definition.isGroup)
+                    ) {
+                      m.isGroup = true;
+                    }
 
-                resolve();
-              })
+                    resolve();
+                  });
+                });
             })
-          })
-        )
-      })
+          );
+        });
 
-      Promise.all(statePromises).then(()=>{
+        Promise.all(statePromises).then(() => {
           catalogJson.catalog.push({
-            type:"group",
+            type: "group",
             name: "NSW Spatial Digital Twin Catalog",
-            members:nswMembers,
-            description: "Please note that data from the NSW Spatial Digital Twin Catalog is subject to Terms & Conditions: https://nsw.digitaltwin.terria.io/about.html#data-attribution"
-          })
+            members: nswMembers,
+            description:
+              "Please note that data from the NSW Spatial Digital Twin Catalog is subject to Terms & Conditions: https://nsw.digitaltwin.terria.io/about.html#data-attribution",
+          });
 
           catalogJson.catalog.push({
-            type:"group",
+            type: "group",
             name: "Digital Twin Victoria Catalog",
-            members:vicMembers,
-            description: "Please note that data from the Digital Twin Victoria Catalog is subject to Terms & Conditions: https://www.land.vic.gov.au/maps-and-spatial/digital-twin-victoria/dtv-platform/data-and-terms#heading-4"
-          })
+            members: vicMembers,
+            description:
+              "Please note that data from the Digital Twin Victoria Catalog is subject to Terms & Conditions: https://www.land.vic.gov.au/maps-and-spatial/digital-twin-victoria/dtv-platform/data-and-terms#heading-4",
+          });
 
           res.status(200).json(catalogJson);
+        });
       })
-    })
-    .catch(e=>{
-      console.log(e);
-    })
-  })
+      .catch((e) => {
+        console.log(e);
+      });
+  });
 
-//   const key = fs.readFileSync('./key.pem');
-//   const cert = fs.readFileSync('./certificate.pem');
-//   const server = https.createServer({
-//     key: key,
-//     cert: cert
-// }, app);
+  //   const key = fs.readFileSync('./key.pem');
+  //   const cert = fs.readFileSync('./certificate.pem');
+  //   const server = https.createServer({
+  //     key: key,
+  //     cert: cert
+  // }, app);
   const server = app.listen(
-  // server.listen(
+    // server.listen(
     argv.port,
     // 443,
     // argv.public ? undefined : "localhost",
