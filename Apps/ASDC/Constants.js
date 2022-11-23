@@ -6,7 +6,14 @@ export const cesiumIonAccessToken =
 export const baseURL =
   window.location.hostname == "localhost"
     ? "https://asdc.cloud.edu.au"
-    : window.location.origin;
+    : `${window.location.protocol}//${window.location.host
+        .split(".")
+        .slice(
+          window.location.host.split(".").length - 5 > 0
+            ? window.location.host.split(".").length - 5
+            : 0
+        )
+        .join(".")}`;
 
 // export const eptServer = "http://localhost:3000";
 // export const eptServer = "http://192.168.99.100:3000";
