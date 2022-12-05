@@ -39,7 +39,12 @@ import {
 import { loadAsset, loadData, syncTimeline } from "./Datasets.js";
 import { pcFormats, processingAPI } from "./Constants.js";
 import { closeGraphModal } from "./Graphs.js";
-import { applyAlpha, getAlpha, applyStyle } from "./Style.js";
+import {
+  applyAlpha,
+  getAlpha,
+  applyStyle,
+  setupStyleToolbar,
+} from "./Style.js";
 import { cropBox } from "./CropBox.js";
 import { cropRectangle } from "./CropRectangle.js";
 // import { cropPolygon } from "./CropPolygon.js";
@@ -522,6 +527,31 @@ export const loadSelectedDataIDs = (fly) => {
 
           newSelectedDatasets.push(datasets[i]);
           loadData(asset, datasets[i], fly && index == 0, false, true);
+
+          if (index == 0) {
+            if (datasets[i].styleDimension) {
+              setSelectedDimension(datasets[i].styleDimension);
+            } else {
+              setSelectedDimension(null);
+            }
+            if (tilesets[data.asset.id] && tilesets[data.asset.id][data.id]) {
+              setupStyleToolbar(tilesets[data.asset.id][data.id]);
+            } else {
+              var checkTilesetTimer = setInterval(checkTilesetToStyle, 500);
+              function checkTilesetToStyle() {
+                if (
+                  tilesets[data.asset.id] &&
+                  tilesets[data.asset.id][data.id]
+                ) {
+                  if (tilesets[data.asset.id][data.id].ready) {
+                    applyStyle(selectedDimension);
+                    setupStyleToolbar(tilesets[data.asset.id][data.id]);
+                    clearInterval(checkTilesetTimer);
+                  }
+                }
+              }
+            }
+          }
 
           if (!assetIDs.includes(asset["id"])) {
             assetIDs.push(asset["id"]);
@@ -1034,11 +1064,11 @@ const handleDataCheckboxChange = (
 
     if (data.styleDimension) {
       setSelectedDimension(data.styleDimension);
-      applyStyle(selectedDimension);
     } else {
       setSelectedDimension(null);
-      applyStyle(selectedDimension);
     }
+    applyStyle(selectedDimension);
+    setupStyleToolbar(tilesets[asset.id][data.id]);
 
     if (new Date(data.date) != "Invalid Date") {
       viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
@@ -2691,11 +2721,11 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
 
         if (data.styleDimension) {
           setSelectedDimension(data.styleDimension);
-          applyStyle(selectedDimension);
         } else {
           setSelectedDimension(null);
-          applyStyle(selectedDimension);
         }
+        applyStyle(selectedDimension);
+        setupStyleToolbar(tilesets[asset.id][data.id]);
 
         if (data.type === "Influx" || data.type === "CSV") {
           var container = document.getElementById("graphs-container");

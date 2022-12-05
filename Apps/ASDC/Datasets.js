@@ -528,10 +528,6 @@ export const loadData = (
       applyInit();
 
       tilesets[asset["id"]][data.id].readyPromise.then(function (tileset) {
-        if (data.styleDimension) {
-          setSelectedDimension(data.styleDimension);
-          applyStyle(selectedDimension);
-        }
         // keep tileset visible at all times
         tileset._geometricError = Number.MAX_SAFE_INTEGER;
 
@@ -561,11 +557,6 @@ export const loadData = (
             new Cesium.Cartesian3()
           );
           tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
-        }
-
-        if (data["type"] === "PointCloud") {
-          setupStyleToolbar(tileset);
-          applyStyle(selectedDimension);
         }
       });
     } else {
@@ -669,14 +660,6 @@ export const loadData = (
                   tileset
                 ) {
                   tileset._geometricError = Number.MAX_SAFE_INTEGER;
-
-                  if (data.styleDimension) {
-                    setSelectedDimension(data.styleDimension);
-                    applyStyle(selectedDimension);
-                  }
-
-                  setupStyleToolbar(tileset);
-                  applyStyle(selectedDimension);
                 });
               }
             });
@@ -696,14 +679,6 @@ export const loadData = (
             );
 
             applyInit();
-
-            if (data.styleDimension) {
-              setSelectedDimension(data.styleDimension);
-              applyStyle(selectedDimension);
-            } else {
-              setSelectedDimension(null);
-              applyStyle(selectedDimension);
-            }
 
             tilesets[asset["id"]][data.id].readyPromise.then(function (
               tileset
@@ -754,9 +729,6 @@ export const loadData = (
                   // tileset.root.transofrm =
                   Cesium.Matrix4.fromTranslation(translation);
               }
-
-              setupStyleToolbar(tileset);
-              applyStyle(selectedDimension);
             });
           }
         });

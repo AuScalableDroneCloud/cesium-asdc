@@ -118,9 +118,14 @@ export const applyStyle = (schemaName) => {
         }
       } else {
         if (alpha) {
-          selectedTileset.style = new Cesium.Cesium3DTileStyle({
-            color: `rgba(\${COLOR}.r * 255, \${COLOR}.g * 255, \${COLOR}.b * 255,${alpha})`,
-          });
+          if (
+            selectedTileset?.root?.content instanceof
+            Cesium.PointCloud3DTileContent
+          ) {
+            selectedTileset.style = new Cesium.Cesium3DTileStyle({
+              color: `rgba(\${COLOR}.r * 255, \${COLOR}.g * 255, \${COLOR}.b * 255,${alpha})`,
+            });
+          }
         }
       }
     }
@@ -128,6 +133,7 @@ export const applyStyle = (schemaName) => {
 };
 
 export const setupStyleToolbar = (tileset) => {
+  if (!tileset) return;
   var toolbar = document.getElementById("dims-toolbar");
 
   while (toolbar.firstChild) {
