@@ -31,6 +31,7 @@ import {
   mousePosition,
   timelineOnDataSelect,
   setSelectedDimension,
+  odmProjects,
 } from "./State.js";
 import { loadInfluxGraphs, loadCSVGraphs, closeGraphModal } from "./Graphs.js";
 import { setupStyleToolbar, applyStyle } from "./Style.js";
@@ -1787,8 +1788,10 @@ export const fetchWebODMProjects = (token = {}) => {
       reject();
       controller.abort();
     };
+    var projPromises = [];
+    var odmProjs = [];
 
-    fetch(`${baseURL}/api/projects/?ordering=-created_at`, {
+    fetch(`${baseURL}/api/projects/?ordering=-created_at&page=1`, {
       cache: "no-store",
       credentials: "include",
       signal: controller.signal,
@@ -1919,296 +1922,322 @@ export const fetchWebODMProjects = (token = {}) => {
           resolve();
         }
       })
-      .then((odmProjects) => {
-        if (!odmProjects) return;
-        setODMProjects(odmProjects);
-        var odmAssets = [];
-        var odmDatasets = [];
-        var taskInfoPromises = [];
-        var metaDataPromises = [];
-        if (Array.isArray(odmProjects)) {
-          odmProjects.map((project) => {
-            taskInfoPromises.push(
-              fetch(
-                `${baseURL}/api/projects/${project.id}/tasks/?ordering=-created_at`,
-                {
-                  cache: "no-store",
-                  credentials: "include",
-                  signal: controller.signal,
-                }
-              ).then((response) => response.json())
+      .then((firstPageProjects) => {
+        odmProjs = odmProjs.concat(firstPageProjects.results);
+        var numPages =
+          firstPageProjects.count / 10 +
+          (firstPageProjects.count % 10 != 0 ? 1 : 0);
+        if (numPages > 1) {
+          for (var i = 2; i <= numPages; i++) {
+            projPromises.push(
+              fetch(`${baseURL}/api/projects/?ordering=-created_at&page=${i}`, {
+                cache: "no-store",
+                credentials: "include",
+                signal: controller.signal,
+              }).then((resp) => resp.json())
             );
-          });
-        }
-        var lastAssetIndex = assets[assets.length - 1].id;
-        Promise.all(taskInfoPromises).then((taskInfos, taskIndex) => {
-          if (Array.isArray(odmProjects)) {
-            var taskDict = {};
-            odmProjects.map((project, projectIndex) => {
-              taskInfos[projectIndex]?.map((task) => {
-                taskDict[task.id] = task;
-                if (task.available_assets.includes("georeferenced_model.laz")) {
-                  metaDataPromises.push(
-                    fetch(
-                      `${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`,
-                      {
-                        cache: "no-store",
-                        credentials: "include",
-                        signal: controller.signal,
-                      }
-                    )
-                      .then((response) => {
-                        if (response.status === 200) {
-                          return response.json();
-                        }
-                      })
-                      .catch((e) => {
-                        if (e.name !== "AbortError") {
-                          console.log(e);
-                        }
-                      })
-                  );
-                }
-                if (task.available_assets.includes("orthophoto.tif")) {
-                  metaDataPromises.push(
-                    fetch(
-                      `${baseURL}/api/projects/${project.id}/tasks/${task.id}/orthophoto/metadata`,
-                      {
-                        cache: "no-store",
-                        credentials: "include",
-                        signal: controller.signal,
-                      }
-                    )
-                      .then((response) => {
-                        if (response.status === 200) {
-                          return response.json();
-                        }
-                      })
-                      .catch((e) => {
-                        if (e.name !== "AbortError") {
-                          console.log(e);
-                        }
-                      })
-                  );
-                }
-                if (task.available_assets.includes("dsm.tif")) {
-                  metaDataPromises.push(
-                    fetch(
-                      `${baseURL}/api/projects/${project.id}/tasks/${task.id}/dsm/metadata`,
-                      {
-                        cache: "no-store",
-                        credentials: "include",
-                        signal: controller.signal,
-                      }
-                    )
-                      .then((response) => {
-                        if (response.status === 200) {
-                          return response.json();
-                        }
-                      })
-                      .catch((e) => {
-                        if (e.name !== "AbortError") {
-                          console.log(e);
-                        }
-                      })
-                  );
-                }
-                if (task.available_assets.includes("dtm.tif")) {
-                  metaDataPromises.push(
-                    fetch(
-                      `${baseURL}/api/projects/${project.id}/tasks/${task.id}/dtm/metadata`,
-                      {
-                        cache: "no-store",
-                        credentials: "include",
-                        signal: controller.signal,
-                      }
-                    )
-                      .then((response) => {
-                        if (response.status === 200) {
-                          return response.json();
-                        }
-                      })
-                      .catch((e) => {
-                        if (e.name !== "AbortError") {
-                          console.log(e);
-                        }
-                      })
-                  );
-                }
-              });
-            });
-            setTaskInfos(taskDict);
           }
-
-          Promise.all(metaDataPromises).then((metadata) => {
-            var metadataIndex = 0;
+        }
+      })
+      .then(() => {
+        Promise.all(projPromises).then((odmProjectsResps) => {
+          odmProjectsResps.map((resp) => {
+            odmProjs = odmProjs.concat(resp.results);
+          });
+          setODMProjects(odmProjs);
+          if (!odmProjects) return;
+          var odmAssets = [];
+          var odmDatasets = [];
+          var taskInfoPromises = [];
+          var metaDataPromises = [];
+          if (Array.isArray(odmProjects)) {
+            odmProjects.map((project) => {
+              taskInfoPromises.push(
+                fetch(
+                  `${baseURL}/api/projects/${project.id}/tasks/?ordering=-created_at`,
+                  {
+                    cache: "no-store",
+                    credentials: "include",
+                    signal: controller.signal,
+                  }
+                ).then((response) => response.json())
+              );
+            });
+          }
+          var lastAssetIndex = assets[assets.length - 1].id;
+          Promise.all(taskInfoPromises).then((taskInfos, taskIndex) => {
             if (Array.isArray(odmProjects)) {
+              var taskDict = {};
               odmProjects.map((project, projectIndex) => {
-                taskInfos[projectIndex]?.map((task, taskIndex) => {
-                  var taskData = [];
+                taskInfos[projectIndex]?.map((task) => {
+                  taskDict[task.id] = task;
                   if (
                     task.available_assets.includes("georeferenced_model.laz")
                   ) {
-                    if (metadata[metadataIndex]) {
-                      if (
-                        metadata[metadataIndex].srs &&
-                        metadata[metadataIndex].srs.wkt
-                      ) {
-                        var sourcePos = [];
-                        sourcePos[0] =
-                          (metadata[metadataIndex].bounds[0] +
-                            metadata[metadataIndex].bounds[3]) /
-                          2;
-                        sourcePos[1] =
-                          (metadata[metadataIndex].bounds[1] +
-                            metadata[metadataIndex].bounds[4]) /
-                          2;
-                        sourcePos[2] =
-                          (metadata[metadataIndex].bounds[2] +
-                            metadata[metadataIndex].bounds[5]) /
-                          2;
-                        var pos = proj4(
-                          metadata[metadataIndex].srs.wkt,
-                          proj4.defs("EPSG:4326"),
-                          sourcePos
-                        );
-
-                        var nw = proj4(
-                          metadata[metadataIndex].srs.wkt,
-                          proj4.defs("EPSG:4326"),
-                          [
-                            metadata[metadataIndex].bounds[0],
-                            metadata[metadataIndex].bounds[1],
-                          ]
-                        );
-                        var se = proj4(
-                          metadata[metadataIndex].srs.wkt,
-                          proj4.defs("EPSG:4326"),
-                          [
-                            metadata[metadataIndex].bounds[3],
-                            metadata[metadataIndex].bounds[4],
-                          ]
-                        );
-
-                        var rectangle = new Cesium.Rectangle.fromDegrees(
-                          nw[0],
-                          nw[1],
-                          se[0],
-                          se[1]
-                        );
-
-                        const cartographics = [
-                          Cesium.Rectangle.center(rectangle),
-                          Cesium.Rectangle.southeast(rectangle),
-                          Cesium.Rectangle.southwest(rectangle),
-                          Cesium.Rectangle.northeast(rectangle),
-                          Cesium.Rectangle.northwest(rectangle),
-                        ];
-
-                        var cartesians =
-                          Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-                            cartographics
-                          );
-                        var boundingSphere =
-                          Cesium.BoundingSphere.fromPoints(cartesians);
-
-                        odmDatasets.push({
-                          id: task.id + "-pc",
-                          type: "EPTPointCloud",
-                          name: "Point Cloud",
-                          url: `${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`,
-                          asset: odmAssets[odmAssets.length - 1],
-                          position: {
-                            lng: pos[0],
-                            lat: pos[1],
-                            height: pos[2],
-                          },
-                          boundingSphereRadius: boundingSphere.radius,
-                          source: {
-                            url: `${baseURL}/api/projects/${project.id}/tasks/${task.id}/download/georeferenced_model.laz`,
-                          },
-                        });
-                        taskData.push(task.id + "-pc");
-                      } else {
-                        // console.log(metadata[metadataIndex])
-                        // console.log(project);
-                        // console.log(task);
-                      }
-                    }
-                    metadataIndex++;
-                  }
-
-                  var imageryTypes = ["Orthophoto", "DSM", "DTM"];
-                  imageryTypes.map((imageryType) => {
-                    if (
-                      task.available_assets.includes(
-                        `${imageryType.toLowerCase()}.tif`
-                      )
-                    ) {
-                      if (metadata[metadataIndex]) {
-                        var tilesUrl;
-                        if (imageryType === "Orthophoto") {
-                          tilesUrl = `${baseURL}${metadata[metadataIndex].tiles[0]}?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
-                        } else if (imageryType === "DSM") {
-                          tilesUrl = `${baseURL}${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
-                        } else if (imageryType === "DTM") {
-                          tilesUrl = `${baseURL}${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                    metaDataPromises.push(
+                      fetch(
+                        `${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`,
+                        {
+                          cache: "no-store",
+                          credentials: "include",
+                          signal: controller.signal,
                         }
-
-                        odmDatasets.push({
-                          id:
-                            task.id +
-                            (imageryType === "Orthophoto"
-                              ? "-op"
-                              : "-" + imageryType.toLowerCase()),
-                          type: "Imagery",
-                          name: imageryType,
-                          url: tilesUrl,
-                          asset: odmAssets[odmAssets.length - 1],
-                          bounds: metadata[metadataIndex].bounds.value,
-                          minzoom: metadata[metadataIndex].minzoom,
-                          maxzoom: metadata[metadataIndex].maxzoom,
-                          position: {
-                            lng: metadata[metadataIndex].center[0],
-                            lat: metadata[metadataIndex].center[1],
-                            height: metadata[metadataIndex].center[2], //zoom level?
-                          },
-                          source: {
-                            url: `${baseURL}/api/projects/${project.id}/tasks/${
-                              task.id
-                            }/download/${imageryType.toLowerCase()}.tif`,
-                          },
-                        });
-                        taskData.push(
-                          task.id +
-                            (imageryType === "Orthophoto"
-                              ? "-op"
-                              : "-" + imageryType.toLowerCase())
-                        );
-                      }
-                      metadataIndex++;
-                    }
-                  });
-
-                  if (taskData.length > 0) {
-                    odmAssets.push({
-                      id: ++lastAssetIndex,
-                      name: task.name,
-                      status: "active",
-                      categoryID: -1,
-                      data: taskData,
-                      project: project.id,
-                      taskID: task.id,
-                      public: task.public,
-                      permissions: project.permissions,
-                    });
+                      )
+                        .then((response) => {
+                          if (response.status === 200) {
+                            return response.json();
+                          }
+                        })
+                        .catch((e) => {
+                          if (e.name !== "AbortError") {
+                            console.log(e);
+                          }
+                        })
+                    );
+                  }
+                  if (task.available_assets.includes("orthophoto.tif")) {
+                    metaDataPromises.push(
+                      fetch(
+                        `${baseURL}/api/projects/${project.id}/tasks/${task.id}/orthophoto/metadata`,
+                        {
+                          cache: "no-store",
+                          credentials: "include",
+                          signal: controller.signal,
+                        }
+                      )
+                        .then((response) => {
+                          if (response.status === 200) {
+                            return response.json();
+                          }
+                        })
+                        .catch((e) => {
+                          if (e.name !== "AbortError") {
+                            console.log(e);
+                          }
+                        })
+                    );
+                  }
+                  if (task.available_assets.includes("dsm.tif")) {
+                    metaDataPromises.push(
+                      fetch(
+                        `${baseURL}/api/projects/${project.id}/tasks/${task.id}/dsm/metadata`,
+                        {
+                          cache: "no-store",
+                          credentials: "include",
+                          signal: controller.signal,
+                        }
+                      )
+                        .then((response) => {
+                          if (response.status === 200) {
+                            return response.json();
+                          }
+                        })
+                        .catch((e) => {
+                          if (e.name !== "AbortError") {
+                            console.log(e);
+                          }
+                        })
+                    );
+                  }
+                  if (task.available_assets.includes("dtm.tif")) {
+                    metaDataPromises.push(
+                      fetch(
+                        `${baseURL}/api/projects/${project.id}/tasks/${task.id}/dtm/metadata`,
+                        {
+                          cache: "no-store",
+                          credentials: "include",
+                          signal: controller.signal,
+                        }
+                      )
+                        .then((response) => {
+                          if (response.status === 200) {
+                            return response.json();
+                          }
+                        })
+                        .catch((e) => {
+                          if (e.name !== "AbortError") {
+                            console.log(e);
+                          }
+                        })
+                    );
                   }
                 });
               });
-              setAssets(assets.concat(odmAssets));
-              setDatasets(datasets.concat(odmDatasets));
-              resolve();
+              setTaskInfos(taskDict);
             }
+
+            Promise.all(metaDataPromises).then((metadata) => {
+              var metadataIndex = 0;
+              if (Array.isArray(odmProjects)) {
+                odmProjects.map((project, projectIndex) => {
+                  taskInfos[projectIndex]?.map((task, taskIndex) => {
+                    var taskData = [];
+                    if (
+                      task.available_assets.includes("georeferenced_model.laz")
+                    ) {
+                      if (metadata[metadataIndex]) {
+                        if (
+                          metadata[metadataIndex].srs &&
+                          metadata[metadataIndex].srs.wkt
+                        ) {
+                          var sourcePos = [];
+                          sourcePos[0] =
+                            (metadata[metadataIndex].bounds[0] +
+                              metadata[metadataIndex].bounds[3]) /
+                            2;
+                          sourcePos[1] =
+                            (metadata[metadataIndex].bounds[1] +
+                              metadata[metadataIndex].bounds[4]) /
+                            2;
+                          sourcePos[2] =
+                            (metadata[metadataIndex].bounds[2] +
+                              metadata[metadataIndex].bounds[5]) /
+                            2;
+                          var pos = proj4(
+                            metadata[metadataIndex].srs.wkt,
+                            proj4.defs("EPSG:4326"),
+                            sourcePos
+                          );
+
+                          var nw = proj4(
+                            metadata[metadataIndex].srs.wkt,
+                            proj4.defs("EPSG:4326"),
+                            [
+                              metadata[metadataIndex].bounds[0],
+                              metadata[metadataIndex].bounds[1],
+                            ]
+                          );
+                          var se = proj4(
+                            metadata[metadataIndex].srs.wkt,
+                            proj4.defs("EPSG:4326"),
+                            [
+                              metadata[metadataIndex].bounds[3],
+                              metadata[metadataIndex].bounds[4],
+                            ]
+                          );
+
+                          var rectangle = new Cesium.Rectangle.fromDegrees(
+                            nw[0],
+                            nw[1],
+                            se[0],
+                            se[1]
+                          );
+
+                          const cartographics = [
+                            Cesium.Rectangle.center(rectangle),
+                            Cesium.Rectangle.southeast(rectangle),
+                            Cesium.Rectangle.southwest(rectangle),
+                            Cesium.Rectangle.northeast(rectangle),
+                            Cesium.Rectangle.northwest(rectangle),
+                          ];
+
+                          var cartesians =
+                            Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                              cartographics
+                            );
+                          var boundingSphere =
+                            Cesium.BoundingSphere.fromPoints(cartesians);
+
+                          odmDatasets.push({
+                            id: task.id + "-pc",
+                            type: "EPTPointCloud",
+                            name: "Point Cloud",
+                            url: `${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`,
+                            asset: odmAssets[odmAssets.length - 1],
+                            position: {
+                              lng: pos[0],
+                              lat: pos[1],
+                              height: pos[2],
+                            },
+                            boundingSphereRadius: boundingSphere.radius,
+                            source: {
+                              url: `${baseURL}/api/projects/${project.id}/tasks/${task.id}/download/georeferenced_model.laz`,
+                            },
+                          });
+                          taskData.push(task.id + "-pc");
+                        } else {
+                          // console.log(metadata[metadataIndex])
+                          // console.log(project);
+                          // console.log(task);
+                        }
+                      }
+                      metadataIndex++;
+                    }
+
+                    var imageryTypes = ["Orthophoto", "DSM", "DTM"];
+                    imageryTypes.map((imageryType) => {
+                      if (
+                        task.available_assets.includes(
+                          `${imageryType.toLowerCase()}.tif`
+                        )
+                      ) {
+                        if (metadata[metadataIndex]) {
+                          var tilesUrl;
+                          if (imageryType === "Orthophoto") {
+                            tilesUrl = `${baseURL}${metadata[metadataIndex].tiles[0]}?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
+                          } else if (imageryType === "DSM") {
+                            tilesUrl = `${baseURL}${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                          } else if (imageryType === "DTM") {
+                            tilesUrl = `${baseURL}${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
+                          }
+
+                          odmDatasets.push({
+                            id:
+                              task.id +
+                              (imageryType === "Orthophoto"
+                                ? "-op"
+                                : "-" + imageryType.toLowerCase()),
+                            type: "Imagery",
+                            name: imageryType,
+                            url: tilesUrl,
+                            asset: odmAssets[odmAssets.length - 1],
+                            bounds: metadata[metadataIndex].bounds.value,
+                            minzoom: metadata[metadataIndex].minzoom,
+                            maxzoom: metadata[metadataIndex].maxzoom,
+                            position: {
+                              lng: metadata[metadataIndex].center[0],
+                              lat: metadata[metadataIndex].center[1],
+                              height: metadata[metadataIndex].center[2], //zoom level?
+                            },
+                            source: {
+                              url: `${baseURL}/api/projects/${
+                                project.id
+                              }/tasks/${
+                                task.id
+                              }/download/${imageryType.toLowerCase()}.tif`,
+                            },
+                          });
+                          taskData.push(
+                            task.id +
+                              (imageryType === "Orthophoto"
+                                ? "-op"
+                                : "-" + imageryType.toLowerCase())
+                          );
+                        }
+                        metadataIndex++;
+                      }
+                    });
+
+                    if (taskData.length > 0) {
+                      odmAssets.push({
+                        id: ++lastAssetIndex,
+                        name: task.name,
+                        status: "active",
+                        categoryID: -1,
+                        data: taskData,
+                        project: project.id,
+                        taskID: task.id,
+                        public: task.public,
+                        permissions: project.permissions,
+                      });
+                    }
+                  });
+                });
+                setAssets(assets.concat(odmAssets));
+                setDatasets(datasets.concat(odmDatasets));
+                resolve();
+              }
+            });
           });
         });
       })
