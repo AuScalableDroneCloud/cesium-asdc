@@ -9,8 +9,10 @@ export const baseURL =
     : `${window.location.protocol}//${window.location.host
         .split(".")
         .slice(
-          window.location.host.split(".").length - 5 > 0
+          window.location.host.split(".").length == 6
             ? window.location.host.split(".").length - 5
+            : window.location.host.split(".").length == 5
+            ? window.location.host.split(".").length - 4
             : 0
         )
         .join(".")}`;
