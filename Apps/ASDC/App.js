@@ -129,7 +129,7 @@ if (window.self !== window.top) {
 setViewer(
   new Cesium.Viewer("cesiumContainer", {
     // imageryProvider: new Cesium.IonImageryProvider({ assetId: 3954 }),//sentinel-2
-    terrainProvider: Cesium.createWorldTerrain({ requestWaterMask: true }),
+    terrainProvider: Cesium.createWorldTerrain({ requestWaterMask: false }),
     vrButton: true,
     fullscreenElement: "cesiumContainer",
     animation: false,
