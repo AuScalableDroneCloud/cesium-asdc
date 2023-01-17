@@ -191,6 +191,7 @@ if (window.location.href.toLowerCase().includes("cesium/apps/asdc/uploads")) {
 
 Cesium.TrustedServers.add("asdc.cloud.edu.au", 443);
 Cesium.TrustedServers.add("dev.asdc.cloud.edu.au", 443);
+// Cesium.TrustedServers.add("localhost", 3000);
 
 if (init) {
   if (init.billboard != undefined) {
@@ -1269,6 +1270,20 @@ document.getElementById("clip-remove-button").onclick = (e) => {
 document.getElementById("clip-export-button").onclick = (e) => {
   if (!cropBoxMap) return;
   var regions = [];
+
+  var scalePoints = cropBoxMap.scalePoints.slice(0, 8);
+  var groundScalePoints = [
+    scalePoints[1],
+    scalePoints[3],
+    scalePoints[5],
+    scalePoints[7],
+  ];
+  var points = groundScalePoints.map((entity) => {
+    var cartesianPos = entity.position.getValue();
+    return cartesianPos;
+  });
+  var now = Cesium.JulianDate.now();
+
   Object.keys(tilesets).map((a) => {
     Object.keys(tilesets[a]).map((d) => {
       var data = selectedDatasets.find((data) => data.id == d);
@@ -1291,19 +1306,6 @@ document.getElementById("clip-export-button").onclick = (e) => {
               : ""
           }${data.name ? "-" + data.name : ""}_PointCloud_Crop.laz`;
         }
-
-        var scalePoints = cropBoxMap.scalePoints.slice(0, 8);
-        var groundScalePoints = [
-          scalePoints[1],
-          scalePoints[3],
-          scalePoints[5],
-          scalePoints[7],
-        ];
-
-        var points = groundScalePoints.map((entity) => {
-          var cartesianPos = entity.position.getValue();
-          return cartesianPos;
-        });
 
         var rect;
         if (!t.root.boundingVolume.rectangle) {
@@ -1348,19 +1350,9 @@ document.getElementById("clip-export-button").onclick = (e) => {
               new Cesium.Cartesian3()
             );
           }
-          var now = Cesium.JulianDate.now();
-
-          var scalePoints = cropBoxMap?.scalePoints.slice(0, 8);
-          var groundScalePoints = [
-            scalePoints[1],
-            scalePoints[3],
-            scalePoints[5],
-            scalePoints[7],
-            scalePoints[1],
-          ];
 
           var wktPolygon = "POLYGON((";
-          groundScalePoints.map((entity, index) => {
+          [...groundScalePoints, scalePoints[1]].map((entity, index) => {
             var translatedPos = new Cesium.Cartesian3();
             var cartesianPos = entity.position.getValue(now);
             cartesianPos.clone(translatedPos);
@@ -1375,7 +1367,7 @@ document.getElementById("clip-export-button").onclick = (e) => {
             var lon = pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
             var lat = pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
             wktPolygon += `${lon} ${lat}`;
-            if (index != groundScalePoints.length - 1) {
+            if (index != groundScalePoints.length) {
               wktPolygon += ",";
             }
           });
@@ -1438,13 +1430,103 @@ document.getElementById("clip-export-button").onclick = (e) => {
 
           regions.push({
             fileName: fileName,
-            ept: ept,
+            url: ept,
+            type: "ept",
             polygon: wktPolygon,
             bbox: bbox,
             outside: false,
           });
         }
       }
+    });
+  });
+
+  Object.keys(imageryLayers).map((a) => {
+    Object.keys(imageryLayers[a]).map((d) => {
+      var data = selectedDatasets.find((data) => data.id == d);
+      console.log(data);
+      if (!data) {
+        console.log(d);
+        console.log(selectedDatasets);
+        return;
+      }
+
+      if (data.asset.project && odmProjects) {
+        var projectName = odmProjects.find(
+          (p) => p.id == data.asset.project
+        ).name;
+        var fileName = `${projectName}_${data.asset.name}_${
+          data.id.endsWith("-op")
+            ? "Orthophoto"
+            : data.id.endsWith("-dtm")
+            ? "DTM"
+            : data.id.endsWith("-dsm")
+            ? "DSM"
+            : ""
+        }_Crop.tif`;
+      } else {
+        var fileName = `${data.asset.name}_${
+          data.date
+            ? new Date(data.date).toLocaleDateString("en-au", {
+                year: "numeric",
+                month: "numeric",
+                day: "numeric",
+              })
+            : ""
+        }${data.name ? "-" + data.name : ""}_${
+          data.id.endsWith("-op")
+            ? "Orthophoto"
+            : data.id.endsWith("-dtm")
+            ? "DTM"
+            : data.id.endsWith("-dsm")
+            ? "DSM"
+            : ""
+        }_Crop.tif`;
+      }
+
+      var p1 = new Cesium.Cartesian3.fromDegrees(
+        data.bounds[0],
+        data.bounds[1]
+      );
+      var p2 = new Cesium.Cartesian3.fromDegrees(
+        data.bounds[2],
+        data.bounds[3]
+      );
+
+      var rect = Cesium.Rectangle.fromCartesianArray([p1, p2]);
+
+      Cesium.Rectangle.fromCartesianArray(points);
+      var intersection = Cesium.Rectangle.intersection(
+        rect,
+        Cesium.Rectangle.fromCartesianArray(points)
+      );
+
+      if (intersection) {
+        var wktPolygon = "POLYGON((";
+        [...groundScalePoints, scalePoints[1]].map((entity, index) => {
+          var translatedPos = new Cesium.Cartesian3();
+          var cartesianPos = entity.position.getValue(now);
+          cartesianPos.clone(translatedPos);
+
+          var pos = Cesium.Cartographic.fromCartesian(translatedPos);
+          var lon = pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
+          var lat = pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
+          wktPolygon += `${lon} ${lat}`;
+          if (index != groundScalePoints.length) {
+            wktPolygon += ",";
+          }
+        });
+
+        wktPolygon += "))";
+      }
+
+      regions.push({
+        fileName: fileName,
+        url: data.source.url,
+        type: "imagery",
+        polygon: wktPolygon,
+        outside: false,
+      });
     });
   });
 
