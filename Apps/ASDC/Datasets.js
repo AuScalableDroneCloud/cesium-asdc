@@ -2439,6 +2439,9 @@ export const fetchPublicTask = () => {
                   lat: metadata[metadataIndex].center[1],
                   height: metadata[metadataIndex].center[2], //zoom level?
                 },
+                source: {
+                  url: `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/download/orthophoto.tif`,
+                },
               });
               taskData.push(publicTask.id + "-op");
             }
@@ -2460,6 +2463,9 @@ export const fetchPublicTask = () => {
                   lat: metadata[metadataIndex].center[1],
                   height: metadata[metadataIndex].center[2], //zoom level?
                 },
+                source: {
+                  url: `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/download/dsm.tif`,
+                },
               });
               taskData.push(publicTask.id + "-dsm");
             }
@@ -2480,6 +2486,9 @@ export const fetchPublicTask = () => {
                   lng: metadata[metadataIndex].center[0],
                   lat: metadata[metadataIndex].center[1],
                   height: metadata[metadataIndex].center[2], //zoom level?
+                },
+                source: {
+                  url: `${baseURL}/api/projects/${projectID}/tasks/${publicTask.id}/download/dtm.tif`,
                 },
               });
               taskData.push(publicTask.id + "-dtm");

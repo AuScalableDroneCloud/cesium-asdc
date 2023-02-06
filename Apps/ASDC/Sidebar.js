@@ -47,7 +47,8 @@ import {
 } from "./Style.js";
 import { cropBox } from "./CropBox.js";
 import { cropRectangle } from "./CropRectangle.js";
-// import { cropPolygon } from "./CropPolygon.js";
+import { cropBox2D } from "./CropBox2D.js";
+import { cropRectangle2D } from "./CropRectangle2D.js";
 
 export const setupSidebar = (uploads, indexParam = false) => {
   if (!assets) return;
@@ -375,28 +376,30 @@ export const setupSidebar = (uploads, indexParam = false) => {
           : ""
       }
       ${
-        taskInfo.options
+        taskInfo.options && Array.isArray(taskInfo.options)
           ? `<tr><td><strong>Options: </strong></td><td>${taskInfo.options.map(
               (o) => `${o.name} : ${o.value}`
             )}</td></tr>`
           : ""
       }
       ${
-        taskInfo.statistics.pointcloud
+        taskInfo.statistics && taskInfo.statistics.gsd
           ? `<tr><td><strong>Average GSD: </strong></td><td>${
               Math.round(taskInfo.statistics.gsd * 100) / 100
             } cm</td></tr>`
           : ""
       }
       ${
-        taskInfo.statistics.pointcloud
+        taskInfo.statistics && taskInfo.statistics.area
           ? `<tr><td><strong>Area: </strong></td><td>${
               Math.round(taskInfo.statistics.area * 100) / 100
             } m²</td></tr>`
           : ""
       }
       ${
-        taskInfo.statistics.pointcloud
+        taskInfo.statistics &&
+        taskInfo.statistics.pointcloud &&
+        taskInfo.statistics.pointcloud.points
           ? `<tr><td><strong>Reconstructed Points: </strong></td><td>${taskInfo.statistics.pointcloud.points}</td></tr>`
           : ""
       }
@@ -1068,7 +1071,9 @@ const handleDataCheckboxChange = (
       setSelectedDimension(null);
     }
     applyStyle(selectedDimension);
-    setupStyleToolbar(tilesets[asset.id][data.id]);
+    if (tilesets[asset.id] && tilesets[asset.id][data.id]) {
+      setupStyleToolbar(tilesets[asset.id][data.id]);
+    }
 
     if (new Date(data.date) != "Invalid Date") {
       viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
@@ -2495,6 +2500,224 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         cropDiv.appendChild(cropTable4);
 
         dateDivs.push(cropDiv);
+      } else if (data.type == "Imagery") {
+        var cropDiv = document.createElement("div");
+        cropDiv.style.display = "none";
+        cropDiv.style["border-bottom"] = "1px solid #efe5d5";
+        cropDiv.style.background = "wheat";
+        cropDiv.id = `cropDiv-${data.id}`;
+
+        var cropTable1 = document.createElement("table");
+        cropTable1.style = "width: 100%;padding: 5px;";
+        var tr1 = document.createElement("tr");
+        var td = document.createElement("td");
+        td.innerHTML = "Show: ";
+        var showCheckbox = document.createElement("input");
+        showCheckbox.id = `crop-checkbox-${data.id}`;
+        showCheckbox.type = "checkbox";
+        showCheckbox.style = "padding: 0;vertical-align:middle;";
+        showCheckbox.checked = true;
+        showCheckbox.onchange = () => {
+          if (imageryLayers[data.asset.id][data.id].show) {
+            if (cropBoxes[data.id]) {
+              if (showCheckbox.checked) {
+                cropBoxes[data.id].toggleVisibilityOn();
+              } else {
+                cropBoxes[data.id].toggleVisibilityOff();
+              }
+            }
+          }
+        };
+        td.appendChild(showCheckbox);
+
+        tr1.appendChild(td);
+        cropTable1.appendChild(tr1);
+
+        var cropTable2 = document.createElement("table");
+        cropTable2.style = "width: 100%;padding: 5px;";
+
+        var cropTable4 = document.createElement("table");
+        var tr4 = document.createElement("tr");
+        tr4.id = `draw-msg-${data.id}`;
+        tr4.innerHTML = "Please click on the map for the 2 vertices";
+        tr4.style.display = "none";
+        cropTable4.appendChild(tr4);
+
+        if (data.source && data.source.url) {
+          var td5 = document.createElement("td");
+          var exportButton = document.createElement("button");
+          exportButton.id = "export-btn";
+          exportButton.innerHTML = "Export";
+          exportButton.className = "button-1";
+
+          exportButton.onclick = () => {
+            if (data.asset.project && odmProjects) {
+              var projectName = odmProjects.find(
+                (p) => p.id == data.asset.project
+              ).name;
+              var fileName = `${projectName}_${data.asset.name}_${
+                data.id.endsWith("-op")
+                  ? "Orthophoto"
+                  : data.id.endsWith("-dtm")
+                  ? "DTM"
+                  : data.id.endsWith("-dsm")
+                  ? "DSM"
+                  : ""
+              }_Crop.tif`;
+            } else {
+              var fileName = `${data.asset.name}_${
+                data.date
+                  ? new Date(data.date).toLocaleDateString("en-au", {
+                      year: "numeric",
+                      month: "numeric",
+                      day: "numeric",
+                    })
+                  : ""
+              }${data.name ? "-" + data.name : ""}_${
+                data.id.endsWith("-op")
+                  ? "Orthophoto"
+                  : data.id.endsWith("-dtm")
+                  ? "DTM"
+                  : data.id.endsWith("-dsm")
+                  ? "DSM"
+                  : ""
+              }_Crop.tif`;
+            }
+
+            var scalePoints = cropBoxes[data.id]?.scalePoints.slice(0, 8);
+            var groundScalePoints = [
+              scalePoints[0],
+              scalePoints[1],
+              scalePoints[2],
+              scalePoints[3],
+              scalePoints[0],
+            ];
+
+            var wktPolygon = "POLYGON((";
+            groundScalePoints.map((entity, index) => {
+              var translatedPos = new Cesium.Cartesian3();
+              var cartesianPos = entity.position.getValue();
+              cartesianPos.clone(translatedPos);
+
+              var pos = Cesium.Cartographic.fromCartesian(translatedPos);
+              var lon = pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
+              var lat = pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
+              wktPolygon += `${lon} ${lat}`;
+              if (index != groundScalePoints.length - 1) {
+                wktPolygon += ",";
+              }
+            });
+
+            wktPolygon += "))";
+
+            var regions = [
+              {
+                fileName: fileName,
+                url: data.source.url,
+                type: "imagery",
+                polygon: wktPolygon,
+                outside: false,
+              },
+            ];
+
+            var zipName = fileName.slice(0, fileName.lastIndexOf(".")) + ".zip";
+
+            if (regions.length > 0) {
+              var cropLink = `${processingAPI}/crop?regions=${encodeURIComponent(
+                JSON.stringify(regions)
+              )}&zipName=${zipName}`;
+
+              var tab = window.open(cropLink, "_blank");
+              var html = `<html><head></head><body>
+              Exporting for download. Please wait...
+              <a href="${cropLink}" id="dl"/>
+              <script>
+                document.getElementById("dl").click();
+              </script>
+              </body></html>`;
+              tab.document.write(html);
+              tab.document.close();
+            }
+          };
+          td5.appendChild(exportButton);
+        }
+
+        var cropTable3 = document.createElement("table");
+        cropTable3.style = "width: 100%;padding: 5px;";
+        var tr3 = document.createElement("tr");
+        var td7 = document.createElement("td");
+
+        var boxDrawButton = document.createElement("button");
+        boxDrawButton.id = `rectangle-btn-${data.id}`;
+        boxDrawButton.className = "button-1";
+        boxDrawButton.innerHTML = "Draw Custom Clipping Box";
+        boxDrawButton.onclick = () => {
+          if (!cropRectangles[data.id]) {
+            boxDrawButton.style["background"] = "#e5e5e5";
+            boxDrawButton.style["border"] = "1px solid #000";
+            boxDrawButton.style["border-radius"] = "3px";
+            boxDrawButton.style["color"] = "#0075ff";
+
+            if (cropBoxes[data.id]) {
+              !!cropBoxes[data.id].disable ?? cropBoxes[data.id].disable();
+              cropBoxes[data.id].toggleVisibilityOff();
+            }
+
+            cropRectangles[data.id] = new cropRectangle2D(data);
+            tr4.style.display = "table-row";
+          } else {
+            boxDrawButton.style["background"] = "#ededed";
+            boxDrawButton.style["color"] = "black";
+
+            if (cropRectangles[data.id]) {
+              cropRectangles[data.id].destroy();
+              delete cropRectangles[data.id];
+            }
+
+            if (cropBoxes[data.id]) {
+              cropBoxes[data.id].enable();
+            }
+
+            tr4.style.display = "none";
+          }
+        };
+
+        td7.appendChild(boxDrawButton);
+
+        tr1.appendChild(td7);
+        cropTable1.appendChild(tr3);
+
+        var td8 = document.createElement("td");
+
+        var resetButton = document.createElement("button");
+        resetButton.innerHTML = "Reset";
+        resetButton.className = "button-1";
+
+        resetButton.onclick = () => {
+          if (cropBoxes[data.id]) {
+            cropBoxes[data.id].destroy();
+          }
+
+          if (cropRectangles[data.id]) {
+            cropRectangles[data.id].destroy();
+            delete cropRectangles[data.id];
+
+            boxDrawButton.style["background"] = "#ededed";
+            boxDrawButton.style["color"] = "black";
+            tr4.style.display = "none";
+          }
+
+          cropBoxes[data.id] = new cropBox2D(data);
+        };
+
+        td8.appendChild(resetButton);
+        tr3.appendChild(td8);
+        if (td5) tr3.appendChild(td5);
+
+        cropDiv.appendChild(cropTable1);
+        cropDiv.appendChild(cropTable4);
+
+        dateDivs.push(cropDiv);
       }
 
       var colorDiv = document.createElement("div");
@@ -2593,6 +2816,9 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         transformButton.style["margin-left"] = "5px";
 
         transformButton.onclick = (e) => {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+
           if (
             !transformButton.style.color ||
             transformButton.style.color == "white"
@@ -2674,6 +2900,83 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
 
         dateContentDiv.appendChild(transformButton);
         dateContentDiv.appendChild(cropButton);
+      } else if (data.type == "Imagery") {
+        var cropButton = document.createElement("div");
+        cropButton.title = "Crop";
+        cropButton.className = "fa fa-crop sidebar-button";
+        cropButton.style["margin-left"] = "5px";
+        cropButton.id = `cropButton-${data.id}`;
+
+        cropButton.onclick = (e) => {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+
+          if (!cropButton.style.color || cropButton.style.color == "white") {
+            cropButton.style.color = "#0075ff";
+            cropDiv.style.display = "block";
+            dateDiv.onclick();
+          } else {
+            cropButton.style.color = null;
+            cropDiv.style.display = "none";
+          }
+
+          if (!cropBoxes[data.id]) {
+            var imageryTimer = setInterval(checkImageryLayer, 500);
+            function checkImageryLayer() {
+              if (
+                imageryLayers[data.asset.id] &&
+                imageryLayers[data.asset.id][data.id]
+              ) {
+                cropBoxes[data.id] = new cropBox2D(data);
+                clearInterval(imageryTimer);
+              }
+            }
+          } else {
+            if (cropBoxes[data.id].getVisibility()) {
+              cropBoxes[data.id].toggleVisibilityOff();
+            } else {
+              if (showCheckbox.checked) {
+                cropBoxes[data.id].toggleVisibilityOn();
+              }
+            }
+          }
+
+          var panel = datesPanelDiv;
+
+          var height = 0;
+          var children = [...panel.children];
+          for (var i = 0; i < children.length; i++) {
+            height +=
+              children[i].scrollHeight +
+              children[i].getBoundingClientRect().height;
+          }
+
+          panel.style.maxHeight = height + "px";
+
+          var elem = panel.parentElement;
+          while (
+            elem &&
+            elem.id != "sidebar" &&
+            elem.id != "sidebar-data-buttons"
+          ) {
+            var height = 0;
+            var children = [...elem.children];
+            for (var i = 0; i < children.length; i++) {
+              if (children[i].style.maxHeight) {
+                height += parseFloat(children[i].style.maxHeight.slice(0, -2));
+              } else {
+                height +=
+                  children[i].scrollHeight +
+                  children[i].getBoundingClientRect().height;
+              }
+            }
+            elem.style.maxHeight = height + "px";
+
+            elem = elem.parentElement;
+          }
+        };
+
+        dateContentDiv.appendChild(cropButton);
       }
       if (data.type === "ImageSeries") {
         var zoomButton = createZoomButton(asset, data);
@@ -2681,7 +2984,13 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
       }
 
       dateDiv.onclick = (e) => {
-        if (e && (e.target === checkbox || e.target === zoomButton)) {
+        if (
+          e &&
+          (e.target === checkbox ||
+            e.target === zoomButton ||
+            e.target === cropButton ||
+            e.target === transformButton)
+        ) {
           return;
         }
         checkbox.checked = true;
@@ -2725,7 +3034,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
           setSelectedDimension(null);
         }
         applyStyle(selectedDimension);
-        setupStyleToolbar(tilesets[asset.id][data.id]);
+        // setupStyleToolbar(tilesets[asset.id][data.id]);
 
         if (data.type === "Influx" || data.type === "CSV") {
           var container = document.getElementById("graphs-container");

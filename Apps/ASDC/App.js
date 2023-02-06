@@ -1444,12 +1444,7 @@ document.getElementById("clip-export-button").onclick = (e) => {
   Object.keys(imageryLayers).map((a) => {
     Object.keys(imageryLayers[a]).map((d) => {
       var data = selectedDatasets.find((data) => data.id == d);
-      console.log(data);
-      if (!data) {
-        console.log(d);
-        console.log(selectedDatasets);
-        return;
-      }
+      if (!data) return;
 
       if (data.asset.project && odmProjects) {
         var projectName = odmProjects.find(
@@ -1484,18 +1479,9 @@ document.getElementById("clip-export-button").onclick = (e) => {
         }_Crop.tif`;
       }
 
-      var p1 = new Cesium.Cartesian3.fromDegrees(
-        data.bounds[0],
-        data.bounds[1]
-      );
-      var p2 = new Cesium.Cartesian3.fromDegrees(
-        data.bounds[2],
-        data.bounds[3]
-      );
+      var imageryLayer = imageryLayers[data.asset.id][data.id];
+      var rect = imageryLayer.imageryProvider.rectangle;
 
-      var rect = Cesium.Rectangle.fromCartesianArray([p1, p2]);
-
-      Cesium.Rectangle.fromCartesianArray(points);
       var intersection = Cesium.Rectangle.intersection(
         rect,
         Cesium.Rectangle.fromCartesianArray(points)
