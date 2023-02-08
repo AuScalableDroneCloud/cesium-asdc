@@ -1265,6 +1265,8 @@ document.getElementById("clip-remove-button").onclick = (e) => {
     setCropBoxMap(null);
   }
   clippingDrawButton.style.background = null;
+
+  document.getElementById("clip-no-region").style.display = "none";
 };
 
 document.getElementById("clip-export-button").onclick = (e) => {
@@ -1504,19 +1506,21 @@ document.getElementById("clip-export-button").onclick = (e) => {
         });
 
         wktPolygon += "))";
-      }
 
-      regions.push({
-        fileName: fileName,
-        url: data.source.url,
-        type: "imagery",
-        polygon: wktPolygon,
-        outside: false,
-      });
+        regions.push({
+          fileName: fileName,
+          url: data.source.url,
+          type: "imagery",
+          polygon: wktPolygon,
+          outside: false,
+        });
+      }
     });
   });
 
   if (regions.length > 0) {
+    document.getElementById("clip-no-region").style.display = "none";
+
     var cropLink = `${processingAPI}/crop?regions=${encodeURIComponent(
       JSON.stringify(regions)
     )}`;
@@ -1531,6 +1535,8 @@ document.getElementById("clip-export-button").onclick = (e) => {
     </body></html>`;
     tab.document.write(html);
     tab.document.close();
+  } else {
+    document.getElementById("clip-no-region").style.display = "table-cell";
   }
 };
 

@@ -555,6 +555,13 @@ export class cropBox2D {
         mouseMove
       );
 
+      var d = Math.sqrt(
+        this.trs.scale.x ** 2 + this.trs.scale.y ** 2 + this.trs.scale.z ** 2
+      );
+      this.scalePoints.map((p) => {
+        p.model.scale = d / 100 > 1 ? 1 : d / 100;
+      });
+
       if (scaleAmount < 0) {
         const isDiagonal = axisLocal.x && axisLocal.y && axisLocal.y;
         const pixelSideLengthAfterScaling = isDiagonal
