@@ -2390,7 +2390,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
               var regions = [
                 {
                   fileName: fileName,
-                  ept: ept,
+                  url: ept,
                   polygon: wktPolygon,
                   bbox: bbox,
                   outside: false,
