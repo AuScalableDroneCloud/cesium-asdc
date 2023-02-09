@@ -191,6 +191,8 @@ if (window.location.href.toLowerCase().includes("cesium/apps/asdc/uploads")) {
 
 Cesium.TrustedServers.add("asdc.cloud.edu.au", 443);
 Cesium.TrustedServers.add("dev.asdc.cloud.edu.au", 443);
+Cesium.TrustedServers.add("ept.asdc.cloud.edu.au", 443);
+Cesium.TrustedServers.add("cesium-api.asdc.cloud.edu.au", 443);
 // Cesium.TrustedServers.add("localhost", 3000);
 
 if (init) {

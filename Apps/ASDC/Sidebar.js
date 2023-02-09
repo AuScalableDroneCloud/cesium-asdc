@@ -2391,6 +2391,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
                 {
                   fileName: fileName,
                   url: ept,
+                  type: "ept",
                   polygon: wktPolygon,
                   bbox: bbox,
                   outside: false,

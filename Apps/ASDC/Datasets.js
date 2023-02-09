@@ -1923,6 +1923,10 @@ export const fetchWebODMProjects = (token = {}) => {
         }
       })
       .then((firstPageProjects) => {
+        if (!firstPageProjects) {
+          token.cancel();
+          return;
+        }
         odmProjs = odmProjs.concat(firstPageProjects.results);
         var numPages =
           firstPageProjects.count / 10 +
