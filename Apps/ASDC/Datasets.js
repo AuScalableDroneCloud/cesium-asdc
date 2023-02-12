@@ -1940,11 +1940,23 @@ export const fetchWebODMProjects = (token = {}) => {
                 signal: controller.signal,
               }).then((resp) => resp.json())
             );
+
+            //get ept server cookie
+            projPromises.push(
+              fetch(`${eptServer}`, {
+                cache: "no-store",
+                credentials: "include",
+                signal: controller.signal,
+              })
+            );
           }
         }
       })
       .then(() => {
         Promise.all(projPromises).then((odmProjectsResps) => {
+          //ept server
+          odmProjectsResps.pop();
+
           odmProjectsResps.map((resp) => {
             odmProjs = odmProjs.concat(resp.results);
           });
