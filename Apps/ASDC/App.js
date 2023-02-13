@@ -189,11 +189,12 @@ if (window.location.href.toLowerCase().includes("cesium/apps/asdc/uploads")) {
   uploadPage = false;
 }
 
-Cesium.TrustedServers.add("asdc.cloud.edu.au", 443);
-Cesium.TrustedServers.add("cesium.asdc.cloud.edu.au", 443);
-Cesium.TrustedServers.add("dev.asdc.cloud.edu.au", 443);
-Cesium.TrustedServers.add("ept.asdc.cloud.edu.au", 443);
-Cesium.TrustedServers.add("cesium-api.asdc.cloud.edu.au", 443);
+var url = new URL(baseURL);
+
+Cesium.TrustedServers.add(url.host, 443);
+Cesium.TrustedServers.add(`cesium.${url.host}`, 443);
+Cesium.TrustedServers.add(`ept.${url.host}`, 443);
+Cesium.TrustedServers.add(`cesium-api.${url.host}`, 443);
 // Cesium.TrustedServers.add("localhost", 3000);
 
 if (init) {
