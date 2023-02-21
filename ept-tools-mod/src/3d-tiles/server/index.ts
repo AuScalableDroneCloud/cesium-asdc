@@ -61,7 +61,6 @@ async function create({
     router.get('/:subpath+', async (ctx) => {
       // const { subpath } = ctx.params
       //for subdomain deployment
-      ctx.params.subpath = `ept/${ctx.params.subpath}`
       const subpath = ctx.params.subpath.split('/').slice(1).join('/')
       const options = parseQuery(ctx.query)
 
