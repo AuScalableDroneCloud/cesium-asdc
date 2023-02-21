@@ -2610,12 +2610,15 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
             });
 
             wktPolygon += "))";
+            console.log(data);
 
             var regions = [
               {
                 fileName: fileName,
                 url: data.source.url,
                 type: "imagery",
+                imageryType: data.name,
+                // taskName:data.asset.name,
                 polygon: wktPolygon,
                 outside: false,
               },
@@ -2626,7 +2629,8 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
             if (regions.length > 0) {
               var cropLink = `${processingAPI}/crop?regions=${encodeURIComponent(
                 JSON.stringify(regions)
-              )}&zipName=${zipName}`;
+              )}&zipName=${zipName}
+              &taskName=${data.asset.name}`; //
 
               var tab = window.open(cropLink, "_blank");
               var html = `<html><head></head><body>

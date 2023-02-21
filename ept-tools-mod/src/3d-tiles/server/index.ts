@@ -11,7 +11,7 @@ import { Httpx } from './httpx'
 import { Ssl } from './ssl'
 import { parseQuery } from './utils'
 import { URL } from 'url'
-import {trustedDomains} from './trustedDomains'
+import { trustedDomains } from './trustedDomains'
 
 export { parseQuery }
 
@@ -54,12 +54,15 @@ async function create({
     if (roots === '*' || roots.length === 1) console.log('Roots:', roots)
     else {
       console.log('Roots:')
-      roots.forEach(root => console.log(`    ${root}`))
+      roots.forEach((root) => console.log(`    ${root}`))
     }
     router.get('/roots', async (ctx) => (ctx.body = { roots }))
 
     router.get('/:subpath+', async (ctx) => {
-      const { subpath } = ctx.params
+      // const { subpath } = ctx.params
+      //for subdomain deployment
+      ctx.params.subpath = `ept/${ctx.params.subpath}`
+      const subpath = ctx.params.subpath.split('/').slice(1).join('/')
       const options = parseQuery(ctx.query)
 
       if (typeof options.ept !== 'string') {
@@ -78,11 +81,11 @@ async function create({
           `This EPT path is not contained in the allowed roots`
         )
       }
-      
-      const eptDomain = new URL(ept);
-      var cookie;
-      if (trustedDomains.includes(eptDomain.hostname)){
-        cookie = ctx.headers.cookie;
+
+      const eptDomain = new URL(ept)
+      var cookie
+      if (trustedDomains.includes(eptDomain.hostname)) {
+        cookie = ctx.headers.cookie
       }
       const filename = join(ept, '..', 'ept-tileset', subpath)
       ctx.body = await translate({ filename, options, cache, cookie })
