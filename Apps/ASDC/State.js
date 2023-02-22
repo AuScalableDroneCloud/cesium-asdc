@@ -146,7 +146,7 @@ export function setTimelineOnDataSelect(newTimelineOnDataSelect) {
   timelineOnDataSelect = newTimelineOnDataSelect;
 }
 
-export function setLoadingFinshed(newLoadingFinished) {
+export function setLoadingFinished(newLoadingFinished) {
   loadingFinished = newLoadingFinished;
 }
 

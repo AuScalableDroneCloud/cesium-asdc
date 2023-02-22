@@ -5,7 +5,7 @@ export const cesiumIonAccessToken =
 // export const baseURL =  "https://asdc.cloud.edu.au";
 export const baseURL =
   window.location.hostname == "localhost"
-    ? "https://asdc.cloud.edu.au"
+    ? "https://dev.asdc.cloud.edu.au"
     : `${window.location.protocol}//${window.location.host
         .split(".")
         .slice(
@@ -30,9 +30,9 @@ export const pcFormats = ["laz", "las", "xyz", "pcd", "ply"];
 // export const processingAPI="http://localhost:8081";
 // export const processingAPI="http://192.168.99.100:8081";
 // export const processingAPI = "https://asdc.cloud.edu.au/cesium-api";
-// export const processingAPI = `${baseURL}/cesium-api`;
+export const processingAPI = `${baseURL}/cesium-api`;
 // export const processingAPI = `https://cesium-api.asdc.cloud.edu.au`; //Cookies need to get passed to subdomain
-export const processingAPI = `${url.protocol}//cesium-api.${url.host}`;
+// export const processingAPI = `${url.protocol}//cesium-api.${url.host}`;
 
 export const highlightHeightPX = 27.2;
 export const highlightColor = "green";

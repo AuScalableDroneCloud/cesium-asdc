@@ -40,7 +40,7 @@ import {
   init,
   odmProjects,
   loadingFinished,
-  setLoadingFinshed,
+  setLoadingFinished,
   mousePosition,
   setTimelineOnDataSelect,
   timelineOnDataSelect,
@@ -386,7 +386,7 @@ if (publicTask) {
     );
   }
   fetchPublicTask().then(() => {
-    setLoadingFinshed(true);
+    setLoadingFinished(true);
     setupSidebar(false);
     loadSelectedDataIDs(!(init && init.camera));
 
@@ -417,7 +417,7 @@ if (publicTask) {
       );
     }
     fetchIndexAssets().then(() => {
-      setLoadingFinshed(true);
+      setLoadingFinished(true);
 
       if (!(init && init.camera) && initVars && initVars.camera) {
         viewer.camera.position = new Cesium.Cartesian3(
@@ -499,7 +499,7 @@ if (publicTask) {
       if (!uploadPage) {
         fetchWebODMProjects(odmToken)
           .then(() => {
-            setLoadingFinshed(true);
+            setLoadingFinished(true);
             setupSidebar(uploadPage);
             loadSelectedDataIDs(!(init && init.camera));
 
@@ -519,7 +519,7 @@ if (publicTask) {
             }
           })
           .catch(() => {
-            setLoadingFinshed(true);
+            setLoadingFinished(true);
             if (
               initVars &&
               initVars.selectedData &&
@@ -1514,6 +1514,7 @@ document.getElementById("clip-export-button").onclick = (e) => {
         regions.push({
           fileName: fileName,
           url: data.source.url,
+          imageryType: data.name,
           type: "imagery",
           polygon: wktPolygon,
           outside: false,

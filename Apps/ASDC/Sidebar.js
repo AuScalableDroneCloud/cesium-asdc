@@ -35,8 +35,14 @@ import {
   cropPolygons,
   setSelectedDimension,
   selectedDimension,
+  setLoadingFinished,
 } from "./State.js";
-import { loadAsset, loadData, syncTimeline } from "./Datasets.js";
+import {
+  loadAsset,
+  loadData,
+  syncTimeline,
+  fetchWebODMProjects,
+} from "./Datasets.js";
 import { pcFormats, processingAPI } from "./Constants.js";
 import { closeGraphModal } from "./Graphs.js";
 import {
@@ -295,9 +301,9 @@ export const setupSidebar = (uploads, indexParam = false) => {
       sourceDivs["WebODM Projects"].nextElementSibling.firstChild.className ===
       "loader-parent"
     ) {
-      sourceDivs["WebODM Projects"].nextElementSibling.removeChild(
-        sourceDivs["WebODM Projects"].nextElementSibling.firstChild
-      );
+      sourceDivs[
+        "WebODM Projects"
+      ].nextElementSibling.firstChild.style.display = "none";
     }
     if (sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight) {
       var height = 0;
@@ -2544,47 +2550,53 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         tr4.style.display = "none";
         cropTable4.appendChild(tr4);
 
-        if (data.source && data.source.url) {
+        if (data.source && data.source.url && data.asset.project) {
           var td5 = document.createElement("td");
           var exportButton = document.createElement("button");
           exportButton.id = "export-btn";
           exportButton.innerHTML = "Export";
           exportButton.className = "button-1";
 
-          exportButton.onclick = () => {
-            if (data.asset.project && odmProjects) {
-              var projectName = odmProjects.find(
-                (p) => p.id == data.asset.project
-              ).name;
-              var fileName = `${projectName}_${data.asset.name}_${
-                data.id.endsWith("-op")
-                  ? "Orthophoto"
-                  : data.id.endsWith("-dtm")
-                  ? "DTM"
-                  : data.id.endsWith("-dsm")
-                  ? "DSM"
-                  : ""
-              }_Crop.tif`;
-            } else {
-              var fileName = `${data.asset.name}_${
-                data.date
-                  ? new Date(data.date).toLocaleDateString("en-au", {
-                      year: "numeric",
-                      month: "numeric",
-                      day: "numeric",
-                    })
-                  : ""
-              }${data.name ? "-" + data.name : ""}_${
-                data.id.endsWith("-op")
-                  ? "Orthophoto"
-                  : data.id.endsWith("-dtm")
-                  ? "DTM"
-                  : data.id.endsWith("-dsm")
-                  ? "DSM"
-                  : ""
-              }_Crop.tif`;
-            }
+          var odmImportButton = document.createElement("button");
+          odmImportButton.id = "odm-import-btn";
+          odmImportButton.innerHTML = "Import to WebODM";
+          odmImportButton.className = "button-1";
+          odmImportButton.style = "margin-left: 5px;";
 
+          if (data.asset.project && odmProjects) {
+            var projectName = odmProjects.find(
+              (p) => p.id == data.asset.project
+            ).name;
+            var fileName = `${projectName}_${data.asset.name}_${
+              data.id.endsWith("-op")
+                ? "Orthophoto"
+                : data.id.endsWith("-dtm")
+                ? "DTM"
+                : data.id.endsWith("-dsm")
+                ? "DSM"
+                : ""
+            }_Crop.tif`;
+          } else {
+            var fileName = `${data.asset.name}_${
+              data.date
+                ? new Date(data.date).toLocaleDateString("en-au", {
+                    year: "numeric",
+                    month: "numeric",
+                    day: "numeric",
+                  })
+                : ""
+            }${data.name ? "-" + data.name : ""}_${
+              data.id.endsWith("-op")
+                ? "Orthophoto"
+                : data.id.endsWith("-dtm")
+                ? "DTM"
+                : data.id.endsWith("-dsm")
+                ? "DSM"
+                : ""
+            }_Crop.tif`;
+          }
+
+          var getRegions = () => {
             var scalePoints = cropBoxes[data.id]?.scalePoints.slice(0, 8);
             var groundScalePoints = [
               scalePoints[0],
@@ -2610,7 +2622,6 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
             });
 
             wktPolygon += "))";
-            console.log(data);
 
             var regions = [
               {
@@ -2618,19 +2629,24 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
                 url: data.source.url,
                 type: "imagery",
                 imageryType: data.name,
-                // taskName:data.asset.name,
+                taskName: data.asset.name,
                 polygon: wktPolygon,
                 outside: false,
               },
             ];
 
-            var zipName = fileName.slice(0, fileName.lastIndexOf(".")) + ".zip";
+            return regions;
+          };
+
+          var zipName = fileName.slice(0, fileName.lastIndexOf(".")) + ".zip";
+
+          exportButton.onclick = () => {
+            var regions = getRegions();
 
             if (regions.length > 0) {
               var cropLink = `${processingAPI}/crop?regions=${encodeURIComponent(
                 JSON.stringify(regions)
-              )}&zipName=${zipName}
-              &taskName=${data.asset.name}`; //
+              )}&zipName=${zipName}`;
 
               var tab = window.open(cropLink, "_blank");
               var html = `<html><head></head><body>
@@ -2644,7 +2660,111 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
               tab.document.close();
             }
           };
+
+          var controller = new AbortController();
+          odmImportButton.onclick = () => {
+            controller.abort();
+            controller = new AbortController();
+
+            var regions = getRegions();
+
+            if (regions.length > 0) {
+              var cropLink = `${processingAPI}/crop?regions=${encodeURIComponent(
+                JSON.stringify(regions)
+              )}&zipName=${zipName}
+              &importToWebODM=true&taskName=${data.asset.name}_crop`;
+
+              if (
+                !odmImportButton.lastChild.className ||
+                !odmImportButton.lastChild.className === "loader-parent"
+              ) {
+                var loaderParent = document.createElement("div");
+                loaderParent.className = "loader-parent";
+                var loader = document.createElement("div");
+                loader.className = "loader";
+                loaderParent.appendChild(loader);
+                odmImportButton.appendChild(loaderParent);
+              }
+
+              fetch(cropLink, {
+                cache: "no-store",
+                credentials: "include",
+                signal: controller.signal,
+              })
+                .then((resp) => {
+                  if (odmImportButton.lastChild.className === "loader-parent") {
+                    odmImportButton.removeChild(odmImportButton.lastChild);
+                  }
+
+                  if (resp.status == 201) {
+                    sourceDivs[
+                      "WebODM Projects"
+                    ].nextElementSibling.firstChild.style.display = "flex";
+                    sourceDivs[
+                      "WebODM Projects"
+                    ].nextElementSibling.firstChild.nextElementSibling.style.display =
+                      "none";
+                    sourceDivs[
+                      "WebODM Projects"
+                    ].nextElementSibling.firstChild.nextElementSibling.nextElementSibling.style.display =
+                      "none";
+
+                    setLoadingFinished(false); //?
+
+                    setTimeout(() => {
+                      fetchWebODMProjects()
+                        .then(() => {
+                          setLoadingFinished(true);
+                          sourceDivs[
+                            "WebODM Projects"
+                          ].nextElementSibling.firstChild.style.display =
+                            "none";
+                          sourceDivs[
+                            "WebODM Projects"
+                          ].nextElementSibling.firstChild.nextElementSibling.style.display =
+                            "block";
+                          sourceDivs[
+                            "WebODM Projects"
+                          ].nextElementSibling.firstChild.nextElementSibling.nextElementSibling.style.display =
+                            "block";
+                          setupSidebar(false);
+
+                          var height = 0;
+                          var children = [...accordionDiv.children];
+                          for (var i = 0; i < children.length; i++) {
+                            if (children[i].style.maxHeight) {
+                              height += parseFloat(
+                                children[i].style.maxHeight.slice(0, -2)
+                              );
+                            } else {
+                              height +=
+                                children[i].scrollHeight +
+                                children[i].getBoundingClientRect().height;
+                            }
+                          }
+                          accordionDiv.style.maxHeight = height + "px";
+                        })
+                        .catch(() => {
+                          setLoadingFinished(true);
+
+                          setupSidebar(false);
+                        });
+                    }, 5000);
+                  } else {
+                    alert("there was an issue importing to webODM");
+                  }
+                })
+                .catch(() => {
+                  if (odmImportButton.lastChild.className === "loader-parent") {
+                    odmImportButton.removeChild(odmImportButton.lastChild);
+                  }
+
+                  alert("there was an issue importing to webODM");
+                });
+            }
+          };
           td5.appendChild(exportButton);
+          td5.appendChild(odmImportButton);
         }
 
         var cropTable3 = document.createElement("table");

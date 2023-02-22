@@ -1910,9 +1910,9 @@ export const fetchWebODMProjects = (token = {}) => {
               sourceDivs["WebODM Projects"].nextElementSibling.firstChild
                 .className === "loader-parent"
             ) {
-              sourceDivs["WebODM Projects"].nextElementSibling.removeChild(
-                sourceDivs["WebODM Projects"].nextElementSibling.firstChild
-              );
+              sourceDivs[
+                "WebODM Projects"
+              ].nextElementSibling.firstChild.style.display = "none";
             }
             sourceDivs["WebODM Projects"].nextElementSibling.appendChild(
               signInButton
@@ -1943,13 +1943,13 @@ export const fetchWebODMProjects = (token = {}) => {
           }
         }
         //get ept server cookie
-        projPromises.push(
-          fetch(`${eptServer}`, {
-            cache: "no-store",
-            credentials: "include",
-            signal: controller.signal,
-          })
-        );
+        // projPromises.push(
+        //   fetch(`${eptServer}`, {
+        //     cache: "no-store",
+        //     credentials: "include",
+        //     signal: controller.signal,
+        //   })
+        // );
       })
       .then(() => {
         Promise.all(projPromises).then((odmProjectsResps) => {
@@ -2248,8 +2248,24 @@ export const fetchWebODMProjects = (token = {}) => {
                     }
                   });
                 });
-                setAssets(assets.concat(odmAssets));
-                setDatasets(datasets.concat(odmDatasets));
+
+                setDatasets(
+                  datasets.concat(
+                    odmDatasets.filter(
+                      (d) => !datasets.map((data) => data.id).includes(d.id)
+                    )
+                  )
+                );
+
+                setAssets(
+                  assets.concat(
+                    odmAssets.filter(
+                      (a) =>
+                        !assets.map((asset) => asset.taskID).includes(a.taskID)
+                    )
+                  )
+                );
+
                 resolve();
               }
             });
