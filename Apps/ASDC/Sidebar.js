@@ -2543,15 +2543,16 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         var cropTable2 = document.createElement("table");
         cropTable2.style = "width: 100%;padding: 5px;";
 
-        var cropTable4 = document.createElement("table");
+        var cropTable3 = document.createElement("table");
         var tr4 = document.createElement("tr");
         tr4.id = `draw-msg-${data.id}`;
         tr4.innerHTML = "Please click on the map for the 2 vertices";
         tr4.style.display = "none";
-        cropTable4.appendChild(tr4);
+        cropTable3.appendChild(tr4);
 
         if (data.source && data.source.url && data.asset.project) {
           var td5 = document.createElement("td");
+          var td6 = document.createElement("td");
           var exportButton = document.createElement("button");
           exportButton.id = "export-btn";
           exportButton.innerHTML = "Export";
@@ -2709,46 +2710,43 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
                     ].nextElementSibling.firstChild.nextElementSibling.nextElementSibling.style.display =
                       "none";
 
-                    setLoadingFinished(false); //?
+                    setLoadingFinished(false);
+
+                    const prevProjectAssets = assets.filter(a=>a.project==data.asset.project)
+
 
                     setTimeout(() => {
                       fetchWebODMProjects()
-                        .then(() => {
-                          setLoadingFinished(true);
-                          sourceDivs[
-                            "WebODM Projects"
-                          ].nextElementSibling.firstChild.style.display =
-                            "none";
-                          sourceDivs[
-                            "WebODM Projects"
-                          ].nextElementSibling.firstChild.nextElementSibling.style.display =
-                            "block";
-                          sourceDivs[
-                            "WebODM Projects"
-                          ].nextElementSibling.firstChild.nextElementSibling.nextElementSibling.style.display =
-                            "block";
-                          setupSidebar(false);
+                      .then((response) => {
+                        setLoadingFinished(true);
+                        sourceDivs[
+                          "WebODM Projects"
+                        ].nextElementSibling.firstChild.style.display =
+                          "none";
+                        sourceDivs[
+                          "WebODM Projects"
+                        ].nextElementSibling.firstChild.nextElementSibling.style.display =
+                          "block";
+                        sourceDivs[
+                          "WebODM Projects"
+                        ].nextElementSibling.firstChild.nextElementSibling.nextElementSibling.style.display =
+                          "block";
 
-                          var height = 0;
-                          var children = [...accordionDiv.children];
-                          for (var i = 0; i < children.length; i++) {
-                            if (children[i].style.maxHeight) {
-                              height += parseFloat(
-                                children[i].style.maxHeight.slice(0, -2)
-                              );
-                            } else {
-                              height +=
-                                children[i].scrollHeight +
-                                children[i].getBoundingClientRect().height;
-                            }
-                          }
-                          accordionDiv.style.maxHeight = height + "px";
+                        setupSidebar(false);
+
+                        const projectAssets = assets.filter(a=>a.project==data.asset.project)
+                        var newAssets = projectAssets.filter(a=>!prevProjectAssets.includes(a))
+                        
+                        newAssets.map(a=>{
+                          projectDivs[data.asset.project].nextElementSibling.insertBefore(assetDivs[a.id].nextElementSibling,assetDivs[prevProjectAssets[0].id])
+                          projectDivs[data.asset.project].nextElementSibling.insertBefore(assetDivs[a.id],assetDivs[prevProjectAssets[0].id].previousElementSibling)
                         })
-                        .catch(() => {
-                          setLoadingFinished(true);
-
-                          setupSidebar(false);
-                        });
+                      })
+                      .catch((e) => {
+                        // console.log(e)
+                        setLoadingFinished(true);
+                        setupSidebar(false);
+                      });
                     }, 5000);
                   } else {
                     alert("there was an issue importing to webODM");
@@ -2764,7 +2762,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
             }
           };
           td5.appendChild(exportButton);
-          td5.appendChild(odmImportButton);
+          td6.appendChild(odmImportButton);
         }
 
         var cropTable3 = document.createElement("table");
@@ -2810,7 +2808,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         td7.appendChild(boxDrawButton);
 
         tr1.appendChild(td7);
-        cropTable1.appendChild(tr3);
+        cropTable2.appendChild(tr3);
 
         var td8 = document.createElement("td");
 
@@ -2838,9 +2836,11 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         td8.appendChild(resetButton);
         tr3.appendChild(td8);
         if (td5) tr3.appendChild(td5);
+        if (td6) tr3.appendChild(td6);
 
         cropDiv.appendChild(cropTable1);
-        cropDiv.appendChild(cropTable4);
+        cropDiv.appendChild(cropTable2);
+        cropDiv.appendChild(cropTable3);
 
         dateDivs.push(cropDiv);
       }

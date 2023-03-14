@@ -1954,7 +1954,7 @@ export const fetchWebODMProjects = (token = {}) => {
       .then(() => {
         Promise.all(projPromises).then((odmProjectsResps) => {
           //ept server
-          odmProjectsResps.pop();
+          // odmProjectsResps.pop();
 
           odmProjectsResps.map((resp) => {
             odmProjs = odmProjs.concat(resp.results);
