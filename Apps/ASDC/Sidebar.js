@@ -2093,11 +2093,18 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
           clippingPlanes.unionClippingRegions = val === "inside" ? false : true;
         };
         td4.appendChild(directionSelect);
+
+        var cropTable5 = document.createElement("table");
+        cropTable5.style = "width: 100%;padding: 5px;";
+        var tr3 = document.createElement("tr");
+        cropTable5.appendChild(tr3);
+
         if (
           (data.type == "EPTPointCloud" && !Array.isArray(data.url)) ||
           (data.source && data.source.ept)
         ) {
           var td5 = document.createElement("td");
+          var td6 = document.createElement("td");
           var exportButton = document.createElement("button");
           exportButton.id = "export-btn";
           exportButton.innerHTML = "Export";
@@ -2400,7 +2407,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
                   type: "ept",
                   polygon: wktPolygon,
                   bbox: bbox,
-                  outside: false,
+                  outside: outside,
                 },
               ];
 
@@ -2424,11 +2431,251 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
               exportModal.style.display = "none";
             };
           };
+
+          var odmImportButton = document.createElement("button");
+          odmImportButton.id = "odm-import-btn";
+          odmImportButton.innerHTML = "Import to WebODM";
+          odmImportButton.className = "button-1";
+          odmImportButton.style = "margin-left: 5px;";
+
+          var getRegions = () => {
+            if (data.type == "EPTPointCloud") {
+              var urlParams = new URLSearchParams(
+                tilesets[data.asset.id][data.id]._url.split("?")[1]
+              );
+              var ept = urlParams.get("ept");
+            } else {
+              var ept = data.source.ept;
+            }
+
+            if (
+              data.position &&
+              tilesets[data.asset.id][data.id].boundingSphereCenter
+            ) {
+              var offset = Cesium.Cartographic.toCartesian(
+                new Cesium.Cartographic.fromDegrees(
+                  data["position"]["lng"],
+                  data["position"]["lat"],
+                  data["position"]["height"]
+                )
+              );
+              var translation = Cesium.Cartesian3.subtract(
+                offset,
+                tilesets[data.asset.id][data.id].boundingSphereCenter,
+                new Cesium.Cartesian3()
+              );
+            }
+            var now = Cesium.JulianDate.now();
+
+            var scalePoints = cropBoxes[data.id]?.scalePoints.slice(0, 8);
+            var groundScalePoints = [
+              scalePoints[1],
+              scalePoints[3],
+              scalePoints[5],
+              scalePoints[7],
+              scalePoints[1],
+            ];
+
+            var wktPolygon = "POLYGON((";
+            groundScalePoints.map((entity, index) => {
+              var translatedPos = new Cesium.Cartesian3();
+              var cartesianPos = entity.position.getValue(now);
+              cartesianPos.clone(translatedPos);
+              if (translation) {
+                Cesium.Cartesian3.subtract(
+                  cartesianPos,
+                  translation,
+                  translatedPos
+                );
+              }
+              var pos = Cesium.Cartographic.fromCartesian(translatedPos);
+              var lon = pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
+              var lat = pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
+              wktPolygon += `${lon} ${lat}`;
+              if (index != groundScalePoints.length - 1) {
+                wktPolygon += ",";
+              }
+            });
+
+            wktPolygon += "))";
+
+            var heights = scalePoints.map((entity) => {
+              var translatedPos = new Cesium.Cartesian3();
+              var cartesianPos = entity.position.getValue(now);
+              cartesianPos.clone(translatedPos);
+              if (translation) {
+                Cesium.Cartesian3.subtract(
+                  cartesianPos,
+                  translation,
+                  translatedPos
+                );
+              }
+              var pos = Cesium.Cartographic.fromCartesian(translatedPos);
+              return pos.height;
+            });
+
+            var maxHeight = Math.max(...heights);
+            var minHeight = Math.min(...heights);
+
+            var lons = scalePoints.map((entity) => {
+              var translatedPos = new Cesium.Cartesian3();
+              var cartesianPos = entity.position.getValue(now);
+              cartesianPos.clone(translatedPos);
+              if (translation) {
+                Cesium.Cartesian3.subtract(
+                  cartesianPos,
+                  translation,
+                  translatedPos
+                );
+              }
+              var pos = Cesium.Cartographic.fromCartesian(translatedPos);
+              return pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
+            });
+            var minLon = Math.min(...lons);
+            var maxLon = Math.max(...lons);
+
+            var lats = scalePoints.map((entity) => {
+              var translatedPos = new Cesium.Cartesian3();
+              var cartesianPos = entity.position.getValue(now);
+              cartesianPos.clone(translatedPos);
+              if (translation) {
+                Cesium.Cartesian3.subtract(
+                  cartesianPos,
+                  translation,
+                  translatedPos
+                );
+              }
+              var pos = Cesium.Cartographic.fromCartesian(translatedPos);
+              return pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
+            });
+            var minLat = Math.min(...lats);
+            var maxLat = Math.max(...lats);
+
+            var bbox = [minLon, maxLon, minLat, maxLat, minHeight, maxHeight];
+            var outside =
+              !tilesets[data.asset.id][data.id].clippingPlanes
+                ?.unionClippingRegions;
+
+            var regions = [
+              {
+                url: ept,
+                type: "ept",
+                polygon: wktPolygon,
+                bbox: bbox,
+                outside: outside,
+              },
+            ];
+
+            return regions;
+          };
+
+          var pcController = new AbortController();
+          odmImportButton.onclick = () => {
+            pcController.abort();
+            pcController = new AbortController();
+
+            var regions = getRegions();
+
+            if (regions.length > 0) {
+              var cropLink = `${processingAPI}/crop?regions=${encodeURIComponent(
+                JSON.stringify(regions)
+              )}
+              &importToWebODM=true&taskName=${data.asset.name}_crop`;
+
+              if (
+                !odmImportButton.lastChild.className ||
+                !odmImportButton.lastChild.className === "loader-parent"
+              ) {
+                var loaderParent = document.createElement("div");
+                loaderParent.className = "loader-parent";
+                var loader = document.createElement("div");
+                loader.className = "loader";
+                loaderParent.appendChild(loader);
+                odmImportButton.appendChild(loaderParent);
+              }
+
+              fetch(cropLink, {
+                cache: "no-store",
+                credentials: "include",
+                signal: pcController.signal,
+              })
+                .then((resp) => {
+                  if (odmImportButton.lastChild.className === "loader-parent") {
+                    odmImportButton.removeChild(odmImportButton.lastChild);
+                  }
+
+                  if (resp.status == 201) {
+                    sourceDivs[
+                      "WebODM Projects"
+                    ].nextElementSibling.firstChild.style.display = "flex";
+                    sourceDivs[
+                      "WebODM Projects"
+                    ].nextElementSibling.firstChild.nextElementSibling.style.display =
+                      "none";
+                    sourceDivs[
+                      "WebODM Projects"
+                    ].nextElementSibling.firstChild.nextElementSibling.nextElementSibling.style.display =
+                      "none";
+
+                    setLoadingFinished(false);
+
+                    const prevProjectAssets = assets.filter(a=>a.project==data.asset.project)
+
+
+                    setTimeout(() => {
+                      fetchWebODMProjects()
+                      .then((response) => {
+                        setLoadingFinished(true);
+                        sourceDivs[
+                          "WebODM Projects"
+                        ].nextElementSibling.firstChild.style.display =
+                          "none";
+                        sourceDivs[
+                          "WebODM Projects"
+                        ].nextElementSibling.firstChild.nextElementSibling.style.display =
+                          "block";
+                        sourceDivs[
+                          "WebODM Projects"
+                        ].nextElementSibling.firstChild.nextElementSibling.nextElementSibling.style.display =
+                          "block";
+
+                        setupSidebar(false);
+
+                        const projectAssets = assets.filter(a=>a.project==data.asset.project)
+                        var newAssets = projectAssets.filter(a=>!prevProjectAssets.includes(a))
+                        
+                        newAssets.map(a=>{
+                          projectDivs[data.asset.project].nextElementSibling.insertBefore(assetDivs[a.id].nextElementSibling,assetDivs[prevProjectAssets[0].id])
+                          projectDivs[data.asset.project].nextElementSibling.insertBefore(assetDivs[a.id],assetDivs[prevProjectAssets[0].id].previousElementSibling)
+                        })
+                      })
+                      .catch((e) => {
+                        // console.log(e)
+                        setLoadingFinished(true);
+                        setupSidebar(false);
+                      });
+                    }, 5000);
+                  } else {
+                    alert("there was an issue importing to webODM");
+                  }
+                })
+                .catch(() => {
+                  if (odmImportButton.lastChild.className === "loader-parent") {
+                    odmImportButton.removeChild(odmImportButton.lastChild);
+                  }
+
+                  alert("there was an issue importing to webODM");
+                });
+            }
+          };
+
           td5.appendChild(exportButton);
+          td6.appendChild(odmImportButton);
         }
         tr2.appendChild(td3);
         tr2.appendChild(td4);
-        if (td5) tr2.appendChild(td5);
+        if (td5) tr3.appendChild(td5);
+        if (td6) tr3.appendChild(td6);
         cropTable2.appendChild(tr2);
 
         var cropTable3 = document.createElement("table");
@@ -2505,6 +2752,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         cropDiv.appendChild(cropTable2);
         cropDiv.appendChild(cropTable3);
         cropDiv.appendChild(cropTable4);
+        cropDiv.appendChild(cropTable5);
 
         dateDivs.push(cropDiv);
       } else if (data.type == "Imagery") {
