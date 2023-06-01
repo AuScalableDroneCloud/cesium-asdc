@@ -36,6 +36,7 @@ import {
   setSelectedDimension,
   selectedDimension,
   setLoadingFinished,
+  taskCropRectangles
 } from "./State.js";
 import {
   loadAsset,
@@ -55,6 +56,7 @@ import { cropBox } from "./CropBox.js";
 import { cropRectangle } from "./CropRectangle.js";
 import { cropBox2D } from "./CropBox2D.js";
 import { cropRectangle2D } from "./CropRectangle2D.js";
+import { cropRectangleMap } from "./CropRectangleMap.js"
 
 export const setupSidebar = (uploads, indexParam = false) => {
   if (!assets) return;
@@ -1891,6 +1893,500 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
   assetCheckbox.style.margin = "0 5px 0 0";
 
   assetDiv.firstChild.prepend(assetCheckbox);
+
+  if (asset.project){
+    var cropDiv = document.createElement("div");
+    cropDiv.style.display = "none";
+    cropDiv.style["border-bottom"] = "1px solid #efe5d5";
+    cropDiv.style.background = "wheat";
+    cropDiv.id = `assetCropDiv-${asset.id}`;
+
+    var cropTable1 = document.createElement("table");
+    cropTable1.style = "width: 100%;padding: 5px;";
+    var tr3 = document.createElement("tr");
+    var td4 = document.createElement("td");
+
+    var boxDrawButton = document.createElement("button");
+    boxDrawButton.id = `asset-rectangle-btn-${asset.id}`;
+    boxDrawButton.className = "button-1";
+    boxDrawButton.innerHTML = "Draw Custom Clipping Box";
+    boxDrawButton.onclick = () => {
+      if (!taskCropRectangles[asset.id]) {
+        boxDrawButton.style["background"] = "#e5e5e5";
+        boxDrawButton.style["border"] = "1px solid #000";
+        boxDrawButton.style["border-radius"] = "3px";
+        boxDrawButton.style["color"] = "#0075ff";
+
+        if (taskCropRectangles[asset.id]) {
+          taskCropRectangles[asset.id].disable();
+          taskCropRectangles[asset.id].toggleVisibilityOff();
+        }
+        taskCropRectangles[asset.id] = new cropRectangleMap(asset.id);
+        tr4.style.display = "table-row";
+      } else {
+        boxDrawButton.style["background"] = "#ededed";
+        boxDrawButton.style["color"] = "black";
+
+        if (taskCropRectangles[asset.id]) {
+          taskCropRectangles[asset.id].destroy();
+          delete taskCropRectangles[asset.id];
+        }
+
+        if (taskCropRectangles[asset.id]) {
+          taskCropRectangles[asset.id].enable();
+        }
+      }
+    };
+
+    td4.appendChild(boxDrawButton);
+
+    tr3.appendChild(td4);
+    cropTable1.appendChild(tr3);
+
+    var td5 = document.createElement("td");
+
+    var resetButton = document.createElement("button");
+    resetButton.innerHTML = "Reset";
+    resetButton.className = "button-1";
+    
+
+    resetButton.onclick = () => {
+      if (taskCropRectangles[asset.id]) {
+        taskCropRectangles[asset.id].destroy();
+        delete taskCropRectangles[asset.id];
+
+        boxDrawButton.style["background"] = "#ededed";
+        boxDrawButton.style["color"] = "black";
+        tr4.style.display = "none";
+      }
+    };
+    
+
+    td5.appendChild(resetButton);
+    tr3.appendChild(td5);
+
+    var cropTable2 = document.createElement("table");
+    cropTable2.style = "width: 100%;padding: 5px;";
+    //check numbering
+    var tr5 = document.createElement("tr");
+    var td9 = document.createElement("td");
+    td9.innerHTML = "Selected Layers:";
+    tr5.appendChild(td9);
+
+    var getPointCloudRegions = (data) => {
+      var ept=data.url;
+      var now = Cesium.JulianDate.now();
+
+      var scalePoints = taskCropRectangles[asset.id]?.scalePoints.slice(0, 8);
+      var groundScalePoints = [
+        scalePoints[1],
+        scalePoints[3],
+        scalePoints[5],
+        scalePoints[7],
+        scalePoints[1],
+      ];
+
+      var wktPolygon = "POLYGON((";
+      groundScalePoints.map((entity, index) => {
+        var translatedPos = new Cesium.Cartesian3();
+        var cartesianPos = entity.position.getValue(now);
+        cartesianPos.clone(translatedPos);
+        var pos = Cesium.Cartographic.fromCartesian(translatedPos);
+        var lon = pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
+        var lat = pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
+        wktPolygon += `${lon} ${lat}`;
+        if (index != groundScalePoints.length - 1) {
+          wktPolygon += ",";
+        }
+      });
+
+      wktPolygon += "))";
+
+      var heights = scalePoints.map((entity) => {
+        var translatedPos = new Cesium.Cartesian3();
+        var cartesianPos = entity.position.getValue(now);
+        cartesianPos.clone(translatedPos);
+        var pos = Cesium.Cartographic.fromCartesian(translatedPos);
+        return pos.height;
+      });
+
+      var maxHeight = Math.max(...heights);
+      var minHeight = Math.min(...heights);
+
+      var lons = scalePoints.map((entity) => {
+        var translatedPos = new Cesium.Cartesian3();
+        var cartesianPos = entity.position.getValue(now);
+        cartesianPos.clone(translatedPos);
+        var pos = Cesium.Cartographic.fromCartesian(translatedPos);
+        return pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
+      });
+      var minLon = Math.min(...lons);
+      var maxLon = Math.max(...lons);
+
+      var lats = scalePoints.map((entity) => {
+        var translatedPos = new Cesium.Cartesian3();
+        var cartesianPos = entity.position.getValue(now);
+        cartesianPos.clone(translatedPos);
+        var pos = Cesium.Cartographic.fromCartesian(translatedPos);
+        return pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
+      });
+      var minLat = Math.min(...lats);
+      var maxLat = Math.max(...lats);
+
+      var bbox = [minLon, maxLon, minLat, maxLat, minHeight, maxHeight];
+
+      if (data.asset.project && odmProjects) {
+        var projectName = odmProjects.find(
+          (p) => p.id == data.asset.project
+        ).name;
+        var fileName = `${projectName}_${data.asset.name}_PointCloud_Crop.laz`;
+      } else {
+        var fileName = `${data.asset.name}_${data.date
+            ? new Date(data.date).toLocaleDateString("en-au", {
+              year: "numeric",
+              month: "numeric",
+              day: "numeric",
+            })
+            : ""
+          }${data.name ? "-" + data.name : ""}_PointCloud_Crop.laz`;
+      }
+
+      var regions = [
+        {
+          url: ept,
+          type: "ept",
+          polygon: wktPolygon,
+          bbox: bbox,
+          outside: false,
+          
+          fileName:fileName
+        },
+      ];
+
+      return regions;
+    };
+    var getImageryRegions = (data) => {
+      var scalePoints = taskCropRectangles[asset.id]?.scalePoints.slice(0, 8);
+      var groundScalePoints = [
+        scalePoints[1],
+        scalePoints[3],
+        scalePoints[5],
+        scalePoints[7],
+        scalePoints[1],
+      ];
+
+      var wktPolygon = "POLYGON((";
+      groundScalePoints.map((entity, index) => {
+        var translatedPos = new Cesium.Cartesian3();
+        var cartesianPos = entity.position.getValue();
+        cartesianPos.clone(translatedPos);
+
+        var pos = Cesium.Cartographic.fromCartesian(translatedPos);
+        var lon = pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
+        var lat = pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
+        wktPolygon += `${lon} ${lat}`;
+        if (index != groundScalePoints.length - 1) {
+          wktPolygon += ",";
+        }
+      });
+
+      wktPolygon += "))";
+
+      var projectName = odmProjects.find(
+        (p) => p.id == data.asset.project
+      ).name;
+      var fileName = `${projectName}_${data.asset.name}_${
+        data.id.endsWith("-op")
+          ? "Orthophoto"
+          : data.id.endsWith("-dtm")
+          ? "DTM"
+          : data.id.endsWith("-dsm")
+          ? "DSM"
+          : ""
+      }_Crop.tif`;
+
+      var regions = [
+        {
+          fileName: fileName,
+          url: data.source.url,
+          type: "imagery",
+          imageryType: data.name,
+          taskName: data.asset.name,
+          polygon: wktPolygon,
+          outside: false,
+        },
+      ];
+
+      return regions;
+    };
+
+    var selectedLayers={};
+
+    var assetDatasets=[];
+    asset.data.map(d=>{
+      var data;
+      for (var i = 0; i < datasets.length; i++) {
+        if (datasets[i].id == d) {
+          data = datasets[i];
+          data.asset = asset;
+          assetDatasets.push(data);
+          break;
+        }
+      }
+      
+      var td10 = document.createElement("td");
+      td10.innerHTML=d.endsWith("-pc")? "Point Cloud":
+      d.endsWith("-op")? "Orthophoto" : d.slice(d.length-3,d.length).toUpperCase();
+      selectedLayers[td10.innerHTML]=true;
+      var layerChechbox = document.createElement("input");
+      layerChechbox.type = "checkbox";
+      layerChechbox.style = "padding: 0;vertical-align:middle;";
+      layerChechbox.checked = true;
+      layerChechbox.onchange=()=>{
+       selectedLayers[d.endsWith("-pc")? "Point Cloud":
+       d.endsWith("-op")? "Orthophoto" : d.slice(d.length-3,d.length).toUpperCase()]=layerChechbox.checked;
+      }
+      td10.append(layerChechbox)
+      tr5.appendChild(td10);
+      cropTable2.appendChild(tr5);
+    })
+
+    var cropTable3 = document.createElement("table");
+    cropTable3.style = "width: 100%;padding: 5px;";
+    var tr2 = document.createElement("tr");
+
+    var td3 = document.createElement("td");
+    var exportButton = document.createElement("button");
+    exportButton.id = "export-btn";
+    exportButton.innerHTML = "Export";
+    exportButton.style = "width:100%;";
+
+    exportButton.onclick = () => {
+      if (!taskCropRectangles[asset.id]) return;
+      var regions =[];
+      if (selectedLayers["Point Cloud"]){
+        regions.push(...getPointCloudRegions(assetDatasets[0]));
+      }
+      assetDatasets.slice(1,assetDatasets.length).map(d=>{
+        if (selectedLayers[d.name]){
+          regions.push(...getImageryRegions(d));
+        }
+      })
+  
+      var projectName = odmProjects.find(
+        (p) => p.id == asset.project
+      ).name;
+      var zipName = `${projectName}_${asset.name}_Crop.zip`;
+      
+      var cropLink = `${processingAPI}/crop?regions=${encodeURIComponent(
+        JSON.stringify(regions)
+      )}&zipName=${zipName}`;
+
+      var tab = window.open(cropLink, "_blank");
+      var html = `<html><head></head><body>
+      Exporting for download. Please wait...
+      <a href="${cropLink}" id="dl"/>
+      <script>
+        document.getElementById("dl").click();
+      </script>
+      </body></html>`;
+      tab.document.write(html);
+      tab.document.close();
+    };
+    td3.appendChild(exportButton);
+    
+
+    var td4 = document.createElement("td");
+    var odmImportButton = document.createElement("button");
+    odmImportButton.id = "odm-import-btn";
+    odmImportButton.innerHTML = "Import to WebODM";
+    odmImportButton.className = "button-1";
+    odmImportButton.style = "margin-left: 5px;";
+
+    var importController = new AbortController();
+    odmImportButton.onclick = () => {
+      if (!taskCropRectangles[asset.id]) return;
+      importController.abort();
+      importController = new AbortController();
+
+      var regions = [];
+      if (selectedLayers["Point Cloud"]){
+        regions.push(...getPointCloudRegions(assetDatasets[0]));
+      }
+      assetDatasets.slice(1,assetDatasets.length).map(d=>{
+        if (selectedLayers[d.name]){
+          regions.push(...getImageryRegions(d));
+        }
+      })
+
+      if (regions.length > 0) {
+        var cropLink = `${processingAPI}/crop?regions=${encodeURIComponent(
+          JSON.stringify(regions)
+        )}
+        &importToWebODM=true&taskName=${asset.name}_crop`;
+
+        if (
+          !odmImportButton.lastChild.className ||
+          !odmImportButton.lastChild.className === "loader-parent"
+        ) {
+          var loaderParent = document.createElement("div");
+          loaderParent.className = "loader-parent";
+          var loader = document.createElement("div");
+          loader.className = "loader";
+          loaderParent.appendChild(loader);
+          odmImportButton.appendChild(loaderParent);
+        }
+
+        fetch(cropLink, {
+          cache: "no-store",
+          credentials: "include",
+          signal: importController.signal,
+        })
+          .then((resp) => {
+            if (odmImportButton.lastChild.className === "loader-parent") {
+              odmImportButton.removeChild(odmImportButton.lastChild);
+            }
+            if (resp.status == 201) {
+              sourceDivs[
+                "WebODM Projects"
+              ].nextElementSibling.firstChild.style.display = "flex";
+              sourceDivs[
+                "WebODM Projects"
+              ].nextElementSibling.firstChild.nextElementSibling.style.display =
+                "none";
+              sourceDivs[
+                "WebODM Projects"
+              ].nextElementSibling.firstChild.nextElementSibling.nextElementSibling.style.display =
+                "none";
+
+              setLoadingFinished(false);
+
+              const prevProjectAssets = assets.filter(a=>a.project==asset.project)
+
+
+              setTimeout(() => {
+                fetchWebODMProjects()
+                .then((response) => {
+                  setLoadingFinished(true);
+                  sourceDivs[
+                    "WebODM Projects"
+                  ].nextElementSibling.firstChild.style.display =
+                    "none";
+                  sourceDivs[
+                    "WebODM Projects"
+                  ].nextElementSibling.firstChild.nextElementSibling.style.display =
+                    "block";
+                  sourceDivs[
+                    "WebODM Projects"
+                  ].nextElementSibling.firstChild.nextElementSibling.nextElementSibling.style.display =
+                    "block";
+
+                  setupSidebar(false);
+
+                  const projectAssets = assets.filter(a=>a.project==asset.project)
+                  var newAssets = projectAssets.filter(a=>!prevProjectAssets.includes(a))
+                  
+                  newAssets.map(a=>{
+                    projectDivs[asset.project].nextElementSibling.insertBefore(assetDivs[a.id].nextElementSibling,assetDivs[prevProjectAssets[0].id])
+                    projectDivs[asset.project].nextElementSibling.insertBefore(assetDivs[a.id],assetDivs[prevProjectAssets[0].id].previousElementSibling)
+                  })
+                })
+                .catch((e) => {
+                  // console.log(e)
+                  setLoadingFinished(true);
+                  setupSidebar(false);
+                });
+              }, 5000);
+            } else {
+              alert("there was an issue importing to webODM");
+            }
+          })
+          .catch((e) => {
+            if (odmImportButton.lastChild.className === "loader-parent") {
+              odmImportButton.removeChild(odmImportButton.lastChild);
+            }
+            console.log(e)
+
+            alert("there was an issue importing to webODM");
+          });
+      }
+    }; 
+
+    td4.appendChild(odmImportButton);
+
+    if (td3) tr2.appendChild(td3);
+    if (td4) tr2.appendChild(td4);
+    cropTable3.appendChild(tr2);
+
+
+    var cropTable4 = document.createElement("table");
+    var tr4 = document.createElement("tr");
+    tr4.id = `asset-draw-msg-${asset.id}`;
+    tr4.innerHTML =
+      "Please click on the map for the 2 vertices and the extrusion height";
+    cropTable4.appendChild(tr4);
+
+    cropDiv.appendChild(cropTable1);
+    cropDiv.appendChild(cropTable2);
+    cropDiv.appendChild(cropTable3);
+    cropDiv.appendChild(cropTable4);
+    
+    datesPanelDiv.appendChild(cropDiv);
+
+    var assetCropButton = document.createElement("div");
+    assetCropButton.title = "Crop";
+    assetCropButton.className = "fa fa-crop sidebar-button";
+    assetCropButton.style["margin-left"] = "5px";
+    assetCropButton.id = `assetCropButton-${asset.id}`;
+
+    assetCropButton.onclick = (e) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      if (!assetCropButton.style.color || assetCropButton.style.color == "white") {
+        assetCropButton.style.color = "#0075ff";
+        cropDiv.style.display = "block";
+      } else {
+        assetCropButton.style.color = null;
+        cropDiv.style.display = "none";
+      }
+
+      var panel = datesPanelDiv;
+
+      var height = 0;
+      var children = [...panel.children];
+      for (var i = 0; i < children.length; i++) {
+        height +=
+          children[i].scrollHeight +
+          children[i].getBoundingClientRect().height;
+      }
+
+      panel.style.maxHeight = height + "px";
+
+      var elem = panel.parentElement;
+      while (
+        elem &&
+        elem.id != "sidebar" &&
+        elem.id != "sidebar-data-buttons"
+      ) {
+        var height = 0;
+        var children = [...elem.children];
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].style.maxHeight) {
+            height += parseFloat(children[i].style.maxHeight.slice(0, -2));
+          } else {
+            height +=
+              children[i].scrollHeight +
+              children[i].getBoundingClientRect().height;
+          }
+        }
+        elem.style.maxHeight = height + "px";
+
+        elem = elem.parentElement;
+      }
+    };
+    assetDiv.firstChild.appendChild(assetCropButton);
+  }
 
   var assetColorDiv = document.createElement("div");
   assetColorDiv.style =

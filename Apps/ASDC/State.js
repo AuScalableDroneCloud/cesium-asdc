@@ -42,6 +42,7 @@ export var markersDataSource;
 
 export var cropBoxes = {};
 export var cropRectangles = {};
+export var taskCropRectangles = {};
 export var cropPolygons = {};
 
 export const pinBuilder = new Cesium.PinBuilder();

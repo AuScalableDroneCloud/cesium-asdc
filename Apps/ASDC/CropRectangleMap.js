@@ -1,8 +1,8 @@
 import { cropBoxMap } from "./CropBoxMap.js";
-import { viewer, setCropBoxMap } from "./State.js";
+import { viewer, setCropBoxMap, taskCropRectangles } from "./State.js";
 
 export class cropRectangleMap {
-  constructor() {
+  constructor(id) {
     this.positions = [];
 
     this.polygon = viewer.entities.add({
@@ -113,6 +113,8 @@ export class cropRectangleMap {
     );
 
     viewer.scene.canvas.style.cursor = "auto";
+
+    this.assetID=id;
   }
 
   removeEventHandlers = () => {
@@ -318,8 +320,11 @@ export class cropRectangleMap {
       modelMatrix: box.modelMatrix,
       translationRotationScale: box.trs,
     });
-
-    setCropBoxMap(box);
+    if(!this.assetID){
+      setCropBoxMap(box);
+    } else{
+      taskCropRectangles[this.assetID] = box;
+    }
 
     document.getElementById("clip-draw-button").style.background = null;
     delete this;
