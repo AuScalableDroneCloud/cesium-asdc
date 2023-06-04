@@ -81,6 +81,9 @@ export const setupSidebar = (uploads, indexParam = false) => {
       sources.map((s) => {
         sourceDivs[s] = createAccordion(s);
         sourceDivs[s].id = `source-${s}`;
+        sourceDivs[s].style.background="darkseagreen";
+        sourceDivs[s].style["font-size"]="11pt";
+        sourceDivs[s].style["font-weight"]="bold";
         var sourceAccordionPanelDiv = document.createElement("div");
         sourceAccordionPanelDiv.className = "sidebar-accordion-panel";
 
@@ -96,8 +99,9 @@ export const setupSidebar = (uploads, indexParam = false) => {
       });
       togglePublicData = true;
       categories.map((cat) => {
-        categoryDivs[cat.id] = createAccordion(cat.name, 18);
+        categoryDivs[cat.id] = createAccordion(cat.name, 0);
         categoryDivs[cat.id].id = `category-${cat.id}`;
+        categoryDivs[cat.id].style["font-size"]="10.5pt";
         //Uploads page
         if ((!uploads && cat.id !== 6) || (uploads && cat.id == 6)) {
           sourceDivs["Public Data"].nextElementSibling.appendChild(
@@ -114,7 +118,7 @@ export const setupSidebar = (uploads, indexParam = false) => {
   } else {
     categories.map((cat) => {
       if ((uploads && cat.id == 6) || publicTask || indexParam) {
-        categoryDivs[cat.id] = createAccordion(cat.name, 18);
+        categoryDivs[cat.id] = createAccordion(cat.name, 0);
         categoryDivs[cat.id].id = `category-${cat.id}`;
         sidebarDataButtons.appendChild(categoryDivs[cat.id]);
         var accordionPanelDiv = document.createElement("div");
@@ -126,7 +130,7 @@ export const setupSidebar = (uploads, indexParam = false) => {
 
   if (sharedODMAssetsExist) {
     init.index.categories.map((c) => {
-      sharedDivs[c.id] = createAccordion(c.name, 18);
+      sharedDivs[c.id] = createAccordion(c.name, 0);
       sharedDivs[c.id].id = `shared-${c.id}`;
       sourceDivs["Shared WebODM Datasets"].nextElementSibling.appendChild(
         sharedDivs[c.id]
@@ -141,7 +145,8 @@ export const setupSidebar = (uploads, indexParam = false) => {
   if (!uploads && Array.isArray(odmProjects)) {
     odmProjects.map((odmProject) => {
       if (projectDivs[odmProject.id]) return;
-      projectDivs[odmProject.id] = createAccordion(odmProject.name, 18);
+      projectDivs[odmProject.id] = createAccordion(odmProject.name, 0);
+      projectDivs[odmProject.id].style["font-size"]="10.5pt"
       projectDivs[odmProject.id].id = `project-${odmProject.id}`;
 
       const oldProjectClick = projectDivs[odmProject.id].onclick;
@@ -224,7 +229,7 @@ export const setupSidebar = (uploads, indexParam = false) => {
           var layerDiv = document.createElement("div");
           layerDiv.className = "sidebar-item";
           var layerContentDiv = document.createElement("div");
-          layerContentDiv.style.padding = "0 54px";
+          layerContentDiv.style.padding = "0 18px";
           layerContentDiv.innerHTML =
             "All " +
             (suffix == "pc"
@@ -367,8 +372,8 @@ export const setupSidebar = (uploads, indexParam = false) => {
       var metadataDiv = document.createElement("div");
       metadataDiv.className = "sidebar-text";
       var taskInfo = taskInfos[asset.taskID];
-      metadataDiv.innerHTML = `<table>
-      <tr><td><strong> Created on: </strong></td><td>${new Date(
+      metadataDiv.innerHTML = `<table style="text-align: end;">
+      <tr><td> Created on: </td><td>${new Date(
         taskInfo.created_at
       ).toLocaleString("en-au", {
         year: "numeric",
@@ -380,26 +385,26 @@ export const setupSidebar = (uploads, indexParam = false) => {
       })}</td></tr>
       ${
         taskInfo.processing_node_name
-          ? `<tr><td><strong>Processing Node: </strong></td><td>${taskInfo.processing_node_name}</td></tr>`
+          ? `<tr><td>Processing Node: </td><td>${taskInfo.processing_node_name}</td></tr>`
           : ""
       }
       ${
         taskInfo.options && Array.isArray(taskInfo.options)
-          ? `<tr><td><strong>Options: </strong></td><td>${taskInfo.options.map(
+          ? `<tr><td>Options: </td><td>${taskInfo.options.map(
               (o) => `${o.name} : ${o.value}`
             )}</td></tr>`
           : ""
       }
       ${
         taskInfo.statistics && taskInfo.statistics.gsd
-          ? `<tr><td><strong>Average GSD: </strong></td><td>${
+          ? `<tr><td>Average GSD: </td><td>${
               Math.round(taskInfo.statistics.gsd * 100) / 100
             } cm</td></tr>`
           : ""
       }
       ${
         taskInfo.statistics && taskInfo.statistics.area
-          ? `<tr><td><strong>Area: </strong></td><td>${
+          ? `<tr><td>Area: </td><td>${
               Math.round(taskInfo.statistics.area * 100) / 100
             } m²</td></tr>`
           : ""
@@ -408,7 +413,7 @@ export const setupSidebar = (uploads, indexParam = false) => {
         taskInfo.statistics &&
         taskInfo.statistics.pointcloud &&
         taskInfo.statistics.pointcloud.points
-          ? `<tr><td><strong>Reconstructed Points: </strong></td><td>${taskInfo.statistics.pointcloud.points}</td></tr>`
+          ? `<tr><td>Reconstructed Points: </td><td>${taskInfo.statistics.pointcloud.points}</td></tr>`
           : ""
       }
       </table>
@@ -1036,12 +1041,15 @@ const handleDataCheckboxChange = (
     var layerCheckBox = document.getElementById(
       `layerCheckbox-${asset.project}-${suffix}`
     );
+    var projectTasks = assets.filter((a) => a.project === asset.project);
     if (layerCheckBox) {
       var projectLayerDataIDs = [];
-      asset.data.map((dataID) => {
-        if (dataID.endsWith("-" + suffix)) {
-          projectLayerDataIDs.push(dataID);
-        }
+      projectTasks.map((asset) => {
+        asset.data.map((dataID) => {
+          if (dataID.endsWith("-" + suffix)) {
+            projectLayerDataIDs.push(dataID);
+          }
+        });
       });
     }
   }
@@ -1426,6 +1434,30 @@ const handleAssetCheckboxChange = (
       syncTimeline(true);
     }
   }
+
+  asset.data.map(data=>{
+    var suffix = data.split("-")[data.split("-").length - 1];
+
+    var layerCheckBox = document.getElementById(
+      `layerCheckbox-${asset.project}-${suffix}`
+    );
+
+    if (layerCheckBox) {
+      var projectTasks = assets.filter((a) => a.project === asset.project);
+
+      var projectLayerDataIDs = [];
+      projectTasks.map((a) => {
+        a.data.map((dataID) => {
+          if (dataID.endsWith("-" + suffix)) {
+            projectLayerDataIDs.push(dataID);
+          }
+        });
+      });
+      layerCheckBox.checked = projectLayerDataIDs.every((id) =>
+        selectedDatasets.find((d) => d.id == id)
+      );
+    }
+  })
 };
 
 const createZoomButton = (asset, data) => {
@@ -1885,7 +1917,8 @@ const createMarkersDataSource = () => {
 };
 
 const createAssetDiv = (asset, uploads, datesPanelDiv) => {
-  var assetDiv = createAccordion(asset.name, 36);
+  var assetDiv = createAccordion(asset.name, 9);
+  assetDiv.style["font-size"]="10pt";
   var assetCheckbox = document.createElement("input");
   assetCheckbox.id = `assetCheckbox-${asset.id}`;
   assetCheckbox.type = "checkbox";
@@ -1895,6 +1928,17 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
   assetDiv.firstChild.prepend(assetCheckbox);
 
   if (asset.project){
+    const oldAssetDivClick = assetDiv.onclick;
+    assetDiv.onclick=(e)=>{
+      var panel = assetDiv.nextElementSibling;
+      if (panel.style.maxHeight) {
+        assetDiv.style["border-bottom"]="1px solid #efe5d5";
+      } else{
+        assetDiv.style["border-bottom"]="none";
+      }
+      oldAssetDivClick(e);
+    }
+
     var cropDiv = document.createElement("div");
     cropDiv.style.display = "none";
     cropDiv.style["border-bottom"] = "1px solid #efe5d5";
@@ -1948,7 +1992,6 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
     var resetButton = document.createElement("button");
     resetButton.innerHTML = "Reset";
     resetButton.className = "button-1";
-    
 
     resetButton.onclick = () => {
       if (taskCropRectangles[asset.id]) {
@@ -1961,7 +2004,6 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
       }
     };
     
-
     td5.appendChild(resetButton);
     tr3.appendChild(td5);
 
@@ -1970,7 +2012,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
     //check numbering
     var tr5 = document.createElement("tr");
     var td9 = document.createElement("td");
-    td9.innerHTML = "Selected Layers:";
+    td9.innerHTML = "Layers to be Cropped:";
     tr5.appendChild(td9);
 
     var getPointCloudRegions = (data) => {
@@ -2331,8 +2373,6 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
     cropDiv.appendChild(cropTable3);
     cropDiv.appendChild(cropTable4);
     
-    datesPanelDiv.appendChild(cropDiv);
-
     var assetCropButton = document.createElement("div");
     assetCropButton.title = "Crop";
     assetCropButton.className = "fa fa-crop sidebar-button";
@@ -2385,7 +2425,6 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         elem = elem.parentElement;
       }
     };
-    assetDiv.firstChild.appendChild(assetCropButton);
   }
 
   var assetColorDiv = document.createElement("div");
@@ -2475,7 +2514,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
       };
 
       var dateContentDiv = document.createElement("div");
-      dateContentDiv.style.padding = "0 54px";
+      dateContentDiv.style.padding = "0 36px";
       dateContentDiv.style.display = "flex";
 
       var dateContentDivText = document.createElement("div");
@@ -3942,7 +3981,13 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         checkboxes,
         uploads
       );
+      if(assetCropButton){
+        timeseriesDiv.firstChild.appendChild(assetCropButton);
+      }
       datesPanelDiv.appendChild(timeseriesDiv);
+      if(cropDiv){
+        datesPanelDiv.appendChild(cropDiv);
+      }
     }
 
     dateDivs.map((div) => {
