@@ -1820,23 +1820,23 @@ export const fetchWebODMProjects = (token = {}) => {
                 document.getElementById("login-logout-button-text").innerHTML =
                   "Login";
                 const children = [
-                  ...sourceDivs["WebODM Projects"].nextElementSibling.children,
+                  ...sourceDivs["ASDC Projects"].nextElementSibling.children,
                 ];
                 for (var i = 0; i < children.length; i++) {
-                  sourceDivs["WebODM Projects"].nextElementSibling.removeChild(
+                  sourceDivs["ASDC Projects"].nextElementSibling.removeChild(
                     children[i]
                   );
                 }
-                sourceDivs["WebODM Projects"].nextElementSibling.appendChild(
+                sourceDivs["ASDC Projects"].nextElementSibling.appendChild(
                   signInButton
                 );
 
                 if (
-                  sourceDivs["WebODM Projects"].nextElementSibling.style
+                  sourceDivs["ASDC Projects"].nextElementSibling.style
                     .maxHeight
                 ) {
                   sourceDivs[
-                    "WebODM Projects"
+                    "ASDC Projects"
                   ].nextElementSibling.style.maxHeight =
                     signInButton.scrollHeight + "px";
                 }
@@ -1907,14 +1907,14 @@ export const fetchWebODMProjects = (token = {}) => {
                 signInButton.onclick;
             }
             if (
-              sourceDivs["WebODM Projects"].nextElementSibling.firstChild
+              sourceDivs["ASDC Projects"].nextElementSibling.firstChild
                 .className === "loader-parent"
             ) {
               sourceDivs[
-                "WebODM Projects"
+                "ASDC Projects"
               ].nextElementSibling.firstChild.style.display = "none";
             }
-            sourceDivs["WebODM Projects"].nextElementSibling.appendChild(
+            sourceDivs["ASDC Projects"].nextElementSibling.appendChild(
               signInButton
             );
             reject();

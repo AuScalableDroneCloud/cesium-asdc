@@ -128,7 +128,7 @@ if (window.self !== window.top) {
 
 setViewer(
   new Cesium.Viewer("cesiumContainer", {
-    // imageryProvider: new Cesium.IonImageryProvider({ assetId: 3954 }),//sentinel-2
+    //imageryProvider: new Cesium.IonImageryProvider({ assetId: 3954 }),//sentinel-2
     terrainProvider: Cesium.createWorldTerrain({ requestWaterMask: false }),
     vrButton: true,
     fullscreenElement: "cesiumContainer",
@@ -1164,20 +1164,20 @@ if (document.getElementById("login-logout-button")) {
       };
 
       const children = [
-        ...sourceDivs["WebODM Projects"].nextElementSibling.children,
+        ...sourceDivs["ASDC Projects"].nextElementSibling.children,
       ];
       for (var i = 0; i < children.length; i++) {
-        sourceDivs["WebODM Projects"].nextElementSibling.removeChild(
+        sourceDivs["ASDC Projects"].nextElementSibling.removeChild(
           children[i]
         );
       }
 
-      sourceDivs["WebODM Projects"].nextElementSibling.appendChild(
+      sourceDivs["ASDC Projects"].nextElementSibling.appendChild(
         signInButton
       );
 
-      if (sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight) {
-        sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight =
+      if (sourceDivs["ASDC Projects"].nextElementSibling.style.maxHeight) {
+        sourceDivs["ASDC Projects"].nextElementSibling.style.maxHeight =
           signInButton.scrollHeight + "px";
       }
 

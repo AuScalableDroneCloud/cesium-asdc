@@ -66,7 +66,7 @@ export const setupSidebar = (uploads, indexParam = false) => {
   var togglePublicData = false;
   if (!uploads && !publicTask && !indexParam) {
     if (Object.keys(sourceDivs).length == 0) {
-      var sources = ["Public Data", "WebODM Projects"];
+      var sources = ["Public Data", "ASDC Projects"];
 
       var sharedODMAssetsExist = false;
       if (
@@ -81,7 +81,7 @@ export const setupSidebar = (uploads, indexParam = false) => {
       sources.map((s) => {
         sourceDivs[s] = createAccordion(s);
         sourceDivs[s].id = `source-${s}`;
-        sourceDivs[s].style.background="darkseagreen";
+        sourceDivs[s].style.background="#c0dcc6";
         sourceDivs[s].style["font-size"]="11pt";
         sourceDivs[s].style["font-weight"]="bold";
         var sourceAccordionPanelDiv = document.createElement("div");
@@ -210,7 +210,7 @@ export const setupSidebar = (uploads, indexParam = false) => {
       );
       projectDivs[odmProject.id].firstChild.appendChild(projectOpacityBtn);
 
-      var sourcePanelDiv = sourceDivs["WebODM Projects"].nextElementSibling;
+      var sourcePanelDiv = sourceDivs["ASDC Projects"].nextElementSibling;
       sourcePanelDiv.appendChild(projectDivs[odmProject.id]);
 
       var projectsPanelDiv = document.createElement("div");
@@ -288,7 +288,7 @@ export const setupSidebar = (uploads, indexParam = false) => {
                       (d) => d.id === dataID && d.asset.categoryID != -3
                     );
                     var checkbox = sourceDivs[
-                      "WebODM Projects"
+                      "ASDC Projects"
                     ].nextElementSibling.querySelector(
                       `#dataCheckbox-${data.id}`
                     );
@@ -305,17 +305,17 @@ export const setupSidebar = (uploads, indexParam = false) => {
       });
     });
     if (
-      sourceDivs["WebODM Projects"].nextElementSibling.firstChild.className ===
+      sourceDivs["ASDC Projects"].nextElementSibling.firstChild.className ===
       "loader-parent"
     ) {
       sourceDivs[
-        "WebODM Projects"
+        "ASDC Projects"
       ].nextElementSibling.firstChild.style.display = "none";
     }
-    if (sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight) {
+    if (sourceDivs["ASDC Projects"].nextElementSibling.style.maxHeight) {
       var height = 0;
       var children = [
-        ...sourceDivs["WebODM Projects"].nextElementSibling.children,
+        ...sourceDivs["ASDC Projects"].nextElementSibling.children,
       ];
       for (var i = 0; i < children.length; i++) {
         if (children[i].style.maxHeight) {
@@ -326,7 +326,7 @@ export const setupSidebar = (uploads, indexParam = false) => {
             children[i].getBoundingClientRect().height;
         }
       }
-      sourceDivs["WebODM Projects"].nextElementSibling.style.maxHeight =
+      sourceDivs["ASDC Projects"].nextElementSibling.style.maxHeight =
         height + "px";
     }
   }
@@ -373,6 +373,7 @@ export const setupSidebar = (uploads, indexParam = false) => {
       metadataDiv.className = "sidebar-text";
       var taskInfo = taskInfos[asset.taskID];
       metadataDiv.innerHTML = `<table style="text-align: end;">
+      <tbody style="vertical-align: top;">
       <tr><td> Created on: </td><td>${new Date(
         taskInfo.created_at
       ).toLocaleString("en-au", {
@@ -416,6 +417,7 @@ export const setupSidebar = (uploads, indexParam = false) => {
           ? `<tr><td>Reconstructed Points: </td><td>${taskInfo.statistics.pointcloud.points}</td></tr>`
           : ""
       }
+      </tbody>
       </table>
       `;
       datesPanelDiv.appendChild(metadataDiv);
@@ -630,7 +632,7 @@ export const loadSelectedDataIDs = (fly) => {
       } else {
         var sourceDiv;
         if (c == -1) {
-          sourceDiv = sourceDivs["WebODM Projects"];
+          sourceDiv = sourceDivs["ASDC Projects"];
         } else if (c == -3) {
           sourceDiv = sourceDivs["Shared WebODM Datasets"];
         }
@@ -2290,14 +2292,14 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
             }
             if (resp.status == 201) {
               sourceDivs[
-                "WebODM Projects"
+                "ASDC Projects"
               ].nextElementSibling.firstChild.style.display = "flex";
               sourceDivs[
-                "WebODM Projects"
+                "ASDC Projects"
               ].nextElementSibling.firstChild.nextElementSibling.style.display =
                 "none";
               sourceDivs[
-                "WebODM Projects"
+                "ASDC Projects"
               ].nextElementSibling.firstChild.nextElementSibling.nextElementSibling.style.display =
                 "none";
 
@@ -2311,15 +2313,15 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
                 .then((response) => {
                   setLoadingFinished(true);
                   sourceDivs[
-                    "WebODM Projects"
+                    "ASDC Projects"
                   ].nextElementSibling.firstChild.style.display =
                     "none";
                   sourceDivs[
-                    "WebODM Projects"
+                    "ASDC Projects"
                   ].nextElementSibling.firstChild.nextElementSibling.style.display =
                     "block";
                   sourceDivs[
-                    "WebODM Projects"
+                    "ASDC Projects"
                   ].nextElementSibling.firstChild.nextElementSibling.nextElementSibling.style.display =
                     "block";
 
@@ -3141,14 +3143,14 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
 
                   if (resp.status == 201) {
                     sourceDivs[
-                      "WebODM Projects"
+                      "ASDC Projects"
                     ].nextElementSibling.firstChild.style.display = "flex";
                     sourceDivs[
-                      "WebODM Projects"
+                      "ASDC Projects"
                     ].nextElementSibling.firstChild.nextElementSibling.style.display =
                       "none";
                     sourceDivs[
-                      "WebODM Projects"
+                      "ASDC Projects"
                     ].nextElementSibling.firstChild.nextElementSibling.nextElementSibling.style.display =
                       "none";
 
@@ -3162,15 +3164,15 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
                       .then((response) => {
                         setLoadingFinished(true);
                         sourceDivs[
-                          "WebODM Projects"
+                          "ASDC Projects"
                         ].nextElementSibling.firstChild.style.display =
                           "none";
                         sourceDivs[
-                          "WebODM Projects"
+                          "ASDC Projects"
                         ].nextElementSibling.firstChild.nextElementSibling.style.display =
                           "block";
                         sourceDivs[
-                          "WebODM Projects"
+                          "ASDC Projects"
                         ].nextElementSibling.firstChild.nextElementSibling.nextElementSibling.style.display =
                           "block";
 
@@ -3482,14 +3484,14 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
 
                   if (resp.status == 201) {
                     sourceDivs[
-                      "WebODM Projects"
+                      "ASDC Projects"
                     ].nextElementSibling.firstChild.style.display = "flex";
                     sourceDivs[
-                      "WebODM Projects"
+                      "ASDC Projects"
                     ].nextElementSibling.firstChild.nextElementSibling.style.display =
                       "none";
                     sourceDivs[
-                      "WebODM Projects"
+                      "ASDC Projects"
                     ].nextElementSibling.firstChild.nextElementSibling.nextElementSibling.style.display =
                       "none";
 
@@ -3503,15 +3505,15 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
                       .then((response) => {
                         setLoadingFinished(true);
                         sourceDivs[
-                          "WebODM Projects"
+                          "ASDC Projects"
                         ].nextElementSibling.firstChild.style.display =
                           "none";
                         sourceDivs[
-                          "WebODM Projects"
+                          "ASDC Projects"
                         ].nextElementSibling.firstChild.nextElementSibling.style.display =
                           "block";
                         sourceDivs[
-                          "WebODM Projects"
+                          "ASDC Projects"
                         ].nextElementSibling.firstChild.nextElementSibling.nextElementSibling.style.display =
                           "block";
 

@@ -380,7 +380,7 @@
     };
     var webODMgroup = {
       type: "group",
-      name: "WebODM Projects",
+      name: "ASDC Projects",
       members: [],
     };
     fetch(`${baseURL}/api/projects/?ordering=-created_at`, {
