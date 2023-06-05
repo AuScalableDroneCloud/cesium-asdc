@@ -3206,8 +3206,8 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
             }
           };
 
-          td5.appendChild(exportButton);
-          td6.appendChild(odmImportButton);
+          if(data.asset.project) td5.appendChild(exportButton);
+          if(data.asset.project) td6.appendChild(odmImportButton);
         }
         tr2.appendChild(td3);
         tr2.appendChild(td4);
