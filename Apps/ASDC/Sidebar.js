@@ -2240,7 +2240,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
     td3.appendChild(exportButton);
     
 
-    var td4 = document.createElement("td");
+    var td11 = document.createElement("td");
     var odmImportButton = document.createElement("button");
     odmImportButton.id = "odm-import-btn";
     odmImportButton.innerHTML = "Import to WebODM";
@@ -2356,10 +2356,50 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
       }
     }; 
 
-    td4.appendChild(odmImportButton);
+    td11.appendChild(odmImportButton);
+
+    var td12 = document.createElement("td");
+    var odmSaveButton = document.createElement("button");
+    odmSaveButton.id = "odm-import-btn";
+    odmSaveButton.innerHTML = "Save for WebODM";
+    odmSaveButton.className = "button-1";
+    odmSaveButton.style = "margin-left: 5px;";
+
+    odmSaveButton.onclick = () => {
+      var regions = [];
+      if (selectedLayers["Point Cloud"]){
+        regions.push(...getPointCloudRegions(assetDatasets[0]));
+      }
+      assetDatasets.slice(1,assetDatasets.length).map(d=>{
+        if (selectedLayers[d.name]){
+          regions.push(...getImageryRegions(d));
+        }
+      })
+
+      if (regions.length > 0) {
+        var cropLink = `${processingAPI}/crop?regions=${encodeURIComponent(
+          JSON.stringify(regions)
+        )}
+        &importToWebODM=true&saveForWebODM=true&taskName=${asset.name}_crop`;
+
+        var tab = window.open(cropLink, "_blank");
+        var html = `<html><head></head><body>
+        Exporting for download. Please wait...
+        <a href="${cropLink}" id="dl"/>
+        <script>
+          document.getElementById("dl").click();
+        </script>
+        </body></html>`;
+        tab.document.write(html);
+        tab.document.close();
+      }
+    }
+
+    td12.appendChild(odmSaveButton);
 
     if (td3) tr2.appendChild(td3);
-    if (td4) tr2.appendChild(td4);
+    if (td11) tr2.appendChild(td11);
+    if (td12) tr2.appendChild(td12);
     cropTable3.appendChild(tr2);
 
 
@@ -2642,6 +2682,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         ) {
           var td5 = document.createElement("td");
           var td6 = document.createElement("td");
+          var td7 = document.createElement("td");
           var exportButton = document.createElement("button");
           exportButton.id = "export-btn";
           exportButton.innerHTML = "Export";
@@ -3193,7 +3234,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
                       });
                     }, 5000);
                   } else {
-                    alert("there was an issue importing to webODM");
+                    alert("there was an issue creating a webODM project");
                   }
                 })
                 .catch(() => {
@@ -3206,19 +3247,49 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
             }
           };
 
+          var odmSaveButton = document.createElement("button");
+          odmSaveButton.id = "odm-import-btn";
+          odmSaveButton.innerHTML = "Save for WebODM";
+          odmSaveButton.className = "button-1";
+          odmSaveButton.style = "margin-left: 5px;";
+
+          odmSaveButton.onclick = () => {
+            var regions = getRegions();
+
+            if (regions.length > 0) {
+              var cropLink = `${processingAPI}/crop?regions=${encodeURIComponent(
+                JSON.stringify(regions)
+              )}
+              &importToWebODM=true&saveForWebODM=true&taskName=${data.asset.name}_crop`;
+
+              var tab = window.open(cropLink, "_blank");
+              var html = `<html><head></head><body>
+              Exporting for download. Please wait...
+              <a href="${cropLink}" id="dl"/>
+              <script>
+                document.getElementById("dl").click();
+              </script>
+              </body></html>`;
+              tab.document.write(html);
+              tab.document.close();
+            }
+          }
+
           if(data.asset.project) td5.appendChild(exportButton);
           if(data.asset.project) td6.appendChild(odmImportButton);
+          if(data.asset.project) td7.appendChild(odmSaveButton);
         }
         tr2.appendChild(td3);
         tr2.appendChild(td4);
         if (td5) tr3.appendChild(td5);
         if (td6) tr3.appendChild(td6);
+        if (td7) tr3.appendChild(td7);
         cropTable2.appendChild(tr2);
 
         var cropTable3 = document.createElement("table");
         cropTable3.style = "width: 100%;padding: 5px;";
         var tr3 = document.createElement("tr");
-        var td7 = document.createElement("td");
+        var td8 = document.createElement("td");
 
         var boxDrawButton = document.createElement("button");
         boxDrawButton.id = `rectangle-btn-${data.id}`;
@@ -3254,12 +3325,12 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
           }
         };
 
-        td7.appendChild(boxDrawButton);
+        td8.appendChild(boxDrawButton);
 
-        tr3.appendChild(td7);
+        tr3.appendChild(td8);
         cropTable3.appendChild(tr3);
 
-        var td8 = document.createElement("td");
+        var td9 = document.createElement("td");
 
         var resetButton = document.createElement("button");
         resetButton.innerHTML = "Reset";
@@ -3282,8 +3353,8 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
           cropBoxes[data.id] = new cropBox(data);
         };
 
-        td8.appendChild(resetButton);
-        tr3.appendChild(td8);
+        td9.appendChild(resetButton);
+        tr3.appendChild(td9);
 
         cropDiv.appendChild(cropTable1);
         cropDiv.appendChild(cropTable2);
@@ -3338,6 +3409,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         if (data.source && data.source.url && data.asset.project) {
           var td5 = document.createElement("td");
           var td6 = document.createElement("td");
+          var td7 = document.createElement("td");
           var exportButton = document.createElement("button");
           exportButton.id = "export-btn";
           exportButton.innerHTML = "Export";
@@ -3348,6 +3420,12 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
           odmImportButton.innerHTML = "Import to WebODM";
           odmImportButton.className = "button-1";
           odmImportButton.style = "margin-left: 5px;";
+
+          var odmSaveButton = document.createElement("button");
+          odmSaveButton.id = "odm-import-btn";
+          odmSaveButton.innerHTML = "Save for WebODM";
+          odmSaveButton.className = "button-1";
+          odmSaveButton.style = "margin-left: 5px;";
 
           if (data.asset.project && odmProjects) {
             var projectName = odmProjects.find(
@@ -3546,14 +3624,39 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
                 });
             }
           };
+
+          odmSaveButton.onclick = () => {
+            var regions = getRegions();
+
+            if (regions.length > 0) {
+              var cropLink = `${processingAPI}/crop?regions=${encodeURIComponent(
+                JSON.stringify(regions)
+              )}
+              &importToWebODM=true&saveForWebODM=true&taskName=${data.asset.name}_crop`;
+
+              var tab = window.open(cropLink, "_blank");
+              var html = `<html><head></head><body>
+              Exporting for download. Please wait...
+              <a href="${cropLink}" id="dl"/>
+              <script>
+                document.getElementById("dl").click();
+              </script>
+              </body></html>`;
+              tab.document.write(html);
+              tab.document.close();
+
+            }
+          }
+
           td5.appendChild(exportButton);
           td6.appendChild(odmImportButton);
+          td7.appendChild(odmSaveButton);
         }
 
         var cropTable3 = document.createElement("table");
         cropTable3.style = "width: 100%;padding: 5px;";
         var tr3 = document.createElement("tr");
-        var td7 = document.createElement("td");
+        var td8 = document.createElement("td");
 
         var boxDrawButton = document.createElement("button");
         boxDrawButton.id = `rectangle-btn-${data.id}`;
@@ -3590,9 +3693,9 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
           }
         };
 
-        td7.appendChild(boxDrawButton);
+        td8.appendChild(boxDrawButton);
 
-        tr1.appendChild(td7);
+        tr1.appendChild(td8);
         cropTable2.appendChild(tr3);
 
         var td8 = document.createElement("td");
@@ -3622,6 +3725,7 @@ const createAssetDiv = (asset, uploads, datesPanelDiv) => {
         tr3.appendChild(td8);
         if (td5) tr3.appendChild(td5);
         if (td6) tr3.appendChild(td6);
+        if (td7) tr3.appendChild(td7);
 
         cropDiv.appendChild(cropTable1);
         cropDiv.appendChild(cropTable2);
