@@ -1180,7 +1180,7 @@ const handleDataCheckboxChange = (
 
     if (timelineTracks[asset["id"]] && timelineTracks[asset["id"]].intervals) {
       timelineTracks[asset["id"]].intervals.map((t) => {
-        if (t.data.id == data.id) {
+        if (t.data.data.id == data.id) {
           timelineTracks[asset["id"]].intervals.splice(
             timelineTracks[asset["id"]].intervals.indexOf(t),
             1
@@ -1442,7 +1442,8 @@ const handleAssetCheckboxChange = (
   }
 
   asset.data.map(data=>{
-    var suffix = data.split("-")[data.split("-").length - 1];
+    console.log(data);
+    var suffix = data?.split("-")[data?.split("-").length - 1];
 
     var layerCheckBox = document.getElementById(
       `layerCheckbox-${asset.project}-${suffix}`

@@ -1642,12 +1642,12 @@ Cesium.TimelineTrack.prototype.render = function (context, renderState) {
         context.lineWidth = 1;
         context.closePath();
 
-        document.getElementsByClassName("cesium-timeline-main")[0].onclick=()=>{
-          interval.data.viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
-            new Date(interval.data.data.date)
-          );
-          interval.data.viewer.timeline.updateFromClock();
-        }
+        // document.getElementsByClassName("cesium-timeline-main")[0].onclick=()=>{
+        //   interval.data.viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+        //     new Date(interval.data.data.date)
+        //   );
+        //   interval.data.viewer.timeline.updateFromClock();
+        // }
       }
     } else if (
       Cesium.JulianDate.lessThanOrEquals(startInterval, spanStop) &&
@@ -1702,12 +1702,12 @@ Cesium.TimelineTrack.prototype.render = function (context, renderState) {
           context.lineWidth = 1;
           context.closePath();
 
-          document.getElementsByClassName("cesium-timeline-main")[0].onclick=()=>{
-            interval.data.viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
-              new Date(interval.data.data.date)
-            );
-            interval.data.viewer.timeline.updateFromClock();
-          }
+          // document.getElementsByClassName("cesium-timeline-main")[0].onclick=()=>{
+          //   interval.data.viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+          //     new Date(interval.data.data.date)
+          //   );
+          //   interval.data.viewer.timeline.updateFromClock();
+          // }
         }
       }
     }
@@ -2173,6 +2173,9 @@ export const fetchWebODMProjects = (token = {}) => {
                             name: "Point Cloud",
                             url: `${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`,
                             asset: odmAssets[odmAssets.length - 1],
+                            
+                            date:new Date(task?.statistics?.start_date?.split(" at ")[0].split("/").reverse().join("-")),
+
                             position: {
                               lng: pos[0],
                               lat: pos[1],
