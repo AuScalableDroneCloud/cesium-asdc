@@ -1278,7 +1278,7 @@ export const loadData = (
               : Cesium.JulianDate.fromDate(
                   new Date(new Date(date).getTime() + 86400000)
                 ),
-          data: data,
+          data: {data:data,viewer:viewer}
         }),
       ];
 
@@ -1324,7 +1324,7 @@ export const loadData = (
             : Cesium.JulianDate.fromDate(
                 new Date(new Date(date).getTime() + 86400000)
               ),
-        data: data,
+        data: {data:data,viewer:viewer}
       });
 
       if (
@@ -1641,6 +1641,13 @@ Cesium.TimelineTrack.prototype.render = function (context, renderState) {
         context.stroke();
         context.lineWidth = 1;
         context.closePath();
+
+        document.getElementsByClassName("cesium-timeline-main")[0].onclick=()=>{
+          interval.data.viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+            new Date(interval.data.data.date)
+          );
+          interval.data.viewer.timeline.updateFromClock();
+        }
       }
     } else if (
       Cesium.JulianDate.lessThanOrEquals(startInterval, spanStop) &&
@@ -1694,6 +1701,13 @@ Cesium.TimelineTrack.prototype.render = function (context, renderState) {
           context.stroke();
           context.lineWidth = 1;
           context.closePath();
+
+          document.getElementsByClassName("cesium-timeline-main")[0].onclick=()=>{
+            interval.data.viewer.clock.currentTime = new Cesium.JulianDate.fromDate(
+              new Date(interval.data.data.date)
+            );
+            interval.data.viewer.timeline.updateFromClock();
+          }
         }
       }
     }
