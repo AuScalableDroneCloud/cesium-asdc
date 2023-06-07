@@ -1505,7 +1505,14 @@ const createTimeseriesDiv = (asset, assetCheckbox, checkboxes, uploads) => {
   timeseriesContentDiv.style.padding = "0 36px";
   timeseriesContentDiv.innerHTML = "All Layers";
 
+  var tsCheckbox = document.createElement("input");
+  tsCheckbox.id = `tsCheckbox-${asset.id}`
+  tsCheckbox.type = "checkbox";
+  tsCheckbox.style.float = "left";
+  tsCheckbox.style.margin = "0 5px 0 0";
+
   timeseriesDiv.onclick = (e) => {
+    tsCheckbox.checked=true;
     if (e && e.target.nodeName == "INPUT") return;
 
     assetCheckbox.indeterminate = false;
@@ -1548,12 +1555,6 @@ const createTimeseriesDiv = (asset, assetCheckbox, checkboxes, uploads) => {
     );
     loadAsset(asset, true, true);
   };
-
-  var tsCheckbox = document.createElement("input");
-  tsCheckbox.id = `tsCheckbox-${asset.id}`
-  tsCheckbox.type = "checkbox";
-  tsCheckbox.style.float = "left";
-  tsCheckbox.style.margin = "0 5px 0 0";
 
   tsCheckbox.checked=assetCheckbox.checked;
   tsCheckbox.onchange = (e) => {
