@@ -1038,6 +1038,8 @@ const handleDataCheckboxChange = (
   assetCheckbox.indeterminate =
     !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
 
+  document.getElementById(`tsCheckbox-${asset.id}`).checked=assetCheckbox.checked;
+
   if (asset.project) {
     var suffix = data.id.split("-")[data.id.split("-").length - 1];
     var layerCheckBox = document.getElementById(
@@ -1241,6 +1243,8 @@ const handleAssetCheckboxChange = (
   asset,
   uploads
 ) => {
+  document.getElementById(`tsCheckbox-${asset.id}`).checked=assetCheckbox.checked;
+
   checkboxes.map((cb) => {
     cb.checked = assetCheckbox.checked;
   });
@@ -1498,10 +1502,12 @@ const createTimeseriesDiv = (asset, assetCheckbox, checkboxes, uploads) => {
   timeseriesDiv.className = "sidebar-item";
 
   var timeseriesContentDiv = document.createElement("div");
-  timeseriesContentDiv.style.padding = "0 54px";
+  timeseriesContentDiv.style.padding = "0 36px";
   timeseriesContentDiv.innerHTML = "All Layers";
 
-  timeseriesDiv.onclick = () => {
+  timeseriesDiv.onclick = (e) => {
+    if (e && e.target.nodeName == "INPUT") return;
+
     assetCheckbox.indeterminate = false;
     assetCheckbox.checked = true;
     checkboxes?.map((cb) => {
@@ -1543,6 +1549,20 @@ const createTimeseriesDiv = (asset, assetCheckbox, checkboxes, uploads) => {
     loadAsset(asset, true, true);
   };
 
+  var tsCheckbox = document.createElement("input");
+  tsCheckbox.id = `tsCheckbox-${asset.id}`
+  tsCheckbox.type = "checkbox";
+  tsCheckbox.style.float = "left";
+  tsCheckbox.style.margin = "0 5px 0 0";
+
+  tsCheckbox.checked=assetCheckbox.checked;
+  tsCheckbox.onchange = (e) => {
+    assetCheckbox.indeterminate=false;
+    assetCheckbox.checked=tsCheckbox.checked;
+    handleAssetCheckboxChange(checkboxes, assetCheckbox, asset, uploads);
+  };;
+
+  timeseriesContentDiv.appendChild(tsCheckbox);
   timeseriesDiv.appendChild(timeseriesContentDiv);
 
   return timeseriesDiv;
