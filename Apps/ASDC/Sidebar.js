@@ -1512,8 +1512,8 @@ const createTimeseriesDiv = (asset, assetCheckbox, checkboxes, uploads) => {
   tsCheckbox.style.margin = "0 5px 0 0";
 
   timeseriesDiv.onclick = (e) => {
-    tsCheckbox.checked=true;
     if (e && e.target.nodeName == "INPUT") return;
+    tsCheckbox.checked=true;
 
     assetCheckbox.indeterminate = false;
     assetCheckbox.checked = true;
