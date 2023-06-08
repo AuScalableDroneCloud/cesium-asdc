@@ -2174,7 +2174,8 @@ export const fetchWebODMProjects = (token = {}) => {
                             url: `${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`,
                             asset: odmAssets[odmAssets.length - 1],
                             
-                            date:new Date(task?.statistics?.start_date?.split(" at ")[0].split("/").reverse().join("-")),
+                            date:new Date(task?.statistics?.start_date?.split(" at ")[0].split("/").reverse().join("-"))!="Invalid Date"?
+                                  new Date(task?.statistics?.start_date?.split(" at ")[0].split("/").reverse().join("-")):null,
 
                             position: {
                               lng: pos[0],
@@ -2226,6 +2227,10 @@ export const fetchWebODMProjects = (token = {}) => {
                             bounds: metadata[metadataIndex].bounds.value,
                             minzoom: metadata[metadataIndex].minzoom,
                             maxzoom: metadata[metadataIndex].maxzoom,
+
+                            date:new Date(task?.statistics?.start_date?.split(" at ")[0].split("/").reverse().join("-"))!="Invalid Date"?
+                                  new Date(task?.statistics?.start_date?.split(" at ")[0].split("/").reverse().join("-")):null,
+
                             position: {
                               lng: metadata[metadataIndex].center[0],
                               lat: metadata[metadataIndex].center[1],
