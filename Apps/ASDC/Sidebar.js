@@ -1038,8 +1038,10 @@ const handleDataCheckboxChange = (
   assetCheckbox.indeterminate =
     !assetCheckbox.checked && checkboxes.some((cb) => cb.checked);
 
-  document.getElementById(`tsCheckbox-${asset.id}`).checked=assetCheckbox.checked;
-
+  if(document.getElementById(`tsCheckbox-${asset.id}`)){
+    document.getElementById(`tsCheckbox-${asset.id}`).checked=assetCheckbox.checked;
+  }
+  
   if (asset.project) {
     var suffix = data.id.split("-")[data.id.split("-").length - 1];
     var layerCheckBox = document.getElementById(
