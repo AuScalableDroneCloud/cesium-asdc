@@ -1545,6 +1545,43 @@ document.getElementById("clip-export-button").onclick = (e) => {
   }
 };
 
+document.getElementById("clip-copy-button").onclick = (e) => {
+  if (!cropBoxMap) return;
+
+  var scalePoints = cropBoxMap.scalePoints.slice(0, 8);
+  var groundScalePoints = [
+    scalePoints[1],
+    scalePoints[3],
+    scalePoints[5],
+    scalePoints[7],
+  ];
+  var now = Cesium.JulianDate.now();
+
+  var wktPolygon = "POLYGON((";
+  [...groundScalePoints, scalePoints[1]].map((entity, index) => {
+    var cartesianPos = entity.position.getValue(now);
+    var pos = Cesium.Cartographic.fromCartesian(cartesianPos);
+    var lon = pos.longitude * Cesium.Math.DEGREES_PER_RADIAN;
+    var lat = pos.latitude * Cesium.Math.DEGREES_PER_RADIAN;
+    wktPolygon += `${lon} ${lat}`;
+    if (index != groundScalePoints.length) {
+      wktPolygon += ",";
+    }
+  });
+
+  wktPolygon += "))";
+
+  fetch(`${processingAPI}/wkt2geojson?wkt=${wktPolygon}`)
+  .then((response) => {
+    if (response.status === 200) {
+      return response.text();
+    }
+  })
+  .then(response=>{
+    navigator.clipboard.writeText(response)
+  })
+}
+
 const displayShareURL = () => {
   document.getElementById("share-question").style.display = "none";
   document.getElementById("share-link").style.display = "block";
