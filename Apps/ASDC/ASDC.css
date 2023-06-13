@@ -172,8 +172,9 @@
 }
 
 .sidebar-upload-button {
-  padding: 10px;
-  border-top: 1px solid #efe5d5;
+  height:0%;
+  /* padding: 10px;
+  border-top: 1px solid #efe5d5; */
 }
 
 .modal {
