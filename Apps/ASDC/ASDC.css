@@ -156,7 +156,8 @@
 }
 
 #sidebar-data-buttons {
-  height: calc(100% - 34.6px);
+  /* height: calc(100% - 34.6px); */
+  height: 100%;
   overflow: auto;
 }
 

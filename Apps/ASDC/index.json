@@ -103,8 +103,7 @@
       "name": "Doran",
       "status": "active",
       "categoryID": 2,
-      "/data": [36, 117, 37, 38, 39, 40],
-      "data": [36, 117, 37, 38, 39]
+      "data": [36, 117, 37, 38, 39, 40]
     },
     {
       "id": 20,
@@ -846,7 +845,7 @@
         "height": 917.0042392113367
       },
       "boundingSphereRadius": 130.7282106932594,
-      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/USLN/Contours_Doran.json"
+      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/USLN/Contours_Doran_v2.json"
     },
     {
       "id": 41,
