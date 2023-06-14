@@ -182,14 +182,22 @@
         </table>
         <table>
           <tr>
-            <td>Clipping Box:</td>
+            <td style="pointer-events: auto">
+              <input
+                type="button"
+                value="Clipping Box"
+                id="clipping-box-button"
+                class="cesium-button"
+                style="width: 100%"
+              />
+            </td>
             <td style="pointer-events: auto">
               <input
                 type="button"
                 value="Draw"
                 id="clip-draw-button"
                 class="cesium-button"
-                style="width: 100%"
+                style="width: 100%; display: none;"
               />
             </td>
             <td style="pointer-events: auto">
@@ -198,7 +206,7 @@
                 value="Remove"
                 id="clip-remove-button"
                 class="cesium-button"
-                style="width: 100%"
+                style="width: 100%; display: none;"
               />
             </td>
             <td style="pointer-events: auto">
@@ -208,7 +216,7 @@
                 title="Clicking will crop and export all the available supported point clouds within the region"
                 id="clip-export-button"
                 class="cesium-button"
-                style="width: 100%"
+                style="width: 100%; display: none;"
               />
             </td>
             <td style="pointer-events: auto">
@@ -217,7 +225,7 @@
                 value="Copy Polygon to Clipboard"
                 id="clip-copy-button"
                 class="cesium-button"
-                style="width: 100%"
+                style="width: 100%; display: none;"
               />
             </td>
             <td id="clip-no-region" style="display: none">

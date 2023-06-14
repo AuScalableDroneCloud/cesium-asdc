@@ -1088,7 +1088,7 @@ viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
   }
 }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
-document.getElementById("sidebar-upload-button").onclick = openModal;
+// document.getElementById("sidebar-upload-button").onclick = openModal;
 document.getElementById("close-upload-modal").onclick = closeModal;
 document.getElementById("add-file-button").onclick = addFileInput;
 document.getElementById("modal-upload-button").onclick = upload;
@@ -1257,9 +1257,13 @@ clippingDrawButton.onclick = (e) => {
     clippingDrawButton.style.background = "#48b";
     mapRect = new cropRectangleMap();
   }
+
+  document.getElementById("clip-export-button").style.display="none";
+  document.getElementById("clip-copy-button").style.display="none";
 };
 
-document.getElementById("clip-remove-button").onclick = (e) => {
+var clipRemoveButton = document.getElementById("clip-remove-button");
+clipRemoveButton.onclick = (e) => {
   if (mapRect) {
     mapRect.destroy();
     mapRect = null;
@@ -1271,9 +1275,12 @@ document.getElementById("clip-remove-button").onclick = (e) => {
   clippingDrawButton.style.background = null;
 
   document.getElementById("clip-no-region").style.display = "none";
+  document.getElementById("clip-export-button").style.display="none";
+  document.getElementById("clip-copy-button").style.display="none";
 };
 
-document.getElementById("clip-export-button").onclick = (e) => {
+var clipExportButton = document.getElementById("clip-export-button");
+clipExportButton.onclick = (e) => {
   if (!cropBoxMap) return;
   var regions = [];
 
@@ -1545,7 +1552,8 @@ document.getElementById("clip-export-button").onclick = (e) => {
   }
 };
 
-document.getElementById("clip-copy-button").onclick = (e) => {
+var clipCopyButton = document.getElementById("clip-copy-button");
+clipCopyButton.onclick = (e) => {
   if (!cropBoxMap) return;
 
   var scalePoints = cropBoxMap.scalePoints.slice(0, 8);
@@ -1581,6 +1589,38 @@ document.getElementById("clip-copy-button").onclick = (e) => {
     navigator.clipboard.writeText(response)
   })
 }
+
+var clippingBoxButton = document.getElementById("clipping-box-button")
+var clippingButtonsVisible=false;
+clippingBoxButton.onclick = (e) => {
+  if(!clippingButtonsVisible){
+    clippingDrawButton.style.display="block";
+    clipRemoveButton.style.display="block";
+    if(cropBoxMap){
+      clipExportButton.style.display="block";
+      clipCopyButton.style.display="block";
+    }
+    clippingBoxButton.style.background="#48b";
+    clippingBoxButton.style["border-color"]="#aef";
+    clippingBoxButton.style["box-shadow"]="0 0 8px #fff";
+    
+    clippingButtonsVisible = true;
+  } else {
+    clipRemoveButton.onclick();
+    
+    clippingDrawButton.style.display="none";
+    clipRemoveButton.style.display="none";
+    clipExportButton.style.display="none";
+    clipCopyButton.style.display="none";
+
+    clippingBoxButton.style.background=null;
+    clippingBoxButton.style["border-color"]=null;
+    clippingBoxButton.style["box-shadow"]=null;
+
+    clippingButtonsVisible = false;
+  }
+}
+
 
 const displayShareURL = () => {
   document.getElementById("share-question").style.display = "none";

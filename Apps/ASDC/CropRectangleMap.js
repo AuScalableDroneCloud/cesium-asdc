@@ -327,6 +327,8 @@ export class cropRectangleMap {
     }
 
     document.getElementById("clip-draw-button").style.background = null;
+    document.getElementById("clip-export-button").style.display="block";
+    document.getElementById("clip-copy-button").style.display="block";
     delete this;
   };
 
