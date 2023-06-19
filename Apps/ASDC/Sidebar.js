@@ -1444,7 +1444,6 @@ const handleAssetCheckboxChange = (
   }
 
   asset.data.map(data=>{
-    console.log(data);
     var suffix = data?.split("-")[data?.split("-").length - 1];
 
     var layerCheckBox = document.getElementById(

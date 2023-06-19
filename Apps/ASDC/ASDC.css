@@ -171,11 +171,11 @@
   border-bottom: 1px solid #efe5d5;
 }
 
-.sidebar-upload-button {
+/* .sidebar-upload-button {
   height:0%;
-  /* padding: 10px;
-  border-top: 1px solid #efe5d5; */
-}
+  padding: 10px;
+  border-top: 1px solid #efe5d5;
+} */
 
 .modal {
   display: none;
