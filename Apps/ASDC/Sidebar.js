@@ -1915,7 +1915,7 @@ const createMarkersDataSource = () => {
       var id = clusteredEntities[0].id.slice("marker_".length);
       var data = datasets.find((d) => d.id == id);
 
-      if (data.bounds) {
+      if (data && data.bounds) {
         var rect = new Cesium.Rectangle.fromDegrees(
           data.bounds[0],
           data.bounds[1],
