@@ -119,8 +119,7 @@ export const applyStyle = (schemaName) => {
       } else {
         if (alpha) {
           if (
-            selectedTileset?.root?.content instanceof
-            Cesium.PointCloud3DTileContent
+            selectedTileset?.root?.content?.pointsLength
           ) {
             selectedTileset.style = new Cesium.Cesium3DTileStyle({
               color: `rgba(\${COLOR}.r * 255, \${COLOR}.g * 255, \${COLOR}.b * 255,${alpha})`,
