@@ -149,60 +149,60 @@ export const setupSidebar = (uploads, indexParam = false) => {
       projectDivs[odmProject.id].style["font-size"]="10.5pt"
       projectDivs[odmProject.id].id = `project-${odmProject.id}`;
 
-      const oldProjectClick = projectDivs[odmProject.id].onclick;
-      projectDivs[odmProject.id].onclick = () => {
-        oldProjectClick();
-        var projectAssets = assets.filter(
-          (a) => a.project == odmProject.id && a.categoryID == -1
-        );
-        projectAssets.map((asset) => {
-          var assetDatasets = [];
-          asset?.data?.map((dataID, index) => {
-            for (var i = 0; i < datasets.length; i++) {
-              if (datasets[i].id == dataID) {
-                assetDatasets.push(datasets[i]);
-              }
-            }
-          });
+      // const oldProjectClick = projectDivs[odmProject.id].onclick;
+      // projectDivs[odmProject.id].onclick = () => {
+      //   oldProjectClick();
+      //   var projectAssets = assets.filter(
+      //     (a) => a.project == odmProject.id && a.categoryID == -1
+      //   );
+      //   projectAssets.map((asset) => {
+      //     var assetDatasets = [];
+      //     asset?.data?.map((dataID, index) => {
+      //       for (var i = 0; i < datasets.length; i++) {
+      //         if (datasets[i].id == dataID) {
+      //           assetDatasets.push(datasets[i]);
+      //         }
+      //       }
+      //     });
 
-          if (
-            projectDivs[odmProject.id].firstChild.classList.contains(
-              "sidebar-accordion-active"
-            )
-          ) {
-            var data = assetDatasets[0];
+      //     if (
+      //       projectDivs[odmProject.id].firstChild.classList.contains(
+      //         "sidebar-accordion-active"
+      //       )
+      //     ) {
+      //       var data = assetDatasets[0];
 
-            var position = Cesium.Cartesian3.fromDegrees(
-              data["position"]["lng"],
-              data["position"]["lat"]
-            );
+      //       var position = Cesium.Cartesian3.fromDegrees(
+      //         data["position"]["lng"],
+      //         data["position"]["lat"]
+      //       );
 
-            markersDataSource.entities.add({
-              position: position,
-              billboard: {
-                image: pinBuilder
-                  .fromColor(Cesium.Color.fromCssColorString("#5B8B51"), 48)
-                  .toDataURL(),
-                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                disableDepthTestDistance: Number.POSITIVE_INFINITY,
-                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-                distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
-                  data.boundingSphereRadius
-                    ? data.boundingSphereRadius * 4
-                    : 2500,
-                  Number.MAX_VALUE
-                ),
-              },
-              id: "marker_" + asset.id,
-            });
-          } else {
-            markersDataSource.entities.removeById("marker_" + asset.id);
-          }
-        });
-        // setTimeout(() => {
-        //   markersDataSource.clustering.pixelRange = 0;
-        // }, 0);
-      };
+      //       markersDataSource.entities.add({
+      //         position: position,
+      //         billboard: {
+      //           image: pinBuilder
+      //             .fromColor(Cesium.Color.fromCssColorString("#5B8B51"), 48)
+      //             .toDataURL(),
+      //           verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+      //           disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      //           heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+      //           distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
+      //             data.boundingSphereRadius
+      //               ? data.boundingSphereRadius * 4
+      //               : 2500,
+      //             Number.MAX_VALUE
+      //           ),
+      //         },
+      //         id: "marker_" + asset.id,
+      //       });
+      //     } else {
+      //       markersDataSource.entities.removeById("marker_" + asset.id);
+      //     }
+      //   });
+      //   // setTimeout(() => {
+      //   //   markersDataSource.clustering.pixelRange = 0;
+      //   // }, 0);
+      // };
       var projectAssets = assets.filter((a) => a.project == odmProject.id);
       var projectOpacityBtn = createProjectOpacitySliderBtn(
         projectAssets,

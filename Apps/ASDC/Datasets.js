@@ -383,25 +383,13 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
     }
   }
 };
-
-export const loadData = (
+export const loadDataContent = (
   asset,
   data,
   fly,
   timeline,
   timelineTrack,
-  select = true
 ) => {
-  if (select) {
-    if (!selectedAssetIDs.includes(asset["id"])) {
-      setSelectedAssetIDs([...selectedAssetIDs, asset["id"]]);
-    }
-
-    if (!selectedDatasets.includes(data)) {
-      selectedDatasets.push(data);
-    }
-  }
-
   var assetDataset = [];
   asset.data?.map((dataID) => {
     for (var i = 0; i < datasets.length; i++) {
@@ -1027,48 +1015,48 @@ export const loadData = (
         });
       }
     } else {
-      if (assetDataset[0].zoom) {
-        var zoom = assetDataset[0].zoom;
-        viewer.camera.flyTo({
-          destination: new Cesium.Cartesian3(
-            zoom.position.x,
-            zoom.position.y,
-            zoom.position.z
-          ),
-          orientation: {
-            direction: new Cesium.Cartesian3(
-              zoom.orientation.direction.x,
-              zoom.orientation.direction.y,
-              zoom.orientation.direction.z
-            ),
-            up: new Cesium.Cartesian3(
-              zoom.orientation.up.x,
-              zoom.orientation.up.y,
-              zoom.orientation.up.z
-            ),
-          },
-        });
-      } else {
+      // if (assetDataset[0].zoom) {
+      //   var zoom = assetDataset[0].zoom;
+      //   viewer.camera.flyTo({
+      //     destination: new Cesium.Cartesian3(
+      //       zoom.position.x,
+      //       zoom.position.y,
+      //       zoom.position.z
+      //     ),
+      //     orientation: {
+      //       direction: new Cesium.Cartesian3(
+      //         zoom.orientation.direction.x,
+      //         zoom.orientation.direction.y,
+      //         zoom.orientation.direction.z
+      //       ),
+      //       up: new Cesium.Cartesian3(
+      //         zoom.orientation.up.x,
+      //         zoom.orientation.up.y,
+      //         zoom.orientation.up.z
+      //       ),
+      //     },
+      //   });
+      // } else {
         if (
-          assetDataset[0]["type"] === "PointCloud" ||
-          assetDataset[0]["type"] === "EPTPointCloud" ||
-          assetDataset[0]["type"] === "ModelTileset"
+          data["type"] === "PointCloud" ||
+          data["type"] === "EPTPointCloud" ||
+          data["type"] === "ModelTileset"
         ) {
           if (
-            assetDataset[0].position &&
-            assetDataset[0].boundingSphereRadius
+            data.position &&
+            data.boundingSphereRadius
           ) {
             var pos = Cesium.Cartographic.toCartesian(
               Cesium.Cartographic.fromDegrees(
-                assetDataset[0].position["lng"],
-                assetDataset[0].position["lat"],
-                assetDataset[0].position["height"]
+                data.position["lng"],
+                data.position["lat"],
+                data.position["height"]
               )
             );
             viewer.camera.flyToBoundingSphere(
               new Cesium.BoundingSphere(
                 pos,
-                assetDataset[0].boundingSphereRadius
+                data.boundingSphereRadius
               )
             );
           } else {
@@ -1080,32 +1068,32 @@ export const loadData = (
               }
             }
           }
-        } else if (assetDataset[0]["type"] === "Model") {
+        } else if (data["type"] === "Model") {
           viewer.flyTo(entities[asset["id"]][data["id"]]);
         } else if (
-          assetDataset[0]["type"] === "Influx" ||
-          // assetDataset[0]["type"] === "ImageSeries" ||
-          assetDataset[0]["type"] === "CSV"
+          data["type"] === "Influx" ||
+          // data["type"] === "ImageSeries" ||
+          data["type"] === "CSV"
         ) {
-          // if (assetDataset[0] && assetDataset[0]["position"]){
+          // if (data && data["position"]){
           var position = Cesium.Cartesian3.fromDegrees(
-            assetDataset[0]["position"]["lng"],
-            assetDataset[0]["position"]["lat"],
-            assetDataset[0]["position"]["height"]
-              ? assetDataset[0]["position"]["height"] + 1750
+            data["position"]["lng"],
+            data["position"]["lat"],
+            data["position"]["height"]
+              ? data["position"]["height"] + 1750
               : 1750
           );
 
           viewer.camera.flyTo({
             destination: position,
             orientation: {
-              heading: assetDataset[0]["rotation"]
-                ? Cesium.Math.toRadians(assetDataset[0]["rotation"])
+              heading: data["rotation"]
+                ? Cesium.Math.toRadians(data["rotation"])
                 : 0,
             },
           });
           // }
-        } else if (assetDataset[0]["type"] === "ImageSeries") {
+        } else if (data["type"] === "ImageSeries") {
           if (entities[asset.id][data.id]) {
             Cesium.sampleTerrainMostDetailed(
               viewer.terrainProvider,
@@ -1130,13 +1118,13 @@ export const loadData = (
               );
             });
           }
-        } else if (assetDataset[0]["type"] === "Imagery") {
-          if (assetDataset[0].bounds) {
+        } else if (data["type"] === "Imagery") {
+          if (data.bounds) {
             var rectangle = new Cesium.Rectangle.fromDegrees(
-              assetDataset[0].bounds[0],
-              assetDataset[0].bounds[1],
-              assetDataset[0].bounds[2],
-              assetDataset[0].bounds[3]
+              data.bounds[0],
+              data.bounds[1],
+              data.bounds[2],
+              data.bounds[3]
             );
             const cartographics = [
               Cesium.Rectangle.center(rectangle),
@@ -1170,7 +1158,7 @@ export const loadData = (
             }
           }
         }
-      }
+      // }
     }
   }
 
@@ -1347,6 +1335,166 @@ export const loadData = (
     viewer.timeline.container.style.overflow = "visible";
     viewer.timeline._trackContainer.style.overflow = "hidden";
   }
+}
+export const loadData = (
+  asset,
+  data,
+  fly,
+  timeline,
+  timelineTrack,
+  select = true
+) => {
+  if (select) {
+    if (!selectedAssetIDs.includes(asset["id"])) {
+      setSelectedAssetIDs([...selectedAssetIDs, asset["id"]]);
+    }
+
+    if (!selectedDatasets.includes(data)) {
+      selectedDatasets.push(data);
+    }
+  }
+
+  if(data.metadataLink){
+    fetch(data.metadataLink,
+      {
+        cache: "no-store",
+        credentials: "include"
+      }
+    )
+      .then((response) => {
+        if (response.status === 200) {
+          return response.json();
+        }
+      })
+      .then(metadata=>{
+        if (data.id.endsWith("-pc")) {
+            if (
+              metadata.srs &&
+              metadata.srs.wkt
+            ) {
+              var sourcePos = [];
+              sourcePos[0] =
+                (metadata.bounds[0] +
+                  metadata.bounds[3]) /
+                2;
+              sourcePos[1] =
+                (metadata.bounds[1] +
+                  metadata.bounds[4]) /
+                2;
+              sourcePos[2] =
+                (metadata.bounds[2] +
+                  metadata.bounds[5]) /
+                2;
+              var pos = proj4(
+                metadata.srs.wkt,
+                proj4.defs("EPSG:4326"),
+                sourcePos
+              );
+
+              var nw = proj4(
+                metadata.srs.wkt,
+                proj4.defs("EPSG:4326"),
+                [
+                  metadata.bounds[0],
+                  metadata.bounds[1],
+                ]
+              );
+              var se = proj4(
+                metadata.srs.wkt,
+                proj4.defs("EPSG:4326"),
+                [
+                  metadata.bounds[3],
+                  metadata.bounds[4],
+                ]
+              );
+
+              var rectangle = new Cesium.Rectangle.fromDegrees(
+                nw[0],
+                nw[1],
+                se[0],
+                se[1]
+              );
+
+              const cartographics = [
+                Cesium.Rectangle.center(rectangle),
+                Cesium.Rectangle.southeast(rectangle),
+                Cesium.Rectangle.southwest(rectangle),
+                Cesium.Rectangle.northeast(rectangle),
+                Cesium.Rectangle.northwest(rectangle),
+              ];
+
+              var cartesians =
+                Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+                  cartographics
+                );
+              var boundingSphere =
+                Cesium.BoundingSphere.fromPoints(cartesians);
+
+              data.position = {
+                    lng: pos[0],
+                    lat: pos[1],
+                    height: pos[2],
+                  };
+
+              data.boundingSphereRadius=boundingSphere.radius;
+            }
+          
+        } else if (data.id.endsWith("-op")) {
+          var tilesUrl = `${baseURL}${metadata.tiles[0]}?rescale=${metadata.statistics[1].min},${metadata.statistics[1].max}`;
+          data.url=tilesUrl;
+          data.bounds= metadata.bounds.value;
+          data.minzoom = metadata.minzoom;
+          data.maxzoom = metadata.maxzoom;
+          data.position = {
+            lng: metadata.center[0],
+            lat: metadata.center[1],
+            height: metadata.center[2], //zoom level?
+          }
+        } else if (data.id.endsWith("-dsm")) {
+          var tilesUrl = `${baseURL}${metadata.tiles[0]}?color_map=viridis&rescale=${metadata.statistics[1].min},${metadata.statistics[1].max}&hillshade=6`;
+          data.url=tilesUrl;
+          data.bounds= metadata.bounds.value;
+          data.minzoom = metadata.minzoom;
+          data.maxzoom = metadata.maxzoom;
+          data.position = {
+            lng: metadata.center[0],
+            lat: metadata.center[1],
+            height: metadata.center[2], //zoom level?
+          }
+        } else if (data.id.endsWith("-dtm")) {
+          var tilesUrl = `${baseURL}${metadata.tiles[0]}?color_map=viridis&rescale=${metadata.statistics[1].min},${metadata.statistics[1].max}&hillshade=6`;
+          data.url=tilesUrl;
+          data.bounds= metadata.bounds.value;
+          data.minzoom = metadata.minzoom;
+          data.maxzoom = metadata.maxzoom;
+          data.position = {
+            lng: metadata.center[0],
+            lat: metadata.center[1],
+            height: metadata.center[2], //zoom level?
+          }
+        }
+
+        loadDataContent(asset,
+          data,
+          fly,
+          timeline,
+          timelineTrack
+          )
+      })
+      .catch((e) => {
+        if (e.name !== "AbortError") {
+          console.log(e);
+        }
+      })
+  } else {
+    loadDataContent(asset,
+      data,
+      fly,
+      timeline,
+      timelineTrack
+      )
+  }
+
 };
 
 export const loadGeoJson = (asset, data, fly) => {
@@ -2000,297 +2148,132 @@ export const fetchWebODMProjects = (token = {}) => {
               odmProjects.map((project, projectIndex) => {
                 taskInfos[projectIndex]?.map((task) => {
                   taskDict[task.id] = task;
+                  var taskData = [];
                   if (
                     task.available_assets.includes("georeferenced_model.laz")
                   ) {
-                    metaDataPromises.push(
-                      fetch(
-                        `${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`,
-                        {
-                          cache: "no-store",
-                          credentials: "include",
-                          signal: controller.signal,
-                        }
-                      )
-                        .then((response) => {
-                          if (response.status === 200) {
-                            return response.json();
-                          }
-                        })
-                        .catch((e) => {
-                          if (e.name !== "AbortError") {
-                            console.log(e);
-                          }
-                        })
-                    );
+                    
+                    odmDatasets.push({
+                      id: task.id + "-pc",
+                      type: "EPTPointCloud",
+                      name: "Point Cloud",
+                      url: `${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`,
+                      asset: odmAssets[odmAssets.length - 1],
+                      
+                      date:new Date(task?.statistics?.start_date?.split(" at ")[0].split("/").reverse().join("-"))!="Invalid Date"?
+                            new Date(task?.statistics?.start_date?.split(" at ")[0].split("/").reverse().join("-")):null,
+
+                      source: {
+                        url: `${baseURL}/api/projects/${project.id}/tasks/${task.id}/download/georeferenced_model.laz`,
+                      },
+                      metadataLink:`${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`
+                    });
+                    taskData.push(task.id +"-pc");
                   }
                   if (task.available_assets.includes("orthophoto.tif")) {
-                    metaDataPromises.push(
-                      fetch(
-                        `${baseURL}/api/projects/${project.id}/tasks/${task.id}/orthophoto/metadata`,
-                        {
-                          cache: "no-store",
-                          credentials: "include",
-                          signal: controller.signal,
-                        }
-                      )
-                        .then((response) => {
-                          if (response.status === 200) {
-                            return response.json();
-                          }
-                        })
-                        .catch((e) => {
-                          if (e.name !== "AbortError") {
-                            console.log(e);
-                          }
-                        })
-                    );
+                    odmDatasets.push({
+                      id:task.id +"-op",
+                      type: "Imagery",
+                      name: "Orthophoto",
+                      asset: odmAssets[odmAssets.length - 1],
+
+                      date:new Date(task?.statistics?.start_date?.split(" at ")[0].split("/").reverse().join("-"))!="Invalid Date"?
+                            new Date(task?.statistics?.start_date?.split(" at ")[0].split("/").reverse().join("-")):null,
+
+                      source: {
+                        url: `${baseURL}/api/projects/${
+                          project.id
+                        }/tasks/${
+                          task.id
+                        }/download/orthophoto.tif`,
+                      },
+
+                      metadataLink:`${baseURL}/api/projects/${project.id}/tasks/${task.id}/orthophoto/metadata`
+                    });
+                    taskData.push(task.id +"-op");
                   }
                   if (task.available_assets.includes("dsm.tif")) {
-                    metaDataPromises.push(
-                      fetch(
-                        `${baseURL}/api/projects/${project.id}/tasks/${task.id}/dsm/metadata`,
-                        {
-                          cache: "no-store",
-                          credentials: "include",
-                          signal: controller.signal,
-                        }
-                      )
-                        .then((response) => {
-                          if (response.status === 200) {
-                            return response.json();
-                          }
-                        })
-                        .catch((e) => {
-                          if (e.name !== "AbortError") {
-                            console.log(e);
-                          }
-                        })
-                    );
+                    odmDatasets.push({
+                      id:task.id +"-dsm",
+                      type: "Imagery",
+                      name: "DSM",
+                      asset: odmAssets[odmAssets.length - 1],
+
+                      date:new Date(task?.statistics?.start_date?.split(" at ")[0].split("/").reverse().join("-"))!="Invalid Date"?
+                            new Date(task?.statistics?.start_date?.split(" at ")[0].split("/").reverse().join("-")):null,
+
+                      source: {
+                        url: `${baseURL}/api/projects/${
+                          project.id
+                        }/tasks/${
+                          task.id
+                        }/download/dsm.tif`,
+                      },
+
+                      metadataLink:`${baseURL}/api/projects/${project.id}/tasks/${task.id}/dsm/metadata`
+                    });
+                    taskData.push(task.id +"-dsm");
                   }
                   if (task.available_assets.includes("dtm.tif")) {
-                    metaDataPromises.push(
-                      fetch(
-                        `${baseURL}/api/projects/${project.id}/tasks/${task.id}/dtm/metadata`,
-                        {
-                          cache: "no-store",
-                          credentials: "include",
-                          signal: controller.signal,
-                        }
-                      )
-                        .then((response) => {
-                          if (response.status === 200) {
-                            return response.json();
-                          }
-                        })
-                        .catch((e) => {
-                          if (e.name !== "AbortError") {
-                            console.log(e);
-                          }
-                        })
-                    );
+                    odmDatasets.push({
+                      id:task.id +"-dtm",
+                      type: "Imagery",
+                      name: "DTM",
+                      asset: odmAssets[odmAssets.length - 1],
+
+                      date:new Date(task?.statistics?.start_date?.split(" at ")[0].split("/").reverse().join("-"))!="Invalid Date"?
+                            new Date(task?.statistics?.start_date?.split(" at ")[0].split("/").reverse().join("-")):null,
+
+                      source: {
+                        url: `${baseURL}/api/projects/${
+                          project.id
+                        }/tasks/${
+                          task.id
+                        }/download/dtm.tif`,
+                      },
+
+                      metadataLink:`${baseURL}/api/projects/${project.id}/tasks/${task.id}/dtm/metadata`
+                    });
+                    taskData.push(task.id +"-dtm");
+                  }
+                
+                  if (taskData.length > 0) {
+                    odmAssets.push({
+                      id: ++lastAssetIndex,
+                      name: task.name,
+                      status: "active",
+                      categoryID: -1,
+                      data: taskData,
+                      project: project.id,
+                      taskID: task.id,
+                      public: task.public,
+                      permissions: project.permissions,
+                    });
                   }
                 });
               });
+
+              setDatasets(
+                datasets.concat(
+                  odmDatasets.filter(
+                    (d) => !datasets.map((data) => data.id).includes(d.id)
+                  )
+                )
+              );
+
+              setAssets(
+                assets.concat(
+                  odmAssets.filter(
+                    (a) =>
+                      !assets.map((asset) => asset.taskID).includes(a.taskID)
+                  )
+                )
+              );
+
               setTaskInfos(taskDict);
             }
 
-            Promise.all(metaDataPromises).then((metadata) => {
-              var metadataIndex = 0;
-              if (Array.isArray(odmProjects)) {
-                odmProjects.map((project, projectIndex) => {
-                  taskInfos[projectIndex]?.map((task, taskIndex) => {
-                    var taskData = [];
-                    if (
-                      task.available_assets.includes("georeferenced_model.laz")
-                    ) {
-                      if (metadata[metadataIndex]) {
-                        if (
-                          metadata[metadataIndex].srs &&
-                          metadata[metadataIndex].srs.wkt
-                        ) {
-                          var sourcePos = [];
-                          sourcePos[0] =
-                            (metadata[metadataIndex].bounds[0] +
-                              metadata[metadataIndex].bounds[3]) /
-                            2;
-                          sourcePos[1] =
-                            (metadata[metadataIndex].bounds[1] +
-                              metadata[metadataIndex].bounds[4]) /
-                            2;
-                          sourcePos[2] =
-                            (metadata[metadataIndex].bounds[2] +
-                              metadata[metadataIndex].bounds[5]) /
-                            2;
-                          var pos = proj4(
-                            metadata[metadataIndex].srs.wkt,
-                            proj4.defs("EPSG:4326"),
-                            sourcePos
-                          );
-
-                          var nw = proj4(
-                            metadata[metadataIndex].srs.wkt,
-                            proj4.defs("EPSG:4326"),
-                            [
-                              metadata[metadataIndex].bounds[0],
-                              metadata[metadataIndex].bounds[1],
-                            ]
-                          );
-                          var se = proj4(
-                            metadata[metadataIndex].srs.wkt,
-                            proj4.defs("EPSG:4326"),
-                            [
-                              metadata[metadataIndex].bounds[3],
-                              metadata[metadataIndex].bounds[4],
-                            ]
-                          );
-
-                          var rectangle = new Cesium.Rectangle.fromDegrees(
-                            nw[0],
-                            nw[1],
-                            se[0],
-                            se[1]
-                          );
-
-                          const cartographics = [
-                            Cesium.Rectangle.center(rectangle),
-                            Cesium.Rectangle.southeast(rectangle),
-                            Cesium.Rectangle.southwest(rectangle),
-                            Cesium.Rectangle.northeast(rectangle),
-                            Cesium.Rectangle.northwest(rectangle),
-                          ];
-
-                          var cartesians =
-                            Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-                              cartographics
-                            );
-                          var boundingSphere =
-                            Cesium.BoundingSphere.fromPoints(cartesians);
-
-                          odmDatasets.push({
-                            id: task.id + "-pc",
-                            type: "EPTPointCloud",
-                            name: "Point Cloud",
-                            url: `${baseURL}/api/projects/${project.id}/tasks/${task.id}/assets/entwine_pointcloud/ept.json`,
-                            asset: odmAssets[odmAssets.length - 1],
-                            
-                            date:new Date(task?.statistics?.start_date?.split(" at ")[0].split("/").reverse().join("-"))!="Invalid Date"?
-                                  new Date(task?.statistics?.start_date?.split(" at ")[0].split("/").reverse().join("-")):null,
-
-                            position: {
-                              lng: pos[0],
-                              lat: pos[1],
-                              height: pos[2],
-                            },
-                            boundingSphereRadius: boundingSphere.radius,
-                            source: {
-                              url: `${baseURL}/api/projects/${project.id}/tasks/${task.id}/download/georeferenced_model.laz`,
-                            },
-                          });
-                          taskData.push(task.id + "-pc");
-                        } else {
-                          // console.log(metadata[metadataIndex])
-                          // console.log(project);
-                          // console.log(task);
-                        }
-                      }
-                      metadataIndex++;
-                    }
-
-                    var imageryTypes = ["Orthophoto", "DSM", "DTM"];
-                    imageryTypes.map((imageryType) => {
-                      if (
-                        task.available_assets.includes(
-                          `${imageryType.toLowerCase()}.tif`
-                        )
-                      ) {
-                        if (metadata[metadataIndex]) {
-                          var tilesUrl;
-                          if (imageryType === "Orthophoto") {
-                            tilesUrl = `${baseURL}${metadata[metadataIndex].tiles[0]}?rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}`;
-                          } else if (imageryType === "DSM") {
-                            tilesUrl = `${baseURL}${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
-                          } else if (imageryType === "DTM") {
-                            tilesUrl = `${baseURL}${metadata[metadataIndex].tiles[0]}?color_map=viridis&rescale=${metadata[metadataIndex].statistics[1].min},${metadata[metadataIndex].statistics[1].max}&hillshade=6`;
-                          }
-
-                          odmDatasets.push({
-                            id:
-                              task.id +
-                              (imageryType === "Orthophoto"
-                                ? "-op"
-                                : "-" + imageryType.toLowerCase()),
-                            type: "Imagery",
-                            name: imageryType,
-                            url: tilesUrl,
-                            asset: odmAssets[odmAssets.length - 1],
-                            bounds: metadata[metadataIndex].bounds.value,
-                            minzoom: metadata[metadataIndex].minzoom,
-                            maxzoom: metadata[metadataIndex].maxzoom,
-
-                            date:new Date(task?.statistics?.start_date?.split(" at ")[0].split("/").reverse().join("-"))!="Invalid Date"?
-                                  new Date(task?.statistics?.start_date?.split(" at ")[0].split("/").reverse().join("-")):null,
-
-                            position: {
-                              lng: metadata[metadataIndex].center[0],
-                              lat: metadata[metadataIndex].center[1],
-                              height: metadata[metadataIndex].center[2], //zoom level?
-                            },
-                            source: {
-                              url: `${baseURL}/api/projects/${
-                                project.id
-                              }/tasks/${
-                                task.id
-                              }/download/${imageryType.toLowerCase()}.tif`,
-                            },
-                          });
-                          taskData.push(
-                            task.id +
-                              (imageryType === "Orthophoto"
-                                ? "-op"
-                                : "-" + imageryType.toLowerCase())
-                          );
-                        }
-                        metadataIndex++;
-                      }
-                    });
-
-                    if (taskData.length > 0) {
-                      odmAssets.push({
-                        id: ++lastAssetIndex,
-                        name: task.name,
-                        status: "active",
-                        categoryID: -1,
-                        data: taskData,
-                        project: project.id,
-                        taskID: task.id,
-                        public: task.public,
-                        permissions: project.permissions,
-                      });
-                    }
-                  });
-                });
-
-                setDatasets(
-                  datasets.concat(
-                    odmDatasets.filter(
-                      (d) => !datasets.map((data) => data.id).includes(d.id)
-                    )
-                  )
-                );
-
-                setAssets(
-                  assets.concat(
-                    odmAssets.filter(
-                      (a) =>
-                        !assets.map((asset) => asset.taskID).includes(a.taskID)
-                    )
-                  )
-                );
-
-                resolve();
-              }
-            });
+            resolve();
           });
         });
       })
