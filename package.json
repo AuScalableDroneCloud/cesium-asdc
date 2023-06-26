@@ -22,7 +22,7 @@
   "homepage": "https://asdc.io",
   "dependencies": {
     "@types/proj4": "^2.5.2",
-    "cesium": "1.95.0",
+    "cesium": "1.106.0",
     "compression": "^1.7.4",
     "copy-webpack-plugin": "^10.2.4",
     "css-loader": "^6.6.0",

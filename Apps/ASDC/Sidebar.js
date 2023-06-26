@@ -1927,16 +1927,18 @@ const createMarkersDataSource = () => {
           Cesium.Rectangle.subsample(rect)
         );
       }
-
-      cluster.billboard.distanceDisplayCondition =
-        new Cesium.DistanceDisplayCondition(
-          data.boundingSphereRadius
-            ? data.boundingSphereRadius * 4
-            : data.bounds
-            ? rectBoundingSphere.radius * 4
-            : 2500,
-          Number.MAX_VALUE
-        );
+      
+      if (data) {
+        cluster.billboard.distanceDisplayCondition =
+          new Cesium.DistanceDisplayCondition(
+            data.boundingSphereRadius
+              ? data.boundingSphereRadius * 4
+              : data.bounds
+              ? rectBoundingSphere.radius * 4
+              : 2500,
+            Number.MAX_VALUE
+          );
+      }
     });
   }
 };
