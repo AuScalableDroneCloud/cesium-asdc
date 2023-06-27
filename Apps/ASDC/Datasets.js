@@ -383,7 +383,7 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
     }
   }
 };
-export const loadDataContent = (
+export const loadDataContent = async (
   asset,
   data,
   fly,
@@ -497,57 +497,62 @@ export const loadDataContent = (
   if (data["type"] === "PointCloud" || data["type"] === "ModelTileset") {
     if (!tilesets[asset["id"]]) tilesets[asset["id"]] = {};
     if (!tilesets[asset["id"]][data.id]) {
-      tilesets[asset["id"]][data.id] = viewer.scene.primitives.add(
-        new Cesium.Cesium3DTileset({
-          url:
-            data["url"] === "ion"
-              ? Cesium.IonResource.fromAssetId(data.assetId)
-              : !data.useProxy
-              ? data["url"]
-              : new Cesium.Resource({
-                  url: data["url"],
-                  proxy: new Cesium.DefaultProxy("/cesium/proxy/"),
-                }),
-          maximumScreenSpaceError:
+      if(data["url"] === "ion"){
+        var tileset = await Cesium.Cesium3DTileset.fromIonAssetId(data.assetId,
+          {
+            maximumScreenSpaceError:
             ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
-          // show: new Date(data["date"]) != "Invalid Date" ? false : true,
-        })
+          }
+        )
+      } else {
+        var tileset = await Cesium.Cesium3DTileset.fromUrl(!data.useProxy
+          ? data["url"]
+          : new Cesium.Resource({
+              url: data["url"],
+              proxy: new Cesium.DefaultProxy("/cesium/proxy/"),
+            }),{
+              maximumScreenSpaceError:
+              ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
+            })
+      }
+      
+      tilesets[asset["id"]][data.id] = viewer.scene.primitives.add(
+        tileset
       );
 
       applyInit();
 
-      tilesets[asset["id"]][data.id].readyPromise.then(function (tileset) {
-        // keep tileset visible at all times
-        tileset._geometricError = Number.MAX_SAFE_INTEGER;
+      // keep tileset visible at all times
+      tileset._geometricError = Number.MAX_SAFE_INTEGER;
 
-        tilesets[data.asset.id][data.id].boundingSphereCenter =
-          new Cesium.Cartesian3();
-        tilesets[data.asset.id][data.id].boundingSphere.center.clone(
-          tilesets[data.asset.id][data.id].boundingSphereCenter
+      tilesets[data.asset.id][data.id].boundingSphereCenter =
+        new Cesium.Cartesian3();
+      tilesets[data.asset.id][data.id].boundingSphere.center.clone(
+        tilesets[data.asset.id][data.id].boundingSphereCenter
+      );
+
+      // console.log(tileset.boundingSphere);
+      // var carto = Cesium.Cartographic.fromCartesian(tileset.boundingSphere.center);
+      // console.log(carto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
+      // console.log(carto.longitude * Cesium.Math.DEGREES_PER_RADIAN);
+      // console.log(carto.height);
+      if (data["position"]) {
+        var offset = Cesium.Cartographic.toCartesian(
+          new Cesium.Cartographic.fromDegrees(
+            data["position"]["lng"],
+            data["position"]["lat"],
+            data["position"]["height"]
+          )
         );
+        var translation = Cesium.Cartesian3.subtract(
+          offset,
+          // tileset.boundingSphere.center,
+          tileset.boundingSphereCenter,
+          new Cesium.Cartesian3()
+        );
+        tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
+      }
 
-        // console.log(tileset.boundingSphere);
-        // var carto = Cesium.Cartographic.fromCartesian(tileset.boundingSphere.center);
-        // console.log(carto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
-        // console.log(carto.longitude * Cesium.Math.DEGREES_PER_RADIAN);
-        // console.log(carto.height);
-        if (data["position"]) {
-          var offset = Cesium.Cartographic.toCartesian(
-            new Cesium.Cartographic.fromDegrees(
-              data["position"]["lng"],
-              data["position"]["lat"],
-              data["position"]["height"]
-            )
-          );
-          var translation = Cesium.Cartesian3.subtract(
-            offset,
-            // tileset.boundingSphere.center,
-            tileset.boundingSphereCenter,
-            new Cesium.Cartesian3()
-          );
-          tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
-        }
-      });
     } else {
       tilesets[asset["id"]][data.id].show = true;
       setupStyleToolbar(tilesets[asset["id"]][data.id]);
@@ -610,7 +615,7 @@ export const loadDataContent = (
             : "omit",
       })
         .then((response) => response.text())
-        .then((text) => {
+        .then(async (text) => {
           var ept = JSON.parse(text);
           var dimensions = [];
           var truncate = true;
@@ -630,95 +635,86 @@ export const loadDataContent = (
             }
           });
           if (Array.isArray(data.url)) {
-            data.url.map((url, index) => {
+            data.url.map(async(url, index) => {
+              var tileset = await Cesium.Cesium3DTileset.fromUrl(`${eptServer}/tileset.json?ept=${
+                url
+              }&dimensions=${dimensions.join(",")}&${
+                truncate ? "truncate" : null
+              }`,{
+                maximumScreenSpaceError:
+                    ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
+              })
               tilesets[asset["id"]][data.id].push(
                 viewer.scene.primitives.add(
-                  new Cesium.Cesium3DTileset({
-                    url: `${eptServer}/tileset.json?ept=${url}&dimensions=${dimensions.join(
-                      ","
-                    )}&${truncate ? "truncate" : null}`,
-                    maximumScreenSpaceError:
-                      ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
-                  })
+                  tileset
                 )
               );
               if (index == 0) {
                 applyInit();
 
-                tilesets[asset["id"]][data.id][0].readyPromise.then(function (
-                  tileset
-                ) {
-                  tileset._geometricError = Number.MAX_SAFE_INTEGER;
-                });
+                tileset._geometricError = Number.MAX_SAFE_INTEGER;
+
               }
             });
           } else {
-            tilesets[asset["id"]][data.id] = viewer.scene.primitives.add(
-              new Cesium.Cesium3DTileset({
-                url: `${eptServer}/tileset.json?ept=${
-                  data.url
-                }&dimensions=${dimensions.join(",")}&${
-                  truncate ? "truncate" : null
-                }`,
-                maximumScreenSpaceError:
+            var tileset = await Cesium.Cesium3DTileset.fromUrl(`${eptServer}/tileset.json?ept=${
+              data.url
+            }&dimensions=${dimensions.join(",")}&${
+              truncate ? "truncate" : null
+            }`,{
+              maximumScreenSpaceError:
                   ((100 - MSSE) / 100) * viewer.canvas.height * 0.25,
-                // show: new Date(data["date"]) != "Invalid Date" ? false : true,
-                // debugShowBoundingVolume:true
-              })
-            );
+            })
+            tilesets[asset["id"]][data.id] = viewer.scene.primitives.add(tileset);
 
             applyInit();
 
-            tilesets[asset["id"]][data.id].readyPromise.then(function (
-              tileset
-            ) {
-              tileset._geometricError = Number.MAX_SAFE_INTEGER;
+            tileset._geometricError = Number.MAX_SAFE_INTEGER;
 
-              tilesets[data.asset.id][data.id].boundingSphereCenter =
-                new Cesium.Cartesian3();
-              tilesets[data.asset.id][data.id].boundingSphere.center.clone(
-                tilesets[data.asset.id][data.id].boundingSphereCenter
+            tilesets[data.asset.id][data.id].boundingSphereCenter =
+              new Cesium.Cartesian3();
+            tilesets[data.asset.id][data.id].boundingSphere.center.clone(
+              tilesets[data.asset.id][data.id].boundingSphereCenter
+            );
+
+            // console.log(tilesets[asset["id"]][
+            //   data.id
+            //   ].boundingSphere);
+            // var carto = Cesium.Cartographic.fromCartesian(tilesets[asset["id"]][data.id].boundingSphere.center);
+            // console.log(carto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
+            // console.log(carto.longitude * Cesium.Math.DEGREES_PER_RADIAN);
+            // console.log(carto.height);
+            // Cesium.sampleTerrainMostDetailed(
+            //   viewer.terrainProvider,
+            //   [Cesium.Cartographic.fromCartesian(tilesets[asset["id"]][data.id].boundingSphere.center)]
+            // ).then((updatedPositions) => {
+            //   console.log(updatedPositions);
+            //   // var cartesians =
+            //   //   Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+            //   //     updatedPositions
+            //   //   );
+            //   // var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
+            //   // viewer.camera.flyToBoundingSphere(boundingSphere);
+            // });
+
+            if (data["position"]) {
+              var offset = Cesium.Cartographic.toCartesian(
+                new Cesium.Cartographic.fromDegrees(
+                  data["position"]["lng"],
+                  data["position"]["lat"],
+                  data["position"]["height"]
+                )
               );
-
-              // console.log(tilesets[asset["id"]][
-              //   data.id
-              //   ].boundingSphere);
-              // var carto = Cesium.Cartographic.fromCartesian(tilesets[asset["id"]][data.id].boundingSphere.center);
-              // console.log(carto.latitude * Cesium.Math.DEGREES_PER_RADIAN);
-              // console.log(carto.longitude * Cesium.Math.DEGREES_PER_RADIAN);
-              // console.log(carto.height);
-              // Cesium.sampleTerrainMostDetailed(
-              //   viewer.terrainProvider,
-              //   [Cesium.Cartographic.fromCartesian(tilesets[asset["id"]][data.id].boundingSphere.center)]
-              // ).then((updatedPositions) => {
-              //   console.log(updatedPositions);
-              //   // var cartesians =
-              //   //   Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-              //   //     updatedPositions
-              //   //   );
-              //   // var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
-              //   // viewer.camera.flyToBoundingSphere(boundingSphere);
-              // });
-
-              if (data["position"]) {
-                var offset = Cesium.Cartographic.toCartesian(
-                  new Cesium.Cartographic.fromDegrees(
-                    data["position"]["lng"],
-                    data["position"]["lat"],
-                    data["position"]["height"]
-                  )
-                );
-                var translation = Cesium.Cartesian3.subtract(
-                  offset,
-                  // tileset.boundingSphere.center,
-                  tileset.boundingSphereCenter,
-                  new Cesium.Cartesian3()
-                );
-                tileset.modelMatrix =
-                  // tileset.root.transofrm =
-                  Cesium.Matrix4.fromTranslation(translation);
-              }
-            });
+              var translation = Cesium.Cartesian3.subtract(
+                offset,
+                // tileset.boundingSphere.center,
+                tileset.boundingSphereCenter,
+                new Cesium.Cartesian3()
+              );
+              tileset.modelMatrix =
+                // tileset.root.transofrm =
+                Cesium.Matrix4.fromTranslation(translation);
+            }
           }
         });
     } else {
