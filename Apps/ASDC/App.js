@@ -74,6 +74,7 @@ import { cropBox } from "./CropBox.js";
 import { cropRectangleMap } from "./CropRectangleMap.js";
 
 Cesium.Ion.defaultAccessToken = cesiumIonAccessToken;
+Cesium.GoogleMaps.defaultApiKey = "AIzaSyATxNbShIMSj94HPFN88j8XtskYx8EkmZY"
 
 window.CESIUM_BASE_URL = "/cesium/Build/Cesium";
 
@@ -134,8 +135,17 @@ setViewer(
     fullscreenElement: "cesiumContainer",
     animation: false,
     useBrowserRecommendedResolution: false,
+    globe:false
   })
 );
+// viewer.scene.globe.depthTestAgainstTerrain = false;
+
+try {
+  const tileset = await Cesium.createGooglePhotorealistic3DTileset();
+  viewer.scene.primitives.add(tileset);
+} catch (error) {
+  console.log(`Failed to load tileset: ${error}`);
+}
 
 viewer.timeline._trackListEle.onmousemove = function (e) {
   mousePosition.x = e.offsetX;
@@ -157,7 +167,6 @@ if (window.self !== window.top) {
 }
 
 viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
-viewer.scene.globe.depthTestAgainstTerrain = false;
 
 // viewer.animation.viewModel.dateFormatter = (date, viewModel) => {
 //   const localDate = Cesium.JulianDate.toDate(date);
