@@ -135,17 +135,17 @@ setViewer(
     fullscreenElement: "cesiumContainer",
     animation: false,
     useBrowserRecommendedResolution: false,
-    globe:false
+    // globe:false
   })
 );
-// viewer.scene.globe.depthTestAgainstTerrain = false;
+viewer.scene.globe.depthTestAgainstTerrain = false;
 
-try {
-  const tileset = await Cesium.createGooglePhotorealistic3DTileset();
-  viewer.scene.primitives.add(tileset);
-} catch (error) {
-  console.log(`Failed to load tileset: ${error}`);
-}
+// try {
+//   const tileset = await Cesium.createGooglePhotorealistic3DTileset();
+//   viewer.scene.primitives.add(tileset);
+// } catch (error) {
+//   console.log(`Failed to load tileset: ${error}`);
+// }
 
 viewer.timeline._trackListEle.onmousemove = function (e) {
   mousePosition.x = e.offsetX;
