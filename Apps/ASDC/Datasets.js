@@ -47,11 +47,13 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
   if (!asset) return;
 
   var assetDataset = [];
+  var fly=true;
   asset.data?.map((dataID) => {
     for (var i = 0; i < datasets.length; i++) {
       if (datasets[i].id === dataID) {
         assetDataset.push(datasets[i]);
-        loadData(asset, datasets[i], false, false, true);
+        loadData(asset, datasets[i], fly, false, true);
+        fly=false;
         break;
       }
     }
@@ -280,107 +282,108 @@ export const loadAsset = (asset, timeline, timelineTrack) => {
           ),
         },
       });
-    } else {
-      // if (
-      //   assetDataset[0]["type"] === "PointCloud" ||
-      //   assetDataset[0]["type"] === "EPTPointCloud" ||
-      //   assetDataset[0]["type"] === "ModelTileset"
-      // ) {
-      //   document.getElementById("msse-slider-row").style.display = "table-row";
-      // } else {
-      //   document.getElementById("msse-slider-row").style.display = "none";
-      // }
+    } 
+    // else {
+    //   // if (
+    //   //   assetDataset[0]["type"] === "PointCloud" ||
+    //   //   assetDataset[0]["type"] === "EPTPointCloud" ||
+    //   //   assetDataset[0]["type"] === "ModelTileset"
+    //   // ) {
+    //   //   document.getElementById("msse-slider-row").style.display = "table-row";
+    //   // } else {
+    //   //   document.getElementById("msse-slider-row").style.display = "none";
+    //   // }
 
-      if (
-        assetDataset[0]["type"] === "PointCloud" ||
-        assetDataset[0]["type"] === "EPTPointCloud" ||
-        assetDataset[0]["type"] === "ModelTileset"
-      ) {
-        if (assetDataset[0].position && assetDataset[0].boundingSphereRadius) {
-          var pos = Cesium.Cartographic.toCartesian(
-            Cesium.Cartographic.fromDegrees(
-              assetDataset[0].position["lng"],
-              assetDataset[0].position["lat"],
-              assetDataset[0].position["height"]
-            )
-          );
-          viewer.camera.flyToBoundingSphere(
-            new Cesium.BoundingSphere(pos, assetDataset[0].boundingSphereRadius)
-          );
-        } else {
-          viewer.flyTo(tilesets[assetDataset[0].asset.id][assetDataset[0].id]);
-        }
-      } else if (assetDataset[0]["type"] === "Model") {
-        viewer.flyTo(entities[asset["id"]][assetDataset[0]["id"]]);
-      } else if (
-        assetDataset[0]["type"] === "Influx" ||
-        // assetDataset[0]["type"] === "ImageSeries" ||
-        assetDataset[0]["type"] === "CSV"
-      ) {
-        var position = Cesium.Cartesian3.fromDegrees(
-          assetDataset[0]["position"]["lng"],
-          assetDataset[0]["position"]["lat"],
-          assetDataset[0]["position"]["height"]
-            ? assetDataset[0]["position"]["height"] + 1750
-            : 1750
-        );
+    //   if (
+    //     assetDataset[0]["type"] === "PointCloud" ||
+    //     assetDataset[0]["type"] === "EPTPointCloud" ||
+    //     assetDataset[0]["type"] === "ModelTileset"
+    //   ) {
+    //     if (assetDataset[0].position && assetDataset[0].boundingSphereRadius) {
+    //       var pos = Cesium.Cartographic.toCartesian(
+    //         Cesium.Cartographic.fromDegrees(
+    //           assetDataset[0].position["lng"],
+    //           assetDataset[0].position["lat"],
+    //           assetDataset[0].position["height"]
+    //         )
+    //       );
+    //       viewer.camera.flyToBoundingSphere(
+    //         new Cesium.BoundingSphere(pos, assetDataset[0].boundingSphereRadius)
+    //       );
+    //     } else {
+    //       viewer.flyTo(tilesets[assetDataset[0].asset.id][assetDataset[0].id]);
+    //     }
+    //   } else if (assetDataset[0]["type"] === "Model") {
+    //     viewer.flyTo(entities[asset["id"]][assetDataset[0]["id"]]);
+    //   } else if (
+    //     assetDataset[0]["type"] === "Influx" ||
+    //     // assetDataset[0]["type"] === "ImageSeries" ||
+    //     assetDataset[0]["type"] === "CSV"
+    //   ) {
+    //     var position = Cesium.Cartesian3.fromDegrees(
+    //       assetDataset[0]["position"]["lng"],
+    //       assetDataset[0]["position"]["lat"],
+    //       assetDataset[0]["position"]["height"]
+    //         ? assetDataset[0]["position"]["height"] + 1750
+    //         : 1750
+    //     );
 
-        viewer.camera.flyTo({ destination: position });
-      } else if (assetDataset[0]["type"] === "ImageSeries") {
-        if (entities[asset.id][assetDataset[0].id]) {
-          Cesium.sampleTerrainMostDetailed(
-            viewer.terrainProvider,
-            Cesium.Ellipsoid.WGS84.cartesianArrayToCartographicArray(
-              entities[asset.id][
-                assetDataset[0].id
-              ].polygon.hierarchy.getValue().positions
-            )
-          ).then((updatedPositions) => {
-            viewer.camera.flyToBoundingSphere(
-              Cesium.BoundingSphere.fromPoints(
-                Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-                  updatedPositions
-                )
-              ),
-              {
-                offset: new Cesium.HeadingPitchRange(
-                  entities[asset.id][assetDataset[0].id].polygon.stRotation,
-                  Cesium.Math.toRadians(-90),
-                  0
-                ),
-              }
-            );
-          });
-        }
-      } else if (assetDataset[0]["type"] === "Imagery") {
-        var data = assetDataset[0];
-        var rectangle = new Cesium.Rectangle.fromDegrees(
-          data.bounds[0],
-          data.bounds[1],
-          data.bounds[2],
-          data.bounds[3]
-        );
-        const cartographics = [
-          Cesium.Rectangle.center(rectangle),
-          Cesium.Rectangle.southeast(rectangle),
-          Cesium.Rectangle.southwest(rectangle),
-          Cesium.Rectangle.northeast(rectangle),
-          Cesium.Rectangle.northwest(rectangle),
-        ];
+    //     viewer.camera.flyTo({ destination: position });
+    //   } else if (assetDataset[0]["type"] === "ImageSeries") {
+    //     if (entities[asset.id][assetDataset[0].id]) {
+    //       Cesium.sampleTerrainMostDetailed(
+    //         viewer.terrainProvider,
+    //         Cesium.Ellipsoid.WGS84.cartesianArrayToCartographicArray(
+    //           entities[asset.id][
+    //             assetDataset[0].id
+    //           ].polygon.hierarchy.getValue().positions
+    //         )
+    //       ).then((updatedPositions) => {
+    //         viewer.camera.flyToBoundingSphere(
+    //           Cesium.BoundingSphere.fromPoints(
+    //             Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+    //               updatedPositions
+    //             )
+    //           ),
+    //           {
+    //             offset: new Cesium.HeadingPitchRange(
+    //               entities[asset.id][assetDataset[0].id].polygon.stRotation,
+    //               Cesium.Math.toRadians(-90),
+    //               0
+    //             ),
+    //           }
+    //         );
+    //       });
+    //     }
+    //   } else if (assetDataset[0]["type"] === "Imagery") {
+    //     var data = assetDataset[0];
+    //     var rectangle = new Cesium.Rectangle.fromDegrees(
+    //       data.bounds[0],
+    //       data.bounds[1],
+    //       data.bounds[2],
+    //       data.bounds[3]
+    //     );
+    //     const cartographics = [
+    //       Cesium.Rectangle.center(rectangle),
+    //       Cesium.Rectangle.southeast(rectangle),
+    //       Cesium.Rectangle.southwest(rectangle),
+    //       Cesium.Rectangle.northeast(rectangle),
+    //       Cesium.Rectangle.northwest(rectangle),
+    //     ];
 
-        Cesium.sampleTerrainMostDetailed(
-          viewer.terrainProvider,
-          cartographics
-        ).then((updatedPositions) => {
-          var cartesians =
-            Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
-              updatedPositions
-            );
-          var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
-          viewer.camera.flyToBoundingSphere(boundingSphere);
-        });
-      }
-    }
+    //     Cesium.sampleTerrainMostDetailed(
+    //       viewer.terrainProvider,
+    //       cartographics
+    //     ).then((updatedPositions) => {
+    //       var cartesians =
+    //         Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(
+    //           updatedPositions
+    //         );
+    //       var boundingSphere = Cesium.BoundingSphere.fromPoints(cartesians);
+    //       viewer.camera.flyToBoundingSphere(boundingSphere);
+    //     });
+    //   }
+    // }
   }
 };
 export const loadDataContent = async (
