@@ -154,7 +154,7 @@ export const setupStyleToolbar = (tileset) => {
   ];
 
   var selectedIndex;
-  var filterList = ["X", "Y", "GpsTime"];
+  var filterList = ["X", "Y", "GpsTime","Red","Green","Blue"];
   tileset.asset.ept.schema
     .filter((_schema) => {
       if (

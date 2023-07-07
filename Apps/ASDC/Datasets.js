@@ -626,10 +626,14 @@ export const loadDataContent = async (
           ept.schema.map((s) => {
             if (s.minimum && s.maximum) {
               if (s.minimum != s.maximum) {
-                dimensions.push(s.name);
+                if(s.name != "Red" && s.name != "Green" && s.name != "Blue"){
+                  dimensions.push(s.name);
+                }
               }
             } else {
-              dimensions.push(s.name);
+              if(s.name != "Red" && s.name != "Green" && s.name != "Blue"){
+                dimensions.push(s.name);
+              }
             }
             if (s.name === "Red" || s.name === "Green" || s.name === "Blue") {
               if (s.maximum && s.maximum <= 255) {
