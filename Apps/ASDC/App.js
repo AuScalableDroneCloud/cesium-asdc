@@ -216,9 +216,9 @@ if (init) {
       "image-series-toolbar"
     ).childNodes[0].selectedIndex = init.billboard ? 1 : 0;
   }
-  if (init.selectedDimension != undefined) {
-    setSelectedDimension(init.selectedDimension);
-  }
+  // if (init.selectedDimension != undefined) {
+  //   setSelectedDimension(init.selectedDimension);
+  // }
   if (init.zoomOnDataSelect != undefined) {
     setZoomOnDataSelect(init.zoomOnDataSelect);
     document.getElementById("zoom-checkbox").checked = init.zoomOnDataSelect;
@@ -291,6 +291,11 @@ export const applyInit = () => {
             data
           );
         });
+    }
+
+    if (init.selectedDimension != undefined) {
+      setSelectedDimension(init.selectedDimension);
+      applyStyle(selectedDimension);
     }
 
     if (init.cropBoxes || init.cropRectangles) {
@@ -1775,7 +1780,8 @@ const displayShareURL = () => {
     },
     opacity: alphas,
     cropBoxes: shareCropBoxes,
-    pointSize:pointSize
+    pointSize:pointSize,
+    selectedDimension:selectedDimension
   };
 
   if (selectedData) {
