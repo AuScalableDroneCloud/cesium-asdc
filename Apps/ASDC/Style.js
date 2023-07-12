@@ -6,10 +6,11 @@ import {
   imageryLayers,
   entities,
   dataSources,
+  pointSize,
 } from "./State.js";
 
 export const applyStyle = (schemaName) => {
-  selectedAssetIDs.map((assetID) => {
+  Object.keys(tilesets).map((assetID) => {
     if (!tilesets[assetID]) return;
     var tilesetIDs = Object.keys(tilesets[assetID]);
     for (var i = 0; i < tilesetIDs.length; i++) {
@@ -66,6 +67,7 @@ export const applyStyle = (schemaName) => {
           if (alpha) {
             selectedTileset.style = new Cesium.Cesium3DTileStyle({
               color: `rgba(\${COLOR}.r * 255,\${COLOR}.g* 255,\${COLOR}.b* 255,${alpha})`,
+              pointSize:pointSize
             });
           }
           return;
@@ -85,6 +87,7 @@ export const applyStyle = (schemaName) => {
                   ["true", `rgba(255,255,255,${alpha})`],
                 ],
               },
+              pointSize:pointSize
             });
           } else if (schema.name === "Intensity") {
             selectedTileset.style = new Cesium.Cesium3DTileStyle({
@@ -95,6 +98,7 @@ export const applyStyle = (schemaName) => {
               })*255,(\${Intensity}/${
                 schema.mean + schema.stddev
               })*255,${alpha})`,
+              pointSize:pointSize
             });
           } else if (
             schema.name === "Red" ||
@@ -103,26 +107,30 @@ export const applyStyle = (schemaName) => {
           ) {
             selectedTileset.style = new Cesium.Cesium3DTileStyle({
               color: `rgba((\${COLOR} * color('${schema.name.toLowerCase()}')).r *255, (\${COLOR} * color('${schema.name.toLowerCase()}')).g * 255, (\${COLOR} * color('${schema.name.toLowerCase()}')).b * 255, ${alpha})`,
+              pointSize:pointSize
             });
           } else {
             selectedTileset.style = new Cesium.Cesium3DTileStyle({
               color: `hsla((\${${schema.name}}-${schema.minimum})/(${schema.maximum}-${schema.minimum}),1,0.5,${alpha})`,
+              pointSize:pointSize
             });
           }
         } else {
           if (alpha) {
             selectedTileset.style = new Cesium.Cesium3DTileStyle({
               color: `rgba(\${COLOR}.r * 255,\${COLOR}.g* 255,\${COLOR}.b* 255,${alpha})`,
+              pointSize:pointSize
             });
           }
         }
       } else {
         if (alpha) {
           if (
-            selectedTileset?.root?.content?.pointsLength
+            selectedTileset?.root?._contentHeader?.uri?.endsWith(".pnts")
           ) {
             selectedTileset.style = new Cesium.Cesium3DTileStyle({
               color: `rgba(\${COLOR}.r * 255, \${COLOR}.g * 255, \${COLOR}.b * 255,${alpha})`,
+              pointSize:pointSize
             });
           }
         }
@@ -196,6 +204,7 @@ export const applyAlpha = (alpha, asset, data) => {
       if (tilesets[asset.id][data.id].ready) {
         tilesets[asset.id][data.id].style = new Cesium.Cesium3DTileStyle({
           color: `rgba(\${COLOR}.r * 255,\${COLOR}.g * 255,\${COLOR}.b * 255,${alpha})`,
+          pointSize:pointSize
         });
 
         applyStyle(selectedDimension);
@@ -203,6 +212,7 @@ export const applyAlpha = (alpha, asset, data) => {
         tilesets[asset.id][data.id].readyPromise.then((t) => {
           tilesets[asset.id][data.id].style = new Cesium.Cesium3DTileStyle({
             color: `rgba(\${COLOR}.r * 255,\${COLOR}.g * 255,\${COLOR}.b * 255,${alpha})`,
+            pointSize:pointSize
           });
 
           applyStyle(selectedDimension);

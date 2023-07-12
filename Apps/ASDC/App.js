@@ -49,11 +49,14 @@ import {
   cropRectangles,
   cropBoxMap,
   setCropBoxMap,
+  pointSize,
+  setPointSize
 } from "./State.js";
 import {
   loadAsset,
   loadData,
   setScreenSpaceError,
+  applyPointSizeFromSlider,
   fetchIndexAssets,
   fetchWebODMProjects,
   fetchPublicTask,
@@ -69,7 +72,7 @@ import {
 } from "./Sidebar.js";
 import { closeGraphModal, loadCSVGraphs, loadInfluxGraphs } from "./Graphs.js";
 import { readUrlParams } from "./URL.js";
-import { applyAlpha, getAlpha } from "./Style.js";
+import { applyAlpha, applyStyle, getAlpha } from "./Style.js";
 import { cropBox } from "./CropBox.js";
 import { cropRectangleMap } from "./CropRectangleMap.js";
 
@@ -225,6 +228,12 @@ if (init) {
     setMSSE(parseInt(init.MSSE));
     document.getElementById("msse-slider").value = parseInt(init.MSSE);
     document.getElementById("msse-value").innerHTML = MSSE + " %";
+  }
+  if (init.pointSize != undefined) {
+    setPointSize(parseInt(init.pointSize));
+    document.getElementById("point-size-slider").value = parseInt(init.pointSize);
+    document.getElementById("point-size-value").innerHTML = pointSize;
+    applyStyle(selectedDimension);
   }
 
   if (init.index) {
@@ -1103,6 +1112,7 @@ document.getElementById("add-file-button").onclick = addFileInput;
 document.getElementById("modal-upload-button").onclick = upload;
 document.getElementById("close-graph").onclick = closeGraphModal;
 document.getElementById("msse-slider").oninput = setScreenSpaceError;
+document.getElementById("point-size-slider").oninput = applyPointSizeFromSlider;
 
 var sidebarOpen = true;
 document.getElementById("sidebar-close-button").onclick = () => {
@@ -1230,6 +1240,7 @@ if (document.getElementById("login-logout-button")) {
         )
       ) {
         document.getElementById("msse-slider-row").style.display = "none";
+        document.getElementById("point-size-slider-row").style.display = "none";
         document.getElementById("dims-toolbar-row").style.display = "none";
       }
     });
@@ -1764,6 +1775,7 @@ const displayShareURL = () => {
     },
     opacity: alphas,
     cropBoxes: shareCropBoxes,
+    pointSize:pointSize
   };
 
   if (selectedData) {

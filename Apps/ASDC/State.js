@@ -64,6 +64,8 @@ export var cropControllers = {};
 
 export var cropBoxMap;
 
+export var pointSize = 4;
+
 export function setViewer(newViewer) {
   viewer = newViewer;
 }
@@ -157,4 +159,8 @@ export function setInit(newInit) {
 
 export function setCropBoxMap(newCropBoxMap) {
   cropBoxMap = newCropBoxMap;
+}
+
+export function setPointSize(newPointSize){
+  pointSize=newPointSize;
 }

@@ -32,6 +32,8 @@ import {
   timelineOnDataSelect,
   setSelectedDimension,
   odmProjects,
+  pointSize,
+  setPointSize
 } from "./State.js";
 import { loadInfluxGraphs, loadCSVGraphs, closeGraphModal } from "./Graphs.js";
 import { setupStyleToolbar, applyStyle } from "./Style.js";
@@ -525,6 +527,8 @@ export const loadDataContent = async (
 
       applyInit();
 
+      applyStyle(selectedDimension);
+
       // keep tileset visible at all times
       tileset._geometricError = Number.MAX_SAFE_INTEGER;
 
@@ -660,8 +664,8 @@ export const loadDataContent = async (
                 applyInit();
 
                 tileset._geometricError = Number.MAX_SAFE_INTEGER;
-
               }
+              applyStyle(selectedDimension);
             });
           } else {
             var tileset = await Cesium.Cesium3DTileset.fromUrl(`${eptServer}/tileset.json?ept=${
@@ -675,6 +679,8 @@ export const loadDataContent = async (
             tilesets[asset["id"]][data.id] = viewer.scene.primitives.add(tileset);
 
             applyInit();
+
+            applyStyle(selectedDimension);
 
             tileset._geometricError = Number.MAX_SAFE_INTEGER;
 
@@ -966,8 +972,10 @@ export const loadDataContent = async (
     )
   ) {
     document.getElementById("msse-slider-row").style.display = "table-row";
+    document.getElementById("point-size-slider-row").style.display = "table-row";
   } else {
     document.getElementById("msse-slider-row").style.display = "none";
+    document.getElementById("point-size-slider-row").style.display = "none";
   }
 
   if (fly && zoomOnDataSelect) {
@@ -1681,6 +1689,12 @@ export const setScreenSpaceError = (evt) => {
     });
   });
 };
+export const applyPointSizeFromSlider = (evt) => {
+  setPointSize(parseInt(evt.target.value));
+
+  document.getElementById("point-size-value").innerHTML = pointSize;
+  applyStyle(selectedDimension);
+};
 
 //overwriting TimelineTrack render for multiple intervals
 Cesium.TimelineTrack.prototype.render = function (context, renderState) {
@@ -2055,6 +2069,8 @@ export const fetchWebODMProjects = (token = {}) => {
                   )
                 ) {
                   document.getElementById("msse-slider-row").style.display =
+                    "none";
+                  document.getElementById("point-size-slider-row").style.display =
                     "none";
                   document.getElementById("dims-toolbar-row").style.display =
                     "none";
