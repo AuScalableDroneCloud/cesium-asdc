@@ -1245,8 +1245,9 @@ const handleAssetCheckboxChange = (
   asset,
   uploads
 ) => {
-  document.getElementById(`tsCheckbox-${asset.id}`).checked=assetCheckbox.checked;
-
+  if(document.getElementById(`tsCheckbox-${asset.id}`)){
+    document.getElementById(`tsCheckbox-${asset.id}`).checked=assetCheckbox.checked;
+  }
   checkboxes.map((cb) => {
     cb.checked = assetCheckbox.checked;
   });
