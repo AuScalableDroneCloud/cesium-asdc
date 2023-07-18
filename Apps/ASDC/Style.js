@@ -126,7 +126,8 @@ export const applyStyle = (schemaName) => {
       } else {
         if (alpha) {
           if (
-            selectedTileset?.root?._contentHeader?.uri?.endsWith(".pnts")
+            //best way to detect if tileset is point cloud?//.json but not point cloud?
+            !selectedTileset?.root?._contentHeader?.url?.endsWith(".b3dm")
           ) {
             selectedTileset.style = new Cesium.Cesium3DTileStyle({
               color: `rgba(\${COLOR}.r * 255, \${COLOR}.g * 255, \${COLOR}.b * 255,${alpha})`,
