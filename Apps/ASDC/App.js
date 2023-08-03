@@ -149,6 +149,22 @@ viewer.scene.globe.depthTestAgainstTerrain = false;
 // } catch (error) {
 //   console.log(`Failed to load tileset: ${error}`);
 // }
+var showGoogleTileset=false;
+var googleTileset;
+document.getElementById("google-tileset-checkbox").onchange = async (e) => {
+  if(!showGoogleTileset){
+    try {
+      googleTileset = await Cesium.createGooglePhotorealistic3DTileset();
+      viewer.scene.primitives.add(googleTileset);
+    } catch (error) {
+      console.log(`Failed to load tileset: ${error}`);
+    }
+    showGoogleTileset=true;
+  } else{
+    viewer.scene.primitives.remove(googleTileset);
+    showGoogleTileset=false;
+  }
+}
 
 viewer.timeline._trackListEle.onmousemove = function (e) {
   mousePosition.x = e.offsetX;
@@ -236,6 +252,11 @@ if (init) {
     applyStyle(selectedDimension);
   }
 
+  if(init.googleTileset){
+    document.getElementById("google-tileset-checkbox").checked=true;
+    document.getElementById("google-tileset-checkbox").onchange();
+  }
+
   if (init.index) {
     //shared webodm datasets
     init.index.assets.map((a) => {
@@ -258,7 +279,7 @@ if (init) {
   }
 }
 
-export const applyInit = () => {
+export const applyInit = async () => {
   if (init) {
     if (init.currentTime) {
       viewer.clock.currentTime = Cesium.JulianDate.fromDate(
@@ -1781,7 +1802,8 @@ const displayShareURL = () => {
     opacity: alphas,
     cropBoxes: shareCropBoxes,
     pointSize:pointSize,
-    selectedDimension:selectedDimension
+    selectedDimension:selectedDimension,
+    googleTileset:document.getElementById("google-tileset-checkbox").checked
   };
 
   if (selectedData) {
