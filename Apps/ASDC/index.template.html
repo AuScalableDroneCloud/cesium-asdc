@@ -253,17 +253,32 @@
         <table>
           <tr>
             <td
-              id="zoom-td"
+              id="google-tileset-td"
               style="pointer-events: auto; width: 20%"
-              title="If checked, clicking on layer name will zoom to that dataset"
+              title="If checked, Google Photorealistic 3DTileset will be shown"
             >
               Google Photorealistic 3DTileset:
             </td>
-            <td style="pointer-events: auto">
+            <td style="pointer-events: auto;width:10%">
               <input
                 type="checkbox"
                 title="If checked, Google Photorealistic 3DTileset will be shown"
                 id="google-tileset-checkbox"
+              />
+            </td>
+            <td
+              id="depth-test-td"
+              style="pointer-events: auto; width: 20%"
+              title="If checked, depth test against terrain will be active"
+            >
+              Depth Test Against Terrain:
+            </td>
+            <td style="pointer-events: auto">
+              <input
+                type="checkbox"
+                title="If checked, depth test against terrain will be active"
+                id="depth-test-checkbox"
+                checked
               />
             </td>
           </tr>

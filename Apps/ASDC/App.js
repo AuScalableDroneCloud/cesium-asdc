@@ -141,7 +141,7 @@ setViewer(
     // globe:false
   })
 );
-viewer.scene.globe.depthTestAgainstTerrain = false;
+viewer.scene.globe.depthTestAgainstTerrain = true;
 
 // try {
 //   const tileset = await Cesium.createGooglePhotorealistic3DTileset();
@@ -164,6 +164,10 @@ document.getElementById("google-tileset-checkbox").onchange = async (e) => {
     viewer.scene.primitives.remove(googleTileset);
     showGoogleTileset=false;
   }
+}
+
+document.getElementById("depth-test-checkbox").onchange = (e) => {
+  viewer.scene.globe.depthTestAgainstTerrain=e.target.checked;
 }
 
 viewer.timeline._trackListEle.onmousemove = function (e) {
@@ -255,6 +259,14 @@ if (init) {
   if(init.googleTileset){
     document.getElementById("google-tileset-checkbox").checked=true;
     document.getElementById("google-tileset-checkbox").onchange();
+  }
+
+  if(init.depthTestAgainstTerrain){
+    document.getElementById("depth-test-checkbox").checked=true;
+    viewer.scene.globe.depthTestAgainstTerrain=true;
+  } else {
+    document.getElementById("depth-test-checkbox").checked=false;
+    viewer.scene.globe.depthTestAgainstTerrain=false;
   }
 
   if (init.index) {
@@ -1803,7 +1815,8 @@ const displayShareURL = () => {
     cropBoxes: shareCropBoxes,
     pointSize:pointSize,
     selectedDimension:selectedDimension,
-    googleTileset:document.getElementById("google-tileset-checkbox").checked
+    googleTileset:document.getElementById("google-tileset-checkbox").checked,
+    depthTestAgainstTerrain:document.getElementById("depth-test-checkbox").checked
   };
 
   if (selectedData) {
