@@ -1,3 +1,4 @@
+// This is currently Unused
 import { viewer, tilesets } from "./State.js";
 
 export class cropPolygon {
