@@ -1,3 +1,4 @@
+// This is map level cropping
 import { cropBoxMap } from "./CropBoxMap.js";
 import { viewer, setCropBoxMap, taskCropRectangles } from "./State.js";
 
