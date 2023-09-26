@@ -1,3 +1,4 @@
+// This is the map level cropping
 import { viewer } from "./State.js";
 
 const CORNER_POINT_VECTORS = [
