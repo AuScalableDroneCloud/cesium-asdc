@@ -1,3 +1,5 @@
+// called by CropRectangle.js and in sidebar.js
+
 import { tilesets, viewer } from "./State.js";
 //taken and modified from terriajs
 
