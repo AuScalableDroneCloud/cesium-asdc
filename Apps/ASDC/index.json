@@ -117,7 +117,7 @@
       "name": "APPF ANU Phenotyping Facility",
       "status": "active",
       "categoryID": 9,
-      "data": [73, 70, 66, 101, 102, 71, 72, 29]
+      "data": [73, 70, 66, 101, 102, 71, 72]
     },
     {
       "id": 22,
@@ -652,21 +652,6 @@
       },
       "boundingSphereRadius": 77030.83283066475
     },
-    {
-      "id": 29,
-      "date": "2022-02-14",
-      "type": "PointCloud",
-      "name": "ANU hyperspec Scaniverse las",
-      "url": "https://appf-anu.s3.ap-southeast-2.amazonaws.com/Cesium/Uploads/15/0/ept/ept-tileset/tileset.json",
-      "position": {
-        "lng": 149.11679563939344,
-        "lat": -35.27683340340024,
-        "height": 586.5
-      },
-      "boundingSphereRadius": 5.196262908854472,
-      "source": {
-        "url": "s3://appf-anu/Cesium/Uploads/15/0/APPF-ANU-hyperspectral-scanner-Scaniverse.las"
-      },
       "zoom": "boundingSphere"
     },
     {
